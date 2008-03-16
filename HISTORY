@@ -3921,7 +3921,10 @@ Changelog for GXemul:
 20080316	Switching from CVS to SVN.
 		Adding a test to the configure script for the "-ansi" compiler
 		option; implementing a simple parse_number to replace strtoull
-		to make everything build with -ansi.
+		to make everything build with -ansi. Various minor fixes to
+		make -ansi work on a Debian GNU/Linux system (using CXXFLAGS
+		instead of CFLAGS in Makefiles, and probe MAP_ANON in the
+		configure script using $CXX, not $CC).
 		Moving NativeTranslationExists and LookupCurrentCodePage from
 		MIPS_CPUComponent to CPUComponent; these are intended to be
 		used from most CPU components.
