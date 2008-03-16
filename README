@@ -1,0 +1,55 @@
+
+
+
+NOTE!!!
+
+GXemul 0.5.0 will _NOT_ be ready for a long time.
+
+This README is preliminary and is very much subject to change.
+
+
+----------------------------------------------------
+
+
+
+            ------------------------------------------------------
+              Gavare's eXperimental Emulator   --   GXemul 0.5.0
+            ------------------------------------------------------
+
+                    Copyright (C) 2003-2008  Anders Gavare
+
+
+
+Overview  --  What is GXemul?
+-----------------------------
+
+GXemul is a framework for full-system computer architecture emulation. 
+
+TODO
+
+
+Quick start
+-----------
+
+To compile, type './configure' and then 'make'. This should work on most
+Unix-like systems. If it does not, then please mail me a bug report.
+
+Dependencies (optional):
+
+	gtkmm-2.4 >= 2.12.1	for the GUI
+	doxygen			for building C++ class documentation
+
+You might want to experiment with various CC, CXX, and CFLAGS environment
+variable settings, to get optimum performance.
+
+Please read the rest of the documentation in the doc/ sub-directory for
+more detailed information on how to use the emulator.
+
+
+
+Feedback
+--------
+
+If you have found GXemul useful in some way, or feel like sending me
+comments or feedback in general, then mail me at anders(at)gavare.se.
+

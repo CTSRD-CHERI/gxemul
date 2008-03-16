@@ -1,0 +1,25 @@
+#
+#  $Id: Makefile.skel,v 1.5 2008/03/12 11:45:41 debug Exp $
+#
+#  Makefile for GXemul src/main/commands
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE2)
+LIBS=$(XLIB) $(OTHERLIBS)
+
+OBJS=AddComponentCommand.o CloseCommand.o ContinueCommand.o HelpCommand.o \
+	LoadCommand.o ListComponentsCommand.o \
+	QuitCommand.o RedoCommand.o RemoveComponentCommand.o \
+	SaveCommand.o StatusCommand.o TreeCommand.o UndoCommand.o \
+	VersionCommand.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS)
+
+clean_all: clean
+	rm -f Makefile
+

@@ -1,0 +1,35 @@
+#
+#  $Id: Makefile.skel,v 1.3 2008/03/12 11:45:40 debug Exp $
+#
+#  Makefile for GXemul src/components
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE1)
+
+all: do_cpu do_dummy do_machines do_memory
+
+do_cpu:
+	cd cpu; $(MAKE); cd ..
+
+do_dummy:
+	cd dummy; $(MAKE); cd ..
+
+do_machines:
+	cd machines; $(MAKE); cd ..
+
+do_memory:
+	cd memory; $(MAKE); cd ..
+
+clean:
+	cd cpu; $(MAKE) clean; cd ..
+	cd dummy; $(MAKE) clean; cd ..
+	cd machines; $(MAKE) clean; cd ..
+	cd memory; $(MAKE) clean; cd ..
+
+clean_all: clean
+	cd cpu; $(MAKE) clean_all; cd ..
+	cd dummy; $(MAKE) clean_all; cd ..
+	cd machines; $(MAKE) clean_all; cd ..
+	cd memory; $(MAKE) clean_all; cd ..
+	rm -f Makefile
+

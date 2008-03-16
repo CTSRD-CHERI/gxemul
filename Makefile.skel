@@ -1,0 +1,71 @@
+#
+#  $Id: Makefile.skel,v 1.72 2008/03/12 11:45:40 debug Exp $
+#
+#  Makefile for GXemul
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XDEF) $(XINCLUDE)
+BIN=gxemul
+BINGUI=gxemul-gui
+LIBS=$(XLIB) $(OTHERLIBS)
+
+
+all: build
+
+build:
+	cd src; $(MAKE); cd ..
+	$(CXX) $(COPTIM) src/components/*/*.o src/ir/*.o src/main/*.o src/main/*/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
+	ln -f $(BIN) $(BINGUI)
+
+test: build
+	./$(BIN) -W unittest > /dev/null
+
+documentation: build
+	sed s/PAGETITLE/Machines/g < doc/head.html > doc/machines.html
+	./$(BIN) -W machines >> doc/machines.html
+	cat doc/tail.html >> doc/machines.html
+	sed s/PAGETITLE/Components/g < doc/head.html > doc/components.html
+	./$(BIN) -W components >> doc/components.html
+	cat doc/tail.html >> doc/components.html
+	$(DOXYGEN) doc/Doxyfile
+
+install: test documentation
+	@echo
+	@echo Installing binaries...
+	mkdir -p $(PREFIX)/bin
+	cp -f $(BIN) $(PREFIX)/bin/
+	ln -f $(PREFIX)/bin/$(BIN) $(PREFIX)/bin/$(BINGUI)
+	@echo
+	@echo Installing man pages...
+	mkdir -p $(PREFIX)/man/man1
+	cp -f man/gxemul.1 $(PREFIX)/man/man1/
+	ln -f $(PREFIX)/man/man1/gxemul.1 $(PREFIX)/man/man1/gxemul-gui.1
+	@echo
+	@echo Installing documentation...
+	mkdir -p $(PREFIX)/share/doc/gxemul
+	cp -R doc/* $(PREFIX)/share/doc/gxemul/
+	@echo
+	@echo "Done!"
+
+uninstall:
+	@echo Removing binaries, man pages, and documentation...
+	rm -f $(PREFIX)/bin/gxemul
+	rm -f $(PREFIX)/bin/gxemul-gui
+	rm -f $(PREFIX)/man/man1/gxemul.1
+	rm -f $(PREFIX)/man/man1/gxemul-gui.1
+	rm -rf $(PREFIX)/share/doc/gxemul
+	@echo "Done!"
+
+clean:
+	rm -f $(BIN) $(BINGUI) *core core.* *.gmon _* *.exe ktrace.out
+	rm -rf doc/doxygen
+	cd src; $(MAKE) clean; cd ..
+
+#  experiments and demos are not cleaned on a normal clean, only on a clean_all.
+
+clean_all: clean
+	cd experiments; $(MAKE) clean_all; cd ..
+	cd demos; $(MAKE) clean; cd ..
+	rm -f _unittests.tmp unittest.h unittest_h.h commands.h commands_h.h
+	rm -f _components.tmp _commands.tmp components.h components_h.h
+	rm -f config.h Makefile src/Makefile src/*/Makefile src/*/*/Makefile

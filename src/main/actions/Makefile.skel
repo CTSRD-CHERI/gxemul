@@ -1,0 +1,22 @@
+#
+#  $Id: Makefile.skel,v 1.2 2008/01/12 08:29:56 debug Exp $
+#
+#  Makefile for GXemul src/main/actions
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE2)
+LIBS=$(XLIB) $(OTHERLIBS)
+
+OBJS=AddComponentAction.o ClearEmulationAction.o LoadEmulationAction.o \
+	RemoveComponentAction.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS)
+
+clean_all: clean
+	rm -f Makefile
+

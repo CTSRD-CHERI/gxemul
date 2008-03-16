@@ -1,0 +1,141 @@
+.\" $Id: gxemul.1,v 1.111 2008/03/12 11:45:40 debug Exp $
+.\"
+.\" Copyright (C) 2004-2008  Anders Gavare.  All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. The name of the author may not be used to endorse or promote products
+.\"    derived from this software without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\" 
+.\" 
+.\" This is the man page for GXemul. Process this file with
+.\"
+.\"     groff -man -Tascii gxemul.1    or    nroff -man gxemul.1
+.\"
+.Dd JANUARY 2008
+.Dt GXEMUL 1
+.Os
+.Sh NAME
+.Nm gxemul
+.Nd an experimental framework for full-system machine emulation
+.Sh SYNOPSIS
+.Nm
+.Op general options
+.Op configfile
+.Nm
+.Op general options
+.Op machine selection options
+.Op binary...
+.Nm gxemul-gui
+.Op general options
+.Op configfile
+.Nm gxemul-gui
+.Op general options
+.Op machine selection options
+.Op binary...
+.Sh DESCRIPTION
+GXemul is a framework for full-system computer architecture emulation.
+.Sh USAGE
+You can start GXemul using either the gxemul or gxemul-gui binary. The
+gxemul-gui binary does not require any additional options. The gxemul binary
+requires either the
+.Fl V
+flag, to start up without an initial emulation, or other command line arguments
+that define an emulation.
+.Pp
+An emulation can be defined using machine selection options, which create an
+emulation setup consisting of a machine based on a template, or by loading
+an existing emulation setup from a .gxemul configuration file.
+.Pp
+When creating an emulation directly on the command line, it is possible to load
+kernels and other binary files (ELF, raw images, etc.) by supplying their
+filenames last on the command line. The entry point of the main CPU will be
+set to that of the last loaded kernel/binary.
+.Sh COMMAND LINE OPTIONS
+Machine selection options (for creating a simple emulation directly from
+the command line, consisting of a single machine):
+.Bl -tag -width Ds
+.It Fl E Ar template-name
+Start an emulation using machine template
+.Ar template-name.
+Run
+.Nm
+.Fl H
+to get a list of available templates.
+.El
+.Pp
+General options:
+.Bl -tag -width Ds
+.It Fl h
+Shows a detailed help message.
+.It Fl H
+Shows a list of available machine templates. (These can be used with the
+.Fl E
+option to start a template-based emulation.)
+.It Fl q
+Quiet mode. Suppresses the start-up text (if any), and any debug messages.
+(Only applicable when starting the emulator using gxemul, not gxemul-gui.)
+.It Fl V
+Starts the emulator in the Paused state. This option also makes it possible
+to start gxemul without an initial emulation setup. (Note that gxemul-gui can
+always be started without an initial emulation.)
+.El
+.Sh EXAMPLES
+To start the GUI version of GXemul, type:
+.Pp
+.Dl "gxemul-gui"
+.Pp
+To start the text-UI version of GXemul, without any emulation setup configured,
+type:
+.Pp
+.Dl "gxemul -V"
+.Pp
+If you have a .gxemul configuration file, which you want to run, type:
+.Pp
+.Dl "gxemul-gui nameofconfig.gxemul"
+or
+.Dl "gxemul nameofconfig.gxemul"
+.Pp
+The example above starts the emulation right away. You may add the
+.Fl V
+option, to start up the emulator in the Paused state instead.
+.Pp
+Creating simple emulation setups consisting of a single machine, is easily
+done directly from the command line. E.g. to create a testmips machine, type:
+.Pp
+.Dl "gxemul -E testmips kernel"
+.Pp
+where kernel is the name of an ELF kernel that you wish to load into the
+emulator. Execution will start at the kernel's entry point.
+.Sh BUGS
+There are many bugs, and missing features. Some of the known bugs and missing
+features are mentioned in the TODO file in the GXemul source distribution, some
+are marked as TODO in the source code itself.
+.Pp
+GXemul 0.5.x is a complete rewrite of GXemul in C++. Features that were present
+in earlier versions may or may not be included in this version. (Older versions
+are still available for download if you need those, of course.)
+.Sh AUTHOR
+GXemul is Copyright (C) 2003-2008 Anders Gavare <anders@gavare.se>
+.Pp
+See http://gavare.se/gxemul/ for more information. For other Copyright
+messages, see the corresponding parts of the source code and/or
+documentation.

@@ -1,0 +1,21 @@
+#
+#  $Id: Makefile.skel,v 1.2 2007/12/18 14:07:52 debug Exp $
+#
+#  Makefile for GXemul src/components/dummy
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE2)
+LIBS=$(XLIB) $(OTHERLIBS)
+
+OBJS=DummyComponent.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS)
+
+clean_all: clean
+	rm -f Makefile
+

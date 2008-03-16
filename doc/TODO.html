@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>GXemul: TODO</title>
+  <meta name="robots" content="noarchive,nofollow,noindex">
+</head>
+<body>
+<!--  $Id: TODO.html,v 1.3 2008/03/14 12:12:15 debug Exp $  -->
+<!-- 10 lines header.  -->
+
+<h1>GXemul: TODO</h1>
+<hr><p>
+
+<a href="./">Back to the index.</a>
+
+
+<h2>TODO</h2>
+
+<pre><font color="#b0b0b0">$Id: TODO.html,v 1.3 2008/03/14 12:12:15 debug Exp $</font></pre>
+
+<p>Some things, in approximate Time order, that I'd like to implement or fix.
+(Things at the top need to be fixed before those at the bottom.)
+Some items in this list are perhaps already fixed. This is just a place
+for me to do brain-storming.
+
+<p>Please note that GXemul 0.5.0 will be a complete rewrite of GXemul, from
+scratch. This file has nothing to do with the TODO files from previous versions
+of GXemul.
+
+<p>You may also want to read the preliminary documentation:
+<ul>
+	<li><a href="index.html">Main documentation</a>
+	<li><a href="doxygen/html/index.html">Source code documentation</a>
+</ul>
+
+<p><hr><pre>
+<i>
+[ ] = not started
+[/] = started, but not completed
+[X] = completed (but these are usually removed from the TODO list)
+</i>
+<hr>
+
+Legacy (0.4.x) series
+---------------------
+
+	[ ]  Perhaps release 0.4.6.4, with:
+		[ ]  Fixes for PPC instructions?
+		[ ]  OF fixes... Try to get FreeBSD/macppc to boot further?
+
+<hr>
+
+Misc.
+-----
+	[ ]  Move to SVN.
+		[ ]  Local repository.
+		[ ]  Backup script to copy it to the Alpha and to SourceForge?
+
+	[/]  More State variable Unit tests!
+
+	[ ]  RAM component!
+		[ ]  Send initialization parameters to components,
+			e.g. RAM size. :)
+		[ ]  Read-only variables! E.g. "size" of a RAM component.
+
+	[ ]  Variables that have side effects on write, e.g. the "pc"
+	     might invalidate "current PC page" pointers, etc.
+
+	[ ]  File loader: Load stuff into emulated RAM (or ROM) components
+		[ ]  ELF
+		[ ]  a.out
+		[ ]  raw binaries
+
+	[ ]  Main run loop: Verify that both cycle accurate and larger chunks
+	     works well. Unit test?
+
+	[ ]  Work on MIPS_CPUComponent::Run()
+		[ ]  Move out stuff that will be shared among multiple CPU
+			types to the main CPUComponent.
+			[ ]  looking up translations, etc.
+		[ ]  Connect the CPU to RAM
+
+	[ ]  Make some initial things in the GUI work, such as a window
+	     for the text console, and some initial buttons that execute
+	     commands.
+
+	[ ]  Components
+		[ ]  "help" about components could show a file:/// link to
+		     the installed documentation about that component or
+		     machine! (If it exists.)
+
+		[ ]  Reintroduce the -e command line option, for "model hint"
+		     given to the machine template. (3max, for the decstation
+		     type)   Not only for templates. E.g. a MIPS processor, with'
+		     subtype "R3000" instead of "5Kc" or so...
+
+		[ ]  How about aliases? 5000/200, 3max etc. vs pmax/DECstation?
+		     Aliases + comments, for templates.
+
+		[ ]  Limit where components can be added. Like "drop targets"?
+			E.g. a machine can be added at the root, but a machine can not
+			be added on a pcibus. Similarly, a pcibus can not be added
+			at the root. It has to be in a machine of some kind.
+			Think about this. Perhaps as simple as a "if parent class is
+			not blah blah then disallow adding".
+				A machine can be added into a dummy component.
+				A dummy component can be added into a dummy component.
+				A pcibus can be added into a mainbus (in a machine.)
+				etc.
+			bool IsItOkToAddItToThisProposedParentComponent(propsedParent) const;
+
+	[ ]  Define an Interface, "UIOwner" or such, that the UI can
+	     use to communicate back to its owning GXemul instance; it
+	     does not need to have access to the full GXemul class
+	     member functions...
+
+	[ ]  Require binary file (or disk image) to be loaded,
+	     when starting a template based machine from the command line!
+	     	[ ]  Support for reading CD9660, EXT2FS, FFS/UFS, etc!!!
+	     	     and reading the binary from there. Autodetect common
+	     	     cases:  /netbsd, /bsd, /boot/kernel or /kernel,
+	     	     /vmlinu*, etc. If there is only one match, then boot
+	     	     that, otherwise require explicit filename on the
+	     	     command line (either for a file in an emulated
+	     	     filesystem, or a host file).
+
+	[/]  IR: this could be done separately from actual emulation
+	     code, and unit tested. src/ir/
+		[X]  IRBlockCache, hold a bunch of natively translated chunks
+		     of code.
+		[ ]  runtime option to turn off native code generation
+		     backends.		
+		[ ]  IR opcode etc.
+			[ ]  Debug dump must be possible.
+			[ ]  Load of various types
+			[ ]  Store of various types
+			[ ]  Arithmetic
+			[ ]  Bit logic
+			[ ]  Architecture dependent operations (setting/reading
+			     status registers, manipulating the TLBs,
+			     triggering software interrupts, etc)
+			[ ]  Conditional branches
+			[ ]  Unconditional branches
+			[ ]  Calls to subroutines. Special case for known
+			     leaf functions?
+			[ ]  Labels. (?)
+		     Abstraction framework:
+			[ ]  "Run this code"
+				NOTE: If no native target is in use, this should
+				run the code in plain C++! It is ok for this
+				to be not 100% tightly optimized.
+			[ ]  Count nr of times a block has been executed;
+			     this can be used to go from
+			     	1. IR only, to
+			     	2. native, but not optimized
+			     	3. native, heavily optimized
+			     	etc.
+			[ ]  Internal helpers such as "mark this as
+			     executable in memory".
+		[ ]  Initial target: amd64.
+			[ ]  Should generate machine code directly in memory,
+			     should not depend on any specific assembler's
+			     syntax.
+		[ ]  Optimizations?
+			[ ]  Target-independent?
+			[ ]  Per target.
+		[/]  Unit tests. (These probably only run if the host
+			matches one of the supported targets.)
+			E.g. for each IR instruction, and/or for each
+			specific optimization.
+
+	[ ]  UnitTest::Assert => macro, so that the correct line number and
+		file name ends up in the output. Perhaps
+			ASSERT_BOOL(msg, boolexpression)
+			ASSERT_STRING(msg, string, expected)
+			ASSERT_INT(msg, value, expected)
+	     and remove the Assert function(s) entierly?
+
+
+Actions and undo/redo
+---------------------
+
+	[ ]  ModifyStateAction
+		Undoable by remembering old value of a state variable.
+
+	[ ]  MoveComponentAction
+		Undoable by remembering position, similar to Remove, where
+		the component was before.
+
+	[ ]  ResetAction
+		Undoable by keeping a clone of the entire old state.
+
+	[ ]  Undo/redo commands should show what they are doing, e.g.
+		Undoing "add component"
+	     or
+	        Redoing "remove component".
+	     Preferably even including arguments. :-) Think about this.
+
+
+CommandInterpreter
+------------------
+
+	[/]  Tab completion for everything:
+		[X]  command names
+		[X]  component names
+		[ ]  components' state variables
+		[/]  "" + TAB = show available names, both commands, components,
+		     and variables!
+		[ ]  syntax based completion? e.g.:
+			help [cmd]   tab completes the first argument as a
+				     command
+		     This will require a uniform way of describing arguments,
+		     and whether or not they should be optional. The tab
+		     completer must then parse the command line, including
+		     figuring out which arguments were optional, etc.
+
+		     Also, when such syntax is taken into account, the
+		     CommandInterpreter can check syntax _before_ running
+		     Command::Execute. That means that individual Commands
+		     do not have to do manual checking on entry that the
+		     number of arguments is correct etc.
+
+			[ ]  filename
+			[ ]  command name
+			[ ]  component path
+			[ ]  optional vs mandatory args...?
+			[ ]  scan all commands' args at startup, and have an
+				assert() in place, so that unknown arg types
+				are caught during development!
+
+	[ ]	move  		Move a component from one path to another.
+	[ ]	clearundo	Clears the undo/redo stack (can be used to
+				reclaim memory, perhaps... or automatic
+				freeing of some of the oldest entries in the
+				undo history...?)
+	[ ]	inspect component-path	A raw dump of a component's state.
+				How about RAM devices? Perhaps "dump" is a
+				better command name. "dump ram 0x1234" etc?
+	[ ]	copy		copy a component (and its children)
+				to the clipboard
+	[ ]	paste		paste a component from the clipboard
+	[ ]	reset [path]	Reset configuration (i.e. reset all components).
+				If no path is given, the root is used as a
+				starting point.
+	[ ]	print expr  	Prints expression (gets a state variable).
+	[ ]	expr = value	Sets a state variable
+	[ ]	pause		sets RunState to Paused
+	[ ]	step		single-step (Paused)
+	[ ]	trace		toggle function call tracing
+	[ ]	registers	dump registers of a cpu (short form for
+				inspect [focuspath.]cpu  perhaps?)
+
+	[ ]  c, s, r  as abbreviated commands for continue, step, and registers?
+
+	[ ]  "Methods" on objects? E.g. ... ram.read8(addr) returning
+	     a byte from that address.
+
+	[ ]  Strings should be supported, both for e.g. variable
+	     assignment, and for e.g. placing strings in memory.
+
+	[ ]  Arrays?
+
+
+Components
+----------
+
+	[ ]  Reset. Implement this in practice?
+
+	Start implementing suitable components (src/components/):
+
+	busses/			mainbus, TurboChannel, ISA, PCI, ...
+	cpus/
+		CPU		class CPU : public Component, etc
+		arm/
+		alpha/
+		mips/		etc. One for each CPU architecture
+	graphics/		e.g. VGA graphics cards!
+	displays/
+		rgbmonitor	RGB monitor, for e.g. VGA output.
+		lcd		LCD display
+		led		A single led :)
+	dummy/			Contains dummy test components, for testing
+				the components framework (e.g. serialization...)
+	machines/		Machines are usually TEMPLATES which set up a
+				couple of other components!
+	memory/
+		ram
+		rom
+		cache(s)
+	network/		Ethernet and others end up here
+	sound/			sound cards
+
+
+I18N
+----
+
+	x) Unit tests to make sure that unicode strings work as expected.
+	x) Use _(x) for user-readable strings.
+	x) Investigate intltool or gettext or whatever is necessary to get
+	   it all working. po directories/files, etc.
+	x) Initial translation would be Swedish.   LANG=sv_SE.UTF-8 ./gxemul-gui
+	x) Use LANG=he_IL.UTF-8 ./gxemul-gui to try a right-to-left languages,
+	   or  LANG=ja_JP.UTF-8 ./gxemul-gui to try an asian language.
+
+
+Error handling
+--------------
+
+	x) Stack of errors? With human readable (i18n'd) messages.
+	   (e.g. Exception with possibility to add sub-exception-messages...)
+
+
+GTKMM GUI
+---------
+
+	x)  Dockable windows!
+
+	x)  Command input window!  Make it look nice.
+
+	x)  "GXemul" _last_ in the title bar of windows, not first.
+		emulation_name - GXemul
+		machine_name (VGA) - GXemul
+		machine_name (serial console, tty0) - GXemul
+		etc.
+
+	x)  Copy/Paste of components! Both inside one GXemul instance,
+	    and _BETWEEN APPLICATIONS_!
+
+	x)  Menu bar:
+		NOTE: i18n of these! Default names for "File", "Help" etc!
+		
+		File
+			New ->
+				Emulation from template	  (e.g. "testmips")
+				Empty Emulation
+				-----------------------
+				GXemul instance
+			Open
+				(Open can show a list of "thumbnails"
+				of the workspace plus e.g. one main
+				window (such as a VGA display).)
+			Close
+			-----------
+			Save
+			Save as...
+			-----------
+			Quit
+		Edit
+			Copy
+			Paste
+		View
+			[ ]  Show toolbar
+			[ ]  Show workspace
+			[ ]  Show debug console
+			F11  Full screen mode (CTRL-ALT-F11 to get out of it)
+		Emulation
+			Start
+			Pause/continue
+			Reset
+		Help
+			Contents  (installed html files)
+			About
+
+	x)  Toolbar button area:
+		Run/step forward (start emulation)
+		Pause (pause emulation, button kept down until unpaused)
+		Reset (with a dialog asking for confirmation)
+		Run/step backwards
+		Undo/Redo!
+	    (Optional plug-in-ability/extensibility. Buttons should
+	    be bound to debugger commands.)
+
+	x)  "Workspace", where emulations can be created
+	    by drag-n-drop of components from a palette, and/or
+	    from other emulations. Normally, the workspace window would
+	    be docked in the "center" of the GXemul window, with the
+	    palette to the right, and the command window below it.
+
+	    The design mode should use cairo for drawing.
+
+	    Dockable/undockable windows for machines/devices/
+	    I/O-units' contents ?
+
+	    Tooltips for components. (A "summary" of the entire
+	    state window.)
+
+
+Think about
+-----------
+
+	x)  Inspection of state of any Component...
+
+	x)  Callstack window, etc. (per CPU).
+
+	x)  Function call trace window (also per CPU).
+		[ ]  Ability to "fold" a branch of the tree! Could be useful.
+
+	x)  ARBITRARY break conditions, i.e. between each instruction,
+	    check any number of arbitrary conditions:
+		x) Contents of memory locations, even including stuff
+		   on the stack
+		x) Reads/writes from memory?
+		x) Any flags or other device state (registers).
+
+	    This obviously slows things down A LOT, so the default is
+	    to have no such break conditions.
+
+	    [ ]	Optionally increase counters instead of breaking,
+		for statistics gathering.  (Of course, it should then be
+		possible to set a break condition such as   expr > 50 or so)
+
+	    [ ]	Compile these conditions into some form of internal
+	    	byte code?
+
+	x)  Cache emulation, multiple hierarchies, etc.
+
+	x)  Timing modes:
+		1) Real-time approximation. (For guest OSes.)
+		2) Fixed. (For fixed 1 instruction/cycle speed.)
+		   Each device must then have a specified speed (such
+		   as 50 MHz...)
+	    It should be possible to switch timing modes during an emulation,
+	    but going back after such a switch does not have to be possible.
+
+	x)  Generic timer framework
+
+	x)  Generic interrupt framework
+
+	x)  Generic network emulation framework
+		[ ]  Support SLIP/PLIP in emulated guest OS?
+		[ ]  Connect to real world via:
+			[ ]  Built-in NAT layer
+			[ ]  Perhaps VDE or similar?
+
+	x)  PROM emulation in software: Some kind of plugin system,
+	    allowing machines to plug in software PROM emulation packages.
+
+	x)  Regular saving of state with time stamps (i.e. cycle numbers),
+	    so that running "backwards" is possible!
+	    NOTE:
+		1) This must include network packages and disk image
+		   contents! Tricky. But perhaps doable.
+		2) Must be possible to use both from the UI (a "step
+		   backwards" button?) and the debugger.
+	    A kind of "exponential decay"-kind of discarding of old states is
+	    probably the best way to do it.
+	    Not necessary to be able to save the "Backward state"; saving
+	    the state will only save the latest state.
+
+	x)  "Live migration" might be possible. Or at least migrating while
+		the emulation is being paused. (Not very live-ish, but perhaps
+		this can be tweaked.)
+
+	x)  Actual machines being emulated 1 per process? Or all in the
+	    same process?
+	     [ ] Try to take advantage of SMP hosts.
+	     [ ] Prepare early on for emulation using multiple hosts (or
+	     	 GXemul instances)
+
+	x)  Full-screen. CTRL-ALT-F11 toggles full-screen vs docked window
+	    in the designer view? CTRL-ALT-F12 toggles mouse capture?
+
+	x)  There can now be links directly into the documentation,
+	    assuming it is installed. ($PREFIX/share/doc/gxemul/*.html)
+	    I.e. F1 (and Help->Contents) can cause a web browser to be
+	    launched.  F1 in dialogs could link to a page with screenshots
+	    + description of each dialog.
+
+	x)  Userland emulation!
+		Both from the command line, and from the GUI? (Startable,
+		at least.) Possibility to inspect cache misses, etc.
+		-u emulname  should imply -q.
+
+	x)  Command-line options compatible with pre-0.5.0! Start e.g.
+	    framebuffers in full-screen / windowed mode, _not_ docked.
+
+	x)  Hot-swap of devices during runtime, depends on Bus support. e.g.:
+		Floppies
+		CDROMS
+		Some harddisks?
+		PCMCIA
+		USB
+		Serial devices
+		Parallel devices
+		VGA monitors
+		ADB
+		Sun's old bus for keyboards/mice
+		...
+
+	x)  TFTP server built-in into the simulated gateway? For netbooting.
+
+	x)  Investigate switching to SVN for source code revision control.
+	    (If SVN works on FreeBSD/alpha 4.9.)
+
+	x)  GDB debug connection (again).
+	
+	x)  SuperH emulation: Not only SH4, but SH3 too?
+
+
+Preparation for release 0.5.0
+-----------------------------
+
+	x) Not meaningful until enough functionality from the 0.4.x series have
+	   been duplicated. AT LEAST the following before any kind of
+	   0.5.0 BETA:
+	   	o) testmips!
+		o) working GUI.
+	   	o) at least one REAL mips machine, such as pmax!
+	 	o) basic debugger commands:
+	 		trace tree, single step, registers, etc.
+	 	o) reasonably good 64-bit and 32-bit native code generation
+	 	   speed.
+
+	x) Carefully read through all the source code.
+
+	x) Build on as many platforms as possible, including running unit tests.
+
+	x) Documentation:
+		x) Mention in the documentation the recommended way to do
+		   customized distributions of gxemul (by naming the directory
+		   gxemul-MyVer-1.2.3 etc, and supplying all source code). +
+		   SECONDARY_MSG in misc.h.
+		x) Automated build of list of CommandInterpreter Commands + long
+		   description as HTML?
+		x) User guide with screenshots of the new GUI, _BUT_ the
+		   instructions should always mention how things are done
+		   using the text-only UI as well.
+		x) guestoses.html page in the same location as the legacy version,
+		   but with links into various Machine pages (where the actual
+		   documentation for guest OSes are).
+
+	x) When making a release:
+		Make sure to run "make documentation" in the release-named
+		directory, so that html documentation about components and
+		machines is produced for the Stable version, and not the
+		Development version!
+
+	x) Carefully check that the man page reflects the correct
+	   command line options etc.
+
+	x) Carefully read through all the documentation, and test all
+	   instructions given there.
+
+	x) Take reasonable screenshots of the new version, and place on
+	   the homepage. In particular, take a small thumbnail screenshot,
+	   and place above the text "Introduction" in the lefthand navigation
+	   section, on all pages. (And replace the icon on gavare.se for
+	   GXemul with this icon, and perhaps also on Wikipedia?)
+		x)  Screenshots of simple bootup of guest OSes (maybe
+			even amd64 guest OSes?)
+		x)  Screenshots of the GUI, when debugging.
+		x)  Screenshots of running in text console mode, e.g.
+			booting a netbsd kernel, and then single-stepping.
+
+	x) Make sure that the web page looks reasonable. There should be
+	   clear ways to download the old 0.4.x version in addition to
+	   the 0.5.0 release, even when 0.5.0 has been released.
+		x)  Move down legacy screenshots to after the "news"
+		    section.
+		x)  Rename Curiosities/history to Curiosities/older history
+
+
+General notes for ANY release
+-----------------------------
+
+	x) Mention the RELEASE in the HISTORY file.
+	x) Create .tar.gz release package, without CVS artifacts.
+	x) Verify that the package builds as expected on one or more machines.
+	x) Home page updates:
+		x) index.html:
+			x) Version numbers
+			x) News entry
+		x) download.html:
+			x) Version numbers
+			x) Link to .tar.gz
+			x) SourceForge link
+			x) RELEASE note excerpt
+	x) Once the home page has been updated:
+		x) Upload .tar.gz to SourceForge
+		x) Update WikiPedia
+		x) Update FreshMeat
+		x) Post message to the gxemul-users mailing list.
+
+</pre>
+<hr>
+</body></html>

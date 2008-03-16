@@ -1,0 +1,21 @@
+#
+#  $Id: Makefile.skel,v 1.2 2008/03/14 12:12:15 debug Exp $
+#
+#  Makefile for GXemul src/components/cpu
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE2)
+LIBS=$(XLIB) $(OTHERLIBS)
+
+OBJS=CPUComponent.o MIPS_CPUComponent.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS)
+
+clean_all: clean
+	rm -f Makefile
+

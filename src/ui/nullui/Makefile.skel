@@ -1,0 +1,20 @@
+#
+#  $Id: Makefile.skel,v 1.1 2008/01/12 08:29:57 debug Exp $
+#
+#  Makefile for GXemul src/ui/nullui
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE2)
+
+OBJS=NullUI.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS) *core
+
+clean_all: clean
+	rm -f Makefile
+
