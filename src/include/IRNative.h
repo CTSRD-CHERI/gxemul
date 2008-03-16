@@ -62,6 +62,10 @@ public:
 	{
 	}
 
+	virtual ~IRNative()
+	{
+	}
+
 	/**
 	 * \brief Adds an instruction to the native code generator.
 	 *

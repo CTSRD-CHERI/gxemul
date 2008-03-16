@@ -50,6 +50,8 @@ public:
 	 */
 	IRNativeAMD64();
 
+	virtual ~IRNativeAMD64() { }
+
 	// These are described in IRNative.h:
 	virtual void Add(enum Opcode opcode, int widthInBits = 0,
 		size_t arg1 = 0, size_t arg2 = 0, size_t arg3 = 0);

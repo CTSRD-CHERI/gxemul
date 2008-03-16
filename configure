@@ -1021,15 +1021,15 @@ rm -f _tests
 printf "#include <stdio.h>
 #include <sys/types.h>
 #include <sys/mman.h>
-int main(int argc, char *argv[]) { int x = MAP_ANON; return 0;}\n" > _tests.c
-$CC $CFLAGS _tests.c -o _tests 2> /dev/null
+int main(int argc, char *argv[]) { int x = MAP_ANON; return x*0;}\n" > _tests.cc
+$CXX $CFLAGS _tests.cc -o _tests 2> /dev/null
 if [ ! -x _tests ]; then
 	printf "#include <stdio.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 int main(int argc, char *argv[])
-{ int x = MAP_ANONYMOUS; return 0;}\n" > _tests.c
-	$CC $CFLAGS _tests.c -o _tests 2> /dev/null
+{ int x = MAP_ANONYMOUS; return x*0;}\n" > _tests.cc
+	$CXX $CFLAGS _tests.cc -o _tests 2> /dev/null
 	if [ ! -x _tests ]; then
 		printf "no\n\n"
 		printf "WARNING! Neither MAP_ANON nor MAP_ANONYMOUS work on "
@@ -1044,7 +1044,7 @@ int main(int argc, char *argv[])
 else
 	printf "yes\n"
 fi
-rm -f _tests.[co] _tests
+rm -f _tests*
 
 
 #  Check for PRIx64 in inttypes.h:

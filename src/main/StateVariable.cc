@@ -592,7 +592,7 @@ static void Test_StateVariable_Numeric_Construct()
 {
 	uint8_t  varUInt8  = 223;
 	uint16_t varUInt16 = 55000;
-	uint32_t varUInt32 = 3000000001;
+	uint32_t varUInt32 = 3000000001UL;
 	uint64_t varUInt64 = 0xfedc010203040506ULL;
 	int8_t   varSInt8  = -120;
 	int16_t  varSInt16 = -22000;
@@ -635,7 +635,7 @@ static void Test_StateVariable_Numeric_SetValue()
 {
 	uint8_t  varUInt8  = 223;
 	uint16_t varUInt16 = 55000;
-	uint32_t varUInt32 = 3000000001;
+	uint32_t varUInt32 = 3000000001UL;
 	uint64_t varUInt64 = 0xfedc010203040506ULL;
 	int8_t   varSInt8  = -120;
 	int16_t  varSInt16 = -22000;

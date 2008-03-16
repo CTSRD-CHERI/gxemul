@@ -5,6 +5,7 @@
 #
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE2)
+CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE2)
 
 OBJS=DebugConsoleWidget.o EmulationDesignArea.o GtkmmUI.o GXemulWindow.o
 
