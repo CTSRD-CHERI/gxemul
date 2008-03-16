@@ -34,6 +34,54 @@
 #include "StateVariable.h"
 
 
+/*****************************************************************************/
+
+
+// This is basically strtoull(), but it needs to be explicitly implemented
+// since some systems lack it. (Also, compiling with GNU C++ in ANSI mode
+// does not work with strtoull.)
+static uint64_t parse_number(const char* str)
+{
+	int base = 10;
+	uint64_t result = 0;
+	bool negative = false;
+
+	if (str == NULL)
+		return 0;
+
+	while (*str == ' ')
+		++str;
+
+	if (*str == '-') {
+		negative = true;
+		++str;
+	}
+
+	while ((*str == 'x' || *str == 'X') || (*str >= '0' && *str <= '9')
+	    || (*str >= 'a' && *str <= 'f') || (*str >= 'A' && *str <= 'F')) {
+		if (*str == 'x' || *str == 'X') {
+			base = 16;
+		} else {
+			int n = *str - '0';
+			if (*str >= 'a' && *str <= 'f')
+				n = *str - 'a' + 10;
+			if (*str >= 'A' && *str <= 'F')
+				n = *str - 'A' + 10;
+			result = result * base + n;
+		}
+		++str;
+	}
+
+	if (negative)
+		return -result;
+	else
+		return result;
+}
+
+
+/*****************************************************************************/
+
+
 StateVariable::StateVariable()
 	: m_type(String)
 {
@@ -301,7 +349,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			return false;
 	} else if (m_type == UInt8) {
 		string str = EscapedString(escapedStringValue).Decode();
-		uint8_t tmp = strtoull(str.c_str(), NULL, 0);
+		uint8_t tmp = parse_number(str.c_str());
 		sstr << (int) tmp;
 		if (sstr.str() == str)
 			*m_value.puint8 = tmp;
@@ -309,7 +357,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			return false;
 	} else if (m_type == UInt16) {
 		string str = EscapedString(escapedStringValue).Decode();
-		uint16_t tmp = strtoull(str.c_str(), NULL, 0);
+		uint16_t tmp = parse_number(str.c_str());
 		sstr << tmp;
 		if (sstr.str() == str)
 			*m_value.puint16 = tmp;
@@ -317,7 +365,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			return false;
 	} else if (m_type == UInt32) {
 		string str = EscapedString(escapedStringValue).Decode();
-		uint32_t tmp = strtoull(str.c_str(), NULL, 0);
+		uint32_t tmp = parse_number(str.c_str());
 		sstr << tmp;
 		if (sstr.str() == str)
 			*m_value.puint32 = tmp;
@@ -325,7 +373,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			return false;
 	} else if (m_type == UInt64) {
 		string str = EscapedString(escapedStringValue).Decode();
-		uint64_t tmp = strtoull(str.c_str(), NULL, 0);
+		uint64_t tmp = parse_number(str.c_str());
 		sstr << tmp;
 		if (sstr.str() == str)
 			*m_value.puint64 = tmp;
@@ -333,7 +381,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			return false;
 	} else if (m_type == SInt8) {
 		string str = EscapedString(escapedStringValue).Decode();
-		int8_t tmp = strtoull(str.c_str(), NULL, 0);
+		int8_t tmp = parse_number(str.c_str());
 		sstr << (int) tmp;
 		if (sstr.str() == str)
 			*m_value.psint8 = tmp;
@@ -341,7 +389,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			return false;
 	} else if (m_type == SInt16) {
 		string str = EscapedString(escapedStringValue).Decode();
-		int16_t tmp = strtoull(str.c_str(), NULL, 0);
+		int16_t tmp = parse_number(str.c_str());
 		sstr << tmp;
 		if (sstr.str() == str)
 			*m_value.psint16 = tmp;
@@ -349,7 +397,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			return false;
 	} else if (m_type == SInt32) {
 		string str = EscapedString(escapedStringValue).Decode();
-		int32_t tmp = strtoull(str.c_str(), NULL, 0);
+		int32_t tmp = parse_number(str.c_str());
 		sstr << tmp;
 		if (sstr.str() == str)
 			*m_value.psint32 = tmp;
@@ -357,7 +405,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			return false;
 	} else if (m_type == SInt64) {
 		string str = EscapedString(escapedStringValue).Decode();
-		int64_t tmp = strtoull(str.c_str(), NULL, 0);
+		int64_t tmp = parse_number(str.c_str());
 		sstr << tmp;
 		if (sstr.str() == str)
 			*m_value.psint64 = tmp;

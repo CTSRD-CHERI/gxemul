@@ -3919,3 +3919,6 @@ Changelog for GXemul:
 		Adding a CPUComponent base class, from which MIPS_CPUComponent
 		inherits.
 20080316	Switching from CVS to SVN.
+		Adding a test to the configure script for the "-ansi" compiler
+		option; implementing a simple parse_number to replace strtoull
+		to make everything build with -ansi.

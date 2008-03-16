@@ -645,6 +645,19 @@ fi
 rm -f _testprog
 
 
+if [ z"$UNSTABLE" = zYES ]; then
+	printf "checking whether -ansi can be used... "
+	$CC $CFLAGS $CWARNINGS -ansi _testprog.c -o _testprog 2> /dev/null
+	if [ -x _testprog ]; then
+		printf "yes\n"
+		CWARNINGS="$CWARNINGS -ansi"
+	else
+		printf "no\n"
+	fi
+	rm -f _testprog
+fi
+
+
 #  -Wstrict-aliasing
 if [ ! z"$DEBUG" = zYES ]; then
 	printf "checking whether -Wstrict-aliasing can be used... "
