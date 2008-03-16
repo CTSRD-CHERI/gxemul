@@ -1,20 +1,9 @@
+            ------------------------------------------------------
 
-
-
-NOTE!!!
-
-GXemul 0.5.0 will _NOT_ be ready for a long time.
-
-This README is preliminary and is very much subject to change.
-
-
-----------------------------------------------------
-
-
+                                 GXemul 0.5.0
 
             ------------------------------------------------------
-              Gavare's eXperimental Emulator   --   GXemul 0.5.0
-            ------------------------------------------------------
+
 
                     Copyright (C) 2003-2008  Anders Gavare
 
@@ -25,7 +14,6 @@ Overview  --  What is GXemul?
 
 GXemul is a framework for full-system computer architecture emulation. 
 
-TODO
 
 
 Quick start
