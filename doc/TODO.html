@@ -6,7 +6,7 @@
   <meta name="robots" content="noarchive,nofollow,noindex">
 </head>
 <body>
-<!--  $Id: TODO.html,v 1.3 2008/03/14 12:12:15 debug Exp $  -->
+
 <!-- 10 lines header.  -->
 
 <h1>GXemul: TODO</h1>
@@ -16,8 +16,6 @@
 
 
 <h2>TODO</h2>
-
-<pre><font color="#b0b0b0">$Id: TODO.html,v 1.3 2008/03/14 12:12:15 debug Exp $</font></pre>
 
 <p>Some things, in approximate Time order, that I'd like to implement or fix.
 (Things at the top need to be fixed before those at the bottom.)
@@ -34,14 +32,17 @@ of GXemul.
 	<li><a href="doxygen/html/index.html">Source code documentation</a>
 </ul>
 
-<p><hr><pre>
+<p>Please see <a href="http://gavare.se/gxemul/">GXemul's homepage</a>
+for more information about GXemul in general.
+
+<p><br><hr><pre>
+Legend:
 <i>
 [ ] = not started
 [/] = started, but not completed
 [X] = completed (but these are usually removed from the TODO list)
 </i>
 <hr>
-
 Legacy (0.4.x) series
 ---------------------
 
@@ -77,9 +78,6 @@ Misc.
 	     works well. Unit test?
 
 	[ ]  Work on MIPS_CPUComponent::Run()
-		[ ]  Move out stuff that will be shared among multiple CPU
-			types to the main CPUComponent.
-			[ ]  looking up translations, etc.
 		[ ]  Connect the CPU to RAM
 
 	[ ]  Make some initial things in the GUI work, such as a window
@@ -566,8 +564,9 @@ General notes for ANY release
 -----------------------------
 
 	x) Mention the RELEASE in the HISTORY file.
-	x) Create .tar.gz release package, without CVS artifacts.
+	x) Create .tar.gz release package, without .svn directories.
 	x) Verify that the package builds as expected on one or more machines.
+	x) Branch/tag in SVN.
 	x) Home page updates:
 		x) index.html:
 			x) Version numbers
@@ -578,9 +577,10 @@ General notes for ANY release
 			x) SourceForge link
 			x) RELEASE note excerpt
 	x) Once the home page has been updated:
+		x) Verify that the .tar.gz is downloadable, and works.
 		x) Upload .tar.gz to SourceForge
-		x) Update WikiPedia
 		x) Update FreshMeat
+		x) Update WikiPedia
 		x) Post message to the gxemul-users mailing list.
 
 </pre>
