@@ -125,21 +125,6 @@ int MIPS_CPUComponent::Run(int nrOfCycles)
 }
 
 
-bool MIPS_CPUComponent::NativeTranslationExists()
-{
-	// TODO
-	return false;
-}
-
-
-void MIPS_CPUComponent::LookupCurrentCodePage()
-{
-	// TODO
-	std::cerr << "MIPS_CPUComponent::Run(): Page lookup.\n";
-	assert(false);
-}
-
-
 void MIPS_CPUComponent::ExecuteMIPS16Instruction(uint16_t iword)
 {
 	// TODO: Mega switch/case.

@@ -3922,3 +3922,6 @@ Changelog for GXemul:
 		Adding a test to the configure script for the "-ansi" compiler
 		option; implementing a simple parse_number to replace strtoull
 		to make everything build with -ansi.
+		Moving NativeTranslationExists and LookupCurrentCodePage from
+		MIPS_CPUComponent to CPUComponent; these are intended to be
+		used from most CPU components.

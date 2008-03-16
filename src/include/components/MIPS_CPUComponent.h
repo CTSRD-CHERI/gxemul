@@ -84,8 +84,6 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
-	bool NativeTranslationExists();
-	void LookupCurrentCodePage();
 	void ExecuteMIPS16Instruction(uint16_t iword);
 	void ExecuteInstruction(uint32_t iword);
 };

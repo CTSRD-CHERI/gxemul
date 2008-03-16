@@ -71,6 +71,11 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 protected:
+	bool NativeTranslationExists();
+	void LookupCurrentCodePage();
+
+
+protected:
 	uint64_t	m_pc;
 
 	const uint32_t *m_currentCodePage;

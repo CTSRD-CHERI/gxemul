@@ -60,6 +60,21 @@ string CPUComponent::GetAttribute(const string& attributeName)
 }
 
 
+bool CPUComponent::NativeTranslationExists()
+{
+	// TODO
+	return false;
+}
+
+
+void CPUComponent::LookupCurrentCodePage()
+{
+	// TODO
+	std::cerr << "CPUComponent::Run(): Page lookup.\n";
+	assert(false);
+}
+
+
 /*****************************************************************************/
 
 
