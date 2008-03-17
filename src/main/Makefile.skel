@@ -17,18 +17,18 @@ all: $(OBJS) do_actions do_commands
 $(OBJS): Makefile
 
 do_actions:
-	cd actions; $(MAKE); cd ..
+	cd actions; $(MAKE)
 
 do_commands:
-	cd commands; $(MAKE); cd ..
+	cd commands; $(MAKE)
 
 clean:
-	cd actions; $(MAKE) clean; cd ..
-	cd commands; $(MAKE) clean; cd ..
+	cd actions; $(MAKE) clean
+	cd commands; $(MAKE) clean
 	rm -f $(OBJS) *core _test
 
 clean_all: clean
-	cd actions; $(MAKE) clean_all; cd ..
-	cd commands; $(MAKE) clean_all; cd ..
+	cd actions; $(MAKE) clean_all
+	cd commands; $(MAKE) clean_all
 	rm -f Makefile
 

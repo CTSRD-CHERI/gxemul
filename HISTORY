@@ -3928,3 +3928,6 @@ Changelog for GXemul:
 		Moving NativeTranslationExists and LookupCurrentCodePage from
 		MIPS_CPUComponent to CPUComponent; these are intended to be
 		used from most CPU components.
+		Removing lots of "cd .." stuff from the Makefiles; GNU make
+		did not work too well with them. Hopefully this will make
+		tracking down compile problems on GNU/Linux machines easier.

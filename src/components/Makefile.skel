@@ -10,27 +10,27 @@ CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE1)
 all: do_cpu do_dummy do_machines do_memory
 
 do_cpu:
-	cd cpu; $(MAKE); cd ..
+	cd cpu; $(MAKE)
 
 do_dummy:
-	cd dummy; $(MAKE); cd ..
+	cd dummy; $(MAKE)
 
 do_machines:
-	cd machines; $(MAKE); cd ..
+	cd machines; $(MAKE)
 
 do_memory:
-	cd memory; $(MAKE); cd ..
+	cd memory; $(MAKE)
 
 clean:
-	cd cpu; $(MAKE) clean; cd ..
-	cd dummy; $(MAKE) clean; cd ..
-	cd machines; $(MAKE) clean; cd ..
-	cd memory; $(MAKE) clean; cd ..
+	cd cpu; $(MAKE) clean
+	cd dummy; $(MAKE) clean
+	cd machines; $(MAKE) clean
+	cd memory; $(MAKE) clean
 
 clean_all: clean
-	cd cpu; $(MAKE) clean_all; cd ..
-	cd dummy; $(MAKE) clean_all; cd ..
-	cd machines; $(MAKE) clean_all; cd ..
-	cd memory; $(MAKE) clean_all; cd ..
+	cd cpu; $(MAKE) clean_all
+	cd dummy; $(MAKE) clean_all
+	cd machines; $(MAKE) clean_all
+	cd memory; $(MAKE) clean_all
 	rm -f Makefile
 

@@ -14,7 +14,7 @@ LIBS=$(XLIB) $(OTHERLIBS)
 all: build
 
 build:
-	cd src; $(MAKE); cd ..
+	cd src; $(MAKE)
 	$(CXX) $(COPTIM) src/components/*/*.o src/ir/*.o src/main/*.o src/main/*/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
 	ln -f $(BIN) $(BINGUI)
 
@@ -60,13 +60,13 @@ uninstall:
 clean:
 	rm -f $(BIN) $(BINGUI) *core core.* *.gmon _* *.exe ktrace.out
 	rm -rf doc/doxygen
-	cd src; $(MAKE) clean; cd ..
+	cd src; $(MAKE) clean
 
 #  experiments and demos are not cleaned on a normal clean, only on a clean_all.
 
 clean_all: clean
-	cd experiments; $(MAKE) clean_all; cd ..
-	cd demos; $(MAKE) clean; cd ..
+	cd experiments; $(MAKE) clean_all
+	cd demos; $(MAKE) clean
 	rm -f _unittests.tmp unittest.h unittest_h.h commands.h commands_h.h
 	rm -f _components.tmp _commands.tmp components.h components_h.h
 	rm -f config.h Makefile src/Makefile src/*/Makefile src/*/*/Makefile

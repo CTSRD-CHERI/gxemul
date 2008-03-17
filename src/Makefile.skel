@@ -10,28 +10,28 @@ CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 all: do_components do_ir do_main do_ui
 
 do_components:
-	cd components; $(MAKE); cd ..
+	cd components; $(MAKE)
 
 do_ir:
-	cd ir; $(MAKE); cd ..
+	cd ir; $(MAKE)
 
 do_main:
-	cd main; $(MAKE); cd ..
+	cd main; $(MAKE)
 
 do_ui:
-	cd ui; $(MAKE); cd ..
+	cd ui; $(MAKE)
 
 
 clean:
-	cd components; $(MAKE) clean; cd ..
-	cd ir; $(MAKE) clean; cd ..
-	cd main; $(MAKE) clean; cd ..
-	cd ui; $(MAKE) clean; cd ..
+	cd components; $(MAKE) clean
+	cd ir; $(MAKE) clean
+	cd main; $(MAKE) clean
+	cd ui; $(MAKE) clean
 
 clean_all: clean
-	cd components; $(MAKE) clean_all; cd ..
-	cd ir; $(MAKE) clean_all; cd ..
-	cd main; $(MAKE) clean_all; cd ..
-	cd ui; $(MAKE) clean_all; cd ..
+	cd components; $(MAKE) clean_all
+	cd ir; $(MAKE) clean_all
+	cd main; $(MAKE) clean_all
+	cd ui; $(MAKE) clean_all
 	rm -f Makefile
 
