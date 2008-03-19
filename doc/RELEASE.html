@@ -10,7 +10,7 @@
 <h1>GXemul: Release notes</h1>
 <hr><p>
 
-<!--  $Id: RELEASE.html,v 1.10 2008/03/14 12:12:15 debug Exp $  -->
+<!-- -->
 
 
 <h2>Release notes for GXemul 0.5.0</h2>
@@ -19,14 +19,22 @@
 
 
 <p><br>GXemul is a framework for full-system computer architecture emulation. 
+<!-- TODO: More. -->
 
 
 <p><br>The changes between release 0.4.6.x and 0.5.0 are:
 
 <ul>
 
-  <li>GXemul 0.5.0 is a complete rewrite of the emulator, in C++.
-	(Previous versions were written in C.)
+  <li>GXemul 0.5.0 is a complete rewrite of the emulator, in C++, from scratch.
+  	This has the following consequences:
+  	<p><ul>
+  		<li>All emulation modes, processor implementations,
+  			device implementations, and other features were removed.
+  		<li>Some processors, devices etc. have then been reimplemented,
+  			but not all.
+  	</ul>
+	<br>(Previous versions were written in C.)
   <p>
   <li>A preliminary GTK+ GUI is now built-in.
   <p>
@@ -34,14 +42,18 @@
 	makefile targets, which should simplify installation.
 </ul>
 
-<p>To build GXemul, you may need the following:
+<p><br>To build GXemul, you may need the following:
 <ul>
 	<li>The gtkmm libraries and header files (gtkmm-2.4 >= 2.12.1),
 		for the GUI.
 	<li>Doxygen, for building C++ class documentation.
 </ul>
 
-Both gtkmm and Doxygen are optional, GXemul will build without them.
+<p>Both gtkmm and Doxygen are optional, GXemul will build without them.
+
+<p>To build the emulator, run the <tt>configure</tt> script, and then run 
+<tt>make</tt>. This should work on most Unix-like systems, with few or no 
+modifications to the source code.
 
 
 <p><br>Super-short mini FAQ:
@@ -54,11 +66,7 @@ would be a good project to work on. A rewrite was needed anyway,
 since GXemul development had stagnated.
 
 
-<p><br>To build the emulator, run the <tt>configure</tt> script, and then run 
-<tt>make</tt>. This should work on most Unix-like systems, with few or no 
-modifications to the source code.
-
-<p>Regarding files in the <tt>src/include/</tt> directory: only some of 
+<p><br>Regarding files in the <tt>src/include/</tt> directory: only some of 
 these are written by me, the rest are from other sources (such as NetBSD). 
 The license text says that "All advertising materials mentioning features 
 or use of this software" must display acknowledgements. Even though I do 
@@ -69,13 +77,12 @@ software, so regardless of legal requirements, I guess thanking them like
 this is in order:<pre>
 	debug_cpp.{h,cc}, fast_mutex.h, and static_assert.h are
 	Copyright (C) 2004-2005 by Wu Yongwei.
-
 </pre>
 
 <p>See individual files for license details, if you plan to redistribute 
 GXemul or reuse code.
 
-<p>GXemul's homepage is
+<p><br>GXemul's homepage is
 <a href="http://gavare.se/gxemul/">http://gavare.se/gxemul/</a>.
 
 <p>If you have found GXemul useful in some way, or feel like sending me 
