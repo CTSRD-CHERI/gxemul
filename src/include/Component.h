@@ -26,9 +26,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: Component.h,v 1.11 2008/03/14 12:12:15 debug Exp $
  */
 
 #include "misc.h"
@@ -37,6 +34,8 @@
 #include "SerializationContext.h"
 #include "StateVariable.h"
 
+
+class AddressDataBus;
 
 class Component;
 typedef vector< refcount_ptr<Component> > Components;
@@ -154,6 +153,14 @@ public:
 	 * @return	The component's frequency in Hz.
 	 */
 	virtual double GetCurrentFrequency() const;
+
+	/**
+	 * \brief Returns the component's AddressDataBus interface, if any.
+	 *
+	 * @return	A pointer to an AddressDataBus, or NULL if the
+	 *	component does not support that interface.
+	 */
+	virtual AddressDataBus* AsAddressDataBus();
 
 	/**
 	 * \brief Sets the parent component of this component.

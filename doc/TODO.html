@@ -61,10 +61,13 @@ Misc.
 
 	[/]  More State variable Unit tests!
 
-	[ ]  RAM component!
+	[/]  RAM component!
+		[/]  Implement a generic AddressDataBus interface.
 		[ ]  Send initialization parameters to components,
 			e.g. RAM size. :)
 		[ ]  Read-only variables! E.g. "size" of a RAM component.
+
+	[ ]  Mainbus component. (For use in the testmips machine.)
 
 	[ ]  Variables that have side effects on write, e.g. the "pc"
 	     might invalidate "current PC page" pointers, etc.
@@ -395,6 +398,10 @@ Think about
 	x)  Function call trace window (also per CPU).
 		[ ]  Ability to "fold" a branch of the tree! Could be useful.
 
+	x)  Profiling using profil()? On host archs that support it.
+	    That way, the _generated_ runtime code could be profiled
+	    from within the emulator.
+
 	x)  ARBITRARY break conditions, i.e. between each instruction,
 	    check any number of arbitrary conditions:
 		x) Contents of memory locations, even including stuff
@@ -576,6 +583,7 @@ General notes for ANY release
 			x) Link to .tar.gz
 			x) SourceForge link
 			x) RELEASE note excerpt
+	x) After rsync:ing, make sure to remove old LATEST_IS_x.x.x.x files!
 	x) Once the home page has been updated:
 		x) Verify that the .tar.gz is downloadable, and works.
 		x) Upload .tar.gz to SourceForge

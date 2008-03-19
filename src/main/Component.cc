@@ -156,6 +156,15 @@ double Component::GetCurrentFrequency() const
 }
 
 
+AddressDataBus* Component::AsAddressDataBus()
+{
+	// Default implementation (the base Component class) is not an
+	// address data bus.
+
+	return NULL;
+}
+
+
 void Component::SetParent(Component* parentComponent)
 {
 	m_parentComponent = parentComponent;

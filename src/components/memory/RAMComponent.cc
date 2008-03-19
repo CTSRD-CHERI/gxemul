@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: RAMComponent.cc,v 1.1 2008/03/12 11:45:40 debug Exp $
  */
 
 #include "components/RAMComponent.h"
@@ -55,6 +52,49 @@ string RAMComponent::GetAttribute(const string& attributeName)
 }
 
 
+AddressDataBus* RAMComponent::AsAddressDataBus()
+{
+	return this;
+}
+
+
+void RAMComponent::AddressSelect(uint64_t address)
+{
+}
+
+void RAMComponent::ReadData(uint8_t& data)
+{
+}
+
+void RAMComponent::ReadData(uint16_t& data)
+{
+}
+
+void RAMComponent::ReadData(uint32_t& data)
+{
+}
+
+void RAMComponent::ReadData(uint64_t& data)
+{
+}
+
+void RAMComponent::WriteData(uint8_t& data)
+{
+}
+
+void RAMComponent::WriteData(uint16_t& data)
+{
+}
+
+void RAMComponent::WriteData(uint32_t& data)
+{
+}
+
+void RAMComponent::WriteData(uint64_t& data)
+{
+}
+
+
 /*****************************************************************************/
 
 
@@ -68,9 +108,64 @@ static void Test_RAMComponent_IsStable()
 	    ComponentFactory::HasAttribute("ram", "stable"));
 }
 
+static void Test_RAMComponent_AddressDataBus()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+
+	AddressDataBus* bus = ram->AsAddressDataBus();
+	UnitTest::Assert("addressdatabus expected", bus != NULL);
+}
+
+static void Test_RAMComponent_InitiallyZero()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+	AddressDataBus* bus = ram->AsAddressDataBus();
+
+	bus->AddressSelect(0);
+
+	// By default, RAM should be zero-filled:
+	uint8_t data8 = 42;
+	bus->ReadData(data8);
+	UnitTest::Assert("memory should be zero filled", data8, 0);
+
+	uint16_t data16 = 142;
+	bus->ReadData(data16);
+	UnitTest::Assert("memory should be zero filled (16)", data16, 0);
+
+	uint32_t data32 = 342;
+	bus->ReadData(data32);
+	UnitTest::Assert("memory should be zero filled (32)", data32, 0);
+
+	uint64_t data64 = 942;
+	bus->ReadData(data64);
+	UnitTest::Assert("memory should be zero filled (64)", data64, 0);
+
+	bus->AddressSelect(0x10000);
+
+	data8 = 43;
+	bus->ReadData(data8);
+	UnitTest::Assert("B: memory should be zero filled", data8, 0);
+
+	data16 = 143;
+	bus->ReadData(data16);
+	UnitTest::Assert("B: memory should be zero filled (16)", data16, 0);
+
+	data32 = 343;
+	bus->ReadData(data32);
+	UnitTest::Assert("B: memory should be zero filled (32)", data32, 0);
+
+	data64 = 943;
+	bus->ReadData(data64);
+	UnitTest::Assert("B: memory should be zero filled (64)", data64, 0);
+}
+
 UNITTESTS(RAMComponent)
 {
 	UNITTEST(Test_RAMComponent_IsStable);
+	UNITTEST(Test_RAMComponent_AddressDataBus);
+	UNITTEST(Test_RAMComponent_InitiallyZero);
+
+	// TODO: Write + readback tests etc.
 }
 
 #endif

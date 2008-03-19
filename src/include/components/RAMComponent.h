@@ -26,14 +26,12 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: RAMComponent.h,v 1.1 2008/03/12 11:45:41 debug Exp $
  */
 
 // COMPONENT(ram)
 
 
+#include "AddressDataBus.h"
 #include "Component.h"
 
 #include "UnitTest.h"
@@ -44,6 +42,7 @@
  */
 class RAMComponent
 	: public Component
+	, public AddressDataBus
 	, public UnitTestable
 {
 public:
@@ -65,10 +64,31 @@ public:
 	 */
 	static string GetAttribute(const string& attributeName);
 
+	/**
+	 * \brief Returns the component's AddressDataBus interface.
+	 *
+	 * @return	A pointer to an AddressDataBus.
+	 */
+	virtual AddressDataBus* AsAddressDataBus();
+
+	/* Implementation of AddressDataBus: */
+	virtual void AddressSelect(uint64_t address);
+	virtual void ReadData(uint8_t& data);
+	virtual void ReadData(uint16_t& data);
+	virtual void ReadData(uint32_t& data);
+	virtual void ReadData(uint64_t& data);
+	virtual void WriteData(uint8_t& data);
+	virtual void WriteData(uint16_t& data);
+	virtual void WriteData(uint32_t& data);
+	virtual void WriteData(uint64_t& data);
+
 
 	/********************************************************************/
 
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
+private:
+	// TODO
 };
 
 
