@@ -8,6 +8,9 @@
  *   x)	(unsigned) added in some places to get rid of warnings.
  *   x) a brief Doxygen section added to struct new_ptr_list_t's
  *      comment
+ *   x) #print_position changed to print_position (removed the #), to
+ *      suppress a Doxygen warning
+ *   x) "@file" changed to "@ file" to suppress a Doxygen warning.
  */
 
 #ifndef NDEBUG
@@ -41,7 +44,7 @@
  */
 
 /**
- * @file    debug_new.cpp
+ * @ file    debug_new.cpp
  *
  * Implementation of debug versions of new and delete to check leakage.
  *
@@ -82,7 +85,7 @@
 /**
  * @def _DEBUG_NEW_CALLER_ADDRESS
  *
- * The expression to return the caller address.  #print_position will
+ * The expression to return the caller address.  print_position will
  * later on use this address to print the position information of memory
  * operation points.
  */
