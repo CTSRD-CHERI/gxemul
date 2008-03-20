@@ -26,9 +26,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: UnitTest.h,v 1.12 2008/03/12 11:45:41 debug Exp $
  */
 
 #include "misc.h"
@@ -71,8 +68,8 @@ private:
  * \brief Base class for unit testable classes.
  *
  * A class which inherits from the UnitTestable class exposes a function,
- * RunUnitTests, which runs unit tests, and returns the number of failed
- * test cases.
+ * RunUnitTests(int&, int&), which runs unit tests, and returns the number 
+ * of failed test cases.
  */
 class UnitTestable
 {
