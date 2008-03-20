@@ -3933,3 +3933,4 @@ Changelog for GXemul:
 		tracking down compile problems on GNU/Linux machines easier.
 20080317	Beginning on an AddressDataBus abstract class/interface, which
 		e.g. the RAM component will implement.
+20080320	Continuing on the RAMComponent class.

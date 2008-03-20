@@ -38,7 +38,38 @@
 
 
 /**
- * \brief A Component representing Random Access Memory.
+ * \brief A Random Access Memory Component.
+ *
+ * RAM is emulated by allocating large blocks of host memory (e.g. 1 MB
+ * per block), and simply forwarding all read and write requests to those
+ * memory blocks.
+ *
+ * The host memory blocks are not allocated until they are actually written to.
+ * Reading from uninitialized/unwritten emulated memory returns zeros. This
+ * allows e.g. an emulated machine to have, say, 1 TB RAM, even if the host
+ * only has 1 GB, as long as the emulated guest OS does not touch all of the
+ * emulated memory.
+ *
+ * In addition, host memory blocks are allocated as anonymous zero-filled
+ * memory using mmap(), so the blocks do not necessariliy use up host RAM
+ * unless they are touched.
+ *
+ * Note 1: This class does <i>not</i> handle unaligned access. It is up to the
+ * caller to make sure that e.g. ReadData(uint64_t&) is only called when
+ * the selected address is 64-bit aligned.
+ *
+ * (The reason for this is that different emulated components want different
+ * semantics for unaligned access. For example, an x86 processor will
+ * transparently allow unaligned access, most RISC processors will cause
+ * an unaligned address exception, and some old ARM processors may even simply
+ * ignore the lowest bits of the address!)
+ *
+ * Note 2: The RAM component does not have any maximum size associated with it.
+ * The intended usage scenario is to map the RAM component into another
+ * bus' address range. E.g. for most machines, RAM is located at memory offset
+ * 0 of the mainbus, and is of a certain size. It is up to that bus to forward
+ * only those read/write requests that are within the RAM component's
+ * range.
  */
 class RAMComponent
 	: public Component
@@ -50,6 +81,8 @@ public:
 	 * \brief Constructs a RAMComponent.
 	 */
 	RAMComponent();
+
+	virtual ~RAMComponent();
 
 	/**
 	 * \brief Creates a RAMComponent.
@@ -88,7 +121,18 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
-	// TODO
+	void* AllocateBlock();
+
+private:
+	const size_t	m_blockSizeShift;// Host block size, in bit shift steps
+	const size_t	m_blockSize;	 // Host block size, in bytes
+
+	typedef vector<void *> BlockNrToMemoryBlockVector;
+	BlockNrToMemoryBlockVector m_memoryBlocks;
+
+	uint64_t	m_addressSelect;  // For AddressDataBus read/write
+	void *		m_selectedHostMemoryBlock;
+	size_t		m_selectedOffsetWithinBlock;
 };
 
 

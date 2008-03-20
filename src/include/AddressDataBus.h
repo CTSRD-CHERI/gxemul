@@ -32,14 +32,14 @@
 
 
 /**
- * \brief An interface for implementing busses that read/write data via an
+ * \brief An interface for implementing components that read/write data via an
  *	address bus.
  *
  * Any component which allows data to be read or written by using an address
  * as an index/offset should implement this interface.
  *
- * A typical example of a component which should implement the functions
- * of this class is RAM.
+ * A typical example of a Component which implements the functions
+ * of this class is the RAMComponent.
  */
 class AddressDataBus
 {
@@ -59,56 +59,56 @@ public:
 	virtual void AddressSelect(uint64_t address) = 0;
 
 	/**
-	 * \brief Reads data from the currently selected address.
+	 * \brief Reads 8-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 */
 	virtual void ReadData(uint8_t& data) = 0;
 
 	/**
-	 * \brief Reads data from the currently selected address.
+	 * \brief Reads 16-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 */
 	virtual void ReadData(uint16_t& data) = 0;
 
 	/**
-	 * \brief Reads data from the currently selected address.
+	 * \brief Reads 32-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 */
 	virtual void ReadData(uint32_t& data) = 0;
 
 	/**
-	 * \brief Reads data from the currently selected address.
+	 * \brief Reads 64-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 */
 	virtual void ReadData(uint64_t& data) = 0;
 
 	/**
-	 * \brief Writes data to the currently selected address.
+	 * \brief Writes 8-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 */
 	virtual void WriteData(uint8_t& data) = 0;
 
 	/**
-	 * \brief Writes data to the currently selected address.
+	 * \brief Writes 16-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 */
 	virtual void WriteData(uint16_t& data) = 0;
 
 	/**
-	 * \brief Writes data to the currently selected address.
+	 * \brief Writes 32-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 */
 	virtual void WriteData(uint32_t& data) = 0;
 
 	/**
-	 * \brief Writes data to the currently selected address.
+	 * \brief Writes 64-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 */

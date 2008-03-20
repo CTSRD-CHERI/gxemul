@@ -62,17 +62,21 @@ Misc.
 	[/]  More State variable Unit tests!
 
 	[/]  RAM component!
-		[/]  Implement a generic AddressDataBus interface.
-		[ ]  Send initialization parameters to components,
-			e.g. RAM size. :)
-		[ ]  Read-only variables! E.g. "size" of a RAM component.
+		[X]  Implement a generic AddressDataBus interface.
+		[ ]  Endianness. Where should this be configured?
+		[/]  Unit tests. TODO: Writes
 
-	[ ]  Mainbus component. (For use in the testmips machine.)
+	[ ]  Mainbus component? (For use in the testmips machine.)
+	     This should be an AddressDataBus, but redirect all accesses to
+	     other devices that also implement the AddressDataBus interface.
+		[ ]  AddressDataBus should be extended to allow for direct
+		     page mapping.
 
 	[ ]  Variables that have side effects on write, e.g. the "pc"
 	     might invalidate "current PC page" pointers, etc.
 
 	[ ]  File loader: Load stuff into emulated RAM (or ROM) components
+	     (actually into any AddressDataBus component)
 		[ ]  ELF
 		[ ]  a.out
 		[ ]  raw binaries
@@ -397,6 +401,11 @@ Think about
 
 	x)  Function call trace window (also per CPU).
 		[ ]  Ability to "fold" a branch of the tree! Could be useful.
+		[ ]  Ability to "fold" _all_ branches that have a specific
+		     symbol. E.g. fold all "printf" calls, so that individual
+		     putchars are never displayed if they are called from the
+		     printf tree, but they will be displayed if they are
+		     called from elsewhere.
 
 	x)  Profiling using profil()? On host archs that support it.
 	    That way, the _generated_ runtime code could be profiled
@@ -496,9 +505,6 @@ Think about
 
 	x)  TFTP server built-in into the simulated gateway? For netbooting.
 
-	x)  Investigate switching to SVN for source code revision control.
-	    (If SVN works on FreeBSD/alpha 4.9.)
-
 	x)  GDB debug connection (again).
 	
 	x)  SuperH emulation: Not only SH4, but SH3 too?
@@ -508,15 +514,13 @@ Preparation for release 0.5.0
 -----------------------------
 
 	x) Not meaningful until enough functionality from the 0.4.x series have
-	   been duplicated. AT LEAST the following before any kind of
-	   0.5.0 BETA:
+	   been duplicated. AT LEAST the following before the release:
 	   	o) testmips!
 		o) working GUI.
 	   	o) at least one REAL mips machine, such as pmax!
 	 	o) basic debugger commands:
 	 		trace tree, single step, registers, etc.
-	 	o) reasonably good 64-bit and 32-bit native code generation
-	 	   speed.
+	 	o) some form of native code generation
 
 	x) Carefully read through all the source code.
 

@@ -27,10 +27,27 @@
 
 #include "components/RAMComponent.h"
 
+#include <assert.h>
+#include <sys/mman.h>
+
 
 RAMComponent::RAMComponent()
 	: Component("ram")
+	, m_blockSizeShift(20)		// 20 = 1 MB per block
+	, m_blockSize(1 << m_blockSizeShift)
+	, m_addressSelect(0)
+	, m_selectedHostMemoryBlock(NULL)
+	, m_selectedOffsetWithinBlock(0)
 {
+}
+
+
+RAMComponent::~RAMComponent()
+{
+	for (size_t i=0; i<m_memoryBlocks.size(); ++i) {
+		if (m_memoryBlocks[i] != NULL)
+			munmap(m_memoryBlocks[i], m_blockSize);
+	}
 }
 
 
@@ -60,38 +77,130 @@ AddressDataBus* RAMComponent::AsAddressDataBus()
 
 void RAMComponent::AddressSelect(uint64_t address)
 {
+	m_addressSelect = address;
+
+	uint64_t blockNr = address >> m_blockSizeShift;
+
+	if (blockNr+1 > m_memoryBlocks.size())
+		m_selectedHostMemoryBlock = NULL;
+	else
+		m_selectedHostMemoryBlock = m_memoryBlocks[blockNr];
+
+	m_selectedOffsetWithinBlock = address & (m_blockSize-1);
 }
+
+
+void* RAMComponent::AllocateBlock()
+{
+	void * p = mmap(NULL, m_blockSize, PROT_WRITE | PROT_READ | PROT_EXEC,
+	    MAP_ANON, -1, 0);
+
+	if (p == NULL) {
+		std::cerr << "RAMComponent::AllocateBlock: Could not allocate "
+		    << m_blockSize << " bytes. Aborting.\n";
+		throw std::exception();
+	}
+
+	uint64_t blockNr = m_addressSelect >> m_blockSizeShift;
+
+	if (blockNr+1 > m_memoryBlocks.size())
+		m_memoryBlocks.resize(blockNr + 1);
+
+	m_memoryBlocks[blockNr] = p;
+
+	return p;
+}
+
 
 void RAMComponent::ReadData(uint8_t& data)
 {
+	if (m_selectedHostMemoryBlock == NULL)
+		data = 0;
+	else
+		data = (((uint8_t*)m_selectedHostMemoryBlock)
+		    [m_selectedOffsetWithinBlock]);
 }
+
 
 void RAMComponent::ReadData(uint16_t& data)
 {
+	assert((m_addressSelect & 1) == 0);
+
+	if (m_selectedHostMemoryBlock == NULL)
+		data = 0;
+	else
+		data = (((uint16_t*)m_selectedHostMemoryBlock)
+		    [m_selectedOffsetWithinBlock >> 1]);
 }
+
 
 void RAMComponent::ReadData(uint32_t& data)
 {
+	assert((m_addressSelect & 3) == 0);
+
+	if (m_selectedHostMemoryBlock == NULL)
+		data = 0;
+	else
+		data = (((uint32_t*)m_selectedHostMemoryBlock)
+		    [m_selectedOffsetWithinBlock >> 2]);
 }
+
 
 void RAMComponent::ReadData(uint64_t& data)
 {
+	assert((m_addressSelect & 7) == 0);
+
+	if (m_selectedHostMemoryBlock == NULL)
+		data = 0;
+	else
+		data = (((uint64_t*)m_selectedHostMemoryBlock)
+		    [m_selectedOffsetWithinBlock >> 3]);
 }
+
 
 void RAMComponent::WriteData(uint8_t& data)
 {
+	if (m_selectedHostMemoryBlock == NULL)
+		m_selectedHostMemoryBlock = AllocateBlock();
+
+	(((uint8_t*)m_selectedHostMemoryBlock)
+	    [m_selectedOffsetWithinBlock]) = data;
 }
+
 
 void RAMComponent::WriteData(uint16_t& data)
 {
+	assert((m_addressSelect & 1) == 0);
+
+	if (m_selectedHostMemoryBlock == NULL)
+		m_selectedHostMemoryBlock = AllocateBlock();
+
+	(((uint16_t*)m_selectedHostMemoryBlock)
+	    [m_selectedOffsetWithinBlock >> 1]) = data;
 }
+
 
 void RAMComponent::WriteData(uint32_t& data)
 {
+	assert((m_addressSelect & 3) == 0);
+
+	if (m_selectedHostMemoryBlock == NULL)
+		m_selectedHostMemoryBlock = AllocateBlock();
+
+	(((uint32_t*)m_selectedHostMemoryBlock)
+	    [m_selectedOffsetWithinBlock >> 2]) = data;
 }
+
 
 void RAMComponent::WriteData(uint64_t& data)
 {
+	assert((m_addressSelect & 7) == 0);
+
+	if (m_selectedHostMemoryBlock == NULL)
+		m_selectedHostMemoryBlock = AllocateBlock();
+
+	(((uint64_t*)m_selectedHostMemoryBlock)
+	    [m_selectedOffsetWithinBlock >> 3]) = data;
 }
 
 
@@ -113,7 +222,8 @@ static void Test_RAMComponent_AddressDataBus()
 	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
 
 	AddressDataBus* bus = ram->AsAddressDataBus();
-	UnitTest::Assert("addressdatabus expected", bus != NULL);
+	UnitTest::Assert("The RAMComponent should implement the "
+	    "AddressDataBus interface", bus != NULL);
 }
 
 static void Test_RAMComponent_InitiallyZero()
@@ -126,25 +236,25 @@ static void Test_RAMComponent_InitiallyZero()
 	// By default, RAM should be zero-filled:
 	uint8_t data8 = 42;
 	bus->ReadData(data8);
-	UnitTest::Assert("memory should be zero filled", data8, 0);
+	UnitTest::Assert("A: memory should be zero filled (8)", data8, 0);
 
 	uint16_t data16 = 142;
 	bus->ReadData(data16);
-	UnitTest::Assert("memory should be zero filled (16)", data16, 0);
+	UnitTest::Assert("A: memory should be zero filled (16)", data16, 0);
 
 	uint32_t data32 = 342;
 	bus->ReadData(data32);
-	UnitTest::Assert("memory should be zero filled (32)", data32, 0);
+	UnitTest::Assert("A: memory should be zero filled (32)", data32, 0);
 
 	uint64_t data64 = 942;
 	bus->ReadData(data64);
-	UnitTest::Assert("memory should be zero filled (64)", data64, 0);
+	UnitTest::Assert("A: memory should be zero filled (64)", data64, 0);
 
 	bus->AddressSelect(0x10000);
 
 	data8 = 43;
 	bus->ReadData(data8);
-	UnitTest::Assert("B: memory should be zero filled", data8, 0);
+	UnitTest::Assert("B: memory should be zero filled (8)", data8, 0);
 
 	data16 = 143;
 	bus->ReadData(data16);
@@ -166,6 +276,10 @@ UNITTESTS(RAMComponent)
 	UNITTEST(Test_RAMComponent_InitiallyZero);
 
 	// TODO: Write + readback tests etc.
+
+	// TODO: Memory size tests, change size during runtime, etc.
+
+	// TODO: Endianness tests!
 }
 
 #endif
