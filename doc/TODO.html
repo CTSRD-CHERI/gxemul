@@ -64,6 +64,7 @@ Misc.
 	[/]  RAM component!
 		[X]  Implement a generic AddressDataBus interface.
 		[ ]  Endianness. Where should this be configured?
+		[ ]  STATE!
 		[/]  Unit tests. TODO: Writes
 
 	[ ]  Mainbus component? (For use in the testmips machine.)
@@ -320,20 +321,27 @@ Error handling
 GTKMM GUI
 ---------
 
-	x)  Dockable windows!
+	[X]  Register as an application so that it end up in the GNOME
+	     start menu, etc.
+		/usr/local/share/pixmaps/gxemul-gui.png
+		/usr/local/share/applications/gxemul-gui.desktop
+	[X]  Uninstall of the .desktop and icon files (make uninstall).
+	[ ]  TODO: Make the .png icon more meaningful!
 
-	x)  Command input window!  Make it look nice.
+	[ ]  Dockable windows!
 
-	x)  "GXemul" _last_ in the title bar of windows, not first.
+	[ ]  Command input window!  Make it look nice.
+
+	[ ]  "GXemul" _last_ in the title bar of windows, not first.
 		emulation_name - GXemul
 		machine_name (VGA) - GXemul
 		machine_name (serial console, tty0) - GXemul
 		etc.
 
-	x)  Copy/Paste of components! Both inside one GXemul instance,
-	    and _BETWEEN APPLICATIONS_!
+	[ ]  Copy/Paste of components! Both inside one GXemul instance,
+	     and _BETWEEN APPLICATIONS_!
 
-	x)  Menu bar:
+	[ ]  Menu bar:
 		NOTE: i18n of these! Default names for "File", "Help" etc!
 		
 		File
@@ -368,28 +376,28 @@ GTKMM GUI
 			Contents  (installed html files)
 			About
 
-	x)  Toolbar button area:
+	[ ]  Toolbar button area:
 		Run/step forward (start emulation)
 		Pause (pause emulation, button kept down until unpaused)
 		Reset (with a dialog asking for confirmation)
 		Run/step backwards
 		Undo/Redo!
-	    (Optional plug-in-ability/extensibility. Buttons should
-	    be bound to debugger commands.)
+	     (Optional plug-in-ability/extensibility. Buttons should
+	     be bound to debugger commands.)
 
-	x)  "Workspace", where emulations can be created
-	    by drag-n-drop of components from a palette, and/or
-	    from other emulations. Normally, the workspace window would
-	    be docked in the "center" of the GXemul window, with the
-	    palette to the right, and the command window below it.
+	[ ]  "Workspace", where emulations can be created
+	     by drag-n-drop of components from a palette, and/or
+	     from other emulations. Normally, the workspace window would
+	     be docked in the "center" of the GXemul window, with the
+	     palette to the right, and the command window below it.
 
-	    The design mode should use cairo for drawing.
+	     The design mode should use cairo for drawing.
 
-	    Dockable/undockable windows for machines/devices/
-	    I/O-units' contents ?
+	     Dockable/undockable windows for machines/devices/
+	     I/O-units' contents ?
 
-	    Tooltips for components. (A "summary" of the entire
-	    state window.)
+	     Tooltips for components. (A "summary" of the entire
+	     state window.)
 
 
 Think about

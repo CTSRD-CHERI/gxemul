@@ -46,6 +46,12 @@ install: test documentation
 	mkdir -p $(PREFIX)/share/doc/gxemul
 	cp -R doc/* $(PREFIX)/share/doc/gxemul/
 	@echo
+	@echo Installing Application .desktop entry and icon...
+	mkdir -p $(PREFIX)/share/pixmaps
+	cp misc/gxemul-gui.png $(PREFIX)/share/pixmaps
+	mkdir -p $(PREFIX)/share/applications
+	cp misc/gxemul-gui.desktop $(PREFIX)/share/applications
+	@echo
 	@echo "Done!"
 
 uninstall:
@@ -55,6 +61,8 @@ uninstall:
 	rm -f $(PREFIX)/man/man1/gxemul.1
 	rm -f $(PREFIX)/man/man1/gxemul-gui.1
 	rm -rf $(PREFIX)/share/doc/gxemul
+	rm -f $(PREFIX)/share/pixmaps/gxemul-gui.png
+	rm -f $(PREFIX)/share/applications/gxemul-gui.desktop
 	@echo "Done!"
 
 clean:

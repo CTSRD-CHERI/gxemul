@@ -3934,3 +3934,4 @@ Changelog for GXemul:
 20080317	Beginning on an AddressDataBus abstract class/interface, which
 		e.g. the RAM component will implement.
 20080320	Continuing on the RAMComponent class.
+20080321	"make install" now installs .desktop and icon files.
