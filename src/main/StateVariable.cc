@@ -684,7 +684,7 @@ static void Test_StateVariable_Numeric_SetValue()
 	UnitTest::Assert("changing to -110 should be possible",
 	    vsint8.SetValue("-110") == true);
 	UnitTest::Assert("varSInt8 should have been updated",
-	    varSInt8, -110);
+	    varSInt8, (uint64_t) -110);
 
 	// Tests for other numeric types: TODO
 }
