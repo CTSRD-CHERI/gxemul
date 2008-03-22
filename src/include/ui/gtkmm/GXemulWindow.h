@@ -26,9 +26,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: GXemulWindow.h,v 1.1 2007/12/31 11:50:18 debug Exp $
  */
 
 #include <gtkmm.h>
@@ -50,8 +47,13 @@ public:
 
 private:
 	virtual void on_menu_about();
+	virtual void on_menu_go();
 	virtual void on_menu_new();
+	virtual void on_menu_open();
+	virtual void on_menu_pause();
 	virtual void on_menu_quit();
+	virtual void on_menu_undo();
+	virtual void on_menu_redo();
 
 private:
 	GXemul*		m_gxemul;

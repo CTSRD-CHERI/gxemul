@@ -3937,3 +3937,7 @@ Changelog for GXemul:
 20080321	"make install" now installs .desktop and icon files.
 		More work on the RAMComponent class: endianness for loads and
 		stores larger than 8 bits, some simple unit tests.
+20080322	Adding a preliminary toolbar to the GTKMM GUI.
+		Upgrading configure script check for gtkmm-2.4 from version
+		2.12.1 to 2.12.5. (Maybe not stricly necessary, but that's what
+		I am currently using for development.)

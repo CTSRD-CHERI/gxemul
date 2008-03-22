@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: GXemulWindow.cc,v 1.3 2008/01/02 10:56:41 debug Exp $
  */
 
 #ifdef WITH_GTKMM
@@ -49,13 +46,32 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	m_refActionGroup->add(Gtk::Action::create("FileMenu", "_File"));
 	m_refActionGroup->add(Gtk::Action::create("FileNew", Gtk::Stock::NEW),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_new));
+	m_refActionGroup->add(Gtk::Action::create("FileOpen", Gtk::Stock::OPEN),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_open));
 	m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_quit));
+
+	// Edit menu:
+	m_refActionGroup->add(Gtk::Action::create("EditMenu", "_Edit"));
+	m_refActionGroup->add(Gtk::Action::create("EditUndo", Gtk::Stock::UNDO),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_undo));
+	m_refActionGroup->add(Gtk::Action::create("EditRedo", Gtk::Stock::REDO),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_redo));
+
+	// Emulation menu:
+	m_refActionGroup->add(Gtk::Action::create("EmulationMenu",
+	    "E_mulation"));
+	m_refActionGroup->add(Gtk::Action::create("EmulationGo",
+	    Gtk::Stock::MEDIA_PLAY),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_go));
+	m_refActionGroup->add(Gtk::Action::create("EmulationPause",
+	    Gtk::Stock::MEDIA_PAUSE),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_pause));
 
 	// Help menu:
 	m_refActionGroup->add( Gtk::Action::create("HelpMenu", "_Help") );
 	m_refActionGroup->add( Gtk::Action::create("HelpAbout",
-	    Gtk::Stock::HELP), sigc::mem_fun(*this,
+	    Gtk::Stock::ABOUT), sigc::mem_fun(*this,
 	    &GXemulWindow::on_menu_about) );
 
 	m_refUIManager = Gtk::UIManager::create();
@@ -68,13 +84,33 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    "  <menubar name='MenuBar'>"
 	    "    <menu action='FileMenu'>"
 	    "      <menuitem action='FileNew'/>"
+	    "      <menuitem action='FileOpen'/>"
 	    "      <separator/>"
 	    "      <menuitem action='FileQuit'/>"
+	    "    </menu>"
+	    "    <menu action='EditMenu'>"
+	    "      <menuitem action='EditUndo'/>"
+	    "      <menuitem action='EditRedo'/>"
+	    "      <separator/>"
+	    "    </menu>"
+	    "    <menu action='EmulationMenu'>"
+	    "      <menuitem action='EmulationGo'/>"
+	    "      <menuitem action='EmulationPause'/>"
+	    "      <separator/>"
 	    "    </menu>"
 	    "    <menu action='HelpMenu'>"
 	    "      <menuitem action='HelpAbout'/>"
 	    "    </menu>"
 	    "  </menubar>"
+	    "  <toolbar name='ToolBar'>"
+	    "    <toolitem action='FileOpen'/>"
+	    "    <separator/>"
+	    "    <toolitem action='EditUndo'/>"
+	    "    <toolitem action='EditRedo'/>"
+	    "    <separator/>"
+	    "    <toolitem action='EmulationGo'/>"
+	    "    <toolitem action='EmulationPause'/>"
+	    "  </toolbar>"
 	    "</ui>";
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -95,6 +131,10 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	if (pMenubar != NULL)
 		m_Box.pack_start(*pMenubar, Gtk::PACK_SHRINK);
 
+	Gtk::Widget* pToolbar = m_refUIManager->get_widget("/ToolBar");
+	if (pToolbar != NULL)
+		m_Box.pack_start(*pToolbar, Gtk::PACK_SHRINK);
+
 	m_Box.add(m_VPaned);
 
 	m_VPaned.pack1(m_EmulationDesignArea);
@@ -103,9 +143,11 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	show_all_children();
 }
 
+
 GXemulWindow::~GXemulWindow()
 {
 }
+
 
 void GXemulWindow::on_menu_about()
 {
@@ -117,14 +159,47 @@ void GXemulWindow::on_menu_about()
 	dialog.run();
 }
 
+
+void GXemulWindow::on_menu_go()
+{
+	std::cerr << "GXemulWindow::on_menu_go(): TODO\n";
+}
+
+
 void GXemulWindow::on_menu_new()
 {
-	// TODO
+	std::cerr << "GXemulWindow::on_menu_new(): TODO\n";
 }
+
+
+void GXemulWindow::on_menu_open()
+{
+	std::cerr << "GXemulWindow::on_menu_open(): TODO\n";
+}
+
+
+void GXemulWindow::on_menu_pause()
+{
+	std::cerr << "GXemulWindow::on_menu_pause(): TODO\n";
+}
+
 
 void GXemulWindow::on_menu_quit()
 {
 	hide();
 }
+
+
+void GXemulWindow::on_menu_redo()
+{
+	std::cerr << "GXemulWindow::on_menu_redo(): TODO\n";
+}
+
+
+void GXemulWindow::on_menu_undo()
+{
+	std::cerr << "GXemulWindow::on_menu_undo(): TODO\n";
+}
+
 
 #endif	// WITH_GTKMM

@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: EmulationDesignArea.cc,v 1.1 2007/12/31 11:50:19 debug Exp $
  */
 
 #ifdef WITH_GTKMM
@@ -35,52 +32,20 @@
 
 EmulationDesignArea::EmulationDesignArea()
 {
-        set_size_request(800, 550);
+	set_size_request(880, 550);
 }
+
 
 EmulationDesignArea::~EmulationDesignArea()
 {
 }
 
+
 bool EmulationDesignArea::on_expose_event(GdkEventExpose* event)
 {
-  // This is where we draw on the window
-  Glib::RefPtr<Gdk::Window> window = get_window();
-  if(window)
-  {
-    Gtk::Allocation allocation = get_allocation();
-    const int width = allocation.get_width();
-    const int height = allocation.get_height();
-
-    double x0=0.1, y0=0.5, // start point
-           x1=0.4, y1=0.9,  // control point #1
-           x2=0.6, y2=0.1,  // control point #2
-           x3=0.9, y3=0.5;  // end point
-
-    Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
-    // clip to the area indicated by the expose event so that we only redraw
-    // the portion of the window that needs to be redrawn
-    cr->rectangle(event->area.x, event->area.y,
-            event->area.width, event->area.height);
-    cr->clip();
-
-    // scale to unit square (0 to 1 with and height)
-    cr->scale(width, height);
-
-    cr->set_line_width(0.05);
-    // draw curve
-    cr->move_to(x0, y0);
-    cr->curve_to(x1, y1, x2, y2, x3, y3);
-    cr->stroke();
-    // show control points
-    cr->set_source_rgba(1, 0.2, 0.2, 0.6);
-    cr->move_to(x0, y0);
-    cr->line_to (x1, y1);
-    cr->move_to(x2, y2);
-    cr->line_to (x3, y3);
-    cr->stroke();
-  }
-  return true;
+	// TODO
+	return true;
 }
+
 
 #endif	// WITH_GTKMM
