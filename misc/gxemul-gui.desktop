@@ -2,8 +2,8 @@
 Encoding=UTF-8
 Name=GXemul
 Name[sv]=Maskinemulatorn GXemul
-Comment=Full-system computer architecture emulator.
-Comment[sv]=Datorarkitekturemulator.
+Comment=Full-system computer architecture emulator
+Comment[sv]=Datorarkitekturemulator
 Exec=gxemul-gui
 Terminal=false
 Type=Application
