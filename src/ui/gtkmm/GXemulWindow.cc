@@ -42,25 +42,42 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 
 	m_refActionGroup = Gtk::ActionGroup::create();
 
+	// File|New sub menu:
+	m_refActionGroup->add(Gtk::Action::create("FileNewBlack",
+	    Gtk::Stock::NEW, _("_Blank emulation")),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_new_blank));
+	m_refActionGroup->add(Gtk::Action::create("FileNewFromTemplate",
+	    _("From _template")),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_new_from_template));
+
 	// File menu:
-	m_refActionGroup->add(Gtk::Action::create("FileMenu", "_File"));
-	m_refActionGroup->add(Gtk::Action::create("FileNew", Gtk::Stock::NEW),
-	    sigc::mem_fun(*this, &GXemulWindow::on_menu_new));
+	m_refActionGroup->add(Gtk::Action::create("FileMenu", _("_File")));
+	m_refActionGroup->add(Gtk::Action::create("FileNew", _("_New")));
 	m_refActionGroup->add(Gtk::Action::create("FileOpen", Gtk::Stock::OPEN),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_open));
 	m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_quit));
 
 	// Edit menu:
-	m_refActionGroup->add(Gtk::Action::create("EditMenu", "_Edit"));
+	m_refActionGroup->add(Gtk::Action::create("EditMenu", _("_Edit")));
 	m_refActionGroup->add(Gtk::Action::create("EditUndo", Gtk::Stock::UNDO),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_undo));
 	m_refActionGroup->add(Gtk::Action::create("EditRedo", Gtk::Stock::REDO),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_redo));
+	m_refActionGroup->add(Gtk::Action::create("EditCut", Gtk::Stock::CUT),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_cut));
+	m_refActionGroup->add(Gtk::Action::create("EditCopy", Gtk::Stock::COPY),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_copy));
+	m_refActionGroup->add(Gtk::Action::create("EditPaste", Gtk::Stock::PASTE),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_paste));
+	m_refActionGroup->add(Gtk::Action::create("EditDelete", Gtk::Stock::DELETE),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_delete));
+	m_refActionGroup->add(Gtk::Action::create("EditPreferences", Gtk::Stock::PREFERENCES),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_preferences));
 
 	// Emulation menu:
 	m_refActionGroup->add(Gtk::Action::create("EmulationMenu",
-	    "E_mulation"));
+	    _("E_mulation")));
 	m_refActionGroup->add(Gtk::Action::create("EmulationGo",
 	    Gtk::Stock::MEDIA_PLAY),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_go));
@@ -69,7 +86,7 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_pause));
 
 	// Help menu:
-	m_refActionGroup->add( Gtk::Action::create("HelpMenu", "_Help") );
+	m_refActionGroup->add( Gtk::Action::create("HelpMenu", _("_Help")) );
 	m_refActionGroup->add( Gtk::Action::create("HelpAbout",
 	    Gtk::Stock::ABOUT), sigc::mem_fun(*this,
 	    &GXemulWindow::on_menu_about) );
@@ -83,7 +100,10 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    "<ui>"
 	    "  <menubar name='MenuBar'>"
 	    "    <menu action='FileMenu'>"
-	    "      <menuitem action='FileNew'/>"
+	    "      <menu action='FileNew'>"
+	    "        <menuitem action='FileNewBlack'/>"
+	    "        <menuitem action='FileNewFromTemplate'/>"
+	    "      </menu>"
 	    "      <menuitem action='FileOpen'/>"
 	    "      <separator/>"
 	    "      <menuitem action='FileQuit'/>"
@@ -92,6 +112,12 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    "      <menuitem action='EditUndo'/>"
 	    "      <menuitem action='EditRedo'/>"
 	    "      <separator/>"
+	    "      <menuitem action='EditCut'/>"
+	    "      <menuitem action='EditCopy'/>"
+	    "      <menuitem action='EditPaste'/>"
+	    "      <menuitem action='EditDelete'/>"
+	    "      <separator/>"
+	    "      <menuitem action='EditPreferences'/>"
 	    "    </menu>"
 	    "    <menu action='EmulationMenu'>"
 	    "      <menuitem action='EmulationGo'/>"
@@ -160,15 +186,39 @@ void GXemulWindow::on_menu_about()
 }
 
 
+void GXemulWindow::on_menu_copy()
+{
+	std::cerr << "GXemulWindow::on_menu_copy(): TODO\n";
+}
+
+
+void GXemulWindow::on_menu_cut()
+{
+	std::cerr << "GXemulWindow::on_menu_cut(): TODO\n";
+}
+
+
+void GXemulWindow::on_menu_delete()
+{
+	std::cerr << "GXemulWindow::on_menu_delete(): TODO\n";
+}
+
+
 void GXemulWindow::on_menu_go()
 {
 	std::cerr << "GXemulWindow::on_menu_go(): TODO\n";
 }
 
 
-void GXemulWindow::on_menu_new()
+void GXemulWindow::on_menu_new_blank()
 {
-	std::cerr << "GXemulWindow::on_menu_new(): TODO\n";
+	std::cerr << "GXemulWindow::on_menu_new_blank(): TODO\n";
+}
+
+
+void GXemulWindow::on_menu_new_from_template()
+{
+	std::cerr << "GXemulWindow::on_menu_new_from_template(): TODO\n";
 }
 
 
@@ -178,9 +228,21 @@ void GXemulWindow::on_menu_open()
 }
 
 
+void GXemulWindow::on_menu_paste()
+{
+	std::cerr << "GXemulWindow::on_menu_paste(): TODO\n";
+}
+
+
 void GXemulWindow::on_menu_pause()
 {
 	std::cerr << "GXemulWindow::on_menu_pause(): TODO\n";
+}
+
+
+void GXemulWindow::on_menu_preferences()
+{
+	std::cerr << "GXemulWindow::on_menu_preferences(): TODO\n";
 }
 
 

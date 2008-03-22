@@ -32,7 +32,7 @@
 
 EmulationDesignArea::EmulationDesignArea()
 {
-	set_size_request(880, 550);
+	set_size_request(930, 550);
 }
 
 

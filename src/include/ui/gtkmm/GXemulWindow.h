@@ -47,10 +47,16 @@ public:
 
 private:
 	virtual void on_menu_about();
+	virtual void on_menu_copy();
+	virtual void on_menu_cut();
+	virtual void on_menu_delete();
 	virtual void on_menu_go();
-	virtual void on_menu_new();
+	virtual void on_menu_new_blank();
+	virtual void on_menu_new_from_template();
 	virtual void on_menu_open();
+	virtual void on_menu_paste();
 	virtual void on_menu_pause();
+	virtual void on_menu_preferences();
 	virtual void on_menu_quit();
 	virtual void on_menu_undo();
 	virtual void on_menu_redo();

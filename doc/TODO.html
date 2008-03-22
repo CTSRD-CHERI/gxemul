@@ -54,6 +54,9 @@ Legacy (0.4.x) series
 
 Misc.
 -----
+	[ ]  --debug and GTKMM? With GTKMM 2.15.5 it fails because of
+	     "new" operator collisions.
+
 	[/]  More State variable Unit tests!
 		[ ]  State such as RAM? Special handlers?
 		[ ]  Variables that have side effects on write, e.g. the "pc"
@@ -331,45 +334,45 @@ GTKMM GUI
 		NOTE: i18n of these! Default names for "File", "Help" etc!
 		
 		File
-			New ->
-				Emulation from template	  (e.g. "testmips")
-				Empty Emulation
+			[/]  New ->
+				[/]  Blank emulation
+				[/]  From template      (e.g. "testmips")
 				-----------------------
-				GXemul instance
-			Open
+				[ ]  GXemul instance
+			[/]  Open
 				(Open can show a list of "thumbnails"
 				of the workspace plus e.g. one main
 				window (such as a VGA display).)
-			Close
+			[ ]  Close
 			-----------
-			Save
-			Save as...
+			[ ]  Save
+			[ ]  Save as...
 			-----------
-			list of recently used files
+			[ ]  list of recently used files
 			-----------
-			Quit
+			[/]  Quit
 		Edit
-			Undo
-			Redo
+			[/]  Undo
+			[/]  Redo
 			-----------
-			Cut
-			Copy
-			Paste
-			Delete
+			[/]  Cut
+			[/]  Copy
+			[/]  Paste
+			[/]  Delete
 			-----------
-			Preferences   (?)
+			[/]  Preferences   (?)
 		View
 			[ ]  Show toolbar
 			[ ]  Show workspace
 			[ ]  Show debug console
-			F11  Full screen mode (CTRL-ALT-F11 to get out of it)
+			[ ]  Full screen mode (F11, CTRL-ALT-F11 to get out)
 		Emulation
-			Play/Go
-			Pause
-			Reset
+			[/]  Play/Go
+			[/]  Pause
+			[ ]  Reset
 		Help
-			Contents  (installed html files)
-			About
+			[ ]  Contents  (installed html files)
+			[X]  About
 
 	[/]  Toolbar button area:
 		Run/step forward (start emulation)
