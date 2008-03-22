@@ -270,27 +270,26 @@ Components
 
 	Start implementing suitable components (src/components/):
 
-	busses/			mainbus, TurboChannel, ISA, PCI, ...
-	cpus/
-		CPU		class CPU : public Component, etc
-		arm/
-		alpha/
-		mips/		etc. One for each CPU architecture
-	graphics/		e.g. VGA graphics cards!
-	displays/
-		rgbmonitor	RGB monitor, for e.g. VGA output.
-		lcd		LCD display
-		led		A single led :)
-	dummy/			Contains dummy test components, for testing
-				the components framework (e.g. serialization...)
-	machines/		Machines are usually TEMPLATES which set up a
-				couple of other components!
-	memory/
-		ram
-		rom
-		cache(s)
-	network/		Ethernet and others end up here
-	sound/			sound cards
+		busses/			mainbus, TurboChannel, ISA, PCI, ...
+					Busses usually just forward read/write
+					accesses to other components.
+		cpus/
+	[/]		mips
+		graphics/		e.g. VGA graphics cards!
+		displays/
+			rgbmonitor	RGB monitor, for e.g. VGA output.
+			lcd		LCD display
+			led		A single led :)
+		dummy/			dummy components (for unit testing)
+		machines/		Machines are usually TEMPLATES which
+					set up a couple of other components!
+	[/]		testmips
+		memory/			Memory keep data in some form of array.
+	[/]		ram
+			rom
+			cache(s)
+		network/		Ethernet and others end up here
+		sound/			sound cards
 
 
 I18N
@@ -325,10 +324,10 @@ GTKMM GUI
 		machine_name (serial console, tty0) - GXemul
 		etc.
 
-	[ ]  Copy/Paste of components! Both inside one GXemul instance,
-	     and _BETWEEN APPLICATIONS_!
+	[ ]  Disable/gray out menu choices and toolbar buttons that are
+	     not applicable, e.g. Undo if nothing is Undoable.
 
-	[ ]  Menu bar:
+	[/]  Menu bar:
 		NOTE: i18n of these! Default names for "File", "Help" etc!
 		
 		File
@@ -346,24 +345,33 @@ GTKMM GUI
 			Save
 			Save as...
 			-----------
+			list of recently used files
+			-----------
 			Quit
 		Edit
+			Undo
+			Redo
+			-----------
+			Cut
 			Copy
 			Paste
+			Delete
+			-----------
+			Preferences   (?)
 		View
 			[ ]  Show toolbar
 			[ ]  Show workspace
 			[ ]  Show debug console
 			F11  Full screen mode (CTRL-ALT-F11 to get out of it)
 		Emulation
-			Start
-			Pause/continue
+			Play/Go
+			Pause
 			Reset
 		Help
 			Contents  (installed html files)
 			About
 
-	[ ]  Toolbar button area:
+	[/]  Toolbar button area:
 		Run/step forward (start emulation)
 		Pause (pause emulation, button kept down until unpaused)
 		Reset (with a dialog asking for confirmation)
@@ -385,6 +393,9 @@ GTKMM GUI
 
 	     Tooltips for components. (A "summary" of the entire
 	     state window.)
+
+	[ ]  Copy/Paste of components! Both inside one GXemul instance,
+	     and _BETWEEN APPLICATIONS_!
 
 	[ ]  Dockable windows!
 

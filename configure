@@ -27,8 +27,6 @@
 #  SUCH DAMAGE.
 #
 #
-#  $Id: configure,v 1.299 2008/03/12 11:45:40 debug Exp $
-#
 #  This is a minimal configure script, hardcoded for GXemul. This script
 #  figures out which compiler flags will work, and creates Makefiles in
 #  sub-directories. A config.h file is also created.
@@ -1262,7 +1260,7 @@ fi
 
 ###############################################################################
 
-GTKMM_VER="2.12.1"
+GTKMM_VER="2.12.5"
 printf "checking for gtkmm-2.4 >= $GTKMM_VER... "
 
 if [ z$WITHOUTGTKMM = zYES ]; then
