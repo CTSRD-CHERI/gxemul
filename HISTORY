@@ -3935,3 +3935,5 @@ Changelog for GXemul:
 		e.g. the RAM component will implement.
 20080320	Continuing on the RAMComponent class.
 20080321	"make install" now installs .desktop and icon files.
+		More work on the RAMComponent class: endianness for loads and
+		stores larger than 8 bits, some simple unit tests.

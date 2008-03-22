@@ -141,6 +141,13 @@ using std::max;
 #endif
 
 
+enum Endianness
+{
+	BigEndian = 0,
+	LittleEndian
+};
+
+
 #ifdef HOST_LITTLE_ENDIAN
 #define	LE16_TO_HOST(x)	    (x)
 #define	BE16_TO_HOST(x)	    ((((x) & 0xff00) >> 8) | (((x)&0xff) << 8))

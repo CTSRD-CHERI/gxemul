@@ -33,7 +33,7 @@
 
 RAMComponent::RAMComponent()
 	: Component("ram")
-	, m_blockSizeShift(20)		// 20 = 1 MB per block
+	, m_blockSizeShift(22)		// 22 = 4 MB per block
 	, m_blockSize(1 << m_blockSizeShift)
 	, m_addressSelect(0)
 	, m_selectedHostMemoryBlock(NULL)
@@ -122,7 +122,7 @@ void RAMComponent::ReadData(uint8_t& data)
 }
 
 
-void RAMComponent::ReadData(uint16_t& data)
+void RAMComponent::ReadData(uint16_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 1) == 0);
 
@@ -131,10 +131,15 @@ void RAMComponent::ReadData(uint16_t& data)
 	else
 		data = (((uint16_t*)m_selectedHostMemoryBlock)
 		    [m_selectedOffsetWithinBlock >> 1]);
+
+	if (endianness == BigEndian)
+		data = BE16_TO_HOST(data);
+	else
+		data = LE16_TO_HOST(data);
 }
 
 
-void RAMComponent::ReadData(uint32_t& data)
+void RAMComponent::ReadData(uint32_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 3) == 0);
 
@@ -143,10 +148,15 @@ void RAMComponent::ReadData(uint32_t& data)
 	else
 		data = (((uint32_t*)m_selectedHostMemoryBlock)
 		    [m_selectedOffsetWithinBlock >> 2]);
+
+	if (endianness == BigEndian)
+		data = BE32_TO_HOST(data);
+	else
+		data = LE32_TO_HOST(data);
 }
 
 
-void RAMComponent::ReadData(uint64_t& data)
+void RAMComponent::ReadData(uint64_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 7) == 0);
 
@@ -155,10 +165,15 @@ void RAMComponent::ReadData(uint64_t& data)
 	else
 		data = (((uint64_t*)m_selectedHostMemoryBlock)
 		    [m_selectedOffsetWithinBlock >> 3]);
+
+	if (endianness == BigEndian)
+		data = BE64_TO_HOST(data);
+	else
+		data = LE64_TO_HOST(data);
 }
 
 
-void RAMComponent::WriteData(uint8_t& data)
+void RAMComponent::WriteData(const uint8_t& data)
 {
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
@@ -168,39 +183,57 @@ void RAMComponent::WriteData(uint8_t& data)
 }
 
 
-void RAMComponent::WriteData(uint16_t& data)
+void RAMComponent::WriteData(const uint16_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 1) == 0);
 
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
 
+	uint16_t d;
+	if (endianness == BigEndian)
+		d = BE16_TO_HOST(data);
+	else
+		d = LE16_TO_HOST(data);
+
 	(((uint16_t*)m_selectedHostMemoryBlock)
-	    [m_selectedOffsetWithinBlock >> 1]) = data;
+	    [m_selectedOffsetWithinBlock >> 1]) = d;
 }
 
 
-void RAMComponent::WriteData(uint32_t& data)
+void RAMComponent::WriteData(const uint32_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 3) == 0);
 
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
 
+	uint32_t d;
+	if (endianness == BigEndian)
+		d = BE32_TO_HOST(data);
+	else
+		d = LE32_TO_HOST(data);
+
 	(((uint32_t*)m_selectedHostMemoryBlock)
-	    [m_selectedOffsetWithinBlock >> 2]) = data;
+	    [m_selectedOffsetWithinBlock >> 2]) = d;
 }
 
 
-void RAMComponent::WriteData(uint64_t& data)
+void RAMComponent::WriteData(const uint64_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 7) == 0);
 
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
 
+	uint64_t d;
+	if (endianness == BigEndian)
+		d = BE64_TO_HOST(data);
+	else
+		d = LE64_TO_HOST(data);
+
 	(((uint64_t*)m_selectedHostMemoryBlock)
-	    [m_selectedOffsetWithinBlock >> 3]) = data;
+	    [m_selectedOffsetWithinBlock >> 3]) = d;
 }
 
 
@@ -239,15 +272,15 @@ static void Test_RAMComponent_InitiallyZero()
 	UnitTest::Assert("A: memory should be zero filled (8)", data8, 0);
 
 	uint16_t data16 = 142;
-	bus->ReadData(data16);
+	bus->ReadData(data16, BigEndian);
 	UnitTest::Assert("A: memory should be zero filled (16)", data16, 0);
 
 	uint32_t data32 = 342;
-	bus->ReadData(data32);
+	bus->ReadData(data32, BigEndian);
 	UnitTest::Assert("A: memory should be zero filled (32)", data32, 0);
 
 	uint64_t data64 = 942;
-	bus->ReadData(data64);
+	bus->ReadData(data64, BigEndian);
 	UnitTest::Assert("A: memory should be zero filled (64)", data64, 0);
 
 	bus->AddressSelect(0x10000);
@@ -257,16 +290,78 @@ static void Test_RAMComponent_InitiallyZero()
 	UnitTest::Assert("B: memory should be zero filled (8)", data8, 0);
 
 	data16 = 143;
-	bus->ReadData(data16);
+	bus->ReadData(data16, BigEndian);
 	UnitTest::Assert("B: memory should be zero filled (16)", data16, 0);
 
 	data32 = 343;
-	bus->ReadData(data32);
+	bus->ReadData(data32, BigEndian);
 	UnitTest::Assert("B: memory should be zero filled (32)", data32, 0);
 
 	data64 = 943;
-	bus->ReadData(data64);
+	bus->ReadData(data64, BigEndian);
 	UnitTest::Assert("B: memory should be zero filled (64)", data64, 0);
+}
+
+static void Test_RAMComponent_WriteThenRead()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+	AddressDataBus* bus = ram->AsAddressDataBus();
+
+	bus->AddressSelect(256);
+
+	uint64_t data64 = 0x123456789abcdefULL;
+	bus->WriteData(data64, BigEndian);
+
+	uint64_t data64_b = 0;
+	bus->ReadData(data64_b, BigEndian);
+
+	UnitTest::Assert("memory should be same when read", data64_b, data64);
+
+	uint32_t data32_b = 0;
+	bus->ReadData(data32_b, BigEndian);
+
+	UnitTest::Assert("32-bit read should give top 32 bits, "
+	    "in big endian mode", data32_b, data64 >> 32);
+
+	uint16_t data16_b = 0;
+	bus->ReadData(data16_b, BigEndian);
+
+	UnitTest::Assert("16-bit read should give top 16 bits, "
+	    "in big endian mode", data16_b, data64 >> 48);
+
+	uint8_t data8_b = 0;
+	bus->ReadData(data8_b);
+
+	UnitTest::Assert("8-bit read should give top 8 bits, "
+	    "in big endian mode", data8_b, data64 >> 56);
+}
+
+static void Test_RAMComponent_WriteThenRead_ReverseEndianness()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+	AddressDataBus* bus = ram->AsAddressDataBus();
+
+	bus->AddressSelect(256);
+
+	uint64_t data64 = 0x123456789abcdefULL;
+	bus->WriteData(data64, BigEndian);
+
+	bus->AddressSelect(256 + 4);
+
+	uint32_t data32_b = 0;
+	bus->ReadData(data32_b, LittleEndian);
+
+	UnitTest::Assert("32-bit read", data32_b, 0xefcdab89);
+
+	uint16_t data16_b = 0;
+	bus->ReadData(data16_b, LittleEndian);
+
+	UnitTest::Assert("16-bit read", data16_b, 0xab89);
+
+	uint8_t data8_b = 0;
+	bus->ReadData(data8_b);
+
+	UnitTest::Assert("8-bit read", data8_b, 0x89);
 }
 
 UNITTESTS(RAMComponent)
@@ -274,12 +369,10 @@ UNITTESTS(RAMComponent)
 	UNITTEST(Test_RAMComponent_IsStable);
 	UNITTEST(Test_RAMComponent_AddressDataBus);
 	UNITTEST(Test_RAMComponent_InitiallyZero);
+	UNITTEST(Test_RAMComponent_WriteThenRead);
+	UNITTEST(Test_RAMComponent_WriteThenRead_ReverseEndianness);
 
-	// TODO: Write + readback tests etc.
-
-	// TODO: Memory size tests, change size during runtime, etc.
-
-	// TODO: Endianness tests!
+	// TODO: Serialization, deserialization
 }
 
 #endif

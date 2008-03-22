@@ -3,7 +3,7 @@
 <html>
 <head>
   <title>GXemul: TODO</title>
-  <meta name="robots" content="noarchive,nofollow,noindex">
+  <meta name="robots" content="noarchive,noindex">
 </head>
 <body>
 
@@ -54,27 +54,21 @@ Legacy (0.4.x) series
 
 Misc.
 -----
-	[/]  Move to SVN.
-		[X]  Local repository.
-		[/]  Instructions how how to backup to SourceForge.
-		[ ]  Backup script to copy it to the Alpha.
-
 	[/]  More State variable Unit tests!
+		[ ]  State such as RAM? Special handlers?
+		[ ]  Variables that have side effects on write, e.g. the "pc"
+		     might invalidate "current PC page" pointers, etc. Again,
+		     "special handlers".
 
 	[/]  RAM component!
 		[X]  Implement a generic AddressDataBus interface.
-		[ ]  Endianness. Where should this be configured?
-		[ ]  STATE!
-		[/]  Unit tests. TODO: Writes
+		[ ]  STATE! serialize/deserialize, including unit tests
 
 	[ ]  Mainbus component? (For use in the testmips machine.)
 	     This should be an AddressDataBus, but redirect all accesses to
 	     other devices that also implement the AddressDataBus interface.
 		[ ]  AddressDataBus should be extended to allow for direct
 		     page mapping.
-
-	[ ]  Variables that have side effects on write, e.g. the "pc"
-	     might invalidate "current PC page" pointers, etc.
 
 	[ ]  File loader: Load stuff into emulated RAM (or ROM) components
 	     (actually into any AddressDataBus component)
@@ -321,14 +315,7 @@ Error handling
 GTKMM GUI
 ---------
 
-	[X]  Register as an application so that it end up in the GNOME
-	     start menu, etc.
-		/usr/local/share/pixmaps/gxemul-gui.png
-		/usr/local/share/applications/gxemul-gui.desktop
-	[X]  Uninstall of the .desktop and icon files (make uninstall).
-	[ ]  TODO: Make the .png icon more meaningful!
-
-	[ ]  Dockable windows!
+	[ ]  Make the misc/gxemul-gui.png icon more meaningful!
 
 	[ ]  Command input window!  Make it look nice.
 
@@ -398,6 +385,8 @@ GTKMM GUI
 
 	     Tooltips for components. (A "summary" of the entire
 	     state window.)
+
+	[ ]  Dockable windows!
 
 
 Think about

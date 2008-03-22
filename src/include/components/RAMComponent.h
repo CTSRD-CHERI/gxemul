@@ -40,7 +40,7 @@
 /**
  * \brief A Random Access Memory Component.
  *
- * RAM is emulated by allocating large blocks of host memory (e.g. 1 MB
+ * RAM is emulated by allocating large blocks of host memory (e.g. 4 MB
  * per block), and simply forwarding all read and write requests to those
  * memory blocks.
  *
@@ -107,13 +107,13 @@ public:
 	/* Implementation of AddressDataBus: */
 	virtual void AddressSelect(uint64_t address);
 	virtual void ReadData(uint8_t& data);
-	virtual void ReadData(uint16_t& data);
-	virtual void ReadData(uint32_t& data);
-	virtual void ReadData(uint64_t& data);
-	virtual void WriteData(uint8_t& data);
-	virtual void WriteData(uint16_t& data);
-	virtual void WriteData(uint32_t& data);
-	virtual void WriteData(uint64_t& data);
+	virtual void ReadData(uint16_t& data, Endianness endianness);
+	virtual void ReadData(uint32_t& data, Endianness endianness);
+	virtual void ReadData(uint64_t& data, Endianness endianness);
+	virtual void WriteData(const uint8_t& data);
+	virtual void WriteData(const uint16_t& data, Endianness endianness);
+	virtual void WriteData(const uint32_t& data, Endianness endianness);
+	virtual void WriteData(const uint64_t& data, Endianness endianness);
 
 
 	/********************************************************************/

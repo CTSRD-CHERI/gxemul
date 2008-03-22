@@ -70,49 +70,49 @@ public:
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 */
-	virtual void ReadData(uint16_t& data) = 0;
+	virtual void ReadData(uint16_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Reads 32-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 */
-	virtual void ReadData(uint32_t& data) = 0;
+	virtual void ReadData(uint32_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Reads 64-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 */
-	virtual void ReadData(uint64_t& data) = 0;
+	virtual void ReadData(uint64_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Writes 8-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 */
-	virtual void WriteData(uint8_t& data) = 0;
+	virtual void WriteData(const uint8_t& data) = 0;
 
 	/**
 	 * \brief Writes 16-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 */
-	virtual void WriteData(uint16_t& data) = 0;
+	virtual void WriteData(const uint16_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Writes 32-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 */
-	virtual void WriteData(uint32_t& data) = 0;
+	virtual void WriteData(const uint32_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Writes 64-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 */
-	virtual void WriteData(uint64_t& data) = 0;
+	virtual void WriteData(const uint64_t& data, Endianness endianness) = 0;
 };
 
 
