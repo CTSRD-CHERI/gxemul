@@ -46,6 +46,8 @@ public:
 	virtual ~GXemulWindow();
 
 private:
+	void UpdateActionSensitivity();
+
 	virtual void on_menu_about();
 	virtual void on_menu_copy();
 	virtual void on_menu_cut();
@@ -58,8 +60,10 @@ private:
 	virtual void on_menu_pause();
 	virtual void on_menu_preferences();
 	virtual void on_menu_quit();
-	virtual void on_menu_undo();
 	virtual void on_menu_redo();
+	virtual void on_menu_save();
+	virtual void on_menu_save_as();
+	virtual void on_menu_undo();
 
 private:
 	GXemul*		m_gxemul;

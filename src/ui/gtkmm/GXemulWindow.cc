@@ -55,6 +55,11 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	m_refActionGroup->add(Gtk::Action::create("FileNew", _("_New")));
 	m_refActionGroup->add(Gtk::Action::create("FileOpen", Gtk::Stock::OPEN),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_open));
+	m_refActionGroup->add(Gtk::Action::create("FileSave", Gtk::Stock::SAVE),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_save));
+	m_refActionGroup->add(Gtk::Action::create("FileSaveAs",
+	    Gtk::Stock::SAVE_AS),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_save_as));
 	m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_quit));
 
@@ -105,6 +110,9 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    "        <menuitem action='FileNewFromTemplate'/>"
 	    "      </menu>"
 	    "      <menuitem action='FileOpen'/>"
+	    "      <separator/>"
+	    "      <menuitem action='FileSave'/>"
+	    "      <menuitem action='FileSaveAs'/>"
 	    "      <separator/>"
 	    "      <menuitem action='FileQuit'/>"
 	    "    </menu>"
@@ -166,12 +174,25 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	m_VPaned.pack1(m_EmulationDesignArea);
 	m_VPaned.pack2(m_DebugConsoleWidget);
 
+	UpdateActionSensitivity();
+
 	show_all_children();
 }
 
 
 GXemulWindow::~GXemulWindow()
 {
+}
+
+
+void GXemulWindow::UpdateActionSensitivity()
+{
+	m_refActionGroup->get_action("EditUndo")->set_sensitive(
+	    m_gxemul->GetActionStack().IsUndoPossible());
+	m_refActionGroup->get_action("EditRedo")->set_sensitive(
+	    m_gxemul->GetActionStack().IsRedoPossible());
+
+	// TODO: Disable FileSave[As] if there is no emulation defined?
 }
 
 
@@ -255,6 +276,18 @@ void GXemulWindow::on_menu_quit()
 void GXemulWindow::on_menu_redo()
 {
 	std::cerr << "GXemulWindow::on_menu_redo(): TODO\n";
+}
+
+
+void GXemulWindow::on_menu_save()
+{
+	std::cerr << "GXemulWindow::on_menu_save(): TODO\n";
+}
+
+
+void GXemulWindow::on_menu_save_as()
+{
+	std::cerr << "GXemulWindow::on_menu_save_as(): TODO\n";
 }
 
 
