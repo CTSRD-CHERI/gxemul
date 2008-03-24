@@ -1,6 +1,4 @@
 #
-#  $Id: Makefile.skel,v 1.72 2008/03/12 11:45:40 debug Exp $
-#
 #  Makefile for GXemul
 #
 
@@ -78,3 +76,7 @@ clean_all: clean
 	rm -f _unittests.tmp unittest.h unittest_h.h commands.h commands_h.h
 	rm -f _components.tmp _commands.tmp components.h components_h.h
 	rm -f config.h Makefile src/Makefile src/*/Makefile src/*/*/Makefile
+
+todo:
+	@grep -nR TODO src|grep -v \\.svn
+

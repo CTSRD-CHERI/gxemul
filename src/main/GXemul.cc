@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: GXemul.cc,v 1.23 2008/03/14 12:22:27 debug Exp $
- *
  *  This file contains three things:
  *
  *	1. Doxygen documentation for the general design concepts of the
@@ -222,7 +220,7 @@
  *	<li>Build and run with --debug, and do not accept any memory leaks
  *		or other debug warnings.
  *	<li>Insert uppercase <tt>TODO</tt> if something is unclear at the time
- *		of implementation. Periodically do a <tt>grep -R TODO src</tt>
+ *		of implementation. Periodically do a <tt>make todo</tt>
  *		to hunt down these TODOs and fix them permanently.
  *	<li>Use const references for argument passing, to avoid copying.
  *	<li>All functionality should be available both via text-only
