@@ -373,7 +373,7 @@ bool CommandInterpreter::AddKey(stringchar key)
 		}
 		break;
 
-	case '\e':
+	case '\33':
 		// Escape key handling:
 		m_inEscapeSequence = true;
 		m_escapeSequence = "";

@@ -35,7 +35,7 @@
 MIPS_CPUComponent::MIPS_CPUComponent()
 	: CPUComponent("mips_cpu")
 {
-	m_pc = 0xffffffffbfc00000ULL;
+	m_pc = (int32_t) 0xbfc00000;
 	m_pageSize = 4096;
 }
 

@@ -20,8 +20,8 @@
  *  Default (physical) base address and length:
  */
 
-#define	DEV_MP_ADDRESS			0x0000000011000000ULL
-#define	DEV_MP_LENGTH			0x0000000000000100ULL
+#define	DEV_MP_ADDRESS			0x11000000
+#define	DEV_MP_LENGTH			0x00000100
 
 
 /*

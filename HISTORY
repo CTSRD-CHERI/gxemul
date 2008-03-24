@@ -3943,3 +3943,7 @@ Changelog for GXemul:
 		I am currently using for development.)
 20080323	Experimenting with graying out the Undo and Redo actions in
 		the GUI (by querying the ActionStack).
+20080324	Making the code compile cleanly with GNU C++' -pedantic. The
+		only module where -pedantic is not used is src/ir/, which needs
+		to cast e.g. uint8_t* to function pointer (for runtime
+		generated code).

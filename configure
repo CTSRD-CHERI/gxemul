@@ -656,6 +656,19 @@ if [ z"$UNSTABLE" = zYES ]; then
 fi
 
 
+if [ z"$UNSTABLE" = zYES ]; then
+	printf "checking whether -pedantic can be used... "
+	$CC $CFLAGS $CWARNINGS -pedantic _testprog.c -o _testprog 2> /dev/null
+	if [ -x _testprog ]; then
+		printf "yes\n"
+		CPEDANTIC="-pedantic"
+	else
+		printf "no\n"
+	fi
+	rm -f _testprog
+fi
+
+
 #  -Wstrict-aliasing
 if [ ! z"$DEBUG" = zYES ]; then
 	printf "checking whether -Wstrict-aliasing can be used... "
@@ -1297,11 +1310,12 @@ INCLUDE2="-I../../include"
 
 rm -f _testprog.c
 
-#echo C compiler flags: $CFLAGS $CWARNINGS
-#echo Linker flags: $OTHERLIBS
+echo C/C++ compiler flags: $CFLAGS $CWARNINGS $CPEDANTIC
+echo Linker flags: $OTHERLIBS
 
 echo "CWARNINGS=$CWARNINGS" >> _Makefile.header
 echo "COPTIM=$CFLAGS" >> _Makefile.header
+echo "CPEDANTIC=$CPEDANTIC" >> _Makefile.header
 echo "INCLUDE1=$INCLUDE1" >> _Makefile.header
 echo "INCLUDE2=$INCLUDE2" >> _Makefile.header
 echo "PREFIX=$PREFIX" >> _Makefile.header

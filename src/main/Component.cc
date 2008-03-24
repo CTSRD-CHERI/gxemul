@@ -822,7 +822,7 @@ void Component::AddChecksum(Checksum& checksum) const
 	// objects, that just have some fields swapped, or such. (Yes, I know,
 	// that is not a very scientific explanation :) but it will have to do.)
 
-	checksum.Add(0x12491725abcef011LL);
+	checksum.Add(((uint64_t) 0x12491725 << 32) | 0xabcef011);
 	checksum.Add(m_className);
 	
 	SerializationContext dummyContext;
@@ -831,17 +831,18 @@ void Component::AddChecksum(Checksum& checksum) const
 	for (StateVariableMap::const_iterator it = m_stateVariables.begin();
 	    it != m_stateVariables.end();
 	    ++ it) {
-		checksum.Add(0x019fb87925addae1LL);
+		checksum.Add(((uint64_t) 0x019fb879 << 32) | 0x25addae1);
 		checksum.Add((it->second).Serialize(dummyContext));
 	}
 	
 	// Add all child components.
 	for (size_t i = 0; i < m_childComponents.size(); ++ i) {
-		checksum.Add(0xf98a7c7c109f0000LL + i * 0x98127417);
+		checksum.Add((((uint64_t) 0xf98a7c7c << 32) | 0x109f0000)
+		    + i * 0x98127417);
 		m_childComponents[i]->AddChecksum(checksum);
 	}
 
-	checksum.Add(0x90a1022497defa7aLL);
+	checksum.Add(((uint64_t) 0x90a10224 << 32) | 0x97defa7a);
 }
 
 

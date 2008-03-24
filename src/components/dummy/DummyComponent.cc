@@ -443,7 +443,7 @@ public:
 		m_uint8 = 123;
 		m_uint16 = 0xf9a2;
 		m_uint32 = 0x98f8aa01;
-		m_uint64 = 0xf819292930300a0aULL;
+		m_uint64 = ((uint64_t)0xf8192929 << 32) | 0x30300a0a;
 		m_sint8 = -123;
 		m_sint16 = -400;
 		m_sint32 = -10000;

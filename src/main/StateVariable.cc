@@ -593,11 +593,11 @@ static void Test_StateVariable_Numeric_Construct()
 	uint8_t  varUInt8  = 223;
 	uint16_t varUInt16 = 55000;
 	uint32_t varUInt32 = 3000000001UL;
-	uint64_t varUInt64 = 0xfedc010203040506ULL;
+	uint64_t varUInt64 = ((uint64_t) 0xfedc0102 << 32) | 0x03040506;
 	int8_t   varSInt8  = -120;
 	int16_t  varSInt16 = -22000;
 	int32_t  varSInt32 = -1000000001;
-	int64_t  varSInt64 = 0xfedc010203040506ULL;
+	int64_t  varSInt64 = ((uint64_t) 0xfedc0102 << 32) | 0x03040506;
 
 	StateVariable vuint8 ("vuint8",  &varUInt8);
 	StateVariable vuint16("vuint16", &varUInt16);
@@ -636,11 +636,11 @@ static void Test_StateVariable_Numeric_SetValue()
 	uint8_t  varUInt8  = 223;
 	uint16_t varUInt16 = 55000;
 	uint32_t varUInt32 = 3000000001UL;
-	uint64_t varUInt64 = 0xfedc010203040506ULL;
+	uint64_t varUInt64 = ((uint64_t) 0xfedc0102 << 32) | 0x03040506;
 	int8_t   varSInt8  = -120;
 	int16_t  varSInt16 = -22000;
 	int32_t  varSInt32 = -1000000001;
-	int64_t  varSInt64 = 0xfedc010203040506ULL;
+	int64_t  varSInt64 = ((uint64_t) 0xfedc0102 << 32) | 0x03040506;
 
 	StateVariable vuint8 ("vuint8",  &varUInt8);
 	StateVariable vuint16("vuint16", &varUInt16);

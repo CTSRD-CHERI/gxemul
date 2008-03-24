@@ -45,8 +45,8 @@ uint64_t Checksum::Value() const
 
 void Checksum::Add(uint64_t x)
 {
-	m_value += x * 0xc151429517851bfbLL;
-	m_value ^= 0x9183bfec01921947ULL;
+	m_value += x * (((uint64_t)0xc151429 << 32) | 0x517851bf);
+	m_value ^= (((uint64_t)0x9183bfec << 32) | 0x01921947);
 }
 
 

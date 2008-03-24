@@ -309,7 +309,7 @@ static void Test_RAMComponent_WriteThenRead()
 
 	bus->AddressSelect(256);
 
-	uint64_t data64 = 0x123456789abcdefULL;
+	uint64_t data64 = ((uint64_t)0x1234567 << 32) | 0x89abcdef;
 	bus->WriteData(data64, BigEndian);
 
 	uint64_t data64_b = 0;
@@ -343,7 +343,7 @@ static void Test_RAMComponent_WriteThenRead_ReverseEndianness()
 
 	bus->AddressSelect(256);
 
-	uint64_t data64 = 0x123456789abcdefULL;
+	uint64_t data64 = ((uint64_t)0x1234567 << 32) | 0x89abcdef;
 	bus->WriteData(data64, BigEndian);
 
 	bus->AddressSelect(256 + 4);
