@@ -26,9 +26,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: refcount_ptr.h,v 1.5 2008/01/02 11:31:24 debug Exp $
  */
 
 /**
@@ -51,6 +48,11 @@
  * this causes the object to have a reference count of 0. That is, the
  * address should not be taken of such an object and exposed to the
  * outside.
+ *
+ * Implementation note: The counter itself is mutable, and the
+ * increase_refcount and decrease_refcount member functions are marked as
+ * const. This is because const objects also need to be properly
+ * reference counted.
  */
 class ReferenceCountable
 {
@@ -69,26 +71,28 @@ public:
 	}
 
 	/**
-	 * Increases the reference count of the object.
+	 * \brief Increases the reference count of the object.
+	 *
 	 * @return The reference count after increasing it.
 	 */
-	int increase_refcount()
+	int increase_refcount() const
 	{
 		return (++ m_refCount);
 	}
 
 	/**
-	 * Decreases the reference count of the object.
+	 * \brief Decreases the reference count of the object.
+	 *
 	 * @return The reference count after decreasing it. If the
 	 *	value is zero, the caller should delete the object.
 	 */
-	int decrease_refcount()
+	int decrease_refcount() const
 	{
 		return (-- m_refCount);
 	}
 
 private:
-	int	m_refCount;
+	mutable int	m_refCount;
 };
 
 
