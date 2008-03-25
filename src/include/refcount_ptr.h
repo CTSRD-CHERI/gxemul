@@ -34,8 +34,8 @@
  * Usage:<pre>
  * refcount_ptr<MyClass> myPtr = new MyClass(...);
  * </pre>
- * where MyClass should have increase_refcount and
- * decrease_refcount, e.g.<pre>
+ * where MyClass should have increase_refcount() and
+ * decrease_refcount(), e.g.<pre>
  * class MyClass : public ReferenceCountable
  * {
  *	...
@@ -50,7 +50,7 @@
  * outside.
  *
  * Implementation note: The counter itself is mutable, and the
- * increase_refcount and decrease_refcount member functions are marked as
+ * increase_refcount() and decrease_refcount() member functions are marked as
  * const. This is because const objects also need to be properly
  * reference counted.
  */
@@ -58,7 +58,7 @@ class ReferenceCountable
 {
 public:
 	/**
-	 * Default constructor, which initializes the reference
+	 * \brief Default constructor, which initializes the reference
 	 * count to zero.
  	 */
 	ReferenceCountable()
