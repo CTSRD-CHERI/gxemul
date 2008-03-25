@@ -113,7 +113,9 @@ void LoadEmulationAction::Execute()
 	// size of the file, since the string constructor generates a _copy_.
 	// But string takes care of unicode and such (if compiled as ustring).
 	char* buf = (char*) malloc(fileSize);
-	CHECK_ALLOCATION(buf);
+	if (buf == NULL)
+		throw std::exception();
+
 	memset(buf, 0, fileSize);
 	file.read(buf, fileSize);
 	string str(buf, fileSize);

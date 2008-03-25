@@ -27,9 +27,6 @@
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
  *
- *
- *  $Id: misc.h,v 1.274 2008/03/14 12:12:15 debug Exp $
- *
  *  Misc. definitions for GXemul.
  */
 
@@ -212,11 +209,6 @@ enum Endianness
 
 #endif	/*  !HAVE___FUNCTION__  */
 
-
-#define	CHECK_ALLOCATION(ptr)					{	\
-		if ((ptr) == NULL)					\
-			FAILURE("Out of memory");			\
-	}
 
 
 #endif	/*  MISC_H  */
