@@ -3953,3 +3953,5 @@ Changelog for GXemul:
 		because const objects also need to be reference countable.
 		Attempting to fix a bug related to the integer types passed
 		to UnitTest::Assert. (Problem noticed by Hollis Blanchard.)
+		Fixing arguments to and return handling of mmap(). (Also
+		noticed by Hollis.)

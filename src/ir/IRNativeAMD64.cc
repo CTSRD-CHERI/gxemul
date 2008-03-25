@@ -100,8 +100,8 @@ static void Test_IRNativeAMD64_DoNothing()
 	    " must be in there somewhere", size >= 1);
 
 	uint8_t * buf = (uint8_t *) mmap(NULL, size,
-	    PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON, -1, 0);
-	UnitTest::Assert("unable to mmap?", buf != NULL);
+	    PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
+	UnitTest::Assert("unable to mmap?", buf != MAP_FAILED && buf != NULL);
 
 	native.Generate(size, buf);
 

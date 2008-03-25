@@ -71,9 +71,9 @@ void IRBlockCache::InitIfNotYetInitialized()
 	// PROT_EXEC is the important thing here, since the translation
 	// cache will contain generated Executable code.
 	m_cache = mmap(NULL, m_size, PROT_WRITE | PROT_READ | PROT_EXEC,
-	    MAP_ANON, -1, 0);
+	    MAP_ANON | MAP_PRIVATE, -1, 0);
 
-	if (m_cache == NULL) {
+	if (m_cache == MAP_FAILED || m_cache == NULL) {
 		std::cerr << "IRBlockCache: Could not allocate " << m_size
 		    << " bytes for the translation cache. Aborting.\n";
 		throw std::exception();

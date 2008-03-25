@@ -93,9 +93,9 @@ void RAMComponent::AddressSelect(uint64_t address)
 void* RAMComponent::AllocateBlock()
 {
 	void * p = mmap(NULL, m_blockSize, PROT_WRITE | PROT_READ | PROT_EXEC,
-	    MAP_ANON, -1, 0);
+	    MAP_ANON | MAP_PRIVATE, -1, 0);
 
-	if (p == NULL) {
+	if (p == MAP_FAILED || p == NULL) {
 		std::cerr << "RAMComponent::AllocateBlock: Could not allocate "
 		    << m_blockSize << " bytes. Aborting.\n";
 		throw std::exception();
