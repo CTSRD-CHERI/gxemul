@@ -69,6 +69,7 @@ public:
 	 * \brief Reads 16-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
+	 * \param endianness Selects the endianness of the operation.
 	 */
 	virtual void ReadData(uint16_t& data, Endianness endianness) = 0;
 
@@ -76,6 +77,7 @@ public:
 	 * \brief Reads 32-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
+	 * \param endianness Selects the endianness of the operation.
 	 */
 	virtual void ReadData(uint32_t& data, Endianness endianness) = 0;
 
@@ -83,6 +85,7 @@ public:
 	 * \brief Reads 64-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
+	 * \param endianness Selects the endianness of the operation.
 	 */
 	virtual void ReadData(uint64_t& data, Endianness endianness) = 0;
 
@@ -97,6 +100,7 @@ public:
 	 * \brief Writes 16-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
+	 * \param endianness Selects the endianness of the operation.
 	 */
 	virtual void WriteData(const uint16_t& data, Endianness endianness) = 0;
 
@@ -104,6 +108,7 @@ public:
 	 * \brief Writes 32-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
+	 * \param endianness Selects the endianness of the operation.
 	 */
 	virtual void WriteData(const uint32_t& data, Endianness endianness) = 0;
 
@@ -111,6 +116,7 @@ public:
 	 * \brief Writes 64-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
+	 * \param endianness Selects the endianness of the operation.
 	 */
 	virtual void WriteData(const uint64_t& data, Endianness endianness) = 0;
 };

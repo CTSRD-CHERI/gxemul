@@ -1374,7 +1374,7 @@ rm -f _components.tmp
 
 #  Create the Makefiles:
 D=". src src/components"
-D="$D src/components/cpu src/components/dummy"
+D="$D src/components/busses src/components/cpu src/components/dummy"
 D="$D src/components/machines src/components/memory"
 D="$D src/ir"
 D="$D src/main src/main/actions src/main/commands"

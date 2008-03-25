@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: TestMIPSMachine.cc,v 1.1 2008/03/12 11:45:40 debug Exp $
  */
 
 #include "components/TestMIPSMachine.h"
@@ -41,11 +38,18 @@ refcount_ptr<Component> TestMIPSMachine::Create()
 
 	machine->SetVariableValue("template", "testmips");
 
+	refcount_ptr<Component> mainbus =
+	    ComponentFactory::CreateComponent("mainbus");
+	if (mainbus.IsNULL())
+		return NULL;
+
+	machine->AddChild(mainbus);
+
 	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
 	if (ram.IsNULL())
 		return NULL;
 
-	machine->AddChild(ram);
+	mainbus->AddChild(ram);
 
 	refcount_ptr<Component> cpu =
 	    ComponentFactory::CreateComponent("mips_cpu");

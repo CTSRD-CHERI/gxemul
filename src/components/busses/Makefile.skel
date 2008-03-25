@@ -1,0 +1,20 @@
+#
+#  Makefile for GXemul src/components/busses
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
+CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
+LIBS=$(XLIB) $(OTHERLIBS)
+
+OBJS=MainbusComponent.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS)
+
+clean_all: clean
+	rm -f Makefile
+
