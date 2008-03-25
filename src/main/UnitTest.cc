@@ -48,7 +48,7 @@ void UnitTest::Assert(const string& strFailMessage, bool condition)
 
 
 void UnitTest::Assert(const string& strFailMessage,
-	size_t actualValue, size_t expectedValue)
+	uint64_t actualValue, uint64_t expectedValue)
 {
 	if (actualValue != expectedValue) {
 		stringstream ss;

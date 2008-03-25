@@ -129,7 +129,7 @@ public:
 	static void Assert(const string& strFailMessage, bool condition);
 
 	/**
-	 * \brief Asserts that two size_t values are equal.
+	 * \brief Asserts that two uint64_t values are equal.
 	 *
 	 * If the values are not equal, Fail is called with the failure message.
 	 *
@@ -141,7 +141,7 @@ public:
 	 * @param expectedValue The expected value.
 	 */
 	static void Assert(const string& strFailMessage,
-	    size_t actualValue, size_t expectedValue);
+	    uint64_t actualValue, uint64_t expectedValue);
 
 	/**
 	 * \brief Asserts that two string values are equal.
