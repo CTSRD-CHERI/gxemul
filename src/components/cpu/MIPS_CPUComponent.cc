@@ -37,18 +37,13 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 {
 	m_pc = (int32_t) 0xbfc00000;
 	m_pageSize = 4096;
+	m_frequency = 100e6;
 }
 
 
 refcount_ptr<Component> MIPS_CPUComponent::Create()
 {
 	return new MIPS_CPUComponent();
-}
-
-
-double MIPS_CPUComponent::GetCurrentFrequency() const
-{
-	return 100.0e6;
 }
 
 

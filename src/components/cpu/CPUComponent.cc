@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: CPUComponent.cc,v 1.1 2008/03/14 12:12:32 debug Exp $
  */
 
 #include <assert.h>
@@ -37,14 +34,22 @@ CPUComponent::CPUComponent(const string& className)
 	, m_pc(0)
 	, m_currentCodePage(NULL)
 	, m_pageSize(0)
+	, m_frequency(33.0e6)
 {
 	AddVariableUInt64("pc", &m_pc);
+	AddVariableDouble("frequency", &m_frequency);
 }
 
 
 refcount_ptr<Component> CPUComponent::Create()
 {
 	return NULL;
+}
+
+
+double CPUComponent::GetCurrentFrequency() const
+{
+        return m_frequency;
 }
 
 

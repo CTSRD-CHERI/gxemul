@@ -26,9 +26,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: StateVariable.h,v 1.4 2008/03/14 12:12:15 debug Exp $
  */
 
 #include "misc.h"
@@ -56,6 +53,7 @@ public:
 	enum Type {
 		String = 0,
 		Bool,
+		Double,
 		UInt8,
 		UInt16,
 		UInt32,
@@ -63,8 +61,7 @@ public:
 		SInt8,
 		SInt16,
 		SInt32,
-		SInt64,
-		Array
+		SInt64
 	};
 
 public:
@@ -91,14 +88,12 @@ public:
 	StateVariable(const string& name, bool* ptrToVar);
 
 	/**
-	 * \brief Constructor for an Array StateVariable.
+	 * \brief Constructor for a Double StateVariable.
 	 *
 	 * @param name The variable's name.
 	 * @param ptrToVar A pointer to the variable.
-	 * @param arrayLength Length in bytes of the array.
 	 */
-	StateVariable(const string& name, uint8_t* ptrToVar,
-		size_t arrayLength);
+	StateVariable(const string& name, double* ptrToVar);
 
 	/**
 	 * \brief Constructor for a UInt8 StateVariable.
@@ -238,6 +233,7 @@ private:
 	union {
 		string*		pstr;
 		bool*		pbool;
+		double*		pdouble;
 		uint8_t*	puint8;
 		uint16_t*	puint16;
 		uint32_t*	puint32;
@@ -246,10 +242,7 @@ private:
 		int16_t*	psint16;
 		int32_t*	psint32;
 		int64_t*	psint64;
-		uint8_t*	parray;
 	} m_value;
-
-	size_t			m_arrayLength;	// Only used for Arrays
 };
 
 

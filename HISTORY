@@ -3956,3 +3956,5 @@ Changelog for GXemul:
 		Fixing arguments to and return handling of mmap(). (Also
 		noticed by Hollis.)
 20080328	Making everything build using SunStudio (Sun C++ 5.9).
+		Implementing support for Double state variables.
+		CPU speed is now a state variable, in CPUComponent.

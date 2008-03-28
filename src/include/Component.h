@@ -377,6 +377,20 @@ protected:
 	bool AddVariableString(const string& name, string* variablePointer);
 
 	/**
+	 * \brief Adds a 'double' state variable to the %Component.
+	 *
+	 * This function is only meant to be called from the component's
+	 * constructor.
+	 *
+	 * @param name The variable name.
+	 * @param variablePointer A pointer to the variable that the name should
+	 *	be connected to.
+	 * @return True if the state variable was added, false if the name
+	 *	was already in use.
+	 */
+	bool AddVariableDouble(const string& name, double* variablePointer);
+
+	/**
 	 * \brief Adds a uint8 state variable to the %Component.
 	 *
 	 * This function is only meant to be called from the component's

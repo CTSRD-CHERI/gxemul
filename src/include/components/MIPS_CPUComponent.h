@@ -26,9 +26,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: MIPS_CPUComponent.h,v 1.2 2008/03/14 12:12:16 debug Exp $
  */
 
 // COMPONENT(mips_cpu)
@@ -69,14 +66,6 @@ public:
 	 * @return      The number of cycles actually executed.
 	 */
 	virtual int Run(int nrOfCycles);
-
-	/**
-	 * \brief Returns the current frequency (in Hz) that the component
-	 *	runs at.
-	 *
-	 * @return	The component's frequency in Hz.
-	 */
-	virtual double GetCurrentFrequency() const;
 
 
 	/********************************************************************/

@@ -23,12 +23,10 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: StateVariable.cc,v 1.4 2008/03/12 11:45:41 debug Exp $
  */
 
 #include <assert.h>
+#include <math.h>
 
 #include "EscapedString.h"
 #include "StateVariable.h"
@@ -105,13 +103,11 @@ StateVariable::StateVariable(const string& name, bool* ptrToVar)
 }
 
 
-StateVariable::StateVariable(const string& name, uint8_t* ptrToVar,
-		size_t arrayLength)
+StateVariable::StateVariable(const string& name, double* ptrToVar)
 	: m_name(name)
-	, m_type(Array)
-	, m_arrayLength(arrayLength)
+	, m_type(Double)
 {
-	m_value.parray = ptrToVar;
+	m_value.pdouble = ptrToVar;
 }
 
 
@@ -198,8 +194,8 @@ string StateVariable::GetTypeString() const
 		return "string";
 	case Bool:
 		return "bool";
-	case Array:
-		return "array";
+	case Double:
+		return "double";
 	case UInt8:
 		return "uint8";
 	case UInt16:
@@ -234,17 +230,8 @@ bool StateVariable::CopyValueFrom(const StateVariable& otherVariable)
 	case Bool:
 		*m_value.pbool = *otherVariable.m_value.pbool;
 		break;
-	case Array:
-		if (m_arrayLength != otherVariable.m_arrayLength) {
-			std::cerr << "INTERNAL ERROR in StateVariable::"
-			    "CopyValueFrom: lengths differ. " <<
-			    m_arrayLength << " != " <<
-			    otherVariable.m_arrayLength << ".\n";
-			assert(false);
-			return false;
-		}
-		memcpy(m_value.parray, otherVariable.m_value.parray,
-		    m_arrayLength);
+	case Double:
+		*m_value.pdouble = *otherVariable.m_value.pdouble;
 		break;
 	case UInt8:
 		*m_value.puint8 = *otherVariable.m_value.puint8;
@@ -289,10 +276,9 @@ string StateVariable::ToString() const
 	case Bool:
 		sstr << (*m_value.pbool? "true" : "false");
 		return sstr.str();
-	case Array:
-		// TODO
-		assert(false);
-		return "TODO";
+	case Double:
+		sstr << *m_value.pdouble;
+		return sstr.str();
 	case UInt8:
 		sstr << (int) *m_value.puint8;
 		return sstr.str();
@@ -339,7 +325,7 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 
 	if (m_type == String) {
 		*m_value.pstr = EscapedString(escapedStringValue).Decode();
-	} if (m_type == Bool) {
+	} else if (m_type == Bool) {
 		string str = EscapedString(escapedStringValue).Decode();
 		if (str == "true")
 			*m_value.pbool = true;
@@ -347,6 +333,14 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 			*m_value.pbool = false;
 		else
 			return false;
+	} else if (m_type == Double) {
+		string str = EscapedString(escapedStringValue).Decode();
+		double doubleTmp;
+		sstr << str;
+		sstr >> doubleTmp;
+		if (isnan(doubleTmp) || isinf(doubleTmp))
+			return false;
+		*m_value.pdouble = doubleTmp;
 	} else if (m_type == UInt8) {
 		string str = EscapedString(escapedStringValue).Decode();
 		uint8_t tmp = parse_number(str.c_str());
@@ -590,6 +584,7 @@ static void Test_StateVariable_Bool_Serialize()
 
 static void Test_StateVariable_Numeric_Construct()
 {
+	double   varDouble = -12.345;
 	uint8_t  varUInt8  = 223;
 	uint16_t varUInt16 = 55000;
 	uint32_t varUInt32 = 3000000001UL;
@@ -599,6 +594,7 @@ static void Test_StateVariable_Numeric_Construct()
 	int32_t  varSInt32 = -1000000001;
 	int64_t  varSInt64 = ((uint64_t) 0xfedc0102 << 32) | 0x03040506;
 
+	StateVariable vdouble("vdouble", &varDouble);
 	StateVariable vuint8 ("vuint8",  &varUInt8);
 	StateVariable vuint16("vuint16", &varUInt16);
 	StateVariable vuint32("vuint32", &varUInt32);
@@ -609,6 +605,7 @@ static void Test_StateVariable_Numeric_Construct()
 	StateVariable vsint64("vsint64", &varSInt64);
 
 	// Types
+	UnitTest::Assert("Double", vdouble.GetType() == StateVariable::Double);
 	UnitTest::Assert("UInt8",  vuint8.GetType()  == StateVariable::UInt8);
 	UnitTest::Assert("UInt16", vuint16.GetType() == StateVariable::UInt16);
 	UnitTest::Assert("UInt32", vuint32.GetType() == StateVariable::UInt32);
@@ -619,6 +616,7 @@ static void Test_StateVariable_Numeric_Construct()
 	UnitTest::Assert("SInt64", vsint64.GetType() == StateVariable::SInt64);
 
 	// Values
+	UnitTest::Assert("value Double", vdouble.ToString(), "-12.345");
 	UnitTest::Assert("value UInt8",  vuint8.ToString(),  "223");
 	UnitTest::Assert("value UInt16", vuint16.ToString(), "55000");
 	UnitTest::Assert("value UInt32", vuint32.ToString(), "3000000001");
@@ -633,6 +631,7 @@ static void Test_StateVariable_Numeric_Construct()
 
 static void Test_StateVariable_Numeric_SetValue()
 {
+	double   varDouble = -12.345;
 	uint8_t  varUInt8  = 223;
 	uint16_t varUInt16 = 55000;
 	uint32_t varUInt32 = 3000000001UL;
@@ -642,6 +641,7 @@ static void Test_StateVariable_Numeric_SetValue()
 	int32_t  varSInt32 = -1000000001;
 	int64_t  varSInt64 = ((uint64_t) 0xfedc0102 << 32) | 0x03040506;
 
+	StateVariable vdouble("vdouble", &varDouble);
 	StateVariable vuint8 ("vuint8",  &varUInt8);
 	StateVariable vuint16("vuint16", &varUInt16);
 	StateVariable vuint32("vuint32", &varUInt32);
@@ -653,6 +653,16 @@ static void Test_StateVariable_Numeric_SetValue()
 
 	UnitTest::Assert("changing to 'hello' should not be possible",
 	    vuint8.SetValue("hello") == false);
+
+	// Double
+	UnitTest::Assert("changing to 100 should be possible",
+	    vdouble.SetValue("100") == true);
+	UnitTest::Assert("varDouble should have been updated",
+	    varDouble == 100);
+	UnitTest::Assert("changing to -210.42 should be possible",
+	    vdouble.SetValue("-210.42") == true);
+	UnitTest::Assert("varDouble should not have been updated",
+	    varDouble == -210.42);
 
 	// UInt8
 	UnitTest::Assert("changing to 100 should be possible",
@@ -709,8 +719,6 @@ UNITTESTS(StateVariable)
 	UNITTEST(Test_StateVariable_Numeric_SetValue);
 	//UNITTEST(Test_StateVariable_Numeric_CopyValueFrom);
 	//UNITTEST(Test_StateVariable_Numeric_Serialize);
-
-	// TODO: array tests
 }
 
 #endif
