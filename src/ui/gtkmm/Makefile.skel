@@ -1,11 +1,8 @@
 #
-#  $Id: Makefile.skel,v 1.1 2007/12/31 11:50:19 debug Exp $
-#
 #  Makefile for GXemul src/ui/gtkmm
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
-CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
+CXXFLAGS=$(CXXFLAGSBASE) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
 
 OBJS=DebugConsoleWidget.o EmulationDesignArea.o GtkmmUI.o GXemulWindow.o
 

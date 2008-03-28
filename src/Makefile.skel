@@ -1,11 +1,6 @@
 #
-#  $Id: Makefile.skel,v 1.115 2008/03/12 11:45:40 debug Exp $
-#
 #  Makefile for GXemul src
 #
-
-CFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE)
-CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE)
 
 all: do_components do_ir do_main do_ui
 

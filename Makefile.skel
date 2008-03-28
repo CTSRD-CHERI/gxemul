@@ -2,8 +2,6 @@
 #  Makefile for GXemul
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XDEF) $(XINCLUDE)
-CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XDEF) $(XINCLUDE)
 BIN=gxemul
 BINGUI=gxemul-gui
 LIBS=$(XLIB) $(OTHERLIBS)
@@ -13,7 +11,7 @@ all: build
 
 build:
 	cd src; $(MAKE)
-	$(CXX) $(COPTIM) src/components/*/*.o src/ir/*.o src/main/*.o src/main/*/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
+	$(CXX) src/components/*/*.o src/ir/*.o src/main/*.o src/main/*/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
 	ln -f $(BIN) $(BINGUI)
 
 test: build

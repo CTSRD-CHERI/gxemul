@@ -3958,3 +3958,7 @@ Changelog for GXemul:
 20080328	Making everything build using SunStudio (Sun C++ 5.9).
 		Implementing support for Double state variables.
 		CPU speed is now a state variable, in CPUComponent.
+		Cleaning up the CFLAGS/CXXFLAGS/COPTIM/CWARNINGS mess in the
+		configure script and Makefile.skel files; only CXXFLAGS (and
+		CXXFLAGSBASE) are used from now on. Also removing some other
+		unused legacy stuff from the configure script.

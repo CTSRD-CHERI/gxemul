@@ -1,11 +1,8 @@
 #
-#  $Id: Makefile.skel,v 1.1 2008/01/12 08:29:57 debug Exp $
-#
 #  Makefile for GXemul src/ui/nullui
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
-CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
+CXXFLAGS=$(CXXFLAGSBASE) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
 
 OBJS=NullUI.o
 

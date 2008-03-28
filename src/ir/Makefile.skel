@@ -1,11 +1,8 @@
 #
-#  $Id: Makefile.skel,v 1.1 2008/03/12 11:45:41 debug Exp $
-#
 #  Makefile for GXemul src/ir
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE1)
-CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE1)
+CXXFLAGS=$(CXXFLAGSBASE) $(XINCLUDE) $(INCLUDE1)
 LIBS=$(XLIB) $(OTHERLIBS)
 
 OBJS=	IRBlockCache.o IRNativeAMD64.o

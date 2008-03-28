@@ -2,9 +2,6 @@
 #  Makefile for GXemul src/components
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE1)
-CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE1)
-
 all: do_busses do_cpu do_dummy do_machines do_memory
 
 do_busses:

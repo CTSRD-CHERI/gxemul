@@ -4,8 +4,7 @@
 #  Makefile for GXemul src/main/commands
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
-CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
+CXXFLAGS=$(CXXFLAGSBASE) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
 LIBS=$(XLIB) $(OTHERLIBS)
 
 OBJS=AddComponentCommand.o CloseCommand.o ContinueCommand.o HelpCommand.o \
