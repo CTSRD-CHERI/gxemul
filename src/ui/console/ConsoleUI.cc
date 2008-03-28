@@ -68,7 +68,7 @@ static void ReshowCurrentCommandBuffer()
 /**
  * \brief CTRL-C handler which sets the run state to Paused.
  */
-extern "C" static void ConsoleUI_SIGINT_Handler(int n)
+extern "C" void ConsoleUI_SIGINT_Handler(int n)
 {
 	g_GXemul->SetRunState(GXemul::Paused);
 	std::cout << "^C\n";
@@ -84,7 +84,7 @@ extern "C" static void ConsoleUI_SIGINT_Handler(int n)
  * continues, the termios settings might have been invalidated. This
  * function restores them.
  */
-extern "C" static void ConsoleUI_SIGCONT_Handler(int n)
+extern "C" void ConsoleUI_SIGCONT_Handler(int n)
 {
 	tcsetattr(STDIN_FILENO, TCSANOW, &g_curTermios);
 	ReshowCurrentCommandBuffer();
