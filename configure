@@ -225,6 +225,7 @@ int main(int argc, char *argv[])
         return 0;
 }
 ' > _testprog.c
+cp -f _testprog.c _testprog.cc
 
 
 #  Try to detect which C compiler to use, if CC is not set:
@@ -645,7 +646,7 @@ rm -f _testprog
 
 if [ z"$UNSTABLE" = zYES ]; then
 	printf "checking whether -ansi can be used... "
-	$CC $CFLAGS $CWARNINGS -ansi _testprog.c -o _testprog 2> /dev/null
+	$CXX $CFLAGS $CWARNINGS -ansi _testprog.cc -o _testprog 2> /dev/null
 	if [ -x _testprog ]; then
 		printf "yes\n"
 		CWARNINGS="$CWARNINGS -ansi"
@@ -658,7 +659,7 @@ fi
 
 if [ z"$UNSTABLE" = zYES ]; then
 	printf "checking whether -pedantic can be used... "
-	$CC $CFLAGS $CWARNINGS -pedantic _testprog.c -o _testprog 2> /dev/null
+	$CXX $CFLAGS $CWARNINGS -pedantic _testprog.cc -o _testprog 2> /dev/null
 	if [ -x _testprog ]; then
 		printf "yes\n"
 		CPEDANTIC="-pedantic"
@@ -672,7 +673,7 @@ fi
 #  -Wstrict-aliasing
 if [ ! z"$DEBUG" = zYES ]; then
 	printf "checking whether -Wstrict-aliasing can be used... "
-	$CC $CFLAGS -Wstrict-aliasing _testprog.c -o \
+	$CXX $CFLAGS -Wstrict-aliasing _testprog.cc -o \
 	    _testprog 1> _testprog.stdout 2>&1
 	cat _testprog.stdout >> _testprog.error
 	if grep frame _testprog.error > /dev/null 2>&1; then
@@ -724,12 +725,11 @@ fi
 rm -f _testprog
 
 
-#  -fschedule-insns causes bugs on i386 with gcc,
-#  but works OK on my alpha with ccc (compaq's cc).
+#  -fschedule-insns
 if [ ! z"$DEBUG" = zYES ]; then
     if [ z"$COMPAQCC" = zYES ]; then
 	printf "checking whether -fschedule-insns2 can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fschedule-insns2 2> /dev/null
+	$CXX $CFLAGS _testprog.cc -o _testprog -fschedule-insns2 2> /dev/null
 	if [ -x _testprog ]; then
 		CFLAGS="-fschedule-insns2 $CFLAGS"
 		printf "yes\n"
@@ -739,7 +739,7 @@ if [ ! z"$DEBUG" = zYES ]; then
 	rm -f _testprog
 
 	printf "checking whether -fschedule-insns can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fschedule-insns 2> /dev/null
+	$CXX $CFLAGS _testprog.cc -o _testprog -fschedule-insns 2> /dev/null
 	if [ -x _testprog ]; then
 		CFLAGS="-fschedule-insns $CFLAGS"
 		printf "yes\n"
@@ -750,7 +750,7 @@ if [ ! z"$DEBUG" = zYES ]; then
 
 	#  -intrinsics
 	printf "checking whether -intrinsics can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -intrinsics 2> /dev/null
+	$CXX $CFLAGS _testprog.cc -o _testprog -intrinsics 2> /dev/null
 	if [ -x _testprog ]; then
 		CFLAGS="-intrinsics $CFLAGS"
 		printf "yes\n"
@@ -761,7 +761,7 @@ if [ ! z"$DEBUG" = zYES ]; then
 
 	#  -fast
 	printf "checking whether -fast can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fast 2> /dev/null
+	$CXX $CFLAGS _testprog.cc -o _testprog -fast 2> /dev/null
 	if [ -x _testprog ]; then
 		CFLAGS="-fast $CFLAGS"
 		printf "yes\n"
@@ -775,7 +775,7 @@ fi; fi
 #  -fpeephole
 if [ ! z"$DEBUG" = zYES ]; then
 	printf "checking whether -fpeephole can be used... "
-	$CC $CFLAGS -fpeephole _testprog.c -o _testprog > _testprog.stdout 2>&1
+	$CXX $CFLAGS -fpeephole _testprog.cc -o _testprog > _testprog.stdout 2>&1
 	cat _testprog.stdout >> _testprog.error
 	if grep peephole _testprog.error > /dev/null 2>&1; then
 		printf "no\n"
@@ -794,7 +794,7 @@ fi
 #  -fomit-frame-pointer
 if [ ! z"$DEBUG" = zYES ]; then
 	printf "checking whether -fomit-frame-pointer can be used... "
-	$CC $CFLAGS -fomit-frame-pointer _testprog.c -o \
+	$CXX $CFLAGS -fomit-frame-pointer _testprog.cc -o \
 	    _testprog 1> _testprog.stdout 2>&1
 	cat _testprog.stdout >> _testprog.error
 	if grep frame _testprog.error > /dev/null 2>&1; then
@@ -814,7 +814,7 @@ fi
 #  -fstrict-aliasing
 if [ ! z"$DEBUG" = zYES ]; then
 	printf "checking whether -fstrict-aliasing can be used... "
-	$CC $CFLAGS -fstrict-aliasing _testprog.c -o \
+	$CXX $CFLAGS -fstrict-aliasing _testprog.cc -o \
 	    _testprog 1> _testprog.stdout 2>&1
 	cat _testprog.stdout >> _testprog.error
 	if grep frame _testprog.error > /dev/null 2>&1; then
@@ -1274,7 +1274,7 @@ echo "checking for 'make install' prefix (\$PREFIX): $PREFIX"
 INCLUDE1="-I../include/"
 INCLUDE2="-I../../include"
 
-rm -f _testprog.c
+rm -f _testprog*
 
 echo C/C++ compiler flags: $CFLAGS $CWARNINGS $CPEDANTIC
 echo Linker flags: $OTHERLIBS

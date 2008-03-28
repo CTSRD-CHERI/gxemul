@@ -3955,3 +3955,4 @@ Changelog for GXemul:
 		to UnitTest::Assert. (Problem noticed by Hollis Blanchard.)
 		Fixing arguments to and return handling of mmap(). (Also
 		noticed by Hollis.)
+20080328	Making everything build using SunStudio (Sun C++ 5.9).
