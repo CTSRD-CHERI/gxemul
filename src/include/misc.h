@@ -69,18 +69,26 @@ typedef char stringchar;
 #endif
 
 #include <iostream>
-#include <list>
-#include <map>
-#include <set>
-#include <sstream>
-#include <vector>
-using std::auto_ptr;
-using std::list;
-using std::map;
 using std::ostream;
+
+#include <memory>
+using std::auto_ptr;
+
+#include <list>
+using std::list;
+
+#include <map>
+using std::map;
+
+#include <set>
 using std::set;
+
+#include <sstream>
 using std::stringstream;
+
+#include <vector>
 using std::vector;
+
 using std::min;
 using std::max;
 

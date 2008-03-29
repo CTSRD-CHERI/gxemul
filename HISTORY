@@ -3962,3 +3962,5 @@ Changelog for GXemul:
 		configure script and Makefile.skel files; only CXXFLAGS (and
 		CXXFLAGSBASE) are used from now on. Also removing some other
 		unused legacy stuff from the configure script.
+20080329	Minor fixes to make the source code build with a 20080321
+		snapshot of GCC 4.4.

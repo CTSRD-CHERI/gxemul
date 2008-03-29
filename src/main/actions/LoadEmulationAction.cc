@@ -23,12 +23,12 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: LoadEmulationAction.cc,v 1.3 2008/03/12 11:45:41 debug Exp $
  */
 
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <fstream>
 
 #include "actions/LoadEmulationAction.h"
