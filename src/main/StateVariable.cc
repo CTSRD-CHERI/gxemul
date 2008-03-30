@@ -38,11 +38,13 @@
 // This is basically strtoull(), but it needs to be explicitly implemented
 // since some systems lack it. (Also, compiling with GNU C++ in ANSI mode
 // does not work with strtoull.)
-static uint64_t parse_number(const char* str)
+static uint64_t parse_number(const char* str, bool& error)
 {
 	int base = 10;
 	uint64_t result = 0;
 	bool negative = false;
+
+	error = false;
 
 	if (str == NULL)
 		return 0;
@@ -69,6 +71,9 @@ static uint64_t parse_number(const char* str)
 		}
 		++str;
 	}
+
+	if (*str)
+		error = true;
 
 	if (negative)
 		return -result;
@@ -319,6 +324,7 @@ string StateVariable::Serialize(SerializationContext& context) const
 bool StateVariable::SetValue(const string& escapedStringValue)
 {
 	stringstream sstr;
+	bool error = false;
 
 	if (m_value.pstr == NULL)
 		return false;
@@ -343,66 +349,64 @@ bool StateVariable::SetValue(const string& escapedStringValue)
 		*m_value.pdouble = doubleTmp;
 	} else if (m_type == UInt8) {
 		string str = EscapedString(escapedStringValue).Decode();
-		uint8_t tmp = parse_number(str.c_str());
-		sstr << (int) tmp;
-		if (sstr.str() == str)
+		uint64_t tmp64 = parse_number(str.c_str(), error);
+		uint8_t tmp = tmp64;
+		if (tmp == tmp64 && !error)
 			*m_value.puint8 = tmp;
 		else
 			return false;
 	} else if (m_type == UInt16) {
 		string str = EscapedString(escapedStringValue).Decode();
-		uint16_t tmp = parse_number(str.c_str());
-		sstr << tmp;
-		if (sstr.str() == str)
+		uint64_t tmp64 = parse_number(str.c_str(), error);
+		uint16_t tmp = tmp64;
+		if (tmp == tmp64 && !error)
 			*m_value.puint16 = tmp;
 		else
 			return false;
 	} else if (m_type == UInt32) {
 		string str = EscapedString(escapedStringValue).Decode();
-		uint32_t tmp = parse_number(str.c_str());
-		sstr << tmp;
-		if (sstr.str() == str)
+		uint64_t tmp64 = parse_number(str.c_str(), error);
+		uint32_t tmp = tmp64;
+		if (tmp == tmp64 && !error)
 			*m_value.puint32 = tmp;
 		else
 			return false;
 	} else if (m_type == UInt64) {
 		string str = EscapedString(escapedStringValue).Decode();
-		uint64_t tmp = parse_number(str.c_str());
-		sstr << tmp;
-		if (sstr.str() == str)
-			*m_value.puint64 = tmp;
+		uint64_t tmp64 = parse_number(str.c_str(), error);
+		if (!error)
+			*m_value.puint64 = tmp64;
 		else
 			return false;
 	} else if (m_type == SInt8) {
 		string str = EscapedString(escapedStringValue).Decode();
-		int8_t tmp = parse_number(str.c_str());
-		sstr << (int) tmp;
-		if (sstr.str() == str)
+		int64_t tmp64 = parse_number(str.c_str(), error);
+		int8_t tmp = tmp64;
+		if (tmp == tmp64 && !error)
 			*m_value.psint8 = tmp;
 		else
 			return false;
 	} else if (m_type == SInt16) {
 		string str = EscapedString(escapedStringValue).Decode();
-		int16_t tmp = parse_number(str.c_str());
-		sstr << tmp;
-		if (sstr.str() == str)
+		int64_t tmp64 = parse_number(str.c_str(), error);
+		int16_t tmp = tmp64;
+		if (tmp == tmp64 && !error)
 			*m_value.psint16 = tmp;
 		else
 			return false;
 	} else if (m_type == SInt32) {
 		string str = EscapedString(escapedStringValue).Decode();
-		int32_t tmp = parse_number(str.c_str());
-		sstr << tmp;
-		if (sstr.str() == str)
+		int64_t tmp64 = parse_number(str.c_str(), error);
+		int32_t tmp = tmp64;
+		if (tmp == tmp64 && !error)
 			*m_value.psint32 = tmp;
 		else
 			return false;
 	} else if (m_type == SInt64) {
 		string str = EscapedString(escapedStringValue).Decode();
-		int64_t tmp = parse_number(str.c_str());
-		sstr << tmp;
-		if (sstr.str() == str)
-			*m_value.psint64 = tmp;
+		int64_t tmp64 = parse_number(str.c_str(), error);
+		if (!error)
+			*m_value.psint64 = tmp64;
 		else
 			return false;
 	} else {
@@ -669,14 +673,18 @@ static void Test_StateVariable_Numeric_SetValue()
 	    vuint8.SetValue("100") == true);
 	UnitTest::Assert("varUInt8 should have been updated",
 	    varUInt8, 100);
+	UnitTest::Assert("changing to 0x2f should be possible",
+	    vuint8.SetValue("0x2f") == true);
+	UnitTest::Assert("varUInt8 should have been updated to 0x2f",
+	    varUInt8, 0x2f);
 	UnitTest::Assert("changing to 300 should not be possible",
 	    vuint8.SetValue("300") == false);
 	UnitTest::Assert("varUInt8 should not have been updated",
-	    varUInt8, 100);
+	    varUInt8, 0x2f);
 	UnitTest::Assert("changing to -110 should not be possible",
 	    vuint8.SetValue("-110") == false);
 	UnitTest::Assert("varUInt8 should not have been updated",
-	    varUInt8, 100);
+	    varUInt8, 0x2f);
 
 	// SInt8
 	UnitTest::Assert("changing to 100 should be possible",
@@ -695,6 +703,10 @@ static void Test_StateVariable_Numeric_SetValue()
 	    vsint8.SetValue("-110") == true);
 	UnitTest::Assert("varSInt8 should have been updated",
 	    varSInt8, (uint64_t) -110);
+	UnitTest::Assert("changing to -0x1a should be possible",
+	    vsint8.SetValue("-0x1a") == true);
+	UnitTest::Assert("varSInt8 should have been updated",
+	    varSInt8, (uint64_t) -0x1a);
 
 	// Tests for other numeric types: TODO
 }
