@@ -9,10 +9,11 @@ LIBS=$(XLIB) $(OTHERLIBS)
 
 all: build
 
-build:
+build: buildsrc
+	$(CXX) src/components/*/*.o src/ir/*.o src/main/*.o src/main/*/*.o src/ui/*/*.o $(LIBS) -o $(BIN) && ln -f $(BIN) $(BINGUI)
+
+buildsrc:
 	cd src; $(MAKE)
-	$(CXX) src/components/*/*.o src/ir/*.o src/main/*.o src/main/*/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
-	ln -f $(BIN) $(BINGUI)
 
 test: build
 	./$(BIN) -W unittest > /dev/null
