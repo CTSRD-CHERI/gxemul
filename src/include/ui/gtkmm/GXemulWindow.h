@@ -61,6 +61,7 @@ private:
 	virtual void on_menu_preferences();
 	virtual void on_menu_quit();
 	virtual void on_menu_redo();
+	virtual void on_menu_reset();
 	virtual void on_menu_save();
 	virtual void on_menu_save_as();
 	virtual void on_menu_undo();

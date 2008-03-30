@@ -73,11 +73,14 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_cut));
 	m_refActionGroup->add(Gtk::Action::create("EditCopy", Gtk::Stock::COPY),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_copy));
-	m_refActionGroup->add(Gtk::Action::create("EditPaste", Gtk::Stock::PASTE),
+	m_refActionGroup->add(Gtk::Action::create("EditPaste",
+	    Gtk::Stock::PASTE),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_paste));
-	m_refActionGroup->add(Gtk::Action::create("EditDelete", Gtk::Stock::DELETE),
+	m_refActionGroup->add(Gtk::Action::create("EditDelete",
+	    Gtk::Stock::DELETE),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_delete));
-	m_refActionGroup->add(Gtk::Action::create("EditPreferences", Gtk::Stock::PREFERENCES),
+	m_refActionGroup->add(Gtk::Action::create("EditPreferences",
+	    Gtk::Stock::PREFERENCES),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_preferences));
 
 	// Emulation menu:
@@ -89,6 +92,9 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	m_refActionGroup->add(Gtk::Action::create("EmulationPause",
 	    Gtk::Stock::MEDIA_PAUSE),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_pause));
+	m_refActionGroup->add(Gtk::Action::create("EmulationReset",
+	    _("_Reset")),
+	    sigc::mem_fun(*this, &GXemulWindow::on_menu_reset));
 
 	// Help menu:
 	m_refActionGroup->add( Gtk::Action::create("HelpMenu", _("_Help")) );
@@ -130,6 +136,7 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    "    <menu action='EmulationMenu'>"
 	    "      <menuitem action='EmulationGo'/>"
 	    "      <menuitem action='EmulationPause'/>"
+	    "      <menuitem action='EmulationReset'/>"
 	    "      <separator/>"
 	    "    </menu>"
 	    "    <menu action='HelpMenu'>"
@@ -329,6 +336,12 @@ void GXemulWindow::on_menu_quit()
 void GXemulWindow::on_menu_redo()
 {
 	m_gxemul->GetCommandInterpreter().RunCommand("redo");
+}
+
+
+void GXemulWindow::on_menu_reset()
+{
+	TodoDialog(this, "GXemulWindow::on_menu_reset(): TODO");
 }
 
 
