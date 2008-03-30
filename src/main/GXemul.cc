@@ -69,18 +69,19 @@
  * \subsection components_subsec Components
  *
  * The most important core concept in %GXemul is the Component. Examples of
- * components are processors, networks, video displays, RAM memory, busses,
- * interrupt controllers, and all other kinds of devices.
+ * components are processors, networks interface cards, video displays, RAM
+ * memory, busses, interrupt controllers, and all other kinds of devices.
  *
  * Each component has a parent, so the full set of components in an emulation
- * are in fact a tree. A GXemul instance has one such tree. (The root
+ * are in fact a tree. A GXemul instance has one such tree. The root
  * component is a dummy container, which contains zero or more sub-components,
- * but it doesn't actually do anything else.)
+ * but it doesn't actually do anything else.
  *
  * The state of each component is stored within that component. The state
  * consists of a number of variables (see StateVariable) such as strings,
- * integers, bools, and generic memory arrays. (Memory arrays can be used to
- * e.g. emulate RAM or video framebuffer memory.)
+ * integers, and other more high-level types such as zero-filled memory
+ * arrays. Such memory arrays are used e.g. by the RAMComponent to emulate
+ * RAM, and can also be used to emulte video framebuffer memory.
  *
  * Individual components are implemented in <tt>src/components/</tt>, with
  * header files in <tt>src/include/components/</tt>. The <tt>configure</tt>
@@ -139,12 +140,12 @@
  * \subsection unittest_subsec Unit tests
  *
  * Wherever it makes sense, unit tests should be written to make sure
- * that the code is correct. The UnitTest class contains static helper
- * functions for writing unit tests, such as UnitTest::Assert. To add unit
- * tests to a class, the class should be UnitTestable, and in particular, it
- * should implement UnitTestable::RunUnitTests by using the
- * UNITTESTS macro. Individual test cases are then called, as static
- * non-member functions, using the UNITTEST(testname) macro.
+ * that the code is correct, and stays correct. The UnitTest class contains
+ * static helper functions for writing unit tests, such as UnitTest::Assert.
+ * To add unit tests to a class, the class should be UnitTestable, and in
+ * particular, it should implement UnitTestable::RunUnitTests by using the
+ * UNITTESTS(className) macro. Individual test cases are then called, as
+ * static non-member functions, using the UNITTEST(testname) macro.
  *
  * Since test cases are non-member functions, they need to create instances
  * of the class they wish to test, and they can only call public member

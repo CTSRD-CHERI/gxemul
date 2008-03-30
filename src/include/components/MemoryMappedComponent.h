@@ -37,7 +37,17 @@
 
 
 /**
- * \brief A base-class for memory-mapped Components.
+ * \brief A base-class for memory-mapped components.
+ *
+ * A memory-mapped component is a Component which is meant to be mapped
+ * into a bus' address space. It has a <b>base offset</b> and a <b>size</b>,
+ * which the bus sees. The bus then forwards only those read/write requests
+ * to the memory-mapped component that are within that range.
+ *
+ * There is also an <b>address multiplicator</b>, to handle the common
+ * case when a device has, say, N 8-bit registers, but is accessed using
+ * memory-mapped addresses that are seen as N 32-bit registers. In this
+ * example, the address multiplicator would be 4.
  */
 class MemoryMappedComponent
 	: public Component
@@ -62,7 +72,7 @@ public:
 	 */
 	static string GetAttribute(const string& attributeName);
 
-protected:
+private:
 	// Variables common to all memory mapped components:
 	uint64_t	m_memoryMappedBase;
 	uint64_t	m_memoryMappedSize;
