@@ -244,7 +244,7 @@ void GXemulWindow::on_menu_go()
 
 void GXemulWindow::on_menu_new_blank()
 {
-	// TODO: Confirmation if the emulation is "dirty"?
+	// TODO: Confirmation if the current emulation is "dirty"?
 
 	m_gxemul->GetCommandInterpreter().RunCommand("close");
 }
@@ -260,6 +260,8 @@ void GXemulWindow::on_menu_new_from_template()
 
 void GXemulWindow::on_menu_open()
 {
+	// TODO: Confirmation if the current emulation is "dirty"?
+
 	// Mostly inspired by the GTKMM example for a File->Open handler.
 
 	Gtk::FileChooserDialog dialog(
