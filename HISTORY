@@ -3964,3 +3964,7 @@ Changelog for GXemul:
 		unused legacy stuff from the configure script.
 20080329	Minor fixes to make the source code build with a 20080321
 		snapshot of GCC 4.4.
+20080330	Continuing on the GTKMM GUI (File->Open/Save/Save As show
+		file chooser dialogs, and Edit->Undo/Redo execute the "undo"
+		and "redo" commands). "File->New from Blank" and "Go/Continue"
+		also have bare-bones implementations.

@@ -187,12 +187,15 @@ GXemulWindow::~GXemulWindow()
 
 void GXemulWindow::UpdateActionSensitivity()
 {
+	// TODO: This function must be called whenever:
+	//	The action stack changes undoableness/redoableness!
+	
+	// Undo and Redo only work if the action stack contains undoable
+	// and redoable actions, respectively:
 	m_refActionGroup->get_action("EditUndo")->set_sensitive(
 	    m_gxemul->GetActionStack().IsUndoPossible());
 	m_refActionGroup->get_action("EditRedo")->set_sensitive(
 	    m_gxemul->GetActionStack().IsRedoPossible());
-
-	// TODO: Disable FileSave[As] if there is no emulation defined?
 }
 
 
@@ -207,63 +210,111 @@ void GXemulWindow::on_menu_about()
 }
 
 
+static void TodoDialog(Gtk::Window *w, const char *msg)
+{
+	Gtk::MessageDialog dialog(*w, msg,
+	    false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+	dialog.run();
+}
+
+
 void GXemulWindow::on_menu_copy()
 {
-	std::cerr << "GXemulWindow::on_menu_copy(): TODO\n";
+	TodoDialog(this, "GXemulWindow::on_menu_copy(): TODO");
 }
 
 
 void GXemulWindow::on_menu_cut()
 {
-	std::cerr << "GXemulWindow::on_menu_cut(): TODO\n";
+	TodoDialog(this, "GXemulWindow::on_menu_cut(): TODO");
 }
 
 
 void GXemulWindow::on_menu_delete()
 {
-	std::cerr << "GXemulWindow::on_menu_delete(): TODO\n";
+	TodoDialog(this, "GXemulWindow::on_menu_delete(): TODO");
 }
 
 
 void GXemulWindow::on_menu_go()
 {
-	std::cerr << "GXemulWindow::on_menu_go(): TODO\n";
+	m_gxemul->GetCommandInterpreter().RunCommand("continue");
 }
 
 
 void GXemulWindow::on_menu_new_blank()
 {
-	std::cerr << "GXemulWindow::on_menu_new_blank(): TODO\n";
+	// TODO: Confirmation if the emulation is "dirty"?
+
+	m_gxemul->GetCommandInterpreter().RunCommand("close");
 }
 
 
 void GXemulWindow::on_menu_new_from_template()
 {
-	std::cerr << "GXemulWindow::on_menu_new_from_template(): TODO\n";
+	// TODO: List available templates?
+
+	TodoDialog(this, "GXemulWindow::on_menu_new_from_template(): TODO");
 }
 
 
 void GXemulWindow::on_menu_open()
 {
-	std::cerr << "GXemulWindow::on_menu_open(): TODO\n";
+	// Mostly inspired by the GTKMM example for a File->Open handler.
+
+	Gtk::FileChooserDialog dialog(
+	    _("Please choose an emulation to open"),
+	    Gtk::FILE_CHOOSER_ACTION_OPEN);
+	dialog.set_transient_for(*this);
+
+	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+
+	Gtk::FileFilter filter_gxemul;
+	filter_gxemul.set_name(_("GXemul files"));
+	filter_gxemul.add_pattern("*.gxemul");
+	dialog.add_filter(filter_gxemul);
+
+	Gtk::FileFilter filter_any;
+	filter_any.set_name(_("Any files"));
+	filter_any.add_pattern("*");
+	dialog.add_filter(filter_any);
+
+	std::string filename;		// note: std::string, not string
+	int result = dialog.run();
+
+	switch(result) {
+
+	case Gtk::RESPONSE_OK:
+		filename = dialog.get_filename();
+		m_gxemul->GetCommandInterpreter().RunCommand("load "+filename);
+		break;
+
+	case Gtk::RESPONSE_CANCEL:
+		// Do nothing.
+		break;
+
+	default:
+		TodoDialog(this, "Unexpected button clicked. TODO");
+	}
 }
 
 
 void GXemulWindow::on_menu_paste()
 {
-	std::cerr << "GXemulWindow::on_menu_paste(): TODO\n";
+	TodoDialog(this, "GXemulWindow::on_menu_paste(): TODO");
 }
 
 
 void GXemulWindow::on_menu_pause()
 {
-	std::cerr << "GXemulWindow::on_menu_pause(): TODO\n";
+	TodoDialog(this, "GXemulWindow::on_menu_pause(): TODO");
 }
 
 
 void GXemulWindow::on_menu_preferences()
 {
-	std::cerr << "GXemulWindow::on_menu_preferences(): TODO\n";
+	TodoDialog(this, "GXemulWindow::on_menu_preferences(): TODO");
 }
 
 
@@ -275,25 +326,64 @@ void GXemulWindow::on_menu_quit()
 
 void GXemulWindow::on_menu_redo()
 {
-	std::cerr << "GXemulWindow::on_menu_redo(): TODO\n";
+	m_gxemul->GetCommandInterpreter().RunCommand("redo");
 }
 
 
 void GXemulWindow::on_menu_save()
 {
-	std::cerr << "GXemulWindow::on_menu_save(): TODO\n";
+	if (m_gxemul->GetEmulationFilename().empty())
+		on_menu_save_as();
+	else
+		m_gxemul->GetCommandInterpreter().RunCommand("save");
 }
 
 
 void GXemulWindow::on_menu_save_as()
 {
-	std::cerr << "GXemulWindow::on_menu_save_as(): TODO\n";
+	// Mostly inspired by the GTKMM example for a File->Open handler.
+
+	Gtk::FileChooserDialog dialog(
+	    _("Please choose a name for the emulation (.gxemul)"),
+	    Gtk::FILE_CHOOSER_ACTION_SAVE);
+	dialog.set_transient_for(*this);
+
+	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+
+	Gtk::FileFilter filter_gxemul;
+	filter_gxemul.set_name(_("GXemul files"));
+	filter_gxemul.add_pattern("*.gxemul");
+	dialog.add_filter(filter_gxemul);
+
+	Gtk::FileFilter filter_any;
+	filter_any.set_name(_("Any files"));
+	filter_any.add_pattern("*");
+	dialog.add_filter(filter_any);
+
+	std::string filename;		// note: std::string, not string
+	int result = dialog.run();
+
+	switch(result) {
+
+	case Gtk::RESPONSE_OK:
+		filename = dialog.get_filename();
+		m_gxemul->GetCommandInterpreter().RunCommand("save "+filename);
+		break;
+
+	case Gtk::RESPONSE_CANCEL:
+		// Do nothing.
+		break;
+
+	default:
+		TodoDialog(this, "Unexpected button clicked. TODO");
+	}
 }
 
 
 void GXemulWindow::on_menu_undo()
 {
-	std::cerr << "GXemulWindow::on_menu_undo(): TODO\n";
+	m_gxemul->GetCommandInterpreter().RunCommand("undo");
 }
 
 
