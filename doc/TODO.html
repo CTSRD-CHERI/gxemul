@@ -65,19 +65,13 @@ Misc.
 	[/]  RAM component!
 		[X]  Implement a generic AddressDataBus interface.
 		[ ]  STATE! serialize/deserialize, including unit tests
+		[ ]  Hexadecimal tree output for offset/size etc.
 
 	[/]  Mainbus component? (For use in the testmips machine.)
 	     This should be an AddressDataBus, but redirect all accesses to
 	     other devices that also implement the AddressDataBus interface.
-	        [ ]  Register/add other devices/components?
-	        	By scanning immediate child components,
-			automatically, if components are inherit from a
-			MemoryMappedComponent base class... with the following
-			state variables:
-	        		MemoryMappedBase	uint64_t
-	        		MemoryMappedSize	uint64_t
-	        		MemoryMappedAddrMul [=1, optional]
-	        [ ]  Forward accesses to individual other devices/components.
+		[ ]  Check for overlaps in MakeSureMemoryMapExists!
+	        [X]  Forward accesses to individual other devices/components.
 		[ ]  AddressDataBus should be extended to allow for direct
 		     page mapping.
 

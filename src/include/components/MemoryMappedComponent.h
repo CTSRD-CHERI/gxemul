@@ -1,5 +1,5 @@
-#ifndef MAINBUSCOMPONENT_H
-#define	MAINBUSCOMPONENT_H
+#ifndef MEMORYMAPPEDCOMPONENT_H
+#define	MEMORYMAPPEDCOMPONENT_H
 
 /*
  *  Copyright (C) 2008  Anders Gavare.  All rights reserved.
@@ -28,93 +28,46 @@
  *  SUCH DAMAGE.
  */
 
-// COMPONENT(mainbus)
+// COMPONENT(memorymapped)
 
 
-#include "AddressDataBus.h"
 #include "Component.h"
 
 #include "UnitTest.h"
 
 
 /**
- * \brief Main bus Component.
- *
- * An AddressDataBus Component which forwards reads and writes to other
- * AddressDataBus components, e.g. the RAMComponent.
+ * \brief A base-class for memory-mapped Components.
  */
-class MainbusComponent
+class MemoryMappedComponent
 	: public Component
-	, public AddressDataBus
-	, public UnitTestable
 {
 public:
 	/**
-	 * \brief Constructs a MainbusComponent.
+	 * \brief Constructs a MemoryMappedComponent.
 	 */
-	MainbusComponent();
-
-	virtual ~MainbusComponent();
+	MemoryMappedComponent(const string& className);
 
 	/**
-	 * \brief Creates a MainbusComponent.
+	 * \brief Creates a MemoryMappedComponent.
 	 */
 	static refcount_ptr<Component> Create();
 
 	/**
-	 * \brief Get attribute information about the MainbusComponent class.
+	 * \brief Get attribute information about the MemoryMappedComponent
+	 * class.
 	 *
 	 * @param attributeName The attribute name.
 	 * @return A string representing the attribute value.
 	 */
 	static string GetAttribute(const string& attributeName);
 
-	/**
-	 * \brief Returns the component's AddressDataBus interface.
-	 *
-	 * @return	A pointer to an AddressDataBus.
-	 */
-	virtual AddressDataBus* AsAddressDataBus();
-
-	/* Implementation of AddressDataBus: */
-	virtual void AddressSelect(uint64_t address);
-	virtual bool ReadData(uint8_t& data);
-	virtual bool ReadData(uint16_t& data, Endianness endianness);
-	virtual bool ReadData(uint32_t& data, Endianness endianness);
-	virtual bool ReadData(uint64_t& data, Endianness endianness);
-	virtual bool WriteData(const uint8_t& data);
-	virtual bool WriteData(const uint16_t& data, Endianness endianness);
-	virtual bool WriteData(const uint32_t& data, Endianness endianness);
-	virtual bool WriteData(const uint64_t& data, Endianness endianness);
-
-
-	/********************************************************************/
-
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
-
 protected:
-	virtual void FlushCachedStateForComponent();
-
-private:
-	void MakeSureMemoryMapExists();
-
-private:
-	struct MemoryMapEntry {
-		uint64_t		base;
-		uint64_t		size;
-		uint64_t		addrMul;
-		AddressDataBus *	addressDataBus;
-	};
-
-	typedef vector<MemoryMapEntry> MemoryMap;
-
-	MemoryMap	*m_memoryMap;
-
-	// For the currently selected address:
-	AddressDataBus *	m_currentAddressDataBus;
-
-	// TODO: direct page access...
+	// Variables common to all memory mapped components:
+	uint64_t	m_memoryMappedBase;
+	uint64_t	m_memoryMappedSize;
+	uint64_t	m_memoryMappedAddrMul;
 };
 
 
-#endif	// MAINBUSCOMPONENT_H
+#endif	// MEMORYMAPPEDCOMPONENT_H

@@ -7,7 +7,7 @@
 CXXFLAGS=$(CXXFLAGSBASE) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
 LIBS=$(XLIB) $(OTHERLIBS)
 
-OBJS=RAMComponent.o
+OBJS=MemoryMappedComponent.o RAMComponent.o
 
 all: $(OBJS)
 

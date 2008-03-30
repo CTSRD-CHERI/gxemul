@@ -3970,3 +3970,8 @@ Changelog for GXemul:
 		also have bare-bones implementations.
 		Continuing on mainbus related things; moving the mips_cpu in
 		the testmips machine so that it is placed on the mainbus.
+		Adding a MemoryMappedComponent base class, which all memory-
+		mapped components should inherit. (The canonical example is
+		the RAMComponent class.)
+		The mainbus can now forward reads and writes to memory-mapped
+		child components.

@@ -32,7 +32,7 @@
 
 
 RAMComponent::RAMComponent()
-	: Component("ram")
+	: MemoryMappedComponent("ram")
 	, m_blockSizeShift(22)		// 22 = 4 MB per block
 	, m_blockSize(1 << m_blockSizeShift)
 	, m_addressSelect(0)
@@ -65,7 +65,7 @@ string RAMComponent::GetAttribute(const string& attributeName)
 	if (attributeName == "description")
 		return "A generic RAM component.";
 
-	return Component::GetAttribute(attributeName);
+	return MemoryMappedComponent::GetAttribute(attributeName);
 }
 
 

@@ -60,6 +60,8 @@ int MIPS_CPUComponent::Run(int nrOfCycles)
 		bool mips16 = (m_pc & 1) != 0;
 		bool instructionWasRead;
 
+		// TODO: Virtual to physical memory translation.
+
 		// Read an instruction from emulated memory and execute it:
 		if (mips16) {
 			uint16_t iword;
@@ -86,13 +88,15 @@ int MIPS_CPUComponent::Run(int nrOfCycles)
 
 void MIPS_CPUComponent::ExecuteMIPS16Instruction(uint16_t iword)
 {
-	// TODO: Mega switch/case.
+	// TODO: switch/case for all instructions
+	std::cout << "EXECUTE iword16 " << iword << " at pc " << m_pc << "\n";
 }
 
 
 void MIPS_CPUComponent::ExecuteInstruction(uint32_t iword)
 {
-	// TODO: Mega switch/case.
+	// TODO: switch/case for all instructions
+	std::cout << "EXECUTE iword32 " << iword << " at pc " << m_pc << "\n";
 }
 
 

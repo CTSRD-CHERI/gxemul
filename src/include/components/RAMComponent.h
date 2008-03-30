@@ -32,7 +32,7 @@
 
 
 #include "AddressDataBus.h"
-#include "Component.h"
+#include "MemoryMappedComponent.h"
 
 #include "UnitTest.h"
 
@@ -72,7 +72,7 @@
  * range.
  */
 class RAMComponent
-	: public Component
+	: public MemoryMappedComponent
 	, public AddressDataBus
 	, public UnitTestable
 {

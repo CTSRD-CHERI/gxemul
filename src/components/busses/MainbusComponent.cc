@@ -30,12 +30,18 @@
 
 MainbusComponent::MainbusComponent()
 	: Component("mainbus")
+	, m_memoryMap(NULL)
+	, m_currentAddressDataBus(NULL)
 {
 }
 
 
 MainbusComponent::~MainbusComponent()
 {
+	if (m_memoryMap != NULL) {
+		delete m_memoryMap;
+		m_memoryMap = NULL;
+	}
 }
 
 
@@ -57,6 +63,72 @@ string MainbusComponent::GetAttribute(const string& attributeName)
 }
 
 
+void MainbusComponent::FlushCachedStateForComponent()
+{
+	if (m_memoryMap != NULL) {
+		delete m_memoryMap;
+		m_memoryMap = NULL;
+	}
+
+	m_currentAddressDataBus = NULL;
+}
+
+
+void MainbusComponent::MakeSureMemoryMapExists()
+{
+	if (m_memoryMap != NULL)
+		return;
+
+	m_memoryMap = new MemoryMap;
+
+	// Build a memory map of all immediate children, who implement the
+	// AddressDataBus interface:
+	Components children = GetChildren();
+	for (size_t i=0; i<children.size(); ++i) {
+		AddressDataBus* bus = children[i]->AsAddressDataBus();
+		if (bus != NULL) {
+			MemoryMapEntry mmEntry;
+			mmEntry.addressDataBus = bus;
+			mmEntry.addrMul = 1;
+			mmEntry.base = 0;
+
+			const StateVariable* varBase =
+			    children[i]->GetVariable("memoryMappedBase");
+			const StateVariable* varSize =
+			    children[i]->GetVariable("memoryMappedSize");
+			const StateVariable* varAddrMul =
+			    children[i]->GetVariable("memoryMappedAddrMul");
+
+			if (varBase != NULL && !varBase->ToString().empty()) {
+				stringstream tmpss;
+				tmpss << varBase->ToString();
+				tmpss >> mmEntry.base;
+			}
+			if (varSize != NULL && !varSize->ToString().empty()) {
+				stringstream tmpss;
+				tmpss << varSize->ToString();
+				tmpss >> mmEntry.size;
+			}
+			if (varAddrMul != NULL && !varAddrMul->ToString()
+			    .empty()) {
+				stringstream tmpss;
+				tmpss << varAddrMul->ToString();
+				tmpss >> mmEntry.addrMul;
+			}
+
+			if (varSize == NULL || varBase == NULL) {
+				std::cerr << "No base or size? TODO.\n";
+				throw std::exception();
+			}
+
+			m_memoryMap->push_back(mmEntry);
+
+			// TODO: Check for overlaps!
+		}
+	}
+}
+
+
 AddressDataBus* MainbusComponent::AsAddressDataBus()
 {
 	return this;
@@ -65,54 +137,108 @@ AddressDataBus* MainbusComponent::AsAddressDataBus()
 
 void MainbusComponent::AddressSelect(uint64_t address)
 {
+	MakeSureMemoryMapExists();
+
+	m_currentAddressDataBus = NULL;
+
+	for (size_t i=0; i<m_memoryMap->size(); ++i) {
+		MemoryMapEntry& mmEntry = (*m_memoryMap)[i];
+		if (address >= mmEntry.base &&
+		    address < mmEntry.base + mmEntry.size) {
+			m_currentAddressDataBus = mmEntry.addressDataBus;
+			m_currentAddressDataBus->AddressSelect(
+			    (address - mmEntry.base) / mmEntry.addrMul);
+			break;
+		}
+	}
 }
 
 
 bool MainbusComponent::ReadData(uint8_t& data)
 {
-	return false;	// TODO
+	MakeSureMemoryMapExists();
+
+	if (m_currentAddressDataBus != NULL)
+		return m_currentAddressDataBus->ReadData(data);
+	else
+		return false;
 }
 
 
 bool MainbusComponent::ReadData(uint16_t& data, Endianness endianness)
 {
-	return false;	// TODO
+	MakeSureMemoryMapExists();
+
+	if (m_currentAddressDataBus != NULL)
+		return m_currentAddressDataBus->ReadData(data, endianness);
+	else
+		return false;
 }
 
 
 bool MainbusComponent::ReadData(uint32_t& data, Endianness endianness)
 {
-	return false;	// TODO
+	MakeSureMemoryMapExists();
+
+	if (m_currentAddressDataBus != NULL)
+		return m_currentAddressDataBus->ReadData(data, endianness);
+	else
+		return false;
 }
 
 
 bool MainbusComponent::ReadData(uint64_t& data, Endianness endianness)
 {
-	return false;	// TODO
+	MakeSureMemoryMapExists();
+
+	if (m_currentAddressDataBus != NULL)
+		return m_currentAddressDataBus->ReadData(data, endianness);
+	else
+		return false;
 }
 
 
 bool MainbusComponent::WriteData(const uint8_t& data)
 {
-	return false;	// TODO
+	MakeSureMemoryMapExists();
+
+	if (m_currentAddressDataBus != NULL)
+		return m_currentAddressDataBus->WriteData(data);
+	else
+		return false;
 }
 
 
 bool MainbusComponent::WriteData(const uint16_t& data, Endianness endianness)
 {
-	return false;	// TODO
+	MakeSureMemoryMapExists();
+
+	if (m_currentAddressDataBus != NULL)
+		return m_currentAddressDataBus->WriteData(data, endianness);
+	else
+		return false;
 }
 
 
 bool MainbusComponent::WriteData(const uint32_t& data, Endianness endianness)
 {
-	return false;	// TODO
+	MakeSureMemoryMapExists();
+
+	if (m_currentAddressDataBus != NULL)
+		return m_currentAddressDataBus->WriteData(data, endianness);
+	else
+		return false;
 }
 
 
 bool MainbusComponent::WriteData(const uint64_t& data, Endianness endianness)
 {
-	return false;	// TODO
+	MakeSureMemoryMapExists();
+
+	if (m_currentAddressDataBus != NULL)
+		return m_currentAddressDataBus->WriteData(data, endianness);
+	else
+		return false;
 }
 
 

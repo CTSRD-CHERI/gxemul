@@ -239,11 +239,12 @@ string Component::GenerateTreeDump(const string& branchTemplate) const
 	    !templateName->ToString().empty())
 		str += "  [" + templateName->ToString() + "]";
 
+	stringstream ss;
+
 	// If this component has a frequency (i.e. it is runnable), then
 	// show the frequency:
 	double freq = GetCurrentFrequency();
 	if (freq != 0.0) {
-		stringstream ss;
 		if (freq >= 1e9)
 			ss << freq/1e9 << " GHz";
 		else if (freq >= 1e6)
@@ -252,8 +253,39 @@ string Component::GenerateTreeDump(const string& branchTemplate) const
 			ss << freq/1e3 << " kHz";
 		else
 			ss << freq << " Hz";
-		str += "  (" + ss.str() + ")";
 	}
+
+	const StateVariable* memoryMappedBase = GetVariable("memoryMappedBase");
+	const StateVariable* memoryMappedSize = GetVariable("memoryMappedSize");
+	const StateVariable* memoryMappedAddrMul =
+	    GetVariable("memoryMappedAddrMul");
+	if (memoryMappedBase != NULL && memoryMappedSize != NULL) {
+		if (!ss.str().empty())
+			ss << ", ";
+
+		stringstream tmpss;
+		tmpss << memoryMappedSize->ToString();
+		uint64_t nBytes;
+		tmpss >> nBytes;
+		if (nBytes >= (1 << 30))
+			ss << (nBytes >> 30) << " GB";
+		else if (nBytes >= (1 << 20))
+			ss << (nBytes >> 20) << " MB";
+		else if (nBytes >= (1 << 10))
+			ss << (nBytes >> 10) << " KB";
+		else
+			ss << nBytes << " bytes";
+
+		// TODO: Hexadecimal output!
+		ss << " at offset " << memoryMappedBase->ToString();
+
+		if (memoryMappedAddrMul != NULL &&
+		    memoryMappedAddrMul->ToString() != "1")
+			ss << ", addrmul " << memoryMappedAddrMul->ToString();
+	}
+
+	if (!ss.str().empty())
+		str += "  (" + ss.str() + ")";
 
 	// Show the branch of the tree...
 	string result = "  " + str + "\n";
