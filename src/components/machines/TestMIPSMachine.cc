@@ -49,7 +49,21 @@ refcount_ptr<Component> TestMIPSMachine::Create()
 	if (ram.IsNULL())
 		return NULL;
 
+	stringstream tmpss;
+	tmpss << 32 * 1048576;
+	ram->SetVariableValue("memoryMappedSize", tmpss.str());
 	mainbus->AddChild(ram);
+
+	refcount_ptr<Component> rom = ComponentFactory::CreateComponent("ram");
+	if (rom.IsNULL())
+		return NULL;
+
+	stringstream tmpss2;
+	tmpss2 << 32 * 1048576;
+	rom->SetVariableValue("name", "rom0");
+	rom->SetVariableValue("memoryMappedBase", "0xffffffffbfc00000");
+	rom->SetVariableValue("memoryMappedSize", tmpss2.str());
+	mainbus->AddChild(rom);
 
 	refcount_ptr<Component> cpu =
 	    ComponentFactory::CreateComponent("mips_cpu");
