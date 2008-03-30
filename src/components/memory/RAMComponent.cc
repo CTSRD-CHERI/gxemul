@@ -112,17 +112,19 @@ void* RAMComponent::AllocateBlock()
 }
 
 
-void RAMComponent::ReadData(uint8_t& data)
+bool RAMComponent::ReadData(uint8_t& data)
 {
 	if (m_selectedHostMemoryBlock == NULL)
 		data = 0;
 	else
 		data = (((uint8_t*)m_selectedHostMemoryBlock)
 		    [m_selectedOffsetWithinBlock]);
+
+	return true;
 }
 
 
-void RAMComponent::ReadData(uint16_t& data, Endianness endianness)
+bool RAMComponent::ReadData(uint16_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 1) == 0);
 
@@ -136,10 +138,12 @@ void RAMComponent::ReadData(uint16_t& data, Endianness endianness)
 		data = BE16_TO_HOST(data);
 	else
 		data = LE16_TO_HOST(data);
+
+	return true;
 }
 
 
-void RAMComponent::ReadData(uint32_t& data, Endianness endianness)
+bool RAMComponent::ReadData(uint32_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 3) == 0);
 
@@ -153,10 +157,12 @@ void RAMComponent::ReadData(uint32_t& data, Endianness endianness)
 		data = BE32_TO_HOST(data);
 	else
 		data = LE32_TO_HOST(data);
+
+	return true;
 }
 
 
-void RAMComponent::ReadData(uint64_t& data, Endianness endianness)
+bool RAMComponent::ReadData(uint64_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 7) == 0);
 
@@ -170,20 +176,24 @@ void RAMComponent::ReadData(uint64_t& data, Endianness endianness)
 		data = BE64_TO_HOST(data);
 	else
 		data = LE64_TO_HOST(data);
+
+	return true;
 }
 
 
-void RAMComponent::WriteData(const uint8_t& data)
+bool RAMComponent::WriteData(const uint8_t& data)
 {
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
 
 	(((uint8_t*)m_selectedHostMemoryBlock)
 	    [m_selectedOffsetWithinBlock]) = data;
+
+	return true;
 }
 
 
-void RAMComponent::WriteData(const uint16_t& data, Endianness endianness)
+bool RAMComponent::WriteData(const uint16_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 1) == 0);
 
@@ -198,10 +208,12 @@ void RAMComponent::WriteData(const uint16_t& data, Endianness endianness)
 
 	(((uint16_t*)m_selectedHostMemoryBlock)
 	    [m_selectedOffsetWithinBlock >> 1]) = d;
+
+	return true;
 }
 
 
-void RAMComponent::WriteData(const uint32_t& data, Endianness endianness)
+bool RAMComponent::WriteData(const uint32_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 3) == 0);
 
@@ -216,10 +228,12 @@ void RAMComponent::WriteData(const uint32_t& data, Endianness endianness)
 
 	(((uint32_t*)m_selectedHostMemoryBlock)
 	    [m_selectedOffsetWithinBlock >> 2]) = d;
+
+	return true;
 }
 
 
-void RAMComponent::WriteData(const uint64_t& data, Endianness endianness)
+bool RAMComponent::WriteData(const uint64_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 7) == 0);
 
@@ -234,6 +248,8 @@ void RAMComponent::WriteData(const uint64_t& data, Endianness endianness)
 
 	(((uint64_t*)m_selectedHostMemoryBlock)
 	    [m_selectedOffsetWithinBlock >> 3]) = d;
+
+	return true;
 }
 
 

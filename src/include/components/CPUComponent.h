@@ -35,6 +35,8 @@
 
 #include "UnitTest.h"
 
+class AddressDataBus;
+
 
 /**
  * \brief A Component base-class for processors.
@@ -77,17 +79,25 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 protected:
-	bool NativeTranslationExists();
-	void LookupCurrentCodePage();
+	virtual void FlushCachedStateForComponent();
 
+	// Used by all (or most) CPU implementations:
+	bool ReadInstructionWord(uint16_t& iword, uint64_t addr);
+	bool ReadInstructionWord(uint32_t& iword, uint64_t addr);
+
+private:
+	void LookupAddressDataBus();
 
 protected:
-	uint64_t	m_pc;
+	// Variables common to all (or most) kinds of CPUs:
+	double			m_frequency;
 
-	const uint32_t *m_currentCodePage;
-	int		m_pageSize;
+	uint64_t		m_pc;
+	enum Endianness		m_endianness;
 
-	double		m_frequency;
+	AddressDataBus *	m_addressDataBus;
+	const uint8_t *		m_currentCodePage;
+	int			m_pageSize;
 };
 
 

@@ -62,63 +62,79 @@ public:
 	 * \brief Reads 8-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
+	 * \return True if the access was successful, false otherwise (e.g.
+	 *	because of a timeout).
 	 */
-	virtual void ReadData(uint8_t& data) = 0;
+	virtual bool ReadData(uint8_t& data) = 0;
 
 	/**
 	 * \brief Reads 16-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 * \param endianness Selects the endianness of the operation.
+	 * \return True if the access was successful, false otherwise (e.g.
+	 *	because of a timeout).
 	 */
-	virtual void ReadData(uint16_t& data, Endianness endianness) = 0;
+	virtual bool ReadData(uint16_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Reads 32-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 * \param endianness Selects the endianness of the operation.
+	 * \return True if the access was successful, false otherwise (e.g.
+	 *	because of a timeout).
 	 */
-	virtual void ReadData(uint32_t& data, Endianness endianness) = 0;
+	virtual bool ReadData(uint32_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Reads 64-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
 	 * \param endianness Selects the endianness of the operation.
+	 * \return True if the access was successful, false otherwise (e.g.
+	 *	because of a timeout).
 	 */
-	virtual void ReadData(uint64_t& data, Endianness endianness) = 0;
+	virtual bool ReadData(uint64_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Writes 8-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
+	 * \return True if the access was successful, false otherwise (e.g.
+	 *	because of a timeout).
 	 */
-	virtual void WriteData(const uint8_t& data) = 0;
+	virtual bool WriteData(const uint8_t& data) = 0;
 
 	/**
 	 * \brief Writes 16-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 * \param endianness Selects the endianness of the operation.
+	 * \return True if the access was successful, false otherwise (e.g.
+	 *	because of a timeout).
 	 */
-	virtual void WriteData(const uint16_t& data, Endianness endianness) = 0;
+	virtual bool WriteData(const uint16_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Writes 32-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 * \param endianness Selects the endianness of the operation.
+	 * \return True if the access was successful, false otherwise (e.g.
+	 *	because of a timeout).
 	 */
-	virtual void WriteData(const uint32_t& data, Endianness endianness) = 0;
+	virtual bool WriteData(const uint32_t& data, Endianness endianness) = 0;
 
 	/**
 	 * \brief Writes 64-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
 	 * \param endianness Selects the endianness of the operation.
+	 * \return True if the access was successful, false otherwise (e.g.
+	 *	because of a timeout).
 	 */
-	virtual void WriteData(const uint64_t& data, Endianness endianness) = 0;
+	virtual bool WriteData(const uint64_t& data, Endianness endianness) = 0;
 };
 
 

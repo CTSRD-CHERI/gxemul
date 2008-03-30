@@ -3968,3 +3968,5 @@ Changelog for GXemul:
 		file chooser dialogs, and Edit->Undo/Redo execute the "undo"
 		and "redo" commands). "File->New from Blank" and "Go/Continue"
 		also have bare-bones implementations.
+		Continuing on mainbus related things; moving the mips_cpu in
+		the testmips machine so that it is placed on the mainbus.

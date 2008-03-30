@@ -56,7 +56,7 @@ refcount_ptr<Component> TestMIPSMachine::Create()
 	if (cpu.IsNULL())
 		return NULL;
 
-	machine->AddChild(cpu);
+	mainbus->AddChild(cpu);
 
 	return machine;
 }

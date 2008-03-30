@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: MIPS_CPUComponent.cc,v 1.2 2008/03/14 12:12:15 debug Exp $
  */
 
 #include <assert.h>
@@ -35,8 +32,13 @@
 MIPS_CPUComponent::MIPS_CPUComponent()
 	: CPUComponent("mips_cpu")
 {
+	// MIPS CPUs are hardwired to start at 0xffffffffbfc00000:
 	m_pc = (int32_t) 0xbfc00000;
+
+	// Most MIPS CPUs use 4 KB native page size.
+	// TODO: A few use 1 KB pages; this should be supported as well.
 	m_pageSize = 4096;
+
 	m_frequency = 100e6;
 }
 
@@ -52,68 +54,30 @@ int MIPS_CPUComponent::Run(int nrOfCycles)
 	int nrOfCyclesExecuted = 0;
 
 	// Check for interrupts. TODO
-	// This may cause an exception, i.e. a change of PC and other state.
+	// (This may cause an exception, i.e. a change of PC and other state.)
 
-	while (nrOfCycles-- > 0) {	
-		// 1. Check if there is a native translation already for this
-		//    address. If there is, then execute that block, and return.
+	while (nrOfCycles-- > 0) {
+		bool mips16 = (m_pc & 1) != 0;
+		bool instructionWasRead;
 
-		if (NativeTranslationExists()) {
-			// TODO: Execute the native translation.
-			assert(false);
-			continue;
+		// Read an instruction from emulated memory and execute it:
+		if (mips16) {
+			uint16_t iword;
+			instructionWasRead = ReadInstructionWord(
+			    iword, m_pc & ~1);
+			ExecuteMIPS16Instruction(iword);
+		} else {
+			uint32_t iword;
+			instructionWasRead = ReadInstructionWord(iword, m_pc);
+			ExecuteInstruction(iword);
 		}
 
-
-		// 2. Read an instruction word from emulated memory.
-		//
-		//    a) Normally, the current PC page should be cached. If not,
-		//       then look up the page. (This may cause exceptions, etc.,
-		//       which need to be handled.)
-
-		if (m_currentCodePage == NULL)
-			LookupCurrentCodePage();
-
-		//    b) Read the instruction word from the code page.
-
-		int offsetInCodePage = m_pc & (m_pageSize - 1);
-		bool mips16 = (offsetInCodePage & 1) != 0;
-		uint32_t iword;
-		if (mips16)
-			iword = ((uint16_t *)m_currentCodePage)
-			    [offsetInCodePage >> 1];
-		else
-			iword = m_currentCodePage[offsetInCodePage >> 2];
-
-		//    c) Swap byte order within the instruction word, if the
-		//       emulated CPU's byte order is not the same as the host's
-		//       byte order:
-
-		// TODO: LE32_TO_HOST or BE32_TO_HOST, depending on emulated cpu
-
-		//    d) Update the emulated PC after the instruction has been
-		//       read. Also, when going off the edge of a page, or when
-		//       branching to a different page, the current code page
-		//       should be reset to NULL.
-
-		m_pc += mips16? sizeof(uint16_t) : sizeof(uint32_t);
-		offsetInCodePage += mips16? sizeof(uint16_t) : sizeof(uint32_t);
-		if (offsetInCodePage >= m_pageSize)
-			m_currentCodePage = NULL;
+		if (!instructionWasRead) {
+			std::cerr << "TODO: MIPS: no instruction\n";
+			throw std::exception();
+		}
 
 		++ nrOfCyclesExecuted;
-
-
-		// 3. Decode and execute the instruction.
-		//
-		//    Also, update statistics about nr of times this code has
-		//    been executed. If it has reached a certain threshold,
-		//    re-compile the code to native code. TODO
-
-		if (mips16)
-			ExecuteMIPS16Instruction(iword);
-		else
-			ExecuteInstruction(iword);
 	}
 
 	return nrOfCyclesExecuted;

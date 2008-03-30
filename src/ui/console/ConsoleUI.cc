@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: ConsoleUI.cc,v 1.8 2008/03/14 12:12:16 debug Exp $
  */
 
 #include <signal.h>
@@ -174,10 +171,18 @@ void ConsoleUI::InputLineDone()
 
 int ConsoleUI::MainLoop()
 {
+	enum GXemul::RunState oldRunState = m_gxemul->GetRunState();
+
 	while (m_gxemul->GetRunState() != GXemul::Quitting) {
-		switch (m_gxemul->GetRunState()) {
+		enum GXemul::RunState runState = m_gxemul->GetRunState();
+
+		switch (runState) {
 
 		case GXemul::Running:
+			if (oldRunState != GXemul::Running) {
+				m_gxemul->GetRootComponent()->
+				    FlushCachedState();
+			}
 			m_gxemul->ExecuteCycles();
 			break;
 			
@@ -188,6 +193,8 @@ int ConsoleUI::MainLoop()
 			ReadAndExecuteCommand();
 			break;
 		}
+
+		oldRunState = runState;
 	}
 
 	return 0;

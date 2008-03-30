@@ -26,18 +26,22 @@
  */
 
 #include <assert.h>
+#include "AddressDataBus.h"
 #include "components/CPUComponent.h"
 
 
 CPUComponent::CPUComponent(const string& className)
 	: Component(className)
+	, m_frequency(33.0e6)
 	, m_pc(0)
+	, m_endianness(BigEndian)
+	, m_addressDataBus(NULL)
 	, m_currentCodePage(NULL)
 	, m_pageSize(0)
-	, m_frequency(33.0e6)
 {
 	AddVariableUInt64("pc", &m_pc);
 	AddVariableDouble("frequency", &m_frequency);
+	// TODO: Endianness as a variable?
 }
 
 
@@ -53,6 +57,13 @@ double CPUComponent::GetCurrentFrequency() const
 }
 
 
+void CPUComponent::FlushCachedStateForComponent()
+{
+	m_addressDataBus = NULL;
+	m_currentCodePage = NULL;
+}
+
+
 string CPUComponent::GetAttribute(const string& attributeName)
 {
 	if (attributeName == "stable")
@@ -65,18 +76,133 @@ string CPUComponent::GetAttribute(const string& attributeName)
 }
 
 
-bool CPUComponent::NativeTranslationExists()
+void CPUComponent::LookupAddressDataBus()
 {
-	// TODO
-	return false;
+	if (m_addressDataBus != NULL)
+		return;
+
+	// Find a suitable address data bus.
+	AddressDataBus *bus = NULL;
+
+	// 1) A direct first-level decendant of the CPU is probably a
+	//    cache. Use this if it exists.
+	Components& children = GetChildren();
+	for (size_t i=0; i<children.size(); ++i) {
+		bus = children[i]->AsAddressDataBus();
+		if (bus != NULL)
+			break;
+	}
+
+	// 2) If no cache exists, go to a parent bus (usually a mainbus).
+	if (bus == NULL) {
+		refcount_ptr<Component> component = GetParent();
+		while (!component.IsNULL()) {
+			bus = component->AsAddressDataBus();
+			if (bus != NULL)
+				break;
+			component = component->GetParent();
+		}
+	}
+
+	m_addressDataBus = bus;
+
+	if (m_addressDataBus == NULL) {
+		std::cerr << "CPUComponent::LookupAddressDataBus: "
+		    "No AddressDataBus to read from?\n";
+		throw std::exception();
+	}
 }
 
 
-void CPUComponent::LookupCurrentCodePage()
+bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t addr)
 {
-	// TODO
-	std::cerr << "CPUComponent::Run(): Page lookup.\n";
-	assert(false);
+	LookupAddressDataBus();
+
+	if (m_currentCodePage == NULL) {
+		// First attempt: Try to look up the code page in memory,
+		// so that we can read directly from it.
+
+		// TODO
+		// m_addressDataBus->LookupPage(addr); something
+	}
+
+	int offsetInCodePage = addr & (m_pageSize - 1);
+
+	if (m_currentCodePage == NULL) {
+		// If the lookup failed, read using the AddressDataBus
+		// interface manually.
+		m_addressDataBus->AddressSelect(addr);
+		bool success = m_addressDataBus->ReadData(iword, m_endianness);
+		
+		if (!success)
+			return false;
+	} else {
+		// Read directly from the page:
+		uint16_t itmp = ((uint16_t *)m_currentCodePage)
+		    [offsetInCodePage >> 1];
+
+		if (m_endianness == BigEndian)
+			iword = BE16_TO_HOST(itmp);
+		else
+			iword = LE16_TO_HOST(itmp);
+	}
+
+	// Update the emulated PC after the instruction has been
+	// read. Also, when going off the edge of a page, or when
+	// branching to a different page, the current code page
+	// should be reset to NULL.
+	m_pc += sizeof(iword);
+	offsetInCodePage += sizeof(iword);
+	if (offsetInCodePage >= m_pageSize)
+		m_currentCodePage = NULL;
+
+	return true;
+}
+
+
+bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t addr)
+{
+	LookupAddressDataBus();
+
+	if (m_currentCodePage == NULL) {
+		// First attempt: Try to look up the code page in memory,
+		// so that we can read directly from it.
+
+		// TODO
+		// m_addressDataBus->LookupPage(addr); something
+	}
+
+	int offsetInCodePage = addr & (m_pageSize - 1);
+
+	if (m_currentCodePage == NULL) {
+		// If the lookup failed, read using the AddressDataBus
+		// interface manually.
+		m_addressDataBus->AddressSelect(addr);
+		bool success = m_addressDataBus->ReadData(iword, m_endianness);
+		
+		if (!success)
+			return false;
+	} else {
+		// Read directly from the page:
+		uint32_t itmp = ((uint32_t *)m_currentCodePage)
+		    [offsetInCodePage >> 2];
+
+		if (m_endianness == BigEndian)
+			iword = BE32_TO_HOST(itmp);
+		else
+			iword = LE32_TO_HOST(itmp);
+	}
+
+	// Update the emulated PC after the instruction has been
+	// read. Also, when going off the edge of a page, or when
+	// branching to a different page, the current code page
+	// should be reset to NULL.
+	m_pc += sizeof(iword);
+	offsetInCodePage += sizeof(iword);
+	if (offsetInCodePage >= m_pageSize)
+		m_currentCodePage = NULL;
+	
+	return true;
 }
 
 

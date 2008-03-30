@@ -136,6 +136,22 @@ void Component::ResetState()
 }
 
 
+void Component::FlushCachedState()
+{
+	FlushCachedStateForComponent();
+
+	// Recurse:
+	for (size_t i = 0; i < m_childComponents.size(); ++ i)
+		m_childComponents[i]->FlushCachedState();
+}
+
+
+void Component::FlushCachedStateForComponent()
+{
+	// Base implementation: Do nothing.
+}
+
+
 int Component::Run(int nrOfCycles)
 {
 	// Base implementation: Do nothing, but pretend we executed

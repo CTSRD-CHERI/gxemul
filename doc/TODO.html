@@ -70,9 +70,23 @@ Misc.
 	     This should be an AddressDataBus, but redirect all accesses to
 	     other devices that also implement the AddressDataBus interface.
 	        [ ]  Register/add other devices/components?
+	        	By scanning immediate child components,
+			automatically, if components are inherit from a
+			MemoryMappedComponent base class... with the following
+			state variables:
+	        		MemoryMappedBase	uint64_t
+	        		MemoryMappedSize	uint64_t
+	        		MemoryMappedAddrMul [=1, optional]
 	        [ ]  Forward accesses to individual other devices/components.
 		[ ]  AddressDataBus should be extended to allow for direct
 		     page mapping.
+
+	[/]  Work on MIPS_CPUComponent::Run() and the generic CPUComponent
+		[/]  Connect the CPU to an AddressDataBus.
+		[ ]  virtual to physical translation
+		[ ]  Handling of read/write errors?
+		[ ]  Both MIPS16 and regular encoding.
+		[ ]  Unit tests!
 
 	[ ]  File loader: Load stuff into emulated RAM (or ROM) components
 	     (actually into any AddressDataBus component)
@@ -82,15 +96,12 @@ Misc.
 		[ ]  a.out
 		[ ]  raw binaries
 
-	[ ]  Main run loop: Verify that both cycle accurate and larger chunks
-	     works well. Unit test?
-
-	[ ]  Work on MIPS_CPUComponent::Run()
-		[ ]  Connect the CPU to RAM
-
 	[ ]  Make some initial things in the GUI work, such as a window
 	     for the text console, and some initial buttons that execute
 	     commands.
+
+	[ ]  Main run loop: Verify that both cycle accurate and larger chunks
+	     works well. Unit test?
 
 	[ ]  Keep track of whether the document/emulation is "dirty"?
 

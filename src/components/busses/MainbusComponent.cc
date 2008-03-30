@@ -68,43 +68,51 @@ void MainbusComponent::AddressSelect(uint64_t address)
 }
 
 
-void MainbusComponent::ReadData(uint8_t& data)
+bool MainbusComponent::ReadData(uint8_t& data)
 {
+	return false;	// TODO
 }
 
 
-void MainbusComponent::ReadData(uint16_t& data, Endianness endianness)
+bool MainbusComponent::ReadData(uint16_t& data, Endianness endianness)
 {
+	return false;	// TODO
 }
 
 
-void MainbusComponent::ReadData(uint32_t& data, Endianness endianness)
+bool MainbusComponent::ReadData(uint32_t& data, Endianness endianness)
 {
+	return false;	// TODO
 }
 
 
-void MainbusComponent::ReadData(uint64_t& data, Endianness endianness)
+bool MainbusComponent::ReadData(uint64_t& data, Endianness endianness)
 {
+	return false;	// TODO
 }
 
 
-void MainbusComponent::WriteData(const uint8_t& data)
+bool MainbusComponent::WriteData(const uint8_t& data)
 {
+	return false;	// TODO
 }
 
 
-void MainbusComponent::WriteData(const uint16_t& data, Endianness endianness)
+bool MainbusComponent::WriteData(const uint16_t& data, Endianness endianness)
 {
+	return false;	// TODO
 }
 
 
-void MainbusComponent::WriteData(const uint32_t& data, Endianness endianness)
+bool MainbusComponent::WriteData(const uint32_t& data, Endianness endianness)
 {
+	return false;	// TODO
 }
 
 
-void MainbusComponent::WriteData(const uint64_t& data, Endianness endianness)
+bool MainbusComponent::WriteData(const uint64_t& data, Endianness endianness)
 {
+	return false;	// TODO
 }
 
 

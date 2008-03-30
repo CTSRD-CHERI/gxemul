@@ -124,19 +124,16 @@ public:
 	void Reset();
 
 	/**
-	 * \brief Resets the state variables of this component.
+	 * \brief Resets the cached state of this component and all its
+	 * children.
 	 *
-	 * Note 1: This function is not recursive, so children should not be
-	 * traversed.
-	 *
-	 * Note 2: After a component's state variables have been reset, the
-	 * base class' ResetState() function should also be called.
-	 *
-	 * The implementation of this function ususally takes the form of a
-	 * number of assignment of values to member variables, and then
-	 * the call to the base class' ResetState() function.
+	 * For performance reasons, while an emulation is running, it is usually
+	 * a good idea to cache e.g. pointers to various things. However,
+	 * after pausing an emulation, and continuing again, these pointers
+	 * may not be valid. FlushCachedState() should be called before
+	 * Run() is called.
 	 */
-	virtual void ResetState();
+	void FlushCachedState();
 
 	/**
 	 * \brief Runs the component for a number of cycles.
@@ -501,6 +498,37 @@ protected:
 	 *	was already in use.
 	 */
 	bool AddVariableSInt64(const string& name, int64_t* variablePointer);
+
+	/**
+	 * \brief Resets the state variables of this component.
+	 *
+	 * Note 1: This function is not recursive, so children should not be
+	 * traversed.
+	 *
+	 * Note 2: After a component's state variables have been reset, the
+	 * base class' ResetState() function should also be called.
+	 *
+	 * The implementation of this function ususally takes the form of a
+	 * number of assignment of values to member variables, and then
+	 * the call to the base class' ResetState() function.
+	 */
+	virtual void ResetState();
+
+	/**
+	 * \brief Resets the cached state of this component.
+	 *
+	 * Note 1: This function is not recursive, so children should not be
+	 * traversed.
+	 *
+	 * Note 2: After a component's state variables have been reset, the
+	 * base class' FlushCachedStateForComponent() function should also be
+	 * called.
+	 *
+	 * The implementation of this function ususally takes the form of
+	 * setting a number of pointers to NULL, and then
+	 * the call to the base class' FlushCachedStateForComponent() function.
+	 */
+	virtual void FlushCachedStateForComponent();
 
 private:
 	/**
