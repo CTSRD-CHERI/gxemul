@@ -62,6 +62,9 @@ Misc.
 		so... special handlers for
 			Read, Write, Serialize, Deserialize?
 
+	[ ]  Do not list components in the help,documentation etc, if
+		they cannot be created! E.g. "memorymapped", "cpu"!
+
 	[/]  RAM component!
 		[X]  Implement a generic AddressDataBus interface.
 		[ ]  STATE! serialize/deserialize, including unit tests
@@ -558,6 +561,8 @@ Preparation for release 0.5.0
 		   customized distributions of gxemul (by naming the directory
 		   gxemul-MyVer-1.2.3 etc, and supplying all source code). +
 		   SECONDARY_MSG in misc.h.
+		x) Links from component names in the template machine tree
+		   dumps, so that e.g. "mips_cpu0" links to mips_cpu?
 		x) Automated build of list of CommandInterpreter Commands + long
 		   description as HTML?
 		x) User guide with screenshots of the new GUI, _BUT_ the
