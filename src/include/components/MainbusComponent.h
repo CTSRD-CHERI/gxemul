@@ -40,8 +40,9 @@
 /**
  * \brief Main bus Component.
  *
- * An AddressDataBus Component which forwards reads and writes to other
- * AddressDataBus components, e.g. the RAMComponent.
+ * An AddressDataBus Component which forwards reads and writes to
+ * MemoryMappedComponent components (which also must implement the
+ * AddressDataBus interface), e.g. the RAMComponent.
  */
 class MainbusComponent
 	: public Component
