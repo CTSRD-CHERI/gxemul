@@ -360,7 +360,12 @@ static void GenerateHTMLListOfComponents(bool machines)
 	for (size_t i=0; i<names.size(); ++i) {
 		const string& componentName = names[i];
 		string treeDump;
-		
+
+		refcount_ptr<Component> creatable =
+		    ComponentFactory::CreateComponent(componentName);
+		if (creatable.IsNULL())
+			continue;
+
 		bool isTemplateMachine = !ComponentFactory::GetAttribute(
 		    componentName, "machine").empty() &&
 		    !ComponentFactory::GetAttribute(

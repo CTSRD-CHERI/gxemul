@@ -50,9 +50,15 @@ void ListComponentsCommand::Execute(GXemul& gxemul,
 	vector<string> allComponents =
 	    ComponentFactory::GetAllComponentNames(false);
 
-	for (size_t i=0; i<allComponents.size(); i++)
+	for (size_t i=0; i<allComponents.size(); i++) {
+		refcount_ptr<Component> creatable =
+		    ComponentFactory::CreateComponent(allComponents[i]);
+		if (creatable.IsNULL())
+			continue;
+
 		gxemul.GetUI()->ShowDebugMessage(
 		    "  " + allComponents[i] + "\n");
+	}
 }
 
 

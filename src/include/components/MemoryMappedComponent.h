@@ -28,7 +28,7 @@
  *  SUCH DAMAGE.
  */
 
-// Note: Not a COMPONENT; this is used as a base-class only.
+// COMPONENT(memorymapped)
 
 
 #include "Component.h"
