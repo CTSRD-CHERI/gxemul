@@ -902,11 +902,13 @@ printf "// Will be removed by  make clean_all\n\n" >> unittest_h.h
 for a in `find src -name "*.cc" -print`; do grep UNITTESTS\( "$a";
 	done | cut -d \( -f 2|cut -d \) -f 1 > _unittests.tmp
 for a in `cat _unittests.tmp`; do
-	cd src/include
-	HNAME=`find . -name $a.h | cut -c 3-`
-	cd ../..
-	printf "#include \"$HNAME\"\n" >> unittest_h.h
-	printf "\t$a::RunUnitTests(nSucceeded, nFailed);\n" >> unittest.h
+	if [ ! z$a = zclassName ]; then
+		cd src/include
+		HNAME=`find . -name $a.h | cut -c 3-`
+		cd ../..
+		printf "#include \"$HNAME\"\n" >> unittest_h.h
+		printf "\t$a::RunUnitTests(nSucceeded, nFailed);\n" >> unittest.h
+	fi
 done
 rm -f _unittests.tmp
 
