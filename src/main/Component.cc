@@ -263,10 +263,7 @@ string Component::GenerateTreeDump(const string& branchTemplate) const
 		if (!ss.str().empty())
 			ss << ", ";
 
-		stringstream tmpss;
-		tmpss << memoryMappedSize->ToString();
-		uint64_t nBytes;
-		tmpss >> nBytes;
+		uint64_t nBytes = memoryMappedSize->ToInteger();
 		if (nBytes >= (1 << 30))
 			ss << (nBytes >> 30) << " GB";
 		else if (nBytes >= (1 << 20))
@@ -276,12 +273,13 @@ string Component::GenerateTreeDump(const string& branchTemplate) const
 		else
 			ss << nBytes << " bytes";
 
-		// TODO: Hexadecimal output!
-		ss << " at offset " << memoryMappedBase->ToString();
+		ss << " at offset ";
+		ss.flags(std::ios::hex | std::ios::showbase);
+		ss << memoryMappedBase->ToInteger();
 
 		if (memoryMappedAddrMul != NULL &&
 		    memoryMappedAddrMul->ToString() != "1")
-			ss << ", addrmul " << memoryMappedAddrMul->ToString();
+			ss << ", addrmul " << memoryMappedAddrMul->ToInteger();
 	}
 
 	if (!ss.str().empty())
