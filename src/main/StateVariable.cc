@@ -323,7 +323,7 @@ uint64_t StateVariable::ToInteger() const
 	case Bool:
 		return (*m_value.pbool)? 1 : 0;
 	case Double:
-		return *m_value.pdouble;
+		return (uint64_t) *m_value.pdouble;
 	case UInt8:
 		return *m_value.puint8;
 	case UInt16:
