@@ -197,6 +197,13 @@ public:
 	string ToString() const;
 
 	/**
+	 * \brief Returns the variable as an unsignedinteger value.
+	 *
+	 * @return A uint64_t, representing the variable's value.
+	 */
+	uint64_t ToInteger() const;
+
+	/**
 	 * \brief Set the variable's value.
 	 *
 	 * @param escapedStringValue The new value, as a C-style escaped

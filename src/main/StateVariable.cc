@@ -313,6 +313,42 @@ string StateVariable::ToString() const
 	}
 }
 
+
+uint64_t StateVariable::ToInteger() const
+{
+	stringstream sstr;
+	switch (m_type) {
+	case String:
+		return 0;
+	case Bool:
+		return (*m_value.pbool)? 1 : 0;
+	case Double:
+		return *m_value.pdouble;
+	case UInt8:
+		return *m_value.puint8;
+	case UInt16:
+		return *m_value.puint16;
+	case UInt32:
+		return *m_value.puint32;
+	case UInt64:
+		return *m_value.puint64;
+	case SInt8:
+		return *m_value.psint8;
+	case SInt16:
+		return *m_value.psint16;
+	case SInt32:
+		return *m_value.psint32;
+	case SInt64:
+		return *m_value.psint64;
+	}
+
+	// Unimplemented type?
+	assert(false);
+
+	return 0;
+}
+
+
 string StateVariable::Serialize(SerializationContext& context) const
 {
 	return
@@ -731,6 +767,8 @@ UNITTESTS(StateVariable)
 	UNITTEST(Test_StateVariable_Numeric_SetValue);
 	//UNITTEST(Test_StateVariable_Numeric_CopyValueFrom);
 	//UNITTEST(Test_StateVariable_Numeric_Serialize);
+
+	// TODO: ToInteger tests.
 }
 
 #endif
