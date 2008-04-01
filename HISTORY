@@ -3975,3 +3975,4 @@ Changelog for GXemul:
 		the RAMComponent class.)
 		The mainbus can now forward reads and writes to memory-mapped
 		child components.
+20080401	Continuing on the mainbus (writing unit tests).

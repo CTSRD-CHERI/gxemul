@@ -81,50 +81,66 @@ void MainbusComponent::MakeSureMemoryMapExists()
 
 	m_memoryMap = new MemoryMap;
 
-	// Build a memory map of all immediate children, who implement the
+	// Build a memory map of all immediate children who implement the
 	// AddressDataBus interface:
 	Components children = GetChildren();
 	for (size_t i=0; i<children.size(); ++i) {
 		AddressDataBus* bus = children[i]->AsAddressDataBus();
-		if (bus != NULL) {
-			MemoryMapEntry mmEntry;
-			mmEntry.addressDataBus = bus;
-			mmEntry.addrMul = 1;
-			mmEntry.base = 0;
+		if (bus == NULL)
+			continue;
 
-			const StateVariable* varBase =
-			    children[i]->GetVariable("memoryMappedBase");
-			const StateVariable* varSize =
-			    children[i]->GetVariable("memoryMappedSize");
-			const StateVariable* varAddrMul =
-			    children[i]->GetVariable("memoryMappedAddrMul");
+		MemoryMapEntry mmEntry;
+		mmEntry.addressDataBus = bus;
+		mmEntry.addrMul = 1;
+		mmEntry.base = 0;
 
-			if (varBase != NULL && !varBase->ToString().empty()) {
-				stringstream tmpss;
-				tmpss << varBase->ToString();
-				tmpss >> mmEntry.base;
-			}
-			if (varSize != NULL && !varSize->ToString().empty()) {
-				stringstream tmpss;
-				tmpss << varSize->ToString();
-				tmpss >> mmEntry.size;
-			}
-			if (varAddrMul != NULL && !varAddrMul->ToString()
-			    .empty()) {
-				stringstream tmpss;
-				tmpss << varAddrMul->ToString();
-				tmpss >> mmEntry.addrMul;
-			}
+		const StateVariable* varBase =
+		    children[i]->GetVariable("memoryMappedBase");
+		const StateVariable* varSize =
+		    children[i]->GetVariable("memoryMappedSize");
+		const StateVariable* varAddrMul =
+		    children[i]->GetVariable("memoryMappedAddrMul");
 
-			if (varSize == NULL || varBase == NULL) {
-				std::cerr << "No base or size? TODO.\n";
-				throw std::exception();
-			}
+		if (varBase != NULL)
+			mmEntry.base = varBase->ToInteger();
+		if (varSize != NULL)
+			mmEntry.size = varSize->ToInteger();
+		if (varAddrMul != NULL)
+			mmEntry.addrMul = varAddrMul->ToInteger();
 
-			m_memoryMap->push_back(mmEntry);
-
-			// TODO: Check for overlaps!
+		if (varSize == NULL || varBase == NULL) {
+			std::cerr << "No base or size? TODO.\n";
+			throw std::exception();
 		}
+
+		// Treat the non-sensical addrMul value 0 as 1.
+		if (mmEntry.addrMul == 0)
+			mmEntry.addrMul = 1;
+
+		// Empty memory mapped region? Then skip this component.
+		if (mmEntry.size == 0)
+			continue;
+
+		// Check for overlaps against the already existing mappings.
+		//
+		// (Note: Current implementation results in O(n^2) time,
+		// but if the number of memory-mapped immediate childs are
+		// few, then this should not be a big problem.)
+		for (size_t j=0; j<m_memoryMap->size(); ++j) {
+			if (mmEntry.base+mmEntry.size <= (*m_memoryMap)[j].base)
+				continue;
+
+			if (mmEntry.base >= (*m_memoryMap)[j].base +
+			    (*m_memoryMap)[j].size)
+				continue;
+		
+			// TODO: Overlap. How to handle this?
+			std::cerr << "Overlap in mainbus. TODO\n";
+			throw std::exception();
+		}
+
+		// Finally add the new mapping entry.
+		m_memoryMap->push_back(mmEntry);
 	}
 }
 
@@ -141,10 +157,22 @@ void MainbusComponent::AddressSelect(uint64_t address)
 
 	m_currentAddressDataBus = NULL;
 
+	// Note: This is a linear O(n) scan of the list of memory-mapped
+	// components. For small n, this should be ok.
+	//
+	// In practice, my hope is that the bulk of all memory access will be
+	// using direct-mapped pages anyway, so this should not be that much
+	// of a problem.
+
 	for (size_t i=0; i<m_memoryMap->size(); ++i) {
 		MemoryMapEntry& mmEntry = (*m_memoryMap)[i];
+
+		// If this memory map entry contains the address we wish to
+		// select, then...
 		if (address >= mmEntry.base &&
 		    address < mmEntry.base + mmEntry.size) {
+			// ... tell the corresponding component which address
+			// within it we wish to select.
 			m_currentAddressDataBus = mmEntry.addressDataBus;
 			m_currentAddressDataBus->AddressSelect(
 			    (address - mmEntry.base) / mmEntry.addrMul);
@@ -255,6 +283,15 @@ static void Test_MainbusComponent_IsStable()
 	    ComponentFactory::HasAttribute("mainbus", "stable"));
 }
 
+static void Test_MainbusComponent_Creatable()
+{
+	refcount_ptr<Component> mainbus =
+	    ComponentFactory::CreateComponent("mainbus");
+
+	UnitTest::Assert("The MainbusComponent should be "
+	    "instanciable", !mainbus.IsNULL());
+}
+
 static void Test_MainbusComponent_AddressDataBus()
 {
 	refcount_ptr<Component> mainbus =
@@ -265,10 +302,201 @@ static void Test_MainbusComponent_AddressDataBus()
 	    "AddressDataBus interface", bus != NULL);
 }
 
+static void Test_MainbusComponent_Simple()
+{
+	refcount_ptr<Component> mainbus =
+	    ComponentFactory::CreateComponent("mainbus");
+	refcount_ptr<Component> ram0 =
+	    ComponentFactory::CreateComponent("ram");
+
+	mainbus->AddChild(ram0);
+	ram0->SetVariableValue("memoryMappedSize", "0x100000");
+	ram0->SetVariableValue("memoryMappedBase", "0");
+
+	AddressDataBus* bus = mainbus->AsAddressDataBus();
+
+	uint8_t dataByte = 42;
+	bus->AddressSelect(128);
+	bus->WriteData(dataByte);
+	bus->AddressSelect(129);
+	dataByte = 100;
+	bus->WriteData(dataByte);
+	bus->AddressSelect(128);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("memory wasn't written to correctly?", dataByte, 42);
+	bus->AddressSelect(129);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("memory wasn't written to correctly?", dataByte, 100);
+}
+
+static void Test_MainbusComponent_Remapping()
+{
+	refcount_ptr<Component> mainbus =
+	    ComponentFactory::CreateComponent("mainbus");
+	refcount_ptr<Component> ram0 =
+	    ComponentFactory::CreateComponent("ram");
+
+	mainbus->AddChild(ram0);
+	ram0->SetVariableValue("memoryMappedSize", "0x10000");
+	ram0->SetVariableValue("memoryMappedBase", "0x1000");
+
+	AddressDataBus* bus = mainbus->AsAddressDataBus();
+
+	uint8_t dataByte = 123;
+	bus->AddressSelect(0x1030);	// offset 0x30 of ram0
+	bus->WriteData(dataByte);
+	dataByte = 18;
+	bus->AddressSelect(0x1050);	// offset 0x50 of ram0
+	bus->WriteData(dataByte);
+
+	// Set a new base for ram0, but do _NOT_ flush cached state yet!
+	// (This is to assert that cached state is actually cached.)
+	ram0->SetVariableValue("memoryMappedBase", "0x1020");
+
+	uint8_t dataByte2 = 99;
+	bus->AddressSelect(0x1050);	// offset 0x30 of ram0
+	bus->ReadData(dataByte2);
+	UnitTest::Assert("remapping should NOT have taken place yet, "
+	    "cached state should still be in effect!", dataByte2, 18);
+
+	// Now, flush the state and make sure the new mapping takes effect:
+	mainbus->FlushCachedState();
+
+	dataByte2 = 99;
+	bus->AddressSelect(0x1050);	// offset 0x30 of ram0
+	bus->ReadData(dataByte2);
+	UnitTest::Assert("remapping failed?", dataByte2, 123);
+}
+
+static void Test_MainbusComponent_Multiple_NonOverlapping()
+{
+	refcount_ptr<Component> mainbus =
+	    ComponentFactory::CreateComponent("mainbus");
+	refcount_ptr<Component> ram0 =
+	    ComponentFactory::CreateComponent("ram");
+	refcount_ptr<Component> ram1 =
+	    ComponentFactory::CreateComponent("ram");
+	refcount_ptr<Component> ram2 =
+	    ComponentFactory::CreateComponent("ram");
+
+	mainbus->AddChild(ram0);
+	mainbus->AddChild(ram1);
+	mainbus->AddChild(ram2);
+	ram0->SetVariableValue("memoryMappedSize", "0x100");
+	ram0->SetVariableValue("memoryMappedBase", "0x000");
+	ram1->SetVariableValue("memoryMappedSize", "0x100");
+	ram1->SetVariableValue("memoryMappedBase", "0x100");
+	ram2->SetVariableValue("memoryMappedSize", "0x100");
+	ram2->SetVariableValue("memoryMappedBase", "0x200");
+
+	AddressDataBus* bus = mainbus->AsAddressDataBus();
+
+	for (size_t i = 0; i < 0x300; i += sizeof(uint16_t)) {
+		uint16_t data = (uint8_t) i;
+		bus->AddressSelect(i);
+		bus->WriteData(data, LittleEndian);
+	}
+
+	for (size_t i = 0; i < 0x300; i += sizeof(uint16_t)) {
+		uint16_t data;
+		bus->AddressSelect(i);
+		bus->ReadData(data, BigEndian);
+		UnitTest::Assert("memory wasn't written to correctly?",
+		   data, (uint16_t) (i << 8));
+	}
+}
+
+static void Test_MainbusComponent_Simple_With_AddrMul()
+{
+	refcount_ptr<Component> mainbus =
+	    ComponentFactory::CreateComponent("mainbus");
+	refcount_ptr<Component> ram0 =
+	    ComponentFactory::CreateComponent("ram");
+
+	mainbus->AddChild(ram0);
+	ram0->SetVariableValue("memoryMappedSize", "0x1000");
+	ram0->SetVariableValue("memoryMappedBase", "0x80");
+	ram0->SetVariableValue("memoryMappedAddrMul", "5");
+
+	AddressDataBus* bus = mainbus->AsAddressDataBus();
+
+	uint8_t dataByte = 42;
+	bus->AddressSelect(128);
+	bus->WriteData(dataByte);
+	bus->AddressSelect(133);
+	dataByte = 100;
+	bus->WriteData(dataByte);
+
+	bus->AddressSelect(128);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("memory wasn't written to correctly?", dataByte, 42);
+	bus->AddressSelect(133);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("memory wasn't written to correctly?", dataByte, 100);
+
+	ram0->SetVariableValue("memoryMappedAddrMul", "2");
+	mainbus->FlushCachedState();
+
+	bus->AddressSelect(128);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("addr mul strangeness?", dataByte, 42);
+	bus->AddressSelect(130);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("offset 130 should have the same value as "
+	    "offset 133 had", dataByte, 100);
+	bus->AddressSelect(133);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("offset 133 should NOT have any value "
+	    "written to it yet!", dataByte, 0);
+
+	ram0->SetVariableValue("memoryMappedAddrMul", "1");
+	mainbus->FlushCachedState();
+
+	bus->AddressSelect(128);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("addr mul strangeness [2]", dataByte, 42);
+	bus->AddressSelect(129);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("offset 129 mismatch [2]", dataByte, 100);
+	bus->AddressSelect(133);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("offset 133 should NOT have any value "
+	    "written to it yet! [2]", dataByte, 0);
+
+	// AddrMul "0" should be same as "1", because the user might think that
+	// address multiplication is "turned off" by setting it to 0.
+	ram0->SetVariableValue("memoryMappedAddrMul", "0");
+	mainbus->FlushCachedState();
+
+	bus->AddressSelect(128);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("addr mul strangeness [3]", dataByte, 42);
+	bus->AddressSelect(129);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("offset 129 mismatch [3]", dataByte, 100);
+	bus->AddressSelect(133);
+	bus->ReadData(dataByte);
+	UnitTest::Assert("offset 133 should NOT have any value "
+	    "written to it yet! [3]", dataByte, 0);
+}
+
 UNITTESTS(MainbusComponent)
 {
+	// Construction, etc.:
 	UNITTEST(Test_MainbusComponent_IsStable);
+	UNITTEST(Test_MainbusComponent_Creatable);
 	UNITTEST(Test_MainbusComponent_AddressDataBus);
+
+	// Memory mapping, ranges, overlaps, addrmul, etc.:
+	UNITTEST(Test_MainbusComponent_Simple);
+	UNITTEST(Test_MainbusComponent_Remapping);
+	UNITTEST(Test_MainbusComponent_Multiple_NonOverlapping);
+	UNITTEST(Test_MainbusComponent_Simple_With_AddrMul);
+
+	// TODO: Write outside of mapped space
+	// TODO: Write PARTIALLY outside of mapped space!!! e.g. 64-bit
+	//	into a 3-byte memory area???
+	// TODO: Overlapping mappings
 }
 
 #endif
