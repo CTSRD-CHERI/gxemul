@@ -55,18 +55,16 @@ Legacy (0.4.x) series
 Misc.
 -----
 	[/]  State variables:
-		[ ]  Introduce "bool" again.
 		[ ]  Write more unit tests!
 		[ ]  Special handlers for Read, Write, Serialize, Deserialize.
 
 	[/]  RAM component:
 		[X]  Implement a generic AddressDataBus interface.
-		[ ]  bool "write protect", to implement ROM!
 		[ ]  STATE! serialize/deserialize, including unit tests
 
 	[/]  Mainbus component:
 	        [X]  Forward accesses to individual other devices/components.
-		[ ]  Check for overlaps in MakeSureMemoryMapExists!
+		[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
 		[ ]  AddressDataBus should be extended to allow for direct
 		     page mapping.
 		[ ]  Unit tests for the above!

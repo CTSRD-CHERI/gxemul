@@ -3976,3 +3976,6 @@ Changelog for GXemul:
 		The mainbus can now forward reads and writes to memory-mapped
 		child components.
 20080401	Continuing on the mainbus (writing unit tests).
+		Reintroduce the 'bool' state variable type.
+		Adding a 'writeProtected' state bool for the RAMComponent, to
+		emulate ROM behavior in a simple way.

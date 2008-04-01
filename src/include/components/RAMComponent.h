@@ -123,9 +123,12 @@ private:
 	const size_t	m_blockSizeShift;// Host block size, in bit shift steps
 	const size_t	m_blockSize;	 // Host block size, in bytes
 
+	// State:
 	typedef vector<void *> BlockNrToMemoryBlockVector;
-	BlockNrToMemoryBlockVector m_memoryBlocks;
+	BlockNrToMemoryBlockVector	m_memoryBlocks;
+	bool				m_writeProtected;
 
+	// Cached/runtime state:
 	uint64_t	m_addressSelect;  // For AddressDataBus read/write
 	void *		m_selectedHostMemoryBlock;
 	size_t		m_selectedOffsetWithinBlock;

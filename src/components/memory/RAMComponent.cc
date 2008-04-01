@@ -35,10 +35,12 @@ RAMComponent::RAMComponent()
 	: MemoryMappedComponent("ram")
 	, m_blockSizeShift(22)		// 22 = 4 MB per block
 	, m_blockSize(1 << m_blockSizeShift)
+	, m_writeProtected(false)
 	, m_addressSelect(0)
 	, m_selectedHostMemoryBlock(NULL)
 	, m_selectedOffsetWithinBlock(0)
 {
+	AddVariableBool("writeProtect", &m_writeProtected);
 }
 
 
@@ -183,6 +185,9 @@ bool RAMComponent::ReadData(uint64_t& data, Endianness endianness)
 
 bool RAMComponent::WriteData(const uint8_t& data)
 {
+	if (m_writeProtected)
+		return false;
+
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
 
@@ -196,6 +201,9 @@ bool RAMComponent::WriteData(const uint8_t& data)
 bool RAMComponent::WriteData(const uint16_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 1) == 0);
+
+	if (m_writeProtected)
+		return false;
 
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
@@ -217,6 +225,9 @@ bool RAMComponent::WriteData(const uint32_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 3) == 0);
 
+	if (m_writeProtected)
+		return false;
+
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
 
@@ -236,6 +247,9 @@ bool RAMComponent::WriteData(const uint32_t& data, Endianness endianness)
 bool RAMComponent::WriteData(const uint64_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 7) == 0);
+
+	if (m_writeProtected)
+		return false;
 
 	if (m_selectedHostMemoryBlock == NULL)
 		m_selectedHostMemoryBlock = AllocateBlock();
@@ -387,6 +401,8 @@ UNITTESTS(RAMComponent)
 	UNITTEST(Test_RAMComponent_InitiallyZero);
 	UNITTEST(Test_RAMComponent_WriteThenRead);
 	UNITTEST(Test_RAMComponent_WriteThenRead_ReverseEndianness);
+
+	// TODO: Write protect test
 
 	// TODO: Serialization, deserialization
 }

@@ -591,6 +591,20 @@ bool Component::AddVariableDouble(const string& name, double* variablePointer)
 }
 
 
+bool Component::AddVariableBool(const string& name, bool* variablePointer)
+{
+	StateVariableMap::iterator it = m_stateVariables.find(name);
+	if (it != m_stateVariables.end()) {
+		assert(false);
+		return false;
+	}
+
+	m_stateVariables[name] = StateVariable(name, variablePointer);
+
+	return true;
+}
+
+
 bool Component::AddVariableUInt8(const string& name, uint8_t* variablePointer)
 {
 	StateVariableMap::iterator it = m_stateVariables.find(name);

@@ -79,7 +79,7 @@
  *
  * The state of each component is stored within that component. The state
  * consists of a number of variables (see StateVariable) such as strings,
- * integers, and other more high-level types such as zero-filled memory
+ * integers, bools, and other more high-level types such as zero-filled memory
  * arrays. Such memory arrays are used e.g. by the RAMComponent to emulate
  * RAM, and can also be used to emulte video framebuffer memory.
  *
