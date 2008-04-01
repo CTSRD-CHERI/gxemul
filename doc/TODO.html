@@ -54,31 +54,27 @@ Legacy (0.4.x) series
 
 Misc.
 -----
-	[/]  More State variable Unit tests!
-		[ ]  State such as RAM? Special handlers?
-		[ ]  Variables that have side effects on write, e.g. the "pc"
-		     might invalidate "current PC page" pointers, etc. Again,
-		     "special handlers".
-		so... special handlers for
-			Read, Write, Serialize, Deserialize?
+	[/]  State variables:
+		[ ]  Introduce "bool" again.
+		[ ]  Write more unit tests!
+		[ ]  Special handlers for Read, Write, Serialize, Deserialize.
 
-	[/]  RAM component!
+	[/]  RAM component:
 		[X]  Implement a generic AddressDataBus interface.
+		[ ]  bool "write protect", to implement ROM!
 		[ ]  STATE! serialize/deserialize, including unit tests
 
-	[/]  Mainbus component? (For use in the testmips machine.)
-	     This should be an AddressDataBus, but redirect all accesses to
-	     other devices that also implement the AddressDataBus interface.
-		[ ]  Check for overlaps in MakeSureMemoryMapExists!
-		[ ]  Unit tests for the above!
+	[/]  Mainbus component:
 	        [X]  Forward accesses to individual other devices/components.
+		[ ]  Check for overlaps in MakeSureMemoryMapExists!
 		[ ]  AddressDataBus should be extended to allow for direct
 		     page mapping.
+		[ ]  Unit tests for the above!
 
-	[ ]  testmips
+	[/]  testmips
 		[/]  Work on MIPS_CPUComponent::Run() and the generic
 		     CPUComponent
-			[/]  Connect the CPU to an AddressDataBus.
+			[X]  Connect the CPU to an AddressDataBus.
 			[ ]  virtual to physical translation
 			[ ]  Handling of read/write errors?
 			[ ]  Both MIPS16 and regular encoding.
@@ -91,14 +87,16 @@ Misc.
 	[ ]  File loader: Load stuff into emulated RAM (or ROM) components.
 	     Note: Usually, ELFs contain _virtual_ addresses, so file loading
 	     needs to go through a CPU to be properly address translated!
+	     BUT BOTH must be possible! I.e. load into RAM, or load into a CPU.
 		[ ]  ELF
 		[ ]  a.out
 		[ ]  raw binaries
 
 	[ ]  Make some initial things in the GUI work:
-		[ ]  A window for the text console
+		[ ]  A window for the text console, including Input line!
 		[ ]  Undo/redo status update when necessary
-		[ ]  Workspace = show current emulation setup
+		[ ]  Workspace = show current emulation setup, with a
+		     palette on the right-hand side of available components.
 
 	[ ]  Main run loop: Verify that both cycle accurate and larger chunks
 	     works well. Unit test?
@@ -114,6 +112,7 @@ Misc.
 		     given to the machine template. (3max, for the decstation
 		     type)   Not only for templates. E.g. a MIPS processor, with'
 		     subtype "R3000" instead of "5Kc" or so...
+		     Perhaps -C too then?
 
 		[ ]  How about aliases? 5000/200, 3max etc. vs pmax/DECstation?
 		     Aliases + comments, for templates.
@@ -129,11 +128,6 @@ Misc.
 				A pcibus can be added into a mainbus (in a machine.)
 				etc.
 			bool IsItOkToAddItToThisProposedParentComponent(propsedParent) const;
-
-	[ ]  Define an Interface, "UIOwner" or such, that the UI can
-	     use to communicate back to its owning GXemul instance; it
-	     does not need to have access to the full GXemul class
-	     member functions...
 
 	[ ]  Require binary file (or disk image) to be loaded,
 	     when starting a template based machine from the command line!
@@ -308,7 +302,7 @@ Components
 	[/]		testmips
 		memory/			Memory keep data in some form of array.
 	[/]		ram
-			rom
+			rom		Non-writable during execution? TODO
 			cache(s)
 		network/		Ethernet and others end up here
 		sound/			sound cards
@@ -317,20 +311,20 @@ Components
 I18N
 ----
 
-	x) Unit tests to make sure that unicode strings work as expected.
-	x) Use _(x) for user-readable strings.
-	x) Investigate intltool or gettext or whatever is necessary to get
-	   it all working. po directories/files, etc.
-	x) Initial translation would be Swedish.   LANG=sv_SE.UTF-8 ./gxemul-gui
-	x) Use LANG=he_IL.UTF-8 ./gxemul-gui to try a right-to-left languages,
-	   or  LANG=ja_JP.UTF-8 ./gxemul-gui to try an asian language.
+	[ ]  Unit tests to make sure that unicode strings work as expected.
+	[/]  Use _(x) everywhere for user-readable strings.
+	[ ]  Investigate intltool or gettext or whatever is necessary to get
+	     it all working. po directories/files, etc.
+	[ ]  Initial translation would be Swedish. LANG=sv_SE.UTF-8 ./gxemul-gui
+	[ ]  Use LANG=he_IL.UTF-8 ./gxemul-gui to try a right-to-left languages,
+	     or  LANG=ja_JP.UTF-8 ./gxemul-gui to try an asian language.
 
 
 Error handling
 --------------
 
-	x) Stack of errors? With human readable (i18n'd) messages.
-	   (e.g. Exception with possibility to add sub-exception-messages...)
+	[ ]  Stack of errors? With human readable (i18n'd) messages.
+	     (e.g. Exception with possibility to add sub-exception-messages...)
 
 
 GTKMM GUI
@@ -431,11 +425,16 @@ GTKMM GUI
 Think about
 -----------
 
-	x)  Inspection of state of any Component...
+	[ ]  Inspection of state of any Component...
 
-	x)  Callstack window, etc. (per CPU).
+	[ ]  Monitoring of _state transitions_?
 
-	x)  Function call trace window (also per CPU).
+	[ ]  Callstack window, etc. (per CPU).
+
+	[ ]  Memory view with machine code disassembler + show source code
+	     lines (if available), including current execution point.
+
+	[ ]  Function call trace window (also per CPU).
 		[ ]  Ability to "fold" a branch of the tree! Could be useful.
 		[ ]  Ability to "fold" _all_ branches that have a specific
 		     symbol. E.g. fold all "printf" calls, so that individual
@@ -443,30 +442,30 @@ Think about
 		     printf tree, but they will be displayed if they are
 		     called from elsewhere.
 
-	x)  Profiling using profil()? On host archs that support it.
-	    That way, the _generated_ runtime code could be profiled
-	    from within the emulator.
+	[ ]  Profiling using profil()? On host archs that support it.
+	     That way, the _generated_ runtime code could be profiled
+	     from within the emulator.
 
-	x)  ARBITRARY break conditions, i.e. between each instruction,
-	    check any number of arbitrary conditions:
+	[ ]  ARBITRARY break conditions, i.e. between each instruction,
+	     check any number of arbitrary conditions:
 		x) Contents of memory locations, even including stuff
 		   on the stack
 		x) Reads/writes from memory?
 		x) Any flags or other device state (registers).
 
-	    This obviously slows things down A LOT, so the default is
-	    to have no such break conditions.
+	     This obviously slows things down A LOT, so the default is
+	     to have no such break conditions.
 
-	    [ ]	Optionally increase counters instead of breaking,
-		for statistics gathering.  (Of course, it should then be
-		possible to set a break condition such as   expr > 50 or so)
+	     [ ]  Optionally increase counters instead of breaking,
+		  for statistics gathering.  (Of course, it should then be
+		  possible to set a break condition such as   expr > 50 or so)
 
-	    [ ]	Compile these conditions into some form of internal
-	    	byte code?
+	     [ ]  Compile these conditions into some form of internal
+	     	  byte code?
 
-	x)  Cache emulation, multiple hierarchies, etc.
+	[ ]  Cache emulation, multiple hierarchies, etc.
 
-	x)  Timing modes:
+	[ ]  Timing modes:
 		1) Real-time approximation. (For guest OSes.)
 		2) Fixed. (For fixed 1 instruction/cycle speed.)
 		   Each device must then have a specified speed (such
@@ -474,59 +473,59 @@ Think about
 	    It should be possible to switch timing modes during an emulation,
 	    but going back after such a switch does not have to be possible.
 
-	x)  Generic timer framework
+	[ ]  Generic timer framework
 
-	x)  Generic interrupt framework
+	[ ]  Generic interrupt framework
 
-	x)  Generic network emulation framework
+	[ ]  Generic network emulation framework
 		[ ]  Support SLIP/PLIP in emulated guest OS?
 		[ ]  Connect to real world via:
 			[ ]  Built-in NAT layer
 			[ ]  Perhaps VDE or similar?
 
-	x)  PROM emulation in software: Some kind of plugin system,
-	    allowing machines to plug in software PROM emulation packages.
+	[ ]  PROM emulation in software: Some kind of plugin system,
+	     allowing machines to plug in software PROM emulation packages.
 
-	x)  Regular saving of state with time stamps (i.e. cycle numbers),
-	    so that running "backwards" is possible!
-	    NOTE:
-		1) This must include network packages and disk image
+	[ ]  Regular saving of state with time stamps (i.e. cycle numbers),
+	     so that running "backwards" is possible!
+	     NOTE:
+	 	1) This must include network packages and disk image
 		   contents! Tricky. But perhaps doable.
 		2) Must be possible to use both from the UI (a "step
 		   backwards" button?) and the debugger.
-	    A kind of "exponential decay"-kind of discarding of old states is
-	    probably the best way to do it.
-	    Not necessary to be able to save the "Backward state"; saving
-	    the state will only save the latest state.
+	     A kind of "exponential decay"-kind of discarding of old states is
+	     probably the best way to do it.
+	     Not necessary to be able to save the "Backward state"; saving
+	     the state will only save the latest state.
 
-	x)  "Live migration" might be possible. Or at least migrating while
-		the emulation is being paused. (Not very live-ish, but perhaps
-		this can be tweaked.)
+	[ ]  "Live migration" might be possible. Or at least migrating while
+	     the emulation is being paused. (Not very live-ish, but perhaps
+	     this can be tweaked.)
 
-	x)  Actual machines being emulated 1 per process? Or all in the
-	    same process?
+	[ ]  Actual machines being emulated 1 per process/thread? Or all in the
+	     same process/thread?
 	     [ ] Try to take advantage of SMP hosts.
 	     [ ] Prepare early on for emulation using multiple hosts (or
 	     	 GXemul instances)
 
-	x)  Full-screen. CTRL-ALT-F11 toggles full-screen vs docked window
-	    in the designer view? CTRL-ALT-F12 toggles mouse capture?
+	[ ]  Full-screen. CTRL-ALT-F11 toggles full-screen vs docked window
+	     in the designer view? CTRL-ALT-F12 toggles mouse capture?
 
-	x)  There can now be links directly into the documentation,
-	    assuming it is installed. ($PREFIX/share/doc/gxemul/*.html)
-	    I.e. F1 (and Help->Contents) can cause a web browser to be
-	    launched.  F1 in dialogs could link to a page with screenshots
-	    + description of each dialog.
+	[ ]  There can now be links directly into the documentation,
+	     assuming it is installed. ($PREFIX/share/doc/gxemul/*.html)
+	     I.e. F1 (and Help->Contents) can cause a web browser to be
+	     launched.  F1 in dialogs could link to a page with screenshots
+	     + description of each dialog.
 
-	x)  Userland emulation!
-		Both from the command line, and from the GUI? (Startable,
-		at least.) Possibility to inspect cache misses, etc.
+	[ ]  Userland emulation!
+	     Both from the command line, and from the GUI? (Startable,
+	     at least.) Possibility to inspect cache misses, etc.
 		-u emulname  should imply -q.
 
-	x)  Command-line options compatible with pre-0.5.0! Start e.g.
-	    framebuffers in full-screen / windowed mode, _not_ docked.
+	[ ]  Command-line options compatible with pre-0.5.0! Start e.g.
+	     framebuffers in full-screen / windowed mode, _not_ docked.
 
-	x)  Hot-swap of devices during runtime, depends on Bus support. e.g.:
+	[ ]  Hot-swap of devices during runtime, depends on Bus support. e.g.:
 		Floppies
 		CDROMS
 		Some harddisks?
@@ -539,11 +538,11 @@ Think about
 		Sun's old bus for keyboards/mice
 		...
 
-	x)  TFTP server built-in into the simulated gateway? For netbooting.
+	[ ]  TFTP server built-in into the simulated gateway? For netbooting.
 
-	x)  GDB debug connection (again).
+	[ ]  GDB debug connection (again).
 	
-	x)  SuperH emulation: Not only SH4, but SH3 too?
+	[ ]  SuperH emulation: Not only SH4, but SH3 too?
 
 
 Preparation for release 0.5.0
@@ -604,22 +603,22 @@ Preparation for release 0.5.0
 	x) Make sure that the web page looks reasonable. There should be
 	   clear ways to download the old 0.4.x version in addition to
 	   the 0.5.0 release, even when 0.5.0 has been released.
-		x)  Move down legacy screenshots to after the "news"
-		    section.
-		x)  Rename Curiosities/history to Curiosities/older history
 
 
-General notes for ANY release
------------------------------
+General notes for ANY 0.5.x release
+-----------------------------------
 
 	x) Mention the RELEASE in the HISTORY file.
-	x) Create .tar.gz release package, without .svn directories.
+	x) Create .tar.gz release package:
+		x) remove all .svn directories
+		x) run   ./configure; make documentation; make clean_all
 	x) Verify that the package builds as expected on one or more machines.
-	x) Branch/tag in SVN.
+	x) Branch (for 0.5.x) and/or tag (for 0.5.x[.y]) in SVN.
 	x) Home page updates:
 		x) index.html:
 			x) Version numbers
-			x) News entry
+		x) news.html:
+			x) Version number, News entry
 		x) download.html:
 			x) Version numbers
 			x) Link to .tar.gz
@@ -628,10 +627,10 @@ General notes for ANY release
 	x) After rsync:ing, make sure to remove old LATEST_IS_x.x.x.x files!
 	x) Once the home page has been updated:
 		x) Verify that the .tar.gz is downloadable, and works.
-		x) Upload .tar.gz to SourceForge
+		x) Upload .tar.gz to SourceForge's File Release system
+		x) Post message to the gxemul-users mailing list.
 		x) Update FreshMeat
 		x) Update WikiPedia
-		x) Post message to the gxemul-users mailing list.
 
 </pre>
 <hr>
