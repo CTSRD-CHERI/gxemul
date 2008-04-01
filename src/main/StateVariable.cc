@@ -275,6 +275,10 @@ bool StateVariable::CopyValueFrom(const StateVariable& otherVariable)
 string StateVariable::ToString() const
 {
 	stringstream sstr;
+
+	// TODO:  sstr.flags(std::ios::hex | std::ios::showbase);
+	// for large integers. Looks licer, and is more human readable.
+
 	switch (m_type) {
 	case String:
 		return m_value.pstr == NULL? "" : *m_value.pstr;
