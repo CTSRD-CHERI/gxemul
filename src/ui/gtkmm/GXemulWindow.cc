@@ -210,9 +210,12 @@ void GXemulWindow::on_menu_about()
 {
 	Gtk::MessageDialog dialog(*this, "GXemul "VERSION,
 	    false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
-	dialog.set_secondary_text(_(COPYRIGHT_MSG"\n"SECONDARY_MSG"\n"
-	    "If you have questions or feedback, don't "
-	    "hesitate to mail me.\nanders@gavare.se"));
+
+	string msg = COPYRIGHT_MSG"\n"SECONDARY_MSG"\n";
+	msg += _("If you have questions or feedback, don't "
+	    "hesitate to mail me.\nanders@gavare.se");
+	dialog.set_secondary_text(msg);
+
 	dialog.run();
 }
 

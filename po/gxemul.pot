@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-02 22:09+0200\n"
+"POT-Creation-Date: 2008-04-02 23:01+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,22 +48,24 @@ msgstr ""
 msgid "_Help"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:213
-msgid "\n"
+#: src/ui/gtkmm/GXemulWindow.cc:215
+msgid ""
+"If you have questions or feedback, don't hesitate to mail me.\n"
+"anders@gavare.se"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:274
+#: src/ui/gtkmm/GXemulWindow.cc:277
 msgid "Choose an emulation to open"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:282 src/ui/gtkmm/GXemulWindow.cc:369
+#: src/ui/gtkmm/GXemulWindow.cc:285 src/ui/gtkmm/GXemulWindow.cc:372
 msgid "GXemul files"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:287 src/ui/gtkmm/GXemulWindow.cc:374
+#: src/ui/gtkmm/GXemulWindow.cc:290 src/ui/gtkmm/GXemulWindow.cc:377
 msgid "Any files"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:361
+#: src/ui/gtkmm/GXemulWindow.cc:364
 msgid "Choose a name for the emulation (.gxemul)"
 msgstr ""

@@ -4,6 +4,10 @@
 
 MOFILES=sv.mo
 
+# This is needed to make intltool-update not complain:
+top_srcdir=..
+
+
 all: build
 
 build: $(MOFILES)
@@ -18,6 +22,9 @@ uninstall:
 
 sv.mo: sv.po
 	msgfmt sv.po -o sv.mo
+
+update:
+	intltool-update -g gxemul -d sv
 
 clean:
 	rm -f *.mo
