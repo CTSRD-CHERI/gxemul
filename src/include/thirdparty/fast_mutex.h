@@ -1,6 +1,4 @@
 /*
- * GXemul: $Id: fast_mutex.h,v 1.4 2007/12/21 18:16:57 debug Exp $
- *
  * Modified for GXemul:
  *
  *	1. Classes have Doxygen brief sections, indicating that they are

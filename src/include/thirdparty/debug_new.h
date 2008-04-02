@@ -1,6 +1,4 @@
 /*
- * GXemul: $Id: debug_new.h,v 1.2 2007/12/21 18:16:57 debug Exp $
- *
  * Modified for GXemul:
  *
  *	1. Better Doxygen comment for class __debug_new_counter.

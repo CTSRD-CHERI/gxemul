@@ -1,6 +1,4 @@
 /*
- * GXemul: $Id: static_assert.h,v 1.4 2007/12/21 18:16:57 debug Exp $
- *
  * Modified for GXemul:
  *
  *      1. Better Doxygen comment for struct __nvwa_compile_time_error.

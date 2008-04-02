@@ -54,20 +54,13 @@ Legacy (0.4.x) series
 
 Misc.
 -----
-	[/]  State variables:
-		[ ]  Write more unit tests!
-		[ ]  Special handlers for Read, Write, Serialize, Deserialize.
-
-	[/]  RAM component:
-		[X]  Implement a generic AddressDataBus interface.
-		[ ]  STATE! serialize/deserialize, including unit tests
-
-	[/]  Mainbus component:
-	        [X]  Forward accesses to individual other devices/components.
-		[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
-		[ ]  AddressDataBus should be extended to allow for direct
-		     page mapping.
-		[ ]  Unit tests for the above!
+	[ ]  File loader: Load stuff into emulated RAM (or ROM) components.
+	     Note: Usually, ELFs contain _virtual_ addresses, so file loading
+	     needs to go through a CPU to be properly address translated!
+	     BUT BOTH must be possible! I.e. load into RAM, or load into a CPU.
+		[ ]  ELF
+		[ ]  a.out
+		[ ]  raw binaries
 
 	[/]  testmips
 		[/]  Work on MIPS_CPUComponent::Run() and the generic
@@ -82,13 +75,20 @@ Misc.
 		[ ]  Caches!
 		[ ]  Native code generation... etc.
 
-	[ ]  File loader: Load stuff into emulated RAM (or ROM) components.
-	     Note: Usually, ELFs contain _virtual_ addresses, so file loading
-	     needs to go through a CPU to be properly address translated!
-	     BUT BOTH must be possible! I.e. load into RAM, or load into a CPU.
-		[ ]  ELF
-		[ ]  a.out
-		[ ]  raw binaries
+	[/]  State variables:
+		[ ]  Write more unit tests!
+		[ ]  Special handlers for Read, Write, Serialize, Deserialize.
+
+	[/]  RAM component:
+		[X]  Implement a generic AddressDataBus interface.
+		[ ]  STATE! serialize/deserialize, including unit tests
+
+	[/]  Mainbus component:
+	        [X]  Forward accesses to individual other devices/components.
+		[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
+		[ ]  AddressDataBus should be extended to allow for direct
+		     page mapping.
+		[ ]  Unit tests for the above!
 
 	[ ]  Make some initial things in the GUI work:
 		[ ]  A window for the text console, including Input line!

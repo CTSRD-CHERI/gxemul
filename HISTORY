@@ -3979,3 +3979,7 @@ Changelog for GXemul:
 		Reintroduce the 'bool' state variable type.
 		Adding a 'writeProtected' state bool for the RAMComponent, to
 		emulate ROM behavior in a simple way.
+20080402	Creating a src/include/thirdparty directory. Moving debug_new.h
+		etc there. Also importing exec_elf.h from NetBSD [HEAD], and
+		updating doc/RELEASE.html to reflect the location of thirdparty
+		imports.

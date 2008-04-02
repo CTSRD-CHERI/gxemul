@@ -26,7 +26,7 @@
 
 <ul>
 
-  <li>GXemul 0.5.0 is a complete rewrite of the emulator, in C++, from scratch.
+  <li>GXemul 0.5.0 is a complete rewrite of the emulator, from scratch.
   	This has the following consequences:
   	<p><ul>
   		<li>All emulation modes, processor implementations,
@@ -34,7 +34,8 @@
   		<li>Some processors, devices etc. have then been reimplemented,
   			but not all.
   	</ul>
-	<br>(Previous versions were written in C.)
+	<br>(Previous versions were written in C. This version of GXemul
+	is written in C++.)
   <p>
   <li>A preliminary GTK+ GUI is now built-in.
   <p>
@@ -56,27 +57,22 @@
 modifications to the source code.
 
 
-<p><br>Super-short mini FAQ:
-
-<p><b>Q:</b> Why C++? Why the rewrite/redesign?
-<br><b>A:</b> I am more used to plain C, but I thought it would
-be interesting to try to use C++ for a realistically-sized project.
-Hello World is not realistically sized. I thought the emulator
-would be a good project to work on. A rewrite was needed anyway,
-since GXemul development had stagnated.
-
-
-<p><br>Regarding files in the <tt>src/include/</tt> directory: only some of 
-these are written by me, the rest are from other sources (such as NetBSD). 
-The license text says that "All advertising materials mentioning features 
-or use of this software" must display acknowledgements. Even though I do 
+<p><br>Regarding files in the <tt>src/include/thirdparty</tt>
+directory: these are from sources outside of GXemul (such as NetBSD). 
+The license texts in most cases say that "All advertising materials mentioning
+features  or use of this software" must display acknowledgements. Even though I do 
 <i>not</i> feel that I mention features or use of the header files (the 
 "software") in any advertising materials, I am still very grateful for the 
 fact that these people have made their files available for re-use, as Free 
 software, so regardless of legal requirements, I guess thanking them like 
 this is in order:<pre>
-	debug_cpp.{h,cc}, fast_mutex.h, and static_assert.h are
-	Copyright (C) 2004-2005 by Wu Yongwei.
+	debug_new.h, fast_mutex.h, and static_assert.h:
+		Copyright (C) 2004-2005 by Wu Yongwei.
+		(Also src/main/debug_new.cc.)
+
+	exec_elf.h:
+		This product includes software developed by the NetBSD
+		Foundation, Inc. and its contributors.
 </pre>
 
 <p>See individual files for license details, if you plan to redistribute 
@@ -85,9 +81,15 @@ GXemul or reuse code.
 <p><br>GXemul's homepage is
 <a href="http://gavare.se/gxemul/">http://gavare.se/gxemul/</a>.
 
-<p>If you have found GXemul useful in some way, or feel like sending me 
-comments or feedback in general, then mail me at
-<tt>anders(<i>@At</i>)gavare.se</tt>.
+<p>If you have questions about GXemul, please send mail to one of the
+mailing lists: <a href="http://sourceforge.net/mailarchive/forum.php?forum_name=gxemul-devel"><tt>gxemul-devel</tt></a>
+for (technical) discussions about the development of GXemul, or <a
+href="http://sourceforge.net/mailarchive/forum.php?forum_name=gxemul-users"><tt>gxemul-users</tt></a>
+for general user questions.
+
+<p>You may also send feedback directly to me (<tt>anders@gavare.se</tt>),
+if you feel that that is more appropriate, or join the IRC channel
+<tt>#GXemul</tt> on <a href="http://freenode.net/">FreeNode</a>.
 
 
 <hr></body></html>

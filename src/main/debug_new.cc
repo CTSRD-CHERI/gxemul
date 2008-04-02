@@ -65,8 +65,8 @@
 #ifdef _WIN32
 #include <malloc.h>
 #endif
-#include "fast_mutex.h"
-#include "static_assert.h"
+#include "thirdparty/fast_mutex.h"
+#include "thirdparty/static_assert.h"
 
 #if !_FAST_MUTEX_CHECK_INITIALIZATION && !defined(_NOTHREADS)
 #error "_FAST_MUTEX_CHECK_INITIALIZATION not set: check_leaks may not work"
@@ -196,7 +196,7 @@
  * is defined to \c 0 to disable the redefinition of \c new.
  */
 #define _DEBUG_NEW_REDEFINE_NEW 0
-#include "debug_new.h"
+#include "thirdparty/debug_new.h"
 
 /**
  * Gets the aligned value of memory block size.
