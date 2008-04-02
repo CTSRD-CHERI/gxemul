@@ -873,6 +873,43 @@ echo "checking for 'make install' prefix (\$PREFIX): $PREFIX"
 
 ###############################################################################
 
+printf "checking for locale install path... "
+TRANSLATIONS=""
+TRANSLATIONSUNINSTALL=""
+rm -f _testintl*
+printf '#include <stdio.h>
+#include <libintl.h>
+
+int main(int argc, char *argv[])
+{
+        printf("%%s\\n", bindtextdomain("gxemul", NULL));
+        return 0;
+}
+' > _testintl.cc
+$CXX $CXXFLAGS _testintl.cc -o _testintl 2> /dev/null
+if [ -x _testintl ]; then
+	TRANSLATIONS=translations
+	TRANSLATIONSUNINSTALL=translations_uninstall
+	TRANSLATIONSPREFIX=`./_testintl`
+	echo $TRANSLATIONSPREFIX
+	printf "#define I18N\n" >> config.h
+else
+	$CXX $CXXFLAGS -I/usr/local/include -L/usr/local/lib -lintl _testintl.cc -o _testintl 2> /dev/null
+	if [ -x _testintl ]; then
+		TRANSLATIONS=translations
+		TRANSLATIONSUNINSTALL=translations_uninstall
+		TRANSLATIONSPREFIX=`./_testintl`
+		echo $TRANSLATIONSPREFIX
+		printf "#define I18N\n" >> config.h
+	else
+		printf "no\n"
+	fi
+fi
+rm -f _testintl*
+
+
+###############################################################################
+
 INCLUDE1="-I../include/"
 INCLUDE2="-I../../include"
 
@@ -882,6 +919,10 @@ rm -f _testprog*
 # echo "Pedantic flags (for most modules): $CPEDANTIC"
 # echo "Linker flags: $OTHERLIBS"
 
+echo "TRANSLATIONS=$TRANSLATIONS" >> _Makefile.header
+echo "TRANSLATIONSUNINSTALL=$TRANSLATIONSUNINSTALL" >> _Makefile.header
+echo "TRANSLATIONSPREFIX=$TRANSLATIONSPREFIX" >> _Makefile.header
+
 echo "CXXFLAGSBASE=$CXXFLAGS" >> _Makefile.header
 echo "CPEDANTIC=$CPEDANTIC" >> _Makefile.header
 echo "INCLUDE1=$INCLUDE1" >> _Makefile.header
@@ -890,6 +931,7 @@ echo "PREFIX=$PREFIX" >> _Makefile.header
 echo "CC=$CC" >> _Makefile.header
 echo "CXX=$CXX" >> _Makefile.header
 echo "OTHERLIBS=$OTHERLIBS" >> _Makefile.header
+
 echo "DOXYGEN=$DOXYGEN" >> _Makefile.header
 echo "" >> _Makefile.header
 
@@ -943,7 +985,7 @@ cd ../../..
 rm -f _components.tmp
 
 #  Create the Makefiles:
-D=". src src/components"
+D=". po src src/components"
 D="$D src/components/busses src/components/cpu src/components/dummy"
 D="$D src/components/machines src/components/memory"
 D="$D src/ir"

@@ -3983,3 +3983,5 @@ Changelog for GXemul:
 		etc there. Also importing exec_elf.h from NetBSD [HEAD], and
 		updating doc/RELEASE.html to reflect the location of thirdparty
 		imports.
+		Implementing the initial framework for I18N/localization. The
+		first translation is Swedish. :-)

@@ -27,7 +27,13 @@ documentation: build
 	cat doc/tail.html >> doc/components.html
 	$(DOXYGEN) doc/Doxyfile
 
-install: test documentation
+translations:
+	cd po; make install
+
+translations_uninstall:
+	cd po; make uninstall
+
+install: test documentation $(TRANSLATIONS)
 	@echo
 	@echo Installing binaries...
 	mkdir -p $(PREFIX)/bin
@@ -51,7 +57,7 @@ install: test documentation
 	@echo
 	@echo "Done!"
 
-uninstall:
+uninstall: $(TRANSLATIONSUNINSTALL)
 	@echo Removing binaries, man pages, and documentation...
 	rm -f $(PREFIX)/bin/gxemul
 	rm -f $(PREFIX)/bin/gxemul-gui
@@ -65,6 +71,7 @@ uninstall:
 clean:
 	rm -f $(BIN) $(BINGUI) *core core.* *.gmon _* *.exe ktrace.out
 	rm -rf doc/doxygen
+	cd po; $(MAKE) clean
 	cd src; $(MAKE) clean
 
 #  experiments and demos are not cleaned on a normal clean, only on a clean_all.
@@ -72,9 +79,14 @@ clean:
 clean_all: clean
 	cd experiments; $(MAKE) clean_all
 	cd demos; $(MAKE) clean
+	cd po; $(MAKE) clean_all
 	rm -f _unittests.tmp unittest.h unittest_h.h commands.h commands_h.h
 	rm -f _components.tmp _commands.tmp components.h components_h.h
 	rm -f config.h Makefile src/Makefile src/*/Makefile src/*/*/Makefile
+
+
+update_pot:
+	xgettext -o po/gxemul.pot --keyword=_ `find src|grep \\.cc|grep -v \\.svn` 
 
 todo:
 	@grep -nR TODO src|grep -v \\.svn

@@ -271,8 +271,7 @@ void GXemulWindow::on_menu_open()
 
 	// Mostly inspired by the GTKMM example for a File->Open handler.
 
-	Gtk::FileChooserDialog dialog(
-	    _("Please choose an emulation to open"),
+	Gtk::FileChooserDialog dialog(_("Choose an emulation to open"),
 	    Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
 
@@ -359,7 +358,7 @@ void GXemulWindow::on_menu_save_as()
 	// Mostly inspired by the GTKMM example for a File->Open handler.
 
 	Gtk::FileChooserDialog dialog(
-	    _("Please choose a name for the emulation (.gxemul)"),
+	    _("Choose a name for the emulation (.gxemul)"),
 	    Gtk::FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_transient_for(*this);
 
