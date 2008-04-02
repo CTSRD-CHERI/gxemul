@@ -852,6 +852,7 @@ else
 		CXXFLAGS="$CXXFLAGS `pkg-config --cflags gtkmm-2.4`"
 		OTHERLIBS="$OTHERLIBS `pkg-config --libs gtkmm-2.4`"
 		CXXFLAGS="$CXXFLAGS -DWITH_GTKMM"
+		WITHGTKMM=YES
 	else
 		echo not found
 		if [ z$WITHGTKMM = zYES ]; then
@@ -876,8 +877,10 @@ echo "checking for 'make install' prefix (\$PREFIX): $PREFIX"
 printf "checking for locale install path... "
 TRANSLATIONS=""
 TRANSLATIONSUNINSTALL=""
-rm -f _testintl*
-printf '#include <stdio.h>
+
+if [ z$WITHGTKMM = zYES ]; then
+	rm -f _testintl*
+	printf '#include <stdio.h>
 #include <libintl.h>
 
 int main(int argc, char *argv[])
@@ -886,15 +889,7 @@ int main(int argc, char *argv[])
         return 0;
 }
 ' > _testintl.cc
-$CXX $CXXFLAGS _testintl.cc -o _testintl 2> /dev/null
-if [ -x _testintl ]; then
-	TRANSLATIONS=translations
-	TRANSLATIONSUNINSTALL=translations_uninstall
-	TRANSLATIONSPREFIX=`./_testintl`
-	echo $TRANSLATIONSPREFIX
-	printf "#define I18N\n" >> config.h
-else
-	$CXX $CXXFLAGS -I/usr/local/include -L/usr/local/lib -lintl _testintl.cc -o _testintl 2> /dev/null
+	$CXX $CXXFLAGS _testintl.cc -o _testintl 2> /dev/null
 	if [ -x _testintl ]; then
 		TRANSLATIONS=translations
 		TRANSLATIONSUNINSTALL=translations_uninstall
@@ -902,10 +897,21 @@ else
 		echo $TRANSLATIONSPREFIX
 		printf "#define I18N\n" >> config.h
 	else
-		printf "no\n"
+		$CXX $CXXFLAGS -I/usr/local/include -L/usr/local/lib -lintl _testintl.cc -o _testintl 2> /dev/null
+		if [ -x _testintl ]; then
+			TRANSLATIONS=translations
+			TRANSLATIONSUNINSTALL=translations_uninstall
+			TRANSLATIONSPREFIX=`./_testintl`
+			echo $TRANSLATIONSPREFIX
+			printf "#define I18N\n" >> config.h
+		else
+			printf "no\n"
+		fi
 	fi
+	rm -f _testintl*
+else
+	echo skipping
 fi
-rm -f _testintl*
 
 
 ###############################################################################
