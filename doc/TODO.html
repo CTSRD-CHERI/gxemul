@@ -316,18 +316,11 @@ I18N
 
 	[ ]  Unit tests to make sure that unicode strings work as expected.
 	[/]  Use _(x) everywhere for user-readable strings.
-	[/]  Investigate intltool or gettext or whatever is necessary to get
+	[X]  Investigate intltool or gettext or whatever is necessary to get
 	     it all working. po directories/files, etc.
 	[/]  Initial translation would be Swedish. LANG=sv_SE.UTF-8 ./gxemul-gui
 	[ ]  Use LANG=he_IL.UTF-8 ./gxemul-gui to try a right-to-left languages,
 	     or  LANG=ja_JP.UTF-8 ./gxemul-gui to try an asian language.
-
-	To update I18N stuff:
-	
-		make update_pot
-		cd po && make update
-	
-	followed by editing sv.po manually.
 
 
 Error handling
