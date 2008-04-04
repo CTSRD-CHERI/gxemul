@@ -7,13 +7,283 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GXemul 0.5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-02 23:01+0200\n"
+"POT-Creation-Date: 2008-04-04 22:03+0200\n"
 "PO-Revision-Date: 2008-04-02 23:01+0200\n"
 "Last-Translator: GXemul <gxemul-devel@lists.sourceforge.net>\n"
 "Language-Team: GXemul <gxemul-devel@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/main/commands/SaveCommand.cc:133
+msgid "Saves the emulation to a file."
+msgstr "Sparar emuleringen till en fil."
+
+#: src/main/commands/SaveCommand.cc:139
+msgid ""
+"Saves the entire emulation setup, or a part of it, to a file in the "
+"filesystem.\n"
+"The filename may be omitted, if it is known from an earlier save or load\n"
+"command. If the component path is omitted, the entire emulation setup is "
+"saved.\n"
+"\n"
+"See also:  load    (to load an emulation setup)\n"
+msgstr ""
+"Sparar hela emuleringen, eller en del av den till en fil i "
+"filsystemet.\n"
+"Filnamnet behöver ej anges, om det angavs i en tidigare användning av save-"
+" eller 'load-kommandona.\n"
+"Om sökvägen till komponenten inte anges så sparas hela emuleringen, annars"
+" bara den del som anges av sökvägen.\n"
+"\n"
+"Se även:  load    (för att ladda in en emulering)\n"
+
+#: src/main/commands/LoadCommand.cc:82
+#, fuzzy
+msgid "Loads an emulation from a file."
+msgstr "Laddar in en emulering from en fil."
+
+#: src/main/commands/LoadCommand.cc:88
+msgid ""
+"Loads an entire emulation setup, or a part of it, from a file in the "
+"filesystem.\n"
+"The filename may be omitted, if it is known from an earlier save or load\n"
+"command. If the component path is omitted, the loaded emulation replaces "
+"any\n"
+"currently loaded emulation. If a component path is specified, the new\n"
+"component is added as a child to that path.\n"
+"\n"
+"See also:  save    (to save an emulation to a file)\n"
+msgstr ""
+
+#: src/main/commands/TreeCommand.cc:66 src/main/commands/TreeCommand.cc:72
+msgid "Shows the component configuration tree."
+msgstr "Visar komponentkonfigurationsträdet."
+
+#: src/main/commands/RemoveComponentCommand.cc:103
+#, fuzzy
+msgid "Removes a component from the emulation."
+msgstr "Tar bort en komponent ur emuleringen."
+
+#: src/main/commands/RemoveComponentCommand.cc:109
+msgid ""
+"Removes a component (given a path) from the current emulation setup.\n"
+"\n"
+"See also:  add     (to add new components)\n"
+"           tree    (to inspect the current emulation setup)\n"
+msgstr ""
+
+#: src/main/commands/ListComponentsCommand.cc:67
+msgid "Displays all available components."
+msgstr "Visar alla tillgängliga komponenter."
+
+#: src/main/commands/ListComponentsCommand.cc:73
+msgid "Displays a list of all available components."
+msgstr "Visar en lista av alla tillgängliga komponenter."
+
+#: src/main/commands/QuitCommand.cc:54 src/main/commands/QuitCommand.cc:60
+msgid "Quits the application."
+msgstr "Avslutar applikationen."
+
+#: src/main/commands/StatusCommand.cc:57
+msgid "Shows the current status (runstate etc)."
+msgstr "Visar nuvaranda kör-status."
+
+#: src/main/commands/StatusCommand.cc:63
+msgid ""
+"Shows the current status. This currently includes:\n"
+"  o)  Runstate (Running or Paused)\n"
+msgstr ""
+
+#: src/main/commands/ContinueCommand.cc:54
+msgid "Continues the current emulation."
+msgstr "Fortsätter körning av nuvarande emulering."
+
+#: src/main/commands/ContinueCommand.cc:60
+msgid "Continues the emulation, by setting the current RunState to Running."
+msgstr "Fortsätter körning av den laddade emuleringen."
+
+#: src/main/commands/CloseCommand.cc:60
+msgid "Discards (closes) the current emulation."
+msgstr "Stänger nuvarande emulering."
+
+#: src/main/commands/CloseCommand.cc:66
+msgid ""
+"Closes (discards) the current emulation.\n"
+"\n"
+"See also:  load    (to load an existing emulation)\n"
+msgstr ""
+"Stänger nuvarande emulering.\n"
+"\n"
+"Se även:  load    (för att ladda en existerande emulering)\n"
+
+#: src/main/commands/UndoCommand.cc:59
+msgid "Undoes the last action."
+msgstr "Ångrar senaste ändringen."
+
+#: src/main/commands/UndoCommand.cc:65
+msgid ""
+"Undoes the last action, if possible.\n"
+"\n"
+"See also:  redo"
+msgstr ""
+"Ångrar senaste ändringen, om det är möjligt.\n"
+"\n"
+"Se även:  redo"
+
+#: src/main/commands/VersionCommand.cc:55
+#: src/main/commands/VersionCommand.cc:61
+msgid "Prints version information."
+msgstr "Skriver ut versionsinformation."
+
+#: src/main/commands/HelpCommand.cc:124
+msgid "Shows a help message."
+msgstr "Visar hjälp."
+
+#: src/main/commands/HelpCommand.cc:130
+msgid ""
+"Shows a summary of all available commands, or, when given a specific "
+"command\n"
+"name as an argument, shows a detailed description about that command.\n"
+msgstr ""
+
+#: src/main/commands/RedoCommand.cc:59
+msgid "Redoes the next action, if possible."
+msgstr "Gör om nästa ändring, om möjligt."
+
+#: src/main/commands/RedoCommand.cc:65
+msgid ""
+"Redoes the next action on the action stack, if possible.\n"
+"\n"
+"See also:  undo"
+msgstr ""
+
+#: src/main/commands/AddComponentCommand.cc:110
+#, fuzzy
+msgid "Adds a component to the emulation."
+msgstr "Lägger till en komponent till emuleringen."
+
+#: src/main/commands/AddComponentCommand.cc:116
+msgid ""
+"Adds a component (given by the component-name) to the current emulation "
+"setup.\n"
+"If path is omitted, the component is added at the root of the component "
+"tree.\n"
+"\n"
+"See also:  remove  (to remove a component from the emulation)\n"
+"           tree    (to inspect the current emulation setup)\n"
+msgstr ""
+
+#: src/main/GXemul.cc:480
+msgid "The -e option is deprecated. Use -E instead.\n"
+msgstr "-e-flaggan används ej längre. Använd -E istället.\n"
+
+#: src/main/GXemul.cc:521
+msgid ""
+"\n"
+"It is possible that you are attempting to use an option which was available\n"
+"in older versions of GXemul, but has not been reimplemented in GXemul 0.5."
+"x.\n"
+"Please see the man page or the  gxemul -h  help message for available "
+"options.\n"
+"\n"
+msgstr ""
+
+#: src/main/GXemul.cc:538
+msgid "Failed to create configuration from template: "
+msgstr "Misslyckades med att skapa en konfiguration från templat: "
+
+#: src/main/GXemul.cc:540 src/main/GXemul.cc:573 src/main/GXemul.cc:579
+msgid "Aborting."
+msgstr "Avbryter."
+
+#: src/main/GXemul.cc:570
+msgid "Failed to load configuration: "
+msgstr "Misslyckades med att ladda konfiguration: "
+
+#: src/main/GXemul.cc:577
+msgid "More than one configfile name supplied on the command line?"
+msgstr "Mer än ett namn på en konfigurationsfil angavs på kommandoraden?"
+
+#: src/main/GXemul.cc:603
+msgid ""
+"Insufficient command line arguments given to start an emulation. You have\n"
+"the following alternatives:\n"
+msgstr ""
+"Otillräckliga kommandoradsargument för att påbörja en emulering. Du har\n"
+"följande alternativ:\n"
+
+#: src/main/GXemul.cc:607
+msgid ""
+"  1. Run  gxemul  with machine selection options (-E), which creates a\n"
+"     default emulation from a template machine.\n"
+"  2. Run  gxemul  with a configuration file (.gxemul).\n"
+"  3. Run  gxemul -V  with no other options, which causes gxemul to be "
+"started\n"
+"     with no emulation loaded at all.\n"
+"  4. Run  gxemul-gui  which starts the GUI version of GXemul.\n"
+msgstr ""
+
+#: src/main/GXemul.cc:617
+msgid ""
+"Run  gxemul -h  for help on command line options.\n"
+"\n"
+msgstr ""
+"Kör  gxemul -h  för att få hjälp angående kommandoradsflaggor.\n"
+"\n"
+
+#: src/main/GXemul.cc:622
+msgid ""
+"Usage: gxemul [general options] [configfile]\n"
+"       gxemul [general options] [machine selection options] [binary...]\n"
+"       gxemul-gui [general options] [configfile]\n"
+"       gxemul-gui [general options] [machine selection options] [binary...]\n"
+"\n"
+msgstr ""
+"Användnig: gxemul [allmänna flaggor] [konfigurationsfil]\n"
+"           gxemul [allmänna flaggor] [maskinvalsflaggor] [binär...]\n"
+"           gxemul-gui [allmänna flaggor] [konfigurationsfil]\n"
+"           gxemul-gui [allmänna flaggor] [maskinvalsflaggor] [binär...]\n"
+"\n"
+
+#: src/main/GXemul.cc:637
+msgid ""
+"Machine selection options:\n"
+"  -E t       Starts an emulation based on template t. (Use -H to get a "
+"list.)\n"
+"\n"
+"General options:\n"
+"  -H         Displays a list of all machine templates (for use with -E).\n"
+"  -h         Displays this help message.\n"
+"  -q         Quiet mode. (Supresses startup banner and some debug output.)\n"
+"  -V         Starts in the Paused state. (Can also be used to start gxemul\n"
+"             without loading an emulation at all.)\n"
+"\n"
+"An emulation setup is either created by supplying machine selection options\n"
+"directly on the command line, or by supplying a configuration file (with\n"
+"the .gxemul extension).\n"
+"\n"
+msgstr ""
+
+#: src/main/GXemul.cc:677
+msgid "Sorry, this installation of GXemul was compiled without GUI support.\n"
+msgstr "Tyvärr, denna installation av GXemul byggdes utan GUI.\n"
+
+#: src/main/GXemul.cc:765
+msgid "Paused"
+msgstr "Pausad"
+
+#: src/main/GXemul.cc:767
+msgid "Running"
+msgstr "Kör"
+
+#: src/main/GXemul.cc:769
+msgid "Quitting"
+msgstr "Avslutar"
+
+#: src/main/GXemul.cc:772
+msgid "Unknown RunState"
+msgstr "Okänt RunState"
 
 #: src/ui/gtkmm/GXemulWindow.cc:47
 msgid "_Blank emulation"
@@ -52,7 +322,8 @@ msgid ""
 "If you have questions or feedback, don't hesitate to mail me.\n"
 "anders@gavare.se"
 msgstr ""
-"Om du har frågor eller vill lämna annan feedback, maila mig på följande adress:\n"
+"Om du har frågor eller vill lämna annan feedback, maila mig på följande "
+"adress:\n"
 "anders@gavare.se"
 
 #: src/ui/gtkmm/GXemulWindow.cc:277

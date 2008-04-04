@@ -64,12 +64,12 @@ void ListComponentsCommand::Execute(GXemul& gxemul,
 
 string ListComponentsCommand::GetShortDescription() const
 {
-	return "Displays all available components.";
+	return _("Displays all available components.");
 }
 
 
 string ListComponentsCommand::GetLongDescription() const
 {
-	return "Displays a list of all available components.";
+	return _("Displays a list of all available components.");
 }
 

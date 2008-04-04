@@ -51,14 +51,14 @@ void ContinueCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string ContinueCommand::GetShortDescription() const
 {
-	return "Continues the current emulation.";
+	return _("Continues the current emulation.");
 }
 
 
 string ContinueCommand::GetLongDescription() const
 {
-	return "Continues the emulation, by setting the "
-	    "current RunState to Running.";
+	return _("Continues the emulation, by setting the "
+	    "current RunState to Running.");
 }
 
 

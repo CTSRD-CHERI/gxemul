@@ -51,13 +51,13 @@ void QuitCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string QuitCommand::GetShortDescription() const
 {
-	return "Quits the application.";
+	return _("Quits the application.");
 }
 
 
 string QuitCommand::GetLongDescription() const
 {
-	return "Quits the application.";
+	return _("Quits the application.");
 }
 
 

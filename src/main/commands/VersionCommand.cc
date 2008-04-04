@@ -52,13 +52,13 @@ void VersionCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string VersionCommand::GetShortDescription() const
 {
-	return "Prints version information.";
+	return _("Prints version information.");
 }
 
 
 string VersionCommand::GetLongDescription() const
 {
-	return "Prints version information.";
+	return _("Prints version information.");
 }
 
 

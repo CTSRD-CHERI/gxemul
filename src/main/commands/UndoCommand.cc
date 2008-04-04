@@ -56,14 +56,14 @@ void UndoCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string UndoCommand::GetShortDescription() const
 {
-	return "Undoes the last action.";
+	return _("Undoes the last action.");
 }
 
 
 string UndoCommand::GetLongDescription() const
 {
-	return "Undoes the last action, if possible.\n"
+	return _("Undoes the last action, if possible.\n"
 	    "\n"
-	    "See also:  redo";
+	    "See also:  redo");
 }
 

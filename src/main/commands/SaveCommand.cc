@@ -130,19 +130,19 @@ void SaveCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string SaveCommand::GetShortDescription() const
 {
-	return "Saves the emulation to a file.";
+	return _("Saves the emulation to a file.");
 }
 
 
 string SaveCommand::GetLongDescription() const
 {
-	return "Saves the entire emulation setup, or a part of it, to a "
+	return _("Saves the entire emulation setup, or a part of it, to a "
 	    "file in the filesystem.\n"
 	    "The filename may be omitted, if it is known from an"
 	    " earlier save or load\n"
 	    "command. If the component path is omitted, the entire emulation"
 	    " setup is saved.\n"
 	    "\n"
-	    "See also:  load    (to load an emulation setup)\n";
+	    "See also:  load    (to load an emulation setup)\n");
 }
 

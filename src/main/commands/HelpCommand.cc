@@ -121,16 +121,16 @@ void HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string HelpCommand::GetShortDescription() const
 {
-	return "Shows a help message.";
+	return _("Shows a help message.");
 }
 
 
 string HelpCommand::GetLongDescription() const
 {
-	return "Shows a summary of all available commands, or, "
+	return _("Shows a summary of all available commands, or, "
 	    "when given a specific command\n"
 	    "name as an argument, shows a detailed description about "
-	    "that command.\n";
+	    "that command.\n");
 }
 
 

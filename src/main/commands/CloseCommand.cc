@@ -57,14 +57,14 @@ void CloseCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string CloseCommand::GetShortDescription() const
 {
-	return "Discards (closes) the current emulation.";
+	return _("Discards (closes) the current emulation.");
 }
 
 
 string CloseCommand::GetLongDescription() const
 {
-	return "Closes (discards) the current emulation.\n"
+	return _("Closes (discards) the current emulation.\n"
 	    "\n"
-	    "See also:  load    (to load an existing emulation)\n";
+	    "See also:  load    (to load an existing emulation)\n");
 }
 

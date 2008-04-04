@@ -54,13 +54,13 @@ void StatusCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string StatusCommand::GetShortDescription() const
 {
-	return "Shows the current status (runstate etc).";
+	return _("Shows the current status (runstate etc).");
 }
 
 
 string StatusCommand::GetLongDescription() const
 {
-	return "Shows the current status. This currently includes:\n"
-	    "  o)  Runstate (Running or Paused)\n";
+	return _("Shows the current status. This currently includes:\n"
+	    "  o)  Runstate (Running or Paused)\n");
 }
 

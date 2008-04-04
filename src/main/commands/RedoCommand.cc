@@ -56,14 +56,14 @@ void RedoCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string RedoCommand::GetShortDescription() const
 {
-	return "Redoes the next action, if possible.";
+	return _("Redoes the next action, if possible.");
 }
 
 
 string RedoCommand::GetLongDescription() const
 {
-	return "Redoes the next action on the action stack, if possible.\n"
+	return _("Redoes the next action on the action stack, if possible.\n"
 	    "\n"
-	    "See also:  undo";
+	    "See also:  undo");
 }
 

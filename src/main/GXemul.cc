@@ -477,8 +477,8 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 			break;
 
 		case 'e':
-			std::cerr << "The -e option is deprecated. "
-			    "Use -E instead.\n";
+			std::cerr << _("The -e option is deprecated. "
+			    "Use -E instead.\n");
 			return false;
 
 		case 'H':
@@ -518,13 +518,13 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 			break;
 
 		default:
-			std::cout << "\n"
+			std::cout << _("\n"
 				"It is possible that you are attempting to use"
 				    " an option which was available\n"
 				"in older versions of GXemul, but has not been"
 				    " reimplemented in GXemul 0.5.x.\n"
 				"Please see the man page or the  gxemul -h "
-				    " help message for available options.\n\n";
+				    " help message for available options.\n\n");
 			PrintUsage(false);
 			return false;
 		}
@@ -535,8 +535,9 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 			// A template is now being used.
 			optionsEnoughToStartRunning = true;
 		} else {
-			std::cerr << "Failed to create configuration from "
-			    "template " << templateMachine << ". Aborting.\n";
+			std::cerr << _("Failed to create configuration from "
+			    "template: ") << templateMachine << "\n" <<
+			    _("Aborting.") << "\n";
 			return false;
 		}
 	}
@@ -566,14 +567,16 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 
 				if (GetRootComponent()->GetChildren().size()
 				    == 0) {
-					std::cerr << "Failed to load "
-					    "configuration from " <<
-					    configfileName << ". Aborting.\n";
+					std::cerr << _("Failed to load "
+					    "configuration: ") <<
+					    configfileName << "\n" <<
+					    _("Aborting.") << "\n";
 					return false;
 				}
 			} else {
-				std::cerr << "More than one configfile name "
-				    "supplied? Aborting.\n";
+				std::cerr << _("More than one configfile name "
+				    "supplied on the command line?") << "\n" <<
+				    _("Aborting.") << "\n";
 				return false;
 			}
 		}
@@ -597,11 +600,11 @@ void GXemul::PrintUsage(bool longUsage) const
 	std::cout << "GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n";
 
 	if (!longUsage) {
-		std::cout << "Insufficient command line arguments given to"
+		std::cout << _("Insufficient command line arguments given to"
 		    " start an emulation. You have\n"
-		    "the following alternatives:\n"
-		    "\n"
-		    "  1. Run  gxemul  with machine selection options (-E),"
+		    "the following alternatives:\n") <<
+		    "\n" <<
+		    _("  1. Run  gxemul  with machine selection options (-E),"
 		    " which creates a\n"
 		    "     default emulation from a template machine.\n"
 		    "  2. Run  gxemul  with a configuration file (.gxemul).\n"
@@ -609,19 +612,19 @@ void GXemul::PrintUsage(bool longUsage) const
 		    " gxemul to be started\n"
 		    "     with no emulation loaded at all.\n"
 		    "  4. Run  gxemul-gui  which starts the GUI"
-		    " version of GXemul.\n"
-		    "\n"
-		    "Run  gxemul -h  for help on command line options.\n\n";
+		    " version of GXemul.\n") <<
+		    "\n" <<
+		    _("Run  gxemul -h  for help on command line options.\n\n");
 		return;
 	}
 
 	std::cout <<
-		"Usage: gxemul [general options] [configfile]\n"
+		_("Usage: gxemul [general options] [configfile]\n"
 		"       gxemul [general options] [machine selection"
 			" options] [binary...]\n"
 		"       gxemul-gui [general options] [configfile]\n"
 		"       gxemul-gui [general options] [machine"
-			" selection options] [binary...]\n\n";
+			" selection options] [binary...]\n\n");
 
 	// When changing command line options, REMEMBER to keep the following
 	// things in synch:
@@ -631,7 +634,7 @@ void GXemul::PrintUsage(bool longUsage) const
 	//	3. The man page.
 
 	std::cout <<
-		"Machine selection options:\n"
+		_("Machine selection options:\n"
 		"  -E t       Starts an emulation based on template t."
 			" (Use -H to get a list.)\n"
 		// -e is deprecated.
@@ -652,7 +655,7 @@ void GXemul::PrintUsage(bool longUsage) const
 		"directly on the command line, or by supplying a configuration"
 			" file (with\n"
 		"the .gxemul extension).\n"
-		"\n";
+		"\n");
 }
 
 
@@ -671,8 +674,8 @@ int GXemul::Run()
 #ifdef WITH_GTKMM
 		m_ui = new GtkmmUI(this);
 #else
-		std::cerr << "Sorry, this installation of GXemul was "
-		    "compiled without GUI support.\n";
+		std::cerr << _("Sorry, this installation of GXemul was "
+		    "compiled without GUI support.\n");
 		return 0;
 #endif
 	}
@@ -759,14 +762,14 @@ string GXemul::GetRunStateAsString() const
 {
 	switch (m_runState) {
 	case Paused:
-		return "Paused";
+		return _("Paused");
 	case Running:
-		return "Running";
+		return _("Running");
 	case Quitting:
-		return "Quitting";
+		return _("Quitting");
 	}
 
-	return "Unknown";
+	return _("Unknown RunState");
 }
 
 

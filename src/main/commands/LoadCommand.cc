@@ -79,13 +79,13 @@ void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string LoadCommand::GetShortDescription() const
 {
-	return "Loads an emulation from a file.";
+	return _("Loads an emulation from a file.");
 }
 
 
 string LoadCommand::GetLongDescription() const
 {
-	return "Loads an entire emulation setup, or a part of it, from a "
+	return _("Loads an entire emulation setup, or a part of it, from a "
 	    "file in the filesystem.\n"
 	    "The filename may be omitted, if it is known from an"
 	    " earlier save or load\n"
@@ -94,6 +94,6 @@ string LoadCommand::GetLongDescription() const
 	    "currently loaded emulation. If a component path is specified, "
 	    "the new\ncomponent is added as a child to that path.\n"
 	    "\n"
-	    "See also:  save    (to save an emulation to a file)\n";
+	    "See also:  save    (to save an emulation to a file)\n");
 }
 

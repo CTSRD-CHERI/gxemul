@@ -107,18 +107,18 @@ void AddComponentCommand::Execute(GXemul& gxemul,
 
 string AddComponentCommand::GetShortDescription() const
 {
-	return "Adds a component to the emulation.";
+	return _("Adds a component to the emulation.");
 }
 
 
 string AddComponentCommand::GetLongDescription() const
 {
-	return "Adds a component (given by the component-name) to the "
+	return _("Adds a component (given by the component-name) to the "
 	    "current emulation setup.\n"
 	    "If path is omitted, the component is added at the root of"
 	    " the component tree.\n"
 	    "\n"
 	    "See also:  remove  (to remove a component from the emulation)\n"
-	    "           tree    (to inspect the current emulation setup)\n";
+	    "           tree    (to inspect the current emulation setup)\n");
 }
 

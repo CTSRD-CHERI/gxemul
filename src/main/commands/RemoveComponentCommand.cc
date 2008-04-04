@@ -100,16 +100,16 @@ void RemoveComponentCommand::Execute(GXemul& gxemul,
 
 string RemoveComponentCommand::GetShortDescription() const
 {
-	return "Removes a component from the emulation.";
+	return _("Removes a component from the emulation.");
 }
 
 
 string RemoveComponentCommand::GetLongDescription() const
 {
-	return "Removes a component (given a path) from the current "
+	return _("Removes a component (given a path) from the current "
 	    "emulation setup.\n"
 	    "\n"
 	    "See also:  add     (to add new components)\n"
-	    "           tree    (to inspect the current emulation setup)\n";
+	    "           tree    (to inspect the current emulation setup)\n");
 }
 

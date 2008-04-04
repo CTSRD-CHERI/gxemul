@@ -63,12 +63,12 @@ void TreeCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 string TreeCommand::GetShortDescription() const
 {
-	return "Shows the component configuration tree.";
+	return _("Shows the component configuration tree.");
 }
 
 
 string TreeCommand::GetLongDescription() const
 {
-	return "Shows the component configuration tree.";
+	return _("Shows the component configuration tree.");
 }
 
