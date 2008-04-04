@@ -318,6 +318,7 @@ I18N
 	[/]  Use _(x) everywhere for user-readable strings.
 	[X]  Investigate intltool or gettext or whatever is necessary to get
 	     it all working. po directories/files, etc.
+	[ ]  Compose-style "somethign %s something".
 	[/]  Initial translation would be Swedish. LANG=sv_SE.UTF-8 ./gxemul-gui
 	[ ]  Use LANG=he_IL.UTF-8 ./gxemul-gui to try a right-to-left languages,
 	     or  LANG=ja_JP.UTF-8 ./gxemul-gui to try an asian language.
@@ -548,13 +549,30 @@ Think about
 	[ ]  SuperH emulation: Not only SH4, but SH3 too?
 
 
+Building on other platforms
+---------------------------
+
+	[ ]  Cygwin. Known issues preventing build on CYGWIN:
+
+             [ ]  The configure script cannot run grep using variables (?)
+                  which causes header files to be generated in a corrupt manner.
+
+	     [ ]  -Werror doesn't work well with STL; STL gives warnings about
+	          uninitialized stuff.
+
+	     This was on the following system configuration:
+		uname:        CYGWIN_NT-5.2-WOW64
+		sh version:   GNU bash 3.2.33(18)-release (i686-pc-cygwin)
+		C++ version:  GNU C++ 3.4.4
+
+
 Preparation for release 0.5.0
 -----------------------------
 
 	x) Not meaningful until enough functionality from the 0.4.x series have
 	   been duplicated. AT LEAST the following before the release:
 	   	o) testmips!
-		o) working GUI.
+		o) working GUI with at least some basic functionality
 	   	o) at least one REAL mips machine, such as pmax!
 	 	o) basic debugger commands:
 	 		trace tree, single step, registers, etc.
@@ -634,6 +652,10 @@ General notes for ANY 0.5.x release
 		x) Verify that the .tar.gz is downloadable, and works.
 		x) Upload .tar.gz to SourceForge's File Release system
 		x) Post message to the gxemul-users mailing list.
+			Note to package maintainers that it is highly
+			recommended to assume that old descriptions and
+			makefiles etc are not valid anymore.
+			Give example description?
 		x) Update FreshMeat
 		x) Update WikiPedia
 
