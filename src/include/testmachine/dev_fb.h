@@ -4,7 +4,6 @@
 /*
  *  Definitions used by the framebuffer device in GXemul.
  *
- *  $Id: dev_fb.h,v 1.7 2007/12/31 11:47:02 debug Exp $
  *  This file is in the public domain.
  */
 

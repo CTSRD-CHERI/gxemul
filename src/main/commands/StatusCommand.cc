@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: StatusCommand.cc,v 1.2 2008/03/14 12:12:16 debug Exp $
  */
 
 #include "commands/StatusCommand.h"

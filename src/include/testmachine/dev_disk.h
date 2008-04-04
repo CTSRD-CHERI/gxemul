@@ -4,7 +4,6 @@
 /*
  *  Definitions used by the "disk" device in GXemul.
  *
- *  $Id: dev_disk.h,v 1.3 2008/03/12 11:45:41 debug Exp $
  *  This file is in the public domain.
  */
 

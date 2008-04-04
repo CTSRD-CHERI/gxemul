@@ -1,5 +1,3 @@
-$Id: HISTORY,v 1.1679 2008/03/14 12:12:15 debug Exp $
-
 Changelog for GXemul:
 ---------------------
 
@@ -3991,3 +3989,4 @@ Changelog for GXemul:
 		Implementing basic support for updating the UI when some things
 		change: Undo/Redo-applicability, the name of the emulation, and
 		the RunState. (As UI::UpdateUI().)
+		Removing all old CVS $Id$ tags; they are not useful anymore.

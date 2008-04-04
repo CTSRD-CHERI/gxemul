@@ -1,6 +1,4 @@
 /*
- *  $Id: new_test_loadstore_a.c,v 1.3 2005/07/22 20:01:25 debug Exp $
- *
  *  Experimenting with dynamic-but-not-binary-translation load/store.
  *  See new_test_loadstore_b.c for the main() function.
  */

@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: try_runlen.c,v 1.4 2005/01/09 01:55:27 debug Exp $
- *
  *  Run length test.
  *  This program takes a text file of the following format as input:
  *

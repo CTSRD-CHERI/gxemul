@@ -1,4 +1,3 @@
-/*  $Id: new_test_loadstore.h,v 1.4 2005/07/22 20:01:25 debug Exp $  */
 
 #define AAA
 

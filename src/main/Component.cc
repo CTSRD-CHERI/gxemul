@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: Component.cc,v 1.9 2008/03/14 12:12:16 debug Exp $
- *
  *  Note: See DummyComponent.cc for unit tests of the component framework.
  */
 

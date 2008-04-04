@@ -1,6 +1,4 @@
 /*
- *  GXemul: $Id: debug_new.cc,v 1.2 2007/12/21 18:16:57 debug Exp $
- *
  *  GXemul specific changes to debug_new.cc:
  *
  *   x)	debug_new.cpp renamed debug_new.cc.

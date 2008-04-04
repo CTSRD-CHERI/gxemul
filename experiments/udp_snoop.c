@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: udp_snoop.c,v 1.1 2006/09/07 11:44:42 debug Exp $
- *
  *  Dumps UDP packets in hex and ASCII that arrive at a specific port.
  */
 

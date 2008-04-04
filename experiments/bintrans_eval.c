@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: bintrans_eval.c,v 1.3 2005/01/09 01:55:27 debug Exp $
- *
  *  Bintrans algorithm evaluation.
  */
 

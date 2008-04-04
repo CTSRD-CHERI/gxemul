@@ -1,5 +1,3 @@
-$Id: README,v 1.4 2007/06/16 01:12:32 debug Exp $
-
 The files in this directory describe the devices found in GXemul's "test 
 machines". These machines do not match any real-world machines, but they 
 have devices that are similar to those found in real machines:
