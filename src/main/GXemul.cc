@@ -240,12 +240,15 @@
 
 #include <fstream>
 
+#ifdef WITH_GTKMM
+#include <gtkmm.h>
+#endif
+
 #include "misc.h"
 
 // UIs:
 #include "ui/console/ConsoleUI.h"
 #ifdef WITH_GTKMM
-#include <gtkmm.h>
 #include "ui/gtkmm/GtkmmUI.h"
 #endif
 #include "ui/nullui/NullUI.h"

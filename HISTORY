@@ -3985,3 +3985,6 @@ Changelog for GXemul:
 		imports.
 		Implementing the initial framework for I18N/localization. The
 		first translation is Swedish. :-)
+20080404	Making it possible to build with GTKMM 2.15.5 with --debug;
+		note, however, that this produces memory leak warnings, so
+		the GTKMM with --debug combination is not very useful yet.

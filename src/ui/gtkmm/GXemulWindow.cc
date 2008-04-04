@@ -27,6 +27,8 @@
 
 #ifdef WITH_GTKMM
 
+#include <gtkmm.h>
+
 #include <iostream>
 
 #include "misc.h"
