@@ -27,7 +27,9 @@
 
 #ifdef WITH_GTKMM
 
+#include <assert.h>
 #include <gtkmm.h>
+
 #include "ui/gtkmm/GtkmmUI.h"
 #include "ui/gtkmm/GXemulWindow.h"
 
@@ -46,6 +48,13 @@ GtkmmUI::~GtkmmUI()
 void GtkmmUI::Initialize()
 {
 	// No specific initialization necessary.
+}
+
+
+void GtkmmUI::UpdateUI()
+{
+	if (m_window != NULL)
+		m_window->UpdateUI();
 }
 
 
@@ -76,8 +85,16 @@ void GtkmmUI::RedisplayInputLine(const string& inputline,
 
 int GtkmmUI::MainLoop()
 {
-	GXemulWindow window(m_gxemul);
-	Gtk::Main::run(window);
+	if (m_window != NULL) {
+		assert(false);
+		delete m_window;
+	}
+
+	m_window = new GXemulWindow(m_gxemul);
+	Gtk::Main::run(*m_window);
+
+	delete m_window;
+
 	return 0;
 }
 

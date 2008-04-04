@@ -183,7 +183,7 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	m_VPaned.pack1(m_EmulationDesignArea);
 	m_VPaned.pack2(m_DebugConsoleWidget);
 
-	UpdateActionSensitivity();
+	UpdateUI();
 
 	show_all_children();
 }
@@ -194,17 +194,33 @@ GXemulWindow::~GXemulWindow()
 }
 
 
-void GXemulWindow::UpdateActionSensitivity()
+void GXemulWindow::UpdateUI()
 {
-	// TODO: This function must be called whenever:
-	//	The action stack changes undoableness/redoableness!
-	
-	// Undo and Redo only work if the action stack contains undoable
-	// and redoable actions, respectively:
+	// Undo and Redo:
+	// (These only work if the action stack contains undoable
+	// and redoable actions, respectively.)
 	m_refActionGroup->get_action("EditUndo")->set_sensitive(
 	    m_gxemul->GetActionStack().IsUndoPossible());
 	m_refActionGroup->get_action("EditRedo")->set_sensitive(
 	    m_gxemul->GetActionStack().IsRedoPossible());
+
+	// RunState affects the Play/Pause buttons:
+	bool playAndPauseEnabled =
+	    ( m_gxemul->GetRootComponent()->GetChildren().size() > 0 );
+	m_refActionGroup->get_action("EmulationGo")->set_sensitive(
+	    playAndPauseEnabled);
+	m_refActionGroup->get_action("EmulationPause")->set_sensitive(
+	    playAndPauseEnabled);
+
+	// TODO: Play (and Pause?) should stay down while Running!
+
+	// Main window Title:
+	string title = "GXemul";
+	string emulationFilename = m_gxemul->GetEmulationFilename();
+	if (!emulationFilename.empty())
+		title = emulationFilename + " - " + title;
+
+	set_title(title);
 }
 
 

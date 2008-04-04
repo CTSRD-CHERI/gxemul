@@ -3988,3 +3988,6 @@ Changelog for GXemul:
 20080404	Making it possible to build with GTKMM 2.15.5 with --debug;
 		note, however, that this produces memory leak warnings, so
 		the GTKMM with --debug combination is not very useful yet.
+		Implementing basic support for updating the UI when some things
+		change: Undo/Redo-applicability, the name of the emulation, and
+		the RunState. (As UI::UpdateUI().)

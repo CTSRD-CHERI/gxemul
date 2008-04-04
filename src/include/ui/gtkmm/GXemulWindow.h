@@ -45,9 +45,17 @@ public:
 	GXemulWindow(GXemul* gxemul);
 	virtual ~GXemulWindow();
 
-private:
-	void UpdateActionSensitivity();
+	/**
+	 * \brief Update volatile UI components.
+	 *
+	 * Components updated include Undo/Redo button sensibility,
+	 * the main window's title, etc.
+	 *
+	 * Should be called from the GtkmmUI instance.
+	 */
+	void UpdateUI();
 
+private:
 	virtual void on_menu_about();
 	virtual void on_menu_copy();
 	virtual void on_menu_cut();

@@ -26,9 +26,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: ActionStack.h,v 1.10 2008/03/12 11:45:41 debug Exp $
  */
 
 #include "misc.h"
@@ -36,6 +33,8 @@
 #include "Action.h"
 #include "UnitTest.h"
 
+
+class GXemul;
 
 /**
  * \brief A stack of Action objects, for implementing undo/redo functionality.
@@ -56,6 +55,15 @@ class ActionStack
 	: public UnitTestable
 {
 public:
+	/**
+	 * \brief Constructs an %ActionStack.
+	 *
+	 * \param gxemul A pointer to the owner GXemul instance. If non-NULL,
+	 *	then UI updates will be triggered whenever the contents of
+	 *	the %ActionStack changes.
+	 */
+	ActionStack(GXemul* gxemul = NULL);
+
 	/**
 	 * \brief Clears both the Undo and the Redo stacks.
 	 */
@@ -160,6 +168,7 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
+	GXemul *			m_gxemul;
 	list< refcount_ptr<Action> >	m_undoActions;
 	list< refcount_ptr<Action> >	m_redoActions;
 };

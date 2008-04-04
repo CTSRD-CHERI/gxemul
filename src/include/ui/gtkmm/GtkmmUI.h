@@ -31,6 +31,8 @@
 #include "UI.h"
 
 
+class GXemulWindow;
+
 /**
  * \brief GTK+-based User Interface, using GTKMM.
  */
@@ -44,6 +46,8 @@ public:
 
 	virtual void Initialize();
 
+	virtual void UpdateUI();
+
 	virtual void ShowStartupBanner();
 
 	virtual void ShowDebugMessage(const string& msg);
@@ -54,6 +58,9 @@ public:
 	virtual void InputLineDone();
 
 	virtual int MainLoop();
+
+private:
+	GXemulWindow *	m_window;
 };
 
 

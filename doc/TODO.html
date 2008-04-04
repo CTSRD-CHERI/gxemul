@@ -334,23 +334,12 @@ Error handling
 GTKMM GUI
 ---------
 
-	[ ]  Make the misc/gxemul-gui.png icon more meaningful!
-
 	[ ]  Command input window!  Make it look nice.
 
-	[ ]  "GXemul" _last_ in the title bar of windows, not first.
-		emulation_name - GXemul
-		machine_name (VGA) - GXemul
-		machine_name (serial console, tty0) - GXemul
-		etc.
-
-	[/]  Disable/gray out menu choices and toolbar buttons that are
-	     not applicable, e.g. Undo if nothing is Undoable.
-	     [ ]  Make sure this is done on ANY change to the ActionStack!
+	[ ]  Make the Play (and Pause?) buttons stay down, if the RunState
+	     is in specific states.
 
 	[/]  Menu bar:
-		NOTE: i18n of these! Default names for "File", "Help" etc!
-		
 		File
 			[/]  New ->
 				[/]  Blank emulation
@@ -393,11 +382,13 @@ GTKMM GUI
 			[X]  About
 
 	[/]  Toolbar button area:
-		Run/step forward (start emulation)
-		Pause (pause emulation, button kept down until unpaused)
-		Reset (with a dialog asking for confirmation)
-		Run/step backwards
-		Undo/Redo!
+	     [ ]  Step backwards
+	     [ ]  Step forward
+	     [ ]  Run backwards...
+	     [/]  Run (start emulation)
+	     [/]  Pause (pause emulation, button kept down until unpaused)
+	     [ ]  Reset (with a dialog asking for confirmation)
+	     [X]  Undo/Redo!
 	     (Optional plug-in-ability/extensibility. Buttons should
 	     be bound to debugger commands.)
 
@@ -418,6 +409,8 @@ GTKMM GUI
 
 	[ ]  Copy/Paste of components! Both inside one GXemul instance,
 	     and _BETWEEN APPLICATIONS_!
+
+	[ ]  Make the misc/gxemul-gui.png icon more meaningful!
 
 	[ ]  Dockable/undockable windows for machines/devices/
 	     I/O-units' contents ?

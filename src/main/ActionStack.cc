@@ -26,18 +26,31 @@
  */
 
 #include "ActionStack.h"
+#include "GXemul.h"
+
+
+ActionStack::ActionStack(GXemul *gxemul)
+	: m_gxemul(gxemul)
+{
+}
 
 
 void ActionStack::Clear()
 {
 	m_undoActions.clear();
 	m_redoActions.clear();
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 }
 
 
 void ActionStack::ClearRedo()
 {
 	m_redoActions.clear();
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 }
 
 
@@ -74,6 +87,9 @@ void ActionStack::PushActionAndExecute(refcount_ptr<Action>& pAction)
 		Clear();
 	}
 
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
+
 	// Note that the action is executed after any modification to the
 	// stack itself is done. This is because the Execute function may
 	// modify the stack too (e.g. by calling Clear()).
@@ -93,6 +109,9 @@ bool ActionStack::Undo()
 
 	m_redoActions.push_back(pAction);
 
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
+
 	return true;
 }
 
@@ -108,6 +127,9 @@ bool ActionStack::Redo()
 	pAction->Execute();
 
 	m_undoActions.push_back(pAction);
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 
 	return true;
 }

@@ -280,6 +280,7 @@ GXemul::GXemul(bool bWithGUI)
 	, m_quietMode(false)
 	, m_ui(new NullUI(this))
 	, m_rootComponent(new DummyComponent)
+	, m_actionStack(this)
 	, m_commandInterpreter(this)
 {
 	ClearEmulation();
@@ -292,6 +293,8 @@ void GXemul::ClearEmulation()
 	m_rootComponent = new DummyComponent;
 	m_rootComponent->SetVariableValue("name", "root");
 	m_emulationFileName = "";
+
+	m_ui->UpdateUI();
 }
 
 
@@ -703,6 +706,8 @@ const string& GXemul::GetEmulationFilename() const
 void GXemul::SetEmulationFilename(const string& filename)
 {
 	m_emulationFileName = filename;
+
+	m_ui->UpdateUI();
 }
 
 
@@ -746,12 +751,16 @@ void GXemul::SetRootComponent(refcount_ptr<Component> newRootComponent)
 {
 	assert(!newRootComponent.IsNULL());
 	m_rootComponent = newRootComponent;
+
+	m_ui->UpdateUI();
 }
 
 
 void GXemul::SetRunState(RunState newState)
 {
 	m_runState = newState;
+
+	m_ui->UpdateUI();
 }
 
 
