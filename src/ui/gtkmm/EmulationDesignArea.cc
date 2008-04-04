@@ -28,11 +28,12 @@
 #ifdef WITH_GTKMM
 
 #include "ui/gtkmm/EmulationDesignArea.h"
+#include "GXemul.h"
 
 
-EmulationDesignArea::EmulationDesignArea()
+EmulationDesignArea::EmulationDesignArea(GXemul* gxemul)
+	: m_gxemul(gxemul)
 {
-	set_size_request(930, 550);
 }
 
 
@@ -41,9 +42,70 @@ EmulationDesignArea::~EmulationDesignArea()
 }
 
 
+void EmulationDesignArea::DrawComponentAndChildren(
+	Cairo::RefPtr<Cairo::Context> cr,
+	int x1, int y1, int x2, int y2,
+	refcount_ptr<Component> component)
+{
+	Components components = component->GetChildren();
+
+	// TODO: Draw something meaningful!
+
+	int lesser = MIN(x2-x1, y2-y1);
+	int xc = (x2 + x1) / 2;
+	int yc = (y2 + y1) / 2;
+	if (components.size() > 0)
+		yc = y1 + (y2-y1) / 6;
+
+	// Draw the component:
+	cr->save();
+	cr->set_line_width(3);
+	cr->arc(xc, yc, lesser/6.5, 0.0, 2.0 * M_PI);
+	cr->set_source_rgba(0.0, 0.0, 1.0, 0.5);
+	cr->fill_preserve();
+	cr->restore();
+	cr->stroke();
+
+	// Now, draw all children:
+	for (size_t i=0; i<components.size(); ++i) {
+		int cx1 = x1 + i * (x2-x1) / components.size();
+		int cx2 = x1 + (i+1) * (x2-x1) / components.size() - 1;
+
+		int cy1 = y1 + (y2-y1) / 3;
+		int cy2 = y2;
+
+		DrawComponentAndChildren(cr, cx1, cy1, cx2, cy2, components[i]);
+	}
+}
+
+
 bool EmulationDesignArea::on_expose_event(GdkEventExpose* event)
 {
-	// TODO
+	Glib::RefPtr<Gdk::Window> window = get_window();
+	if (!window)
+		return false;
+
+	Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
+
+	// Clip to the expose event area:
+	cr->rectangle(event->area.x, event->area.y,
+	    event->area.width, event->area.height);
+	cr->clip();
+
+	Gtk::Allocation allocation = get_allocation();
+	const int width = allocation.get_width();
+	const int height = allocation.get_height();
+
+	// Draw all components:
+	Components components = m_gxemul->GetRootComponent()->GetChildren();
+	for (size_t i=0; i<components.size(); ++i) {
+		int x1 = i * width / components.size();
+		int x2 = (i+1) * width / components.size() - 1;
+		int y1 = 0, y2 = height - 1;
+
+		DrawComponentAndChildren(cr, x1, y1, x2, y2, components[i]);
+	}
+
 	return true;
 }
 

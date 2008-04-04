@@ -30,14 +30,39 @@
 
 #include <gtkmm.h>
 
+#include "misc.h"
+#include "Component.h"
+
+class GXemul;
+
+/**
+ * \brief The main emulation design area.
+ *
+ * TODO: Longer description.
+ */
 class EmulationDesignArea : public Gtk::DrawingArea
 {
 public:
-	EmulationDesignArea();
+	/**
+	 * \brief Constructs an %EmulationDesignArea.
+	 *
+	 * \param gxemul The owner GXemul instance.
+	 */
+	EmulationDesignArea(GXemul* gxemul);
+
 	virtual ~EmulationDesignArea();
 
 protected:
 	virtual bool on_expose_event(GdkEventExpose* event);
+
+private:
+	void DrawComponentAndChildren(
+	    Cairo::RefPtr<Cairo::Context> cr,
+	    int x1, int y1, int x2, int y2,
+	    refcount_ptr<Component> component);
+
+private:
+	GXemul *	m_gxemul;
 };
 
 #endif	// EMULATIONDESIGNAREA_H

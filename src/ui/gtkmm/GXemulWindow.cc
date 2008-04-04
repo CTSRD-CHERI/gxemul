@@ -37,7 +37,10 @@
 
 GXemulWindow::GXemulWindow(GXemul* gxemul)
 	: m_gxemul(gxemul)
+	, m_EmulationDesignArea(gxemul)
 {
+	set_default_size(960, 690);
+
 	set_title("GXemul");
 
 	add(m_Box);
@@ -181,7 +184,8 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	m_Box.add(m_VPaned);
 
 	m_VPaned.pack1(m_EmulationDesignArea);
-	m_VPaned.pack2(m_DebugConsoleWidget);
+
+	// m_VPaned.pack2(m_DebugConsoleWidget);
 
 	UpdateUI();
 

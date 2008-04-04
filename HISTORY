@@ -3990,3 +3990,5 @@ Changelog for GXemul:
 		change: Undo/Redo-applicability, the name of the emulation, and
 		the RunState. (As UI::UpdateUI().)
 		Removing all old CVS $Id$ tags; they are not useful anymore.
+		The GTKMM GUI EmulationDesignArea now shows some dummy circles
+		(one for each component in the emulation setup).
