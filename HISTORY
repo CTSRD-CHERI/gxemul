@@ -3992,3 +3992,7 @@ Changelog for GXemul:
 		Removing all old CVS $Id$ tags; they are not useful anymore.
 		The GTKMM GUI EmulationDesignArea now shows some dummy circles
 		(one for each component in the emulation setup).
+20080405	Beginning on a FileLoader class, for loading binaries (e.g.
+		ELFs). Also adding a test/ directory, where small test files
+		used for unit tests may be stored. ELF program segments are
+		loaded, but no additional information yet (entry point etc.).

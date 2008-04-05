@@ -1,5 +1,5 @@
-#ifndef MIPS_CPUCOMPONENT_H
-#define	MIPS_CPUCOMPONENT_H
+#ifndef FILELOADER_H
+#define	FILELOADER_H
 
 /*
  *  Copyright (C) 2008  Anders Gavare.  All rights reserved.
@@ -28,59 +28,77 @@
  *  SUCH DAMAGE.
  */
 
-// COMPONENT(mips_cpu)
+#include "misc.h"
 
-
-#include "CPUComponent.h"
+#include "UnitTest.h"
 
 
 /**
- * \brief A Component representing a MIPS processor.
+ * \brief A class used to load binary files into emulated memory.
+ *
+ * A %FileLoader is given a name of a binary file, e.g. an ELF file, and
+ * attempts to load it into emulated memory.
+ *
+ * Binary files may be loaded to either physical or virtual memory addresses.
+ * To load to a physical address, we want to write to a component which
+ * is an AddressDataBus directly. To load to virtual addresses, we need to go
+ * via a particular CPU, because it is the CPU which does the virtual to
+ * physical address translation.
+ *
+ * The type of the file is normally auto-detected by reading magic sequences
+ * at the start of the file.
  */
-class MIPS_CPUComponent
-	: public CPUComponent
+class FileLoader
+	: public UnitTestable
 {
 public:
 	/**
-	 * \brief Constructs a MIPS_CPUComponent.
-	 */
-	MIPS_CPUComponent();
-
-	/**
-	 * \brief Creates a MIPS_CPUComponent.
-	 */
-	static refcount_ptr<Component> Create();
-
-	/**
-	 * \brief Get attribute information about the MIPS_CPUComponent class.
+	 * \brief Constructs a %FileLoader object.
 	 *
-	 * @param attributeName The attribute name.
-	 * @return A string representing the attribute value.
+	 * \param filename The name of the file to open.
 	 */
-	static string GetAttribute(const string& attributeName);
+	FileLoader(const string& filename);
 
 	/**
-	 * \brief Runs the component for a number of cycles.
+	 * \brief Retrieves the filename of this %FileLoader.
 	 *
-	 * @param nrOfCycles    The number of cycles to run.
-	 * @return      The number of cycles actually executed.
+	 * \return The filename.
 	 */
-	virtual int Run(int nrOfCycles);
+	const string& GetFilename() const;
+
+	/**
+	 * \brief Attempt to detect the file format of the file.
+	 *
+	 * \return A string representing the file format.
+	 */
+	string DetectFileFormat() const;
+
+	/**
+	 * \brief Loads the file into a CPU or an AddressDataBus.
+	 *
+	 * Note: The file is usually loaded into a virtual address space.
+	 * It is therefore necessary to load it into a CPU, and not directly
+	 * into RAM.
+	 *
+	 * \param component A CPUComponent (or any other
+	 *	component which implements the AddressDataBus interface),
+	 *	into which the file will be loaded.
+	 * \return True if loading succeeded, false otherwise.
+	 */
+	bool Load(refcount_ptr<Component> component) const;
 
 
 	/********************************************************************/
 
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
-protected:
-	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
-	    bool& writable);
-
+private:
+	// Disallow construction without arguments.
+	FileLoader();
 
 private:
-	void ExecuteMIPS16Instruction(uint16_t iword);
-	void ExecuteInstruction(uint32_t iword);
+	const string		m_filename;
 };
 
 
-#endif	// MIPS_CPUCOMPONENT_H
+#endif	// FILELOADER_H

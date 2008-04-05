@@ -100,6 +100,17 @@ void MIPS_CPUComponent::ExecuteInstruction(uint32_t iword)
 }
 
 
+bool MIPS_CPUComponent::VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
+	bool& writable)
+{
+	// TODO. For now, just return the lowest 30 bits.
+
+	paddr = vaddr & 0x3fffffff;
+	writable = true;
+	return true;
+}
+
+
 string MIPS_CPUComponent::GetAttribute(const string& attributeName)
 {
 	if (attributeName == "stable")

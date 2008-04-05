@@ -1,0 +1,19 @@
+#
+#  Makefile for GXemul src/main/fileloaders
+#
+
+CXXFLAGS=$(CXXFLAGSBASE) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
+LIBS=$(XLIB) $(OTHERLIBS)
+
+OBJS=FileLoader_ELF.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS)
+
+clean_all: clean
+	rm -f Makefile
+

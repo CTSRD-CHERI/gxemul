@@ -328,7 +328,8 @@ void GXemulWindow::on_menu_open()
 		break;
 
 	default:
-		TodoDialog(this, "Unexpected button clicked. TODO");
+		// Unexpected button clicked. TODO
+		break;
 	}
 }
 
@@ -415,7 +416,8 @@ void GXemulWindow::on_menu_save_as()
 		break;
 
 	default:
-		TodoDialog(this, "Unexpected button clicked. TODO");
+		// Unexpected button clicked. TODO
+		break;
 	}
 }
 

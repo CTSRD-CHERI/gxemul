@@ -108,10 +108,9 @@ void MainbusComponent::MakeSureMemoryMapExists()
 		if (varAddrMul != NULL)
 			mmEntry.addrMul = varAddrMul->ToInteger();
 
-		if (varSize == NULL || varBase == NULL) {
-			std::cerr << "No base or size? TODO.\n";
-			throw std::exception();
-		}
+		// No base or size? Then skip this component.
+		if (varSize == NULL || varBase == NULL)
+			continue;
 
 		// Treat the non-sensical addrMul value 0 as 1.
 		if (mmEntry.addrMul == 0)

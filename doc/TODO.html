@@ -54,19 +54,26 @@ Legacy (0.4.x) series
 
 Misc.
 -----
-	[ ]  File loader: Load stuff into emulated RAM (or ROM) components.
+	[/]  File loader: Load stuff into emulated RAM (or ROM) components.
 	     Note: Usually, ELFs contain _virtual_ addresses, so file loading
 	     needs to go through a CPU to be properly address translated!
 	     BUT BOTH must be possible! I.e. load into RAM, or load into a CPU.
-		[ ]  ELF
+		[/]  File loader, which uses file sensing magic to
+		     load using the correct format.
+		[/]  ELF
 		[ ]  a.out
 		[ ]  raw binaries
+		[ ]  Meta data:
+			[ ]  Entry point
+			[ ]  symbols
+			[ ]  line number information
+			[ ]  data type information, etc.
 
 	[/]  testmips
 		[/]  Work on MIPS_CPUComponent::Run() and the generic
 		     CPUComponent
 			[X]  Connect the CPU to an AddressDataBus.
-			[ ]  virtual to physical translation
+			[/]  virtual to physical translation
 			[ ]  Handling of read/write errors?
 			[ ]  Both MIPS16 and regular encoding.
 			[ ]  Unit tests!
@@ -90,11 +97,13 @@ Misc.
 		     page mapping.
 		[ ]  Unit tests for the above!
 
-	[ ]  Make some initial things in the GUI work:
+	[/]  Make some initial things in the GUI work:
 		[ ]  A window for the text console, including Input line!
-		[ ]  Undo/redo status update when necessary
-		[ ]  Workspace = show current emulation setup, with a
-		     palette on the right-hand side of available components.
+		[X]  Undo/redo status update when necessary
+		[/]  Workspace = show current emulation setup.
+		     [ ]  Draw meaningful graphics.
+		     [ ]  Draw text labels for Components.
+		[ ]  Palette on the right-hand side of available components.
 
 	[ ]  Main run loop: Verify that both cycle accurate and larger chunks
 	     works well. Unit test?
@@ -249,6 +258,7 @@ CommandInterpreter
 				assert() in place, so that unknown arg types
 				are caught during development!
 
+	[ ]	dump		Dump memory (or, any address data bus contents)
 	[ ]	move  		Move a component from one path to another.
 	[ ]	clearundo	Clears the undo/redo stack (can be used to
 				reclaim memory, perhaps... or automatic
@@ -401,6 +411,8 @@ GTKMM GUI
 		[/]  Main workspace:
 			[/]  Draw all components in the emulation tree,
 			     using cairo.
+			     [ ]  Invalidate the EmulationDrawingArea when
+			          the Component tree changes!
 			[ ]  Scrollbars if the whole design area isn't possible
 			     to fit in the designated rectangle?
 			[ ]  Tooltips for components? (A "summary" of the entire

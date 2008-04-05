@@ -31,6 +31,7 @@
 // COMPONENT(cpu)
 
 
+#include "AddressDataBus.h"
 #include "Component.h"
 
 #include "UnitTest.h"
@@ -43,6 +44,7 @@ class AddressDataBus;
  */
 class CPUComponent
 	: public Component
+	, public AddressDataBus
 	, public UnitTestable
 {
 public:
@@ -64,7 +66,6 @@ public:
 	 */
 	static string GetAttribute(const string& attributeName);
 
-
 	/**
 	 * \brief Returns the current frequency (in Hz) that the component
 	 *      runs at.
@@ -72,6 +73,24 @@ public:
 	 * @return      The component's frequency in Hz.
 	 */
 	virtual double GetCurrentFrequency() const;
+
+	/**
+	 * \brief Returns the component's AddressDataBus interface.
+	 *
+	 * @return	A pointer to an AddressDataBus.
+	 */
+	virtual AddressDataBus* AsAddressDataBus();
+
+	/* Implementation of AddressDataBus: */
+	virtual void AddressSelect(uint64_t address);
+	virtual bool ReadData(uint8_t& data);
+	virtual bool ReadData(uint16_t& data, Endianness endianness);
+	virtual bool ReadData(uint32_t& data, Endianness endianness);
+	virtual bool ReadData(uint64_t& data, Endianness endianness);
+	virtual bool WriteData(const uint8_t& data);
+	virtual bool WriteData(const uint16_t& data, Endianness endianness);
+	virtual bool WriteData(const uint32_t& data, Endianness endianness);
+	virtual bool WriteData(const uint64_t& data, Endianness endianness);
 
 
 	/********************************************************************/
@@ -82,8 +101,12 @@ protected:
 	virtual void FlushCachedStateForComponent();
 
 	// Used by all (or most) CPU implementations:
-	bool ReadInstructionWord(uint16_t& iword, uint64_t addr);
-	bool ReadInstructionWord(uint32_t& iword, uint64_t addr);
+	bool ReadInstructionWord(uint16_t& iword, uint64_t vaddr);
+	bool ReadInstructionWord(uint32_t& iword, uint64_t vaddr);
+
+	// CPU-specific virtual to physical address translation (MMU):
+	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
+					bool& writable);
 
 private:
 	void LookupAddressDataBus();
@@ -91,13 +114,16 @@ private:
 protected:
 	// Variables common to all (or most) kinds of CPUs:
 	double			m_frequency;
-
+	int			m_pageSize;
 	uint64_t		m_pc;
 	enum Endianness		m_endianness;
 
+	// Cached state:
 	AddressDataBus *	m_addressDataBus;
 	const uint8_t *		m_currentCodePage;
-	int			m_pageSize;
+
+	// Other volatile state:
+	uint64_t		m_addressSelect;
 };
 
 

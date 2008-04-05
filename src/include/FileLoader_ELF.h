@@ -1,5 +1,5 @@
-#ifndef MIPS_CPUCOMPONENT_H
-#define	MIPS_CPUCOMPONENT_H
+#ifndef FILELOADER_ELF_H
+#define	FILELOADER_ELF_H
 
 /*
  *  Copyright (C) 2008  Anders Gavare.  All rights reserved.
@@ -28,59 +28,47 @@
  *  SUCH DAMAGE.
  */
 
-// COMPONENT(mips_cpu)
+#include "misc.h"
 
+#include "UnitTest.h"
 
-#include "CPUComponent.h"
+class AddressDataBus;
 
 
 /**
- * \brief A Component representing a MIPS processor.
+ * \brief ELF binary loader.
  */
-class MIPS_CPUComponent
-	: public CPUComponent
+class FileLoader_ELF
+	: public UnitTestable
 {
 public:
 	/**
-	 * \brief Constructs a MIPS_CPUComponent.
-	 */
-	MIPS_CPUComponent();
-
-	/**
-	 * \brief Creates a MIPS_CPUComponent.
-	 */
-	static refcount_ptr<Component> Create();
-
-	/**
-	 * \brief Get attribute information about the MIPS_CPUComponent class.
+	 * \brief Constructs a %FileLoader_ELF.
 	 *
-	 * @param attributeName The attribute name.
-	 * @return A string representing the attribute value.
+	 * \param filename The filename to load. This must be an ELF file.
 	 */
-	static string GetAttribute(const string& attributeName);
+	FileLoader_ELF(const string& filename);
 
 	/**
-	 * \brief Runs the component for a number of cycles.
+	 * \brief Loads the ELF into an AddressDataBus.
 	 *
-	 * @param nrOfCycles    The number of cycles to run.
-	 * @return      The number of cycles actually executed.
+	 * \param bus The AddressDataBus to load the file into.
+	 * \return True if loading succeeded, false otherwise.
 	 */
-	virtual int Run(int nrOfCycles);
+	bool LoadIntoBus(AddressDataBus* bus);
 
 
 	/********************************************************************/
 
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
-protected:
-	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
-	    bool& writable);
-
+private:
+	// Disallow construction without arguments.
+	FileLoader_ELF();
 
 private:
-	void ExecuteMIPS16Instruction(uint16_t iword);
-	void ExecuteInstruction(uint32_t iword);
+	const string		m_filename;
 };
 
 
-#endif	// MIPS_CPUCOMPONENT_H
+#endif	// FILELOADER_ELF_H

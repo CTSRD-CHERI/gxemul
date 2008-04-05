@@ -33,15 +33,15 @@
 CPUComponent::CPUComponent(const string& className)
 	: Component(className)
 	, m_frequency(33.0e6)
+	, m_pageSize(0)
 	, m_pc(0)
 	, m_endianness(BigEndian)
 	, m_addressDataBus(NULL)
 	, m_currentCodePage(NULL)
-	, m_pageSize(0)
 {
 	AddVariableUInt64("pc", &m_pc);
 	AddVariableDouble("frequency", &m_frequency);
-	// TODO: Endianness as a variable?
+	// TODO: Endianness as a variable!
 }
 
 
@@ -54,6 +54,12 @@ refcount_ptr<Component> CPUComponent::Create()
 double CPUComponent::GetCurrentFrequency() const
 {
         return m_frequency;
+}
+
+
+AddressDataBus * CPUComponent::AsAddressDataBus()
+{
+        return this;
 }
 
 
@@ -114,9 +120,13 @@ void CPUComponent::LookupAddressDataBus()
 }
 
 
-bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t addr)
+bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t vaddr)
 {
 	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(vaddr, paddr, writable);
 
 	if (m_currentCodePage == NULL) {
 		// First attempt: Try to look up the code page in memory,
@@ -126,12 +136,12 @@ bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t addr)
 		// m_addressDataBus->LookupPage(addr); something
 	}
 
-	int offsetInCodePage = addr & (m_pageSize - 1);
+	int offsetInCodePage = vaddr & (m_pageSize - 1);
 
 	if (m_currentCodePage == NULL) {
 		// If the lookup failed, read using the AddressDataBus
 		// interface manually.
-		m_addressDataBus->AddressSelect(addr);
+		m_addressDataBus->AddressSelect(paddr);
 		bool success = m_addressDataBus->ReadData(iword, m_endianness);
 		
 		if (!success)
@@ -160,9 +170,13 @@ bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t addr)
 }
 
 
-bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t addr)
+bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t vaddr)
 {
 	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(vaddr, paddr, writable);
 
 	if (m_currentCodePage == NULL) {
 		// First attempt: Try to look up the code page in memory,
@@ -172,12 +186,12 @@ bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t addr)
 		// m_addressDataBus->LookupPage(addr); something
 	}
 
-	int offsetInCodePage = addr & (m_pageSize - 1);
+	int offsetInCodePage = vaddr & (m_pageSize - 1);
 
 	if (m_currentCodePage == NULL) {
 		// If the lookup failed, read using the AddressDataBus
 		// interface manually.
-		m_addressDataBus->AddressSelect(addr);
+		m_addressDataBus->AddressSelect(paddr);
 		bool success = m_addressDataBus->ReadData(iword, m_endianness);
 		
 		if (!success)
@@ -203,6 +217,138 @@ bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t addr)
 		m_currentCodePage = NULL;
 	
 	return true;
+}
+
+
+bool CPUComponent::VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
+   bool& writable)
+{
+	// Dummy implementation, return physical address = virtual address.
+	paddr = vaddr;
+	writable = true;
+	return true;
+}
+
+
+void CPUComponent::AddressSelect(uint64_t address)
+{
+	m_addressSelect = address;
+}
+
+
+bool CPUComponent::ReadData(uint8_t& data)
+{
+	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(m_addressSelect, paddr, writable);
+
+	m_addressDataBus->AddressSelect(paddr);
+	return m_addressDataBus->ReadData(data);
+}
+
+
+bool CPUComponent::ReadData(uint16_t& data, Endianness endianness)
+{
+	assert((m_addressSelect & 1) == 0);
+
+	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(m_addressSelect, paddr, writable);
+
+	m_addressDataBus->AddressSelect(paddr);
+	return m_addressDataBus->ReadData(data, endianness);
+}
+
+
+bool CPUComponent::ReadData(uint32_t& data, Endianness endianness)
+{
+	assert((m_addressSelect & 3) == 0);
+
+	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(m_addressSelect, paddr, writable);
+
+	m_addressDataBus->AddressSelect(paddr);
+	return m_addressDataBus->ReadData(data, endianness);
+}
+
+
+bool CPUComponent::ReadData(uint64_t& data, Endianness endianness)
+{
+	assert((m_addressSelect & 7) == 0);
+
+	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(m_addressSelect, paddr, writable);
+
+	m_addressDataBus->AddressSelect(paddr);
+	return m_addressDataBus->ReadData(data, endianness);
+}
+
+
+bool CPUComponent::WriteData(const uint8_t& data)
+{
+	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(m_addressSelect, paddr, writable);
+
+	m_addressDataBus->AddressSelect(paddr);
+	return m_addressDataBus->WriteData(data);
+}
+
+
+bool CPUComponent::WriteData(const uint16_t& data, Endianness endianness)
+{
+	assert((m_addressSelect & 1) == 0);
+
+	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(m_addressSelect, paddr, writable);
+
+	m_addressDataBus->AddressSelect(paddr);
+	return m_addressDataBus->WriteData(data, endianness);
+}
+
+
+bool CPUComponent::WriteData(const uint32_t& data, Endianness endianness)
+{
+	assert((m_addressSelect & 3) == 0);
+
+	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(m_addressSelect, paddr, writable);
+
+	m_addressDataBus->AddressSelect(paddr);
+	return m_addressDataBus->WriteData(data, endianness);
+}
+
+
+bool CPUComponent::WriteData(const uint64_t& data, Endianness endianness)
+{
+	assert((m_addressSelect & 7) == 0);
+
+	LookupAddressDataBus();
+
+	uint64_t paddr;
+	bool writable;
+	VirtualToPhysical(m_addressSelect, paddr, writable);
+
+	m_addressDataBus->AddressSelect(paddr);
+	return m_addressDataBus->WriteData(data, endianness);
 }
 
 

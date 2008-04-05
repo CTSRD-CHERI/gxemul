@@ -69,9 +69,9 @@
 #endif
 
 #if HAVE_NBTOOL_CONFIG_H
-#include <nbinclude/machine/elf_machdep.h>
+// #include <nbinclude/machine/elf_machdep.h>
 #else
-#include <machine/elf_machdep.h>
+// #include <machine/elf_machdep.h>
 #endif
 
 typedef	uint8_t  	Elf_Byte;
