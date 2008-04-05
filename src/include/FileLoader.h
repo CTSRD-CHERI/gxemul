@@ -30,6 +30,7 @@
 
 #include "misc.h"
 
+#include "Component.h"
 #include "UnitTest.h"
 
 

@@ -63,11 +63,13 @@ Misc.
 		[/]  ELF
 		[ ]  a.out
 		[ ]  raw binaries
-		[ ]  Meta data:
-			[ ]  Entry point
+		[/]  Meta data:
+			[/]  Entry point
 			[ ]  symbols
 			[ ]  line number information
 			[ ]  data type information, etc.
+		[ ]  Don't hardcode the CPU path in GXemul.cc:
+			    LookupPath("root.machine0.mainbus0.mips_cpu0");
 
 	[/]  testmips
 		[/]  Work on MIPS_CPUComponent::Run() and the generic

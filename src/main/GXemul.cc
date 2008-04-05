@@ -253,6 +253,7 @@
 #endif
 #include "ui/nullui/NullUI.h"
 
+#include "FileLoader.h"
 #include "GXemul.h"
 #include "actions/LoadEmulationAction.h"
 #include "components/DummyComponent.h"
@@ -539,7 +540,6 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 	if (templateMachine != "") {
 		if (CreateEmulationFromTemplateMachine(templateMachine)) {
 			// A template is now being used.
-			optionsEnoughToStartRunning = true;
 		} else {
 			std::cerr << _("Failed to create configuration from "
 			    "template: ") << templateMachine << "\n" <<
@@ -558,9 +558,31 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 
 	if (argc > 0) {
 		if (templateMachine != "") {
-			// Machine template:
+			// Machine template.
+
+			// Load binaries into the main cpu.
+			refcount_ptr<Component> main_cpu =
+			    GetRootComponent()->
+			    LookupPath("root.machine0.mainbus0.mips_cpu0");
+			// TODO: Don't hardcode the CPU path!
+
+			while (argc > 0) {
+				FileLoader loader(argv[0]);
+				if (!loader.Load(main_cpu)) {
+					std::cerr << _("Failed to load "
+					    "binary: ") <<
+					    argv[0] << "\n" <<
+					    _("Aborting.") << "\n";
+					return false;
+				}
+
+				argc --;
+				argv ++;
+			}
+
+			optionsEnoughToStartRunning = true;
 		} else {
-			// Config file:
+			// Config file.
 			if (argc == 1) {
 				string configfileName = argv[0];
 				optionsEnoughToStartRunning = true;
@@ -595,6 +617,11 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 	if (optionsEnoughToStartRunning) {
 		return true;
 	} else {
+		if (templateMachine != "") {
+			std::cerr << _("No binary specified. Aborting.\n");
+			return false;
+		}
+		
 		PrintUsage(false);
 		return false;
 	}
@@ -627,10 +654,10 @@ void GXemul::PrintUsage(bool longUsage) const
 	std::cout <<
 		_("Usage: gxemul [general options] [configfile]\n"
 		"       gxemul [general options] [machine selection"
-			" options] [binary...]\n"
+			" options] binary [...]\n"
 		"       gxemul-gui [general options] [configfile]\n"
 		"       gxemul-gui [general options] [machine"
-			" selection options] [binary...]\n\n");
+			" selection options] binary [...]\n\n");
 
 	// When changing command line options, REMEMBER to keep the following
 	// things in synch:

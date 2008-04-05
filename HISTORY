@@ -3998,3 +3998,8 @@ Changelog for GXemul:
 		loaded, but no additional information yet (entry point etc.).
 		Catching std::exception at the outermost level, in order to
 		print a reasonable message if the application crashes.
+		Instead of loading binaries into an AddressDataBus, they are
+		now loaded into a Component, which, if it has a "pc" state
+		variable, is set to the entry point. Starting gxemul with
+		-E testmips test/FileLoader_ELF_MIPS actually attempts to
+		start running the binary now :-)

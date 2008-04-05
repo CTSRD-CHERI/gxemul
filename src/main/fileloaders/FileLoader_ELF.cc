@@ -42,8 +42,12 @@ FileLoader_ELF::FileLoader_ELF(const string& filename)
 }
 
 
-bool FileLoader_ELF::LoadIntoBus(AddressDataBus* bus)
+bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component)
 {
+	AddressDataBus* bus = component->AsAddressDataBus();
+	if (bus == NULL)
+		return false;
+
 	ifstream file(m_filename.c_str());
 	if (!file.is_open())
 		return false;
@@ -114,7 +118,8 @@ bool FileLoader_ELF::LoadIntoBus(AddressDataBus* bus)
 		return false;
 	}
 
-//	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_entry);
+	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_entry);
+	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_machine);
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_phoff);
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_phentsize);
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_phnum);
@@ -172,6 +177,17 @@ bool FileLoader_ELF::LoadIntoBus(AddressDataBus* bus)
 			}
 		}
 	}
+
+	// Set the CPU's entry point.
+	// Special handling for some architectures: 32-bit MIPS uses
+	// sign-extension.
+	if (e_machine == EM_MIPS && elf32)
+		e_entry = (int32_t) e_entry;
+
+	stringstream ss;
+	ss << e_entry;
+	component->SetVariableValue("pc", ss.str());
+	// TODO: Error handling if there was no "pc"?
 
 	return true;
 }

@@ -30,13 +30,14 @@
 
 #include "misc.h"
 
+#include "Component.h"
 #include "UnitTest.h"
-
-class AddressDataBus;
 
 
 /**
  * \brief ELF binary loader.
+ *
+ * TODO: Longer comment.
  */
 class FileLoader_ELF
 	: public UnitTestable
@@ -50,12 +51,13 @@ public:
 	FileLoader_ELF(const string& filename);
 
 	/**
-	 * \brief Loads the ELF into an AddressDataBus.
+	 * \brief Loads the ELF into a Component.
 	 *
-	 * \param bus The AddressDataBus to load the file into.
+	 * \param component The AddressDataBus component to load the file
+	 *	into. (This is usually a CPUComponent.)
 	 * \return True if loading succeeded, false otherwise.
 	 */
-	bool LoadIntoBus(AddressDataBus* bus);
+	bool LoadIntoComponent(refcount_ptr<Component> component);
 
 
 	/********************************************************************/

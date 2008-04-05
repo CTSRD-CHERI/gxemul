@@ -113,7 +113,7 @@ bool FileLoader::Load(refcount_ptr<Component> component) const
 
 	if (fileFormat == "ELF32" || fileFormat == "ELF64") {
 		FileLoader_ELF elfLoader(m_filename);
-		return elfLoader.LoadIntoBus(bus);
+		return elfLoader.LoadIntoComponent(component);
 	}
 
 	// TODO: Other formats!

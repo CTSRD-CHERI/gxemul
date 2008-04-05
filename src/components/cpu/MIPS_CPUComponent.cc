@@ -58,25 +58,22 @@ int MIPS_CPUComponent::Run(int nrOfCycles)
 
 	while (nrOfCycles-- > 0) {
 		bool mips16 = (m_pc & 1) != 0;
-		bool instructionWasRead;
-
-		// TODO: Virtual to physical memory translation.
 
 		// Read an instruction from emulated memory and execute it:
 		if (mips16) {
 			uint16_t iword;
-			instructionWasRead = ReadInstructionWord(
-			    iword, m_pc & ~1);
+			if (!ReadInstructionWord(iword, m_pc & ~1)) {
+				std::cerr << "TODO: MIPS: no instruction?\n";
+				throw std::exception();
+			}
 			ExecuteMIPS16Instruction(iword);
 		} else {
 			uint32_t iword;
-			instructionWasRead = ReadInstructionWord(iword, m_pc);
+			if (!ReadInstructionWord(iword, m_pc)) {
+				std::cerr << "TODO: MIPS: no instruction?\n";
+				throw std::exception();
+			}
 			ExecuteInstruction(iword);
-		}
-
-		if (!instructionWasRead) {
-			std::cerr << "TODO: MIPS: no instruction\n";
-			throw std::exception();
 		}
 
 		++ nrOfCyclesExecuted;
@@ -89,14 +86,20 @@ int MIPS_CPUComponent::Run(int nrOfCycles)
 void MIPS_CPUComponent::ExecuteMIPS16Instruction(uint16_t iword)
 {
 	// TODO: switch/case for all instructions
-	std::cout << "EXECUTE iword16 " << iword << " at pc " << m_pc << "\n";
+	std::cerr.flags(std::ios::hex | std::ios::showbase);	
+	std::cerr << "EXECUTE iword16 " << iword << " at pc " << m_pc << "\n";
+	std::cerr << "TODO: MIPS: unimplemented instruction\n";
+	throw std::exception();
 }
 
 
 void MIPS_CPUComponent::ExecuteInstruction(uint32_t iword)
 {
 	// TODO: switch/case for all instructions
-	std::cout << "EXECUTE iword32 " << iword << " at pc " << m_pc << "\n";
+	std::cerr.flags(std::ios::hex | std::ios::showbase);	
+	std::cerr << "EXECUTE iword32 " << iword << " at pc " << m_pc << "\n";
+	std::cerr << "TODO: MIPS: unimplemented instruction\n";
+	throw std::exception();
 }
 
 
