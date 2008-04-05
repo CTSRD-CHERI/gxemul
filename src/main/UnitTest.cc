@@ -49,6 +49,7 @@ void UnitTest::Assert(const string& strFailMessage,
 {
 	if (actualValue != expectedValue) {
 		stringstream ss;
+		ss.flags(std::ios::hex | std::ios::showbase);
 		ss << strFailMessage <<
 		    "\n\tExpected: " << expectedValue <<
 		    "\n\tbut was:  " << actualValue;
