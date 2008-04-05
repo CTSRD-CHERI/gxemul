@@ -135,6 +135,13 @@ void ConsoleUI::ShowDebugMessage(const string& msg)
 }
 
 
+void ConsoleUI::FatalError(const string& msg)
+{
+	std::cerr << msg;
+	std::cerr.flush();
+}
+
+
 void ConsoleUI::RedisplayInputLine(const string& inputline,
     size_t cursorPosition)
 {

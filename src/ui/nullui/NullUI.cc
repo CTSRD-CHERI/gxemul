@@ -60,6 +60,11 @@ void NullUI::ShowDebugMessage(const string& msg)
 }
 
 
+void NullUI::FatalError(const string& msg)
+{
+}
+
+
 void NullUI::RedisplayInputLine(const string& inputline, size_t cursorPosition)
 {
 }

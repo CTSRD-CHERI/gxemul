@@ -691,7 +691,19 @@ int GXemul::Run()
 	if (!GetQuietMode())
 		m_ui->ShowStartupBanner();
 
-	m_ui->MainLoop();
+	try {
+		m_ui->MainLoop();
+	} catch (std::exception& ex) {
+		stringstream ss;
+		ss << _("\n### FATAL ERROR ###\n\n") << ex.what() << "\n\n" <<
+		    _("If you are able to reproduce this crash, "
+		    "please send detailed repro-steps to\n"
+		    "the author, to the gxemul-devel mailing list, or"
+		    " ask in #GXemul on the\n"
+		    "FreeNode IRC network.\n");
+		m_ui->FatalError(ss.str());
+		return 1;
+	}
 
 	return 0;
 }

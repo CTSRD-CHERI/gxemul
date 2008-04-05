@@ -84,6 +84,18 @@ public:
 	virtual void ShowDebugMessage(const string& msg) = 0;
 
 	/**
+	 * \brief Shows a fatal error message.
+	 *
+	 * After showing the fatal error message, the application
+	 * is expected to terminate. In a GUI implementation, it
+	 * is therefore good to wait for the user to acknowledge
+	 * the error message before returning.
+	 *
+	 * @param msg The message to show.
+	 */
+	virtual void FatalError(const string& msg) = 0;
+
+	/**
 	 * \brief Redisplays the interactive command input line.
 	 *
 	 * This function generally displays a prompt (e.g. "GXemul> ")

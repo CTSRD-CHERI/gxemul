@@ -70,6 +70,18 @@ void GtkmmUI::ShowDebugMessage(const string& msg)
 }
 
 
+void GtkmmUI::FatalError(const string& msg)
+{
+	// Print to stderr in case the GUI crashes too.
+	std::cerr << msg;
+	std::cerr.flush();
+
+	Gtk::MessageDialog dialog(*m_window, msg,
+	    false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+        dialog.run();
+}
+
+
 void GtkmmUI::InputLineDone()
 {
 	std::cerr << "GtkmmUI::InputLineDone: TODO\n";

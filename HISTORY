@@ -3996,3 +3996,5 @@ Changelog for GXemul:
 		ELFs). Also adding a test/ directory, where small test files
 		used for unit tests may be stored. ELF program segments are
 		loaded, but no additional information yet (entry point etc.).
+		Catching std::exception at the outermost level, in order to
+		print a reasonable message if the application crashes.

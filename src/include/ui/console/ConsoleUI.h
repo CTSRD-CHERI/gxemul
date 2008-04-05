@@ -72,6 +72,14 @@ public:
 	virtual void ShowDebugMessage(const string& msg);
 
 	/**
+	 * \brief Shows a fata error message, by printing it
+	 * to stderr.
+	 *
+	 * @param msg The error message to show.
+	 */
+	virtual void FatalError(const string& msg);
+
+	/**
 	 * \brief Redisplays the interactive command input line.
 	 *
 	 * For the %ConsoleUI, this function displays a prompt ("GXemul> ")

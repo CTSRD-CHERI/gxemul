@@ -72,6 +72,13 @@ public:
 	/**
 	 * \brief Does nothing, for the dummy UI.
 	 *
+	 * @param msg The error message to show. (Ignored.)
+	 */
+	virtual void FatalError(const string& msg);
+
+	/**
+	 * \brief Does nothing, for the dummy UI.
+	 *
 	 * @param inputline The entire input line. (Ignored.)
 	 * @param cursorPosition The current cursor position. 0 is at the
 	 *	leftmost position. (Ignored.)
