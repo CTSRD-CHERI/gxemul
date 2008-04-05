@@ -27,17 +27,42 @@
 
 #ifdef WITH_GTKMM
 
+#include "misc.h"
 #include "ui/gtkmm/DebugConsoleWidget.h"
 
 
 DebugConsoleWidget::DebugConsoleWidget()
 {
-	add(m_TextView);
-	add(m_Entry);
+	Gtk::VBox *const pVBox = new Gtk::VBox();
+	add(*Gtk::manage(pVBox));
+
+	m_refTextBuffer = Gtk::TextBuffer::create();
+	m_textBufferIterator = m_refTextBuffer->begin();
+	InsertText("GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n");
+
+	m_TextView.set_buffer(m_refTextBuffer);
+	m_TextView.set_cursor_visible(false);
+	m_TextView.set_editable(false);
+
+	m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC,
+	    Gtk::POLICY_AUTOMATIC);
+	m_ScrolledWindow.add(m_TextView);
+
+	pVBox->pack_start(m_ScrolledWindow);
+	pVBox->pack_start(m_Entry, Gtk::PACK_SHRINK);
 }
+
 
 DebugConsoleWidget::~DebugConsoleWidget()
 {
 }
+
+
+void DebugConsoleWidget::InsertText(const string& msg)
+{
+	m_textBufferIterator = m_refTextBuffer->insert(
+	    m_textBufferIterator, msg);
+}	    
+
 
 #endif	// WITH_GTKMM

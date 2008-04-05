@@ -52,6 +52,8 @@ public:
 
 	virtual void ShowDebugMessage(const string& msg);
 
+	virtual void ShowCommandMessage(const string& command);
+
 	virtual void FatalError(const string& msg);
 
 	virtual void RedisplayInputLine(const string& inputline,

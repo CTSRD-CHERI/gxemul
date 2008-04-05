@@ -60,13 +60,24 @@ void GtkmmUI::UpdateUI()
 
 void GtkmmUI::ShowStartupBanner()
 {
-	// No startup banner, for now.
+	// No startup banner.
 }
 
 
 void GtkmmUI::ShowDebugMessage(const string& msg)
 {
-	std::cerr << "GtkmmUI::ShowDebugMessage(\"" << msg << "\"): TODO\n";
+	if (m_window != NULL)
+		m_window->InsertText(msg);
+}
+
+
+void GtkmmUI::ShowCommandMessage(const string& command)
+{
+	stringstream ss;
+	ss << "> " << command << "\n";
+
+	if (m_window != NULL)
+		m_window->InsertText(ss.str());
 }
 
 
@@ -103,9 +114,11 @@ int GtkmmUI::MainLoop()
 	}
 
 	m_window = new GXemulWindow(m_gxemul);
+
 	Gtk::Main::run(*m_window);
 
 	delete m_window;
+	m_window = NULL;
 
 	return 0;
 }

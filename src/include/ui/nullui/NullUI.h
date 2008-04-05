@@ -72,6 +72,13 @@ public:
 	/**
 	 * \brief Does nothing, for the dummy UI.
 	 *
+	 * @param command The command to show. (Ignored.)
+	 */
+	virtual void ShowCommandMessage(const string& command);
+
+	/**
+	 * \brief Does nothing, for the dummy UI.
+	 *
 	 * @param msg The error message to show. (Ignored.)
 	 */
 	virtual void FatalError(const string& msg);

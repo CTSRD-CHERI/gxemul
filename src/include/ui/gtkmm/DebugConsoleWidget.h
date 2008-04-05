@@ -36,9 +36,16 @@ public:
 	DebugConsoleWidget();
 	virtual ~DebugConsoleWidget();
 
+	void InsertText(const string& msg);
+
 protected:
-	Gtk::TextView	m_TextView;
-	Gtk::Entry	m_Entry;
+	Gtk::ScrolledWindow	m_ScrolledWindow;
+
+	Gtk::TextView		m_TextView;
+	Glib::RefPtr<Gtk::TextBuffer> m_refTextBuffer;
+	Gtk::TextBuffer::iterator m_textBufferIterator;
+
+	Gtk::Entry		m_Entry;
 };
 
 #endif	// DEBUGCONSOLEWIDGET_H

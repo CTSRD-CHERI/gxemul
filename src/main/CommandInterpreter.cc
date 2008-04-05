@@ -517,6 +517,8 @@ bool CommandInterpreter::RunCommand(const string& command)
 	vector<string> arguments;
 	SplitIntoWords(command, commandName, arguments);
 
+	m_GXemul->GetUI()->ShowCommandMessage(command);
+
 	// Find the command...
 	Commands::iterator it = m_commands.find(commandName);
 	if (it == m_commands.end()) {

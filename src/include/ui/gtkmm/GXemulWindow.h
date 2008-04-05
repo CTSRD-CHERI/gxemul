@@ -55,6 +55,14 @@ public:
 	 */
 	void UpdateUI();
 
+	/**
+	 * \brief Add a message to the debug window text output
+	 * area.
+	 *
+	 * \param msg The message to add.
+	 */
+	void InsertText(const string& msg);
+
 private:
 	virtual void on_menu_about();
 	virtual void on_menu_copy();
@@ -78,7 +86,6 @@ private:
 	GXemul*		m_gxemul;
 
 	Gtk::VBox	m_Box;
-	Gtk::VPaned	m_VPaned;
 
 	EmulationDesignArea m_EmulationDesignArea;
 	DebugConsoleWidget m_DebugConsoleWidget;

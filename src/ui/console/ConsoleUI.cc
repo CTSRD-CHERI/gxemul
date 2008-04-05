@@ -135,6 +135,14 @@ void ConsoleUI::ShowDebugMessage(const string& msg)
 }
 
 
+void ConsoleUI::ShowCommandMessage(const string& command)
+{
+	// Not for ConsoleUI; commands entered by the user are
+	// displayed anyway (echoing characters while the command
+	// was entered).
+}
+
+
 void ConsoleUI::FatalError(const string& msg)
 {
 	std::cerr << msg;

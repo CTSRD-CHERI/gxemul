@@ -4003,3 +4003,5 @@ Changelog for GXemul:
 		variable, is set to the entry point. Starting gxemul with
 		-E testmips test/FileLoader_ELF_MIPS actually attempts to
 		start running the binary now :-)
+		Some more work on the GTKMM GUI: the debug output window now
+		shows debug messages and commands being executed.

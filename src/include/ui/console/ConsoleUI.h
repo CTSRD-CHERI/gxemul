@@ -72,6 +72,13 @@ public:
 	virtual void ShowDebugMessage(const string& msg);
 
 	/**
+	 * \brief Does nothing for the %ConsoleUI.
+	 *
+	 * @param command The command being executed.
+	 */
+	virtual void ShowCommandMessage(const string& command);
+
+	/**
 	 * \brief Shows a fata error message, by printing it
 	 * to stderr.
 	 *

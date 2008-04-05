@@ -84,6 +84,13 @@ public:
 	virtual void ShowDebugMessage(const string& msg) = 0;
 
 	/**
+	 * \brief Shows a command being executed.
+	 *
+	 * @param command The command being executed.
+	 */
+	virtual void ShowCommandMessage(const string& command) = 0;
+
+	/**
 	 * \brief Shows a fatal error message.
 	 *
 	 * After showing the fatal error message, the application

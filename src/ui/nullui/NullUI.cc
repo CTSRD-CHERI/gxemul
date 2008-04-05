@@ -60,6 +60,11 @@ void NullUI::ShowDebugMessage(const string& msg)
 }
 
 
+void NullUI::ShowCommandMessage(const string& command)
+{
+}
+
+
 void NullUI::FatalError(const string& msg)
 {
 }

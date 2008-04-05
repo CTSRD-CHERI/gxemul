@@ -39,8 +39,6 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	: m_gxemul(gxemul)
 	, m_EmulationDesignArea(gxemul)
 {
-	set_default_size(960, 690);
-
 	set_title("GXemul");
 
 	add(m_Box);
@@ -181,11 +179,30 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	if (pToolbar != NULL)
 		m_Box.pack_start(*pToolbar, Gtk::PACK_SHRINK);
 
-	m_Box.add(m_VPaned);
+	Gtk::VBox *const pVBox = new Gtk::VBox();
+	m_Box.add(*Gtk::manage(pVBox));
 
-	m_VPaned.pack1(m_EmulationDesignArea);
+	Gtk::VPaned *const pVPaned = new Gtk::VPaned();
+	pVBox->pack_start(*Gtk::manage(pVPaned));
+	pVPaned->set_border_width(1);
 
-	// m_VPaned.pack2(m_DebugConsoleWidget);
+	Gtk::HPaned *const pHPaned = new Gtk::HPaned();
+	pVPaned->add1(*Gtk::manage(pHPaned));
+
+	Gtk::Frame *const pFrame1 = new Gtk::Frame();
+	pHPaned->add1(*Gtk::manage(pFrame1));
+	pFrame1->set_size_request(700, 400);
+	pFrame1->add(m_EmulationDesignArea);
+
+	Gtk::Frame *const pFrame2 = new Gtk::Frame();
+	pHPaned->add2(*Gtk::manage(pFrame2));
+	pFrame2->set_size_request(240, 400);
+	// TODO: Component Palette
+
+	Gtk::Frame *const pFrame3 = new Gtk::Frame();
+	pVPaned->add2(*Gtk::manage(pFrame3));
+	pFrame3->set_size_request(650, 160);
+	pFrame3->add(m_DebugConsoleWidget);
 
 	UpdateUI();
 
@@ -195,6 +212,12 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 
 GXemulWindow::~GXemulWindow()
 {
+}
+
+
+void GXemulWindow::InsertText(const string& msg)
+{
+	m_DebugConsoleWidget.InsertText(msg);
 }
 
 
