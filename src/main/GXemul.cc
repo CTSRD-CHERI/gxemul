@@ -77,6 +77,8 @@
  * component is a dummy container, which contains zero or more sub-components,
  * but it doesn't actually do anything else.
  *
+ * <center><img src="../../model.png"></center>
+ *
  * The state of each component is stored within that component. The state
  * consists of a number of variables (see StateVariable) such as strings,
  * integers, bools, and other more high-level types such as zero-filled memory
@@ -163,17 +165,46 @@
  * <tt>--without-gtkmm</tt> is also useful.)
  *
  *
+ * \section Model-view-controller
+ *
+ * GXemul's design is somewhat 
+ * <a href="http://en.wikipedia.org/wiki/Model-view-controller">Model-view-controller</a>-like.
+ * It boils down to keeping things modular in a reasonable way. In %GXemul, the
+ * Model, View, and Controller words map to the following concepts:
+ * <ul>
+ *	<li><b>Model:</b>
+ *		<br>The configuration tree, made up of <i>all the components
+ *		and their state</i>. One GXemul instance has
+ *		one root component, which in turn has child components.
+ *		If you see the expression "the emulation setup" in the source
+ *		code, it is a synonyme to "the configuration tree". (In other
+ *		applications, this may be called "the document".)
+ *	<p>
+ *	<li><b>View:</b>
+ *		<br>The active UI, e.g. a ConsoleUI or a GtkmmUI. The view's
+ *		purpose is to render the model visually (or textually), and
+ *		if the user interacts with the view (clicks on buttons, uses
+ *		drag'n'drop, or enters text commands), then the view calls the
+ *		controller to take care of these actions, which (sometimes)
+ *		affect the underlying model.
+ *	<p>
+ *	<li><b>Controller:</b>
+ *		<br>The GXemul instance and some
+ *		surrounding classes (the CommandInterpreter, for example)
+ *		make up the controller concept. The correct way for the
+ *		controller to affect the model is by using an Action, pushing
+ *		it onto the ActionStack. This makes sure than Undo/Redo will
+ *		work as expected.
+ * </ul>
+ *
+ *
  * \section codeguidelines_sec Coding guidelines
  *
- * The most important guideline is:
+ * Some important guidelines:
  *
  * <ul>
  *	<li>Newly written code should be similar to existing code.
- * </ul>
- *
- * But also:
- * <ul>
- *	<li>Avoid using non-portable code constructs. If possible, avoid
+ *	<li>Avoid using non-portable code constructs. Avoid
  *		using GNU-specific C++.
  *	<li>Any external library dependencies should be optional! Why?
  *		Because one of the best regression tests for the emulator is
