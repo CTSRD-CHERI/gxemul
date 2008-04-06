@@ -707,6 +707,10 @@ static void Test_StateVariable_Numeric_SetValue()
 	    vdouble.SetValue("-210.42") == true);
 	UnitTest::Assert("varDouble should not have been updated",
 	    varDouble == -210.42);
+	UnitTest::Assert("changing to 1e-100 should be possible (2)",
+	    vdouble.SetValue("1e-100") == true);
+	UnitTest::Assert("varDouble should have been updated (2)",
+	    varDouble == 1e-100);
 
 	// UInt8
 	UnitTest::Assert("changing to 100 should be possible",
