@@ -29,7 +29,7 @@
 
 
 MainbusComponent::MainbusComponent()
-	: Component("mainbus")
+	: Component("mainbus", "mainbus")
 	, m_memoryMap(NULL)
 	, m_currentAddressDataBus(NULL)
 {

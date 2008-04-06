@@ -276,9 +276,6 @@ string StateVariable::ToString() const
 {
 	stringstream sstr;
 
-	// TODO:  sstr.flags(std::ios::hex | std::ios::showbase);
-	// for large integers. Looks licer, and is more human readable.
-
 	switch (m_type) {
 	case String:
 		return m_value.pstr == NULL? "" : *m_value.pstr;
@@ -292,12 +289,15 @@ string StateVariable::ToString() const
 		sstr << (int) *m_value.puint8;
 		return sstr.str();
 	case UInt16:
+		sstr.flags(std::ios::hex | std::ios::showbase);
 		sstr << *m_value.puint16;
 		return sstr.str();
 	case UInt32:
+		sstr.flags(std::ios::hex | std::ios::showbase);
 		sstr << *m_value.puint32;
 		return sstr.str();
 	case UInt64:
+		sstr.flags(std::ios::hex | std::ios::showbase);
 		sstr << *m_value.puint64;
 		return sstr.str();
 	case SInt8:
@@ -662,10 +662,10 @@ static void Test_StateVariable_Numeric_Construct()
 	// Values
 	UnitTest::Assert("value Double", vdouble.ToString(), "-12.345");
 	UnitTest::Assert("value UInt8",  vuint8.ToString(),  "223");
-	UnitTest::Assert("value UInt16", vuint16.ToString(), "55000");
-	UnitTest::Assert("value UInt32", vuint32.ToString(), "3000000001");
+	UnitTest::Assert("value UInt16", vuint16.ToString(), "0xd6d8");
+	UnitTest::Assert("value UInt32", vuint32.ToString(), "0xb2d05e01");
 	UnitTest::Assert("value UInt64", vuint64.ToString(),
-	    "18364554488662197510");
+	    "0xfedc010203040506");
 	UnitTest::Assert("value SInt8",  vsint8.ToString(),  "-120");
 	UnitTest::Assert("value SInt16", vsint16.ToString(), "-22000");
 	UnitTest::Assert("value SInt32", vsint32.ToString(), "-1000000001");

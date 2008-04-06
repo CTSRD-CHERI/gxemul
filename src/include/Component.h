@@ -60,8 +60,13 @@ protected:
 	 * @param className	The name of the component class.
 	 *			It should be a short, descriptive name.
 	 *			For e.g. a PCI bus class, it can be "pcibus".
+	 *			For a MIPS CPU, it can be "mips_cpu".
+	 * @param visibleClassName	The visible name of the component class.
+	 *			It should be a short, descriptive name.
+	 *			For e.g. a PCI bus class, it can be "pcibus".
+	 *			For a MIPS CPU, it can be "cpu".
 	 */
-	Component(const string& className);
+	Component(const string& className, const string& visibleClassName);
 
 public:
 	virtual ~Component() = 0;
@@ -70,9 +75,17 @@ public:
 	 * \brief Gets the class name of the component.
 	 *
 	 * @return the class name of the component, e.g. "pcibus" for a PCI
-	 *	bus component class
+	 *	bus component class, or "mips_cpu" for a MIPS CPU.
 	 */
 	string GetClassName() const;
+
+	/**
+	 * \brief Gets the visible class name of the component.
+	 *
+	 * @return the class name of the component, e.g. "pcibus" for a PCI
+	 *	bus component class, or "cpu" for a MIPS CPU.
+	 */
+	string GetVisibleClassName() const;
 
 	/**
 	 * \brief Creates a Component.
@@ -581,6 +594,7 @@ private:
 	Component*		m_parentComponent;
 	Components		m_childComponents;
 	string			m_className;
+	string			m_visibleClassName;
 	StateVariableMap	m_stateVariables;
 
 	// The following are this component's variables. Components that

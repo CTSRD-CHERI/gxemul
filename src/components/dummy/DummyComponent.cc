@@ -31,7 +31,7 @@
 
 
 DummyComponent::DummyComponent(string className)
-	: Component(className)
+	: Component(className, className)
 {
 	// The dummy component should have no additional state.
 }

@@ -29,7 +29,7 @@
 
 
 MachineComponent::MachineComponent()
-	: Component("machine")
+	: Component("machine", "machine")
 {
 }
 

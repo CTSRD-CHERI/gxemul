@@ -30,15 +30,19 @@
 #include "components/CPUComponent.h"
 
 
-CPUComponent::CPUComponent(const string& className)
-	: Component(className)
+CPUComponent::CPUComponent(const string& className, const string& cpuKind)
+	: Component(className, "cpu")	// all cpus have "cpu" as their
+					// visible class name, regardless of
+					// their actual class name
 	, m_frequency(33.0e6)
+	, m_cpuKind(cpuKind)
 	, m_pageSize(0)
 	, m_pc(0)
 	, m_endianness(BigEndian)
 	, m_addressDataBus(NULL)
 	, m_currentCodePage(NULL)
 {
+	AddVariableString("kind", &m_cpuKind);
 	AddVariableUInt64("pc", &m_pc);
 	AddVariableDouble("frequency", &m_frequency);
 	// TODO: Endianness as a variable!

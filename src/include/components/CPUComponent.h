@@ -50,8 +50,12 @@ class CPUComponent
 public:
 	/**
 	 * \brief Constructs a CPUComponent.
+	 *
+	 * @param className The class name for the component.
+	 * @param cpuKind The CPU kind, e.g. "MIPS R4400" for a
+	 *	MIPS R4400 processor.
 	 */
-	CPUComponent(const string& className);
+	CPUComponent(const string& className, const string& cpuKind);
 
 	/**
 	 * \brief Creates a CPUComponent.
@@ -114,6 +118,7 @@ private:
 protected:
 	// Variables common to all (or most) kinds of CPUs:
 	double			m_frequency;
+	string			m_cpuKind;
 	int			m_pageSize;
 	uint64_t		m_pc;
 	enum Endianness		m_endianness;

@@ -598,7 +598,7 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 			// Load binaries into the main cpu.
 			refcount_ptr<Component> main_cpu =
 			    GetRootComponent()->
-			    LookupPath("root.machine0.mainbus0.mips_cpu0");
+			    LookupPath("root.machine0.mainbus0.cpu0");
 			// TODO: Don't hardcode the CPU path!
 
 			while (argc > 0) {

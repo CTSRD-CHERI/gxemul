@@ -30,7 +30,7 @@
 
 
 MIPS_CPUComponent::MIPS_CPUComponent()
-	: CPUComponent("mips_cpu")
+	: CPUComponent("mips_cpu", "MIPS")
 {
 	// MIPS CPUs are hardwired to start at 0xffffffffbfc00000:
 	m_pc = (int32_t) 0xbfc00000;
@@ -147,7 +147,7 @@ static void Test_MIPS_CPUComponent_Create()
 
 	const StateVariable * p = cpu->GetVariable("pc");
 	UnitTest::Assert("cpu has no pc state variable?", p != NULL);
-	UnitTest::Assert("initial pc", p->ToString(), "18446744072631615488");
+	UnitTest::Assert("initial pc", p->ToString(), "0xffffffffbfc00000");
 }
 
 UNITTESTS(MIPS_CPUComponent)

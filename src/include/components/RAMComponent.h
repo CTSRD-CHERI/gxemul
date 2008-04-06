@@ -75,8 +75,12 @@ class RAMComponent
 public:
 	/**
 	 * \brief Constructs a RAMComponent.
+	 *
+	 * @param visibleClassName The visible class name. Defaults to
+	 *	"ram". Useful alternatives may be "rom" or
+	 *	"vram" for video ram.
 	 */
-	RAMComponent();
+	RAMComponent(const string& visibleClassName = "ram");
 
 	virtual ~RAMComponent();
 

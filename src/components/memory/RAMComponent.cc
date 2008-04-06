@@ -31,8 +31,8 @@
 #include <sys/mman.h>
 
 
-RAMComponent::RAMComponent()
-	: MemoryMappedComponent("ram")
+RAMComponent::RAMComponent(const string& visibleClassName)
+	: MemoryMappedComponent("ram", visibleClassName)
 	, m_blockSizeShift(22)		// 22 = 4 MB per block
 	, m_blockSize(1 << m_blockSizeShift)
 	, m_writeProtected(false)

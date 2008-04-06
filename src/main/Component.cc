@@ -34,9 +34,10 @@
 #include "ComponentFactory.h"
 
 
-Component::Component(const string& className)
+Component::Component(const string& className, const string& visibleClassName)
 	: m_parentComponent(NULL)
 	, m_className(className)
+	, m_visibleClassName(visibleClassName)
 {
 	AddVariableString("name", &m_name);
 	AddVariableString("template", &m_template);
@@ -51,6 +52,12 @@ Component::~Component()
 string Component::GetClassName() const
 {
 	return m_className;
+}
+
+
+string Component::GetVisibleClassName() const
+{
+	return m_visibleClassName;
 }
 
 
@@ -239,10 +246,21 @@ string Component::GenerateTreeDump(const string& branchTemplate) const
 
 	stringstream ss;
 
+	// If this component has a Kind, then show that.
+	const StateVariable* kind = GetVariable("kind");
+	if (kind != NULL && !kind->ToString().empty()) {
+		if (!ss.str().empty())
+			ss << ", ";
+		ss << kind->ToString();
+	}
+
 	// If this component has a frequency (i.e. it is runnable), then
 	// show the frequency:
 	double freq = GetCurrentFrequency();
 	if (freq != 0.0) {
+		if (!ss.str().empty())
+			ss << ", ";
+
 		if (freq >= 1e9)
 			ss << freq/1e9 << " GHz";
 		else if (freq >= 1e6)
@@ -276,7 +294,7 @@ string Component::GenerateTreeDump(const string& branchTemplate) const
 		ss << memoryMappedBase->ToInteger();
 
 		if (memoryMappedAddrMul != NULL &&
-		    memoryMappedAddrMul->ToString() != "1")
+		    memoryMappedAddrMul->ToInteger() != 1)
 			ss << ", addrmul " << memoryMappedAddrMul->ToInteger();
 	}
 
@@ -328,9 +346,10 @@ void Component::AddChild(refcount_ptr<Component> childComponent,
 		const StateVariable* name =
 		    childComponent->GetVariable("name");
 		if (name->ToString().empty() || collision) {
-			// Set the default name:  classname + postfix number
+			// Set the default name:
+			//	visibleclassname + postfix number
 			stringstream ss;
-			ss << childComponent->GetClassName() << postfix;
+			ss << childComponent->GetVisibleClassName() << postfix;
 			childComponent->SetVariableValue("name", ss.str());
 
 			name = childComponent->GetVariable("name");

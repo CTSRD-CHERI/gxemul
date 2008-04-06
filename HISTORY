@@ -4005,3 +4005,11 @@ Changelog for GXemul:
 		start running the binary now :-)
 		Some more work on the GTKMM GUI: the debug output window now
 		shows debug messages and commands being executed.
+20080406	Adding a section about Model-View-Controller to the source
+		code documentation main page, and a simple picture of what the
+		component tree may look like.
+		Introducing "visible class names" in addition to the normal
+		class name, for components. This makes mips_cpu0 show up as
+		just cpu0, which is much nicer.
+		uint16_t, 32_t, and 64_t state variables are now outputted in
+		hexadecimal form in ToString(), for readability.

@@ -59,7 +59,7 @@ refcount_ptr<Component> TestMIPSMachine::Create()
 		return NULL;
 
 	stringstream tmpss2;
-	tmpss2 << 32 * 1048576;
+	tmpss2 << 16 * 1048576;
 	rom->SetVariableValue("name", "rom0");
 	rom->SetVariableValue("memoryMappedBase", "0x1fc00000");
 	rom->SetVariableValue("memoryMappedSize", tmpss2.str());

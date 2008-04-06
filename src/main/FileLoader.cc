@@ -184,7 +184,7 @@ static void Test_FileLoader_Load_ELF32()
 
 	machine->SetVariableValue("name", "machine");
 	refcount_ptr<Component> component =
-	    machine->LookupPath("machine.mainbus0.mips_cpu0");
+	    machine->LookupPath("machine.mainbus0.cpu0");
 	UnitTest::Assert("could not look up CPU to load into?",
 	    !component.IsNULL());
 

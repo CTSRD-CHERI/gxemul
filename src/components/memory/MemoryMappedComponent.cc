@@ -28,8 +28,9 @@
 #include "components/MemoryMappedComponent.h"
 
 
-MemoryMappedComponent::MemoryMappedComponent(const string& className)
-	: Component(className)
+MemoryMappedComponent::MemoryMappedComponent(const string& className,
+		const string& visibleClassName)
+	: Component(className, visibleClassName)
 	, m_memoryMappedBase(0)
 	, m_memoryMappedSize(0)
 	, m_memoryMappedAddrMul(1)

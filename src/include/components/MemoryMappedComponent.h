@@ -56,7 +56,8 @@ public:
 	/**
 	 * \brief Constructs a MemoryMappedComponent.
 	 */
-	MemoryMappedComponent(const string& className);
+	MemoryMappedComponent(const string& className,
+		const string& visibleClassName);
 
 	/**
 	 * \brief Creates a MemoryMappedComponent.
