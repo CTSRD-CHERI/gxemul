@@ -87,7 +87,7 @@
  * consists of a number of variables (see StateVariable) such as strings,
  * integers, bools, and other more high-level types such as zero-filled memory
  * arrays. Such memory arrays are used e.g. by the RAMComponent to emulate
- * RAM, and can also be used to emulte video framebuffer memory.
+ * RAM, and can also be used to emulate video framebuffer memory.
  *
  * Individual components are implemented in <tt>src/components/</tt>, with
  * header files in <tt>src/include/components/</tt>. The <tt>configure</tt>
