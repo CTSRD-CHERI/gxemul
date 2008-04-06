@@ -127,9 +127,12 @@ public:
 	 *
 	 * @param branchTemplate Used for recursion. Start with an empty
 	 *	string ("").
+	 * @param htmlLinksForClassNames Used to generate HTML links
+	 *	by 'make documentation'.
 	 * @return An ASCII string containing the tree.
 	 */
-	string GenerateTreeDump(const string& branchTemplate) const;
+	string GenerateTreeDump(const string& branchTemplate,
+		bool htmlLinksForClassNames = false) const;
 
 	/**
 	 * \brief Resets the state of this component and all its children.

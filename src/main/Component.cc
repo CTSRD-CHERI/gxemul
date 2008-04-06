@@ -29,6 +29,7 @@
  */
 
 #include "assert.h"
+#include <fstream>
 
 #include "Component.h"
 #include "ComponentFactory.h"
@@ -198,7 +199,8 @@ Component* Component::GetParent()
 }
 
 
-string Component::GenerateTreeDump(const string& branchTemplate) const
+string Component::GenerateTreeDump(const string& branchTemplate,
+	bool htmlLinksForClassNames) const
 {
 	// Basically, this generates a string which looks like:
 	//
@@ -228,14 +230,30 @@ string Component::GenerateTreeDump(const string& branchTemplate) const
 	}
 
 	// Fallback to showing the component's class name in parentheses...
-	string name = "(unnamed " + GetClassName() + ")";
+	const string className = GetClassName();
+	string name = "(unnamed " + className + ")";
 
 	// ... but prefer the state variable "name" if it is non-empty:
 	const StateVariable* value = GetVariable("name");
 	if (!value->ToString().empty())
 		name = value->ToString();
 
-	string str = branch + name;
+	string str = branch;
+
+	if (htmlLinksForClassNames) {
+		// See if this class name has its own HTML page.
+		std::ifstream documentationComponentFile((
+		    "doc/components/component_"
+		    + className + ".html").c_str());
+
+		if (documentationComponentFile.is_open())
+			str += "<a href=\"components/component_" +
+			    className + ".html\">" + name + "</a>";
+		else
+			str += name;
+	} else {
+		str += name;
+	}
 
 	// If this component was created by a template, then show the template
 	// type in [ ].
@@ -313,7 +331,8 @@ string Component::GenerateTreeDump(const string& branchTemplate) const
 		else
 			subBranch += "|   ";
 
-		result += children[i]->GenerateTreeDump(subBranch);
+		result += children[i]->GenerateTreeDump(subBranch,
+		    htmlLinksForClassNames);
 	}
 
 	return result;

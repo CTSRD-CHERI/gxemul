@@ -4015,3 +4015,5 @@ Changelog for GXemul:
 		hexadecimal form in ToString(), for readability.
 		The ListComponents command now shows the short description of
 		each command.
+		Links are now generated from component names in machines.html
+		to corresponding component_xxx.html pages.

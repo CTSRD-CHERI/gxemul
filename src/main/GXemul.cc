@@ -437,7 +437,8 @@ static void GenerateHTMLListOfComponents(bool machines)
 			if (!component.IsNULL() &&
 			    component->GetChildren().size() != 0)
 				treeDump = "<pre>" +
-				    component->GenerateTreeDump("") + "</pre>";
+				    component->GenerateTreeDump("", true)
+				    + "</pre>";
 		}
 
 		// Some distance between table entries:
