@@ -79,6 +79,10 @@
  *
  * <center><img src="../../model.png"></center>
  *
+ * Starting from the root node, each component has a <i>path</i>, e.g.
+ * <tt>root.machine1.mainbus0.ram0</tt> for the RAM component in machine1
+ * in the example above.
+ *
  * The state of each component is stored within that component. The state
  * consists of a number of variables (see StateVariable) such as strings,
  * integers, bools, and other more high-level types such as zero-filled memory
