@@ -49,8 +49,7 @@ string DummyComponent::GetAttribute(const string& attributeName)
 		return "yes";
 
 	if (attributeName == "description")
-		return "A dummy component, which does nothing.<br>"
-		    "It can act as a container for other components.";
+		return "A dummy component, which does nothing.";
 
 	return Component::GetAttribute(attributeName);
 }

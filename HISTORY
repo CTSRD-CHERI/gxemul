@@ -4013,3 +4013,5 @@ Changelog for GXemul:
 		just cpu0, which is much nicer.
 		uint16_t, 32_t, and 64_t state variables are now outputted in
 		hexadecimal form in ToString(), for readability.
+		The ListComponents command now shows the short description of
+		each command.

@@ -49,8 +49,7 @@ string MachineComponent::GetAttribute(const string& attributeName)
 		return "yes";
 
 	if (attributeName == "description")
-		return "A generic component which acts as a base component"
-		    " for all machines.";
+		return "A generic machine container.";
 
 	return Component::GetAttribute(attributeName);
 }

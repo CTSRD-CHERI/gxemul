@@ -47,14 +47,27 @@ void ListComponentsCommand::Execute(GXemul& gxemul,
 	vector<string> allComponents =
 	    ComponentFactory::GetAllComponentNames(false);
 
-	for (size_t i=0; i<allComponents.size(); i++) {
+	size_t maxLen = 0;
+	size_t i;
+	for (i=0; i<allComponents.size(); i++)
+		if (allComponents[i].length() > maxLen)
+			maxLen = allComponents[i].length();
+
+	for (i=0; i<allComponents.size(); i++) {
+		const string& name = allComponents[i];
 		refcount_ptr<Component> creatable =
-		    ComponentFactory::CreateComponent(allComponents[i]);
+		    ComponentFactory::CreateComponent(name);
 		if (creatable.IsNULL())
 			continue;
 
-		gxemul.GetUI()->ShowDebugMessage(
-		    "  " + allComponents[i] + "\n");
+		stringstream msg;
+		msg << "  " + name;
+		for (size_t j = 0; j < 3 + maxLen - name.length(); j++)
+			msg << " ";
+		msg << ComponentFactory::GetAttribute(name, "description");
+		msg << "\n";
+
+		gxemul.GetUI()->ShowDebugMessage(msg.str());
 	}
 }
 
