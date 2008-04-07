@@ -79,6 +79,13 @@ public:
 	virtual double GetCurrentFrequency() const;
 
 	/**
+	 * \brief Returns the component's CPUComponent interface.
+	 *
+	 * @return The %CPUComponent itself.
+	 */
+	virtual CPUComponent* AsCPUComponent();
+
+	/**
 	 * \brief Returns the component's AddressDataBus interface.
 	 *
 	 * @return	A pointer to an AddressDataBus.
@@ -96,6 +103,28 @@ public:
 	virtual bool WriteData(const uint32_t& data, Endianness endianness);
 	virtual bool WriteData(const uint64_t& data, Endianness endianness);
 
+	/**
+	 * \brief Disassembles an instruction into readable strings.
+	 *
+	 * @param vaddr The virtual address of the program counter.
+	 * @param maxLen The number of bytes in the instruction buffer.
+	 * @param instruction A pointer to a buffer containing the instruction.
+	 * @param result A vector where the implementation will add:
+	 *	<ol>
+	 *		<li>machine code bytes in a standard notation
+	 *		<li>instruction mnemonic
+	 *		<li>instruction arguments
+	 *		<li>instruction comments
+	 *	</ol>
+	 *	All of the fields above are optional, but they have to be
+	 *	specified in the same order for a particular CPU implementation,
+	 *	so that the fields of the vector can be listed in a tabular
+	 *	format.
+	 * @return The number of bytes that the instruction occupied.
+	 */	
+	virtual size_t DisassembleInstruction(uint64_t vaddr, size_t maxLen,
+		unsigned char *instruction, vector<string>& result) = 0;
+
 
 	/********************************************************************/
 
@@ -108,7 +137,21 @@ protected:
 	bool ReadInstructionWord(uint16_t& iword, uint64_t vaddr);
 	bool ReadInstructionWord(uint32_t& iword, uint64_t vaddr);
 
-	// CPU-specific virtual to physical address translation (MMU):
+	/**
+	 * \brief Virtual to physical address translation (MMU).
+	 *
+	 * This function should be overridden in each CPU implementation.
+	 * The default implementation is just a dummy, which returns paddr =
+	 * vaddr for all addresses, and everything is writable.
+	 *
+	 * @param vaddr The virtual address to translate.
+	 * @param paddr The return value; physical address.
+	 * @param writable This is set to true or false by the function,
+	 *	depending on if the memory at the virtual address was
+	 *	writable or not.
+	 * @return True if the translation succeeded, false if there was a
+	 *	translation error.
+	 */
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 					bool& writable);
 

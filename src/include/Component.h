@@ -36,6 +36,7 @@
 
 
 class AddressDataBus;
+class CPUComponent;
 
 class Component;
 typedef vector< refcount_ptr<Component> > Components;
@@ -166,6 +167,14 @@ public:
 	 * @return	The component's frequency in Hz.
 	 */
 	virtual double GetCurrentFrequency() const;
+
+	/**
+	 * \brief Returns the component's CPUComponent interface.
+	 *
+	 * @return A pointer to the component as a %CPUComponent, or
+	 * NULL if the component isn't a CPU.
+	 */
+	virtual CPUComponent* AsCPUComponent();
 
 	/**
 	 * \brief Returns the component's AddressDataBus interface, if any.

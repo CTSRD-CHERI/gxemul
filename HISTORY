@@ -4017,3 +4017,7 @@ Changelog for GXemul:
 		each command.
 		Links are now generated from component names in machines.html
 		to corresponding component_xxx.html pages.
+		Beginning on internal support for instruction disassembly (not
+		user-accessible yet).
+20080407	Continuing on the instruction disassembly stuff; importing
+		some MIPS defines from GXemul 0.4.6.3.

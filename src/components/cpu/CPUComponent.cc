@@ -61,6 +61,12 @@ double CPUComponent::GetCurrentFrequency() const
 }
 
 
+CPUComponent * CPUComponent::AsCPUComponent()
+{
+        return this;
+}
+
+
 AddressDataBus * CPUComponent::AsAddressDataBus()
 {
         return this;

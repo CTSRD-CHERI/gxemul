@@ -178,6 +178,14 @@ double Component::GetCurrentFrequency() const
 }
 
 
+CPUComponent* Component::AsCPUComponent()
+{
+	// Default implementation (the base Component class) is not a CPU.
+
+	return NULL;
+}
+
+
 AddressDataBus* Component::AsAddressDataBus()
 {
 	// Default implementation (the base Component class) is not an
