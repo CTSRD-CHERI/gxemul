@@ -54,6 +54,18 @@ Legacy (0.4.x) series
 
 Misc.
 -----
+	[/]  CommandInterpreter:
+		[ ]  Tab completion of methods!
+		[X]  "Methods" on objects? E.g.
+			[/]  cpu.unassemble		disassemble
+			[ ]  cpu.registers		show registers
+			[ ]  ram.dump			dump memory
+		[X]  Short form:  cpu.u
+		     When searching for substrings, try e.g. "cpu.u" first,
+		     then "cpu".
+		[ ]  State variable assignments? (causes an Action to be
+		     executed, which allows Undo.)
+
 	[/]  File loader: Load stuff into emulated RAM (or ROM) components.
 	     Note: Usually, ELFs contain _virtual_ addresses, so file loading
 	     needs to go through a CPU to be properly address translated!
@@ -293,14 +305,9 @@ CommandInterpreter
 	[ ]	expr = value	Sets a state variable
 	[ ]	pause		sets RunState to Paused
 	[ ]	step		single-step (Paused)
-	[ ]	trace		toggle function call tracing
-	[ ]	registers	dump registers of a cpu (short form for
-				inspect [focuspath.]cpu  perhaps?)
+	[ ]?	trace		toggle function call tracing (cpu.trace?)
 
 	[ ]  c, s, r  as abbreviated commands for continue, step, and registers?
-
-	[ ]  "Methods" on objects? E.g. ... ram.read8(addr) returning
-	     a byte from that address.
 
 	[ ]  Strings should be supported, both for e.g. variable
 	     assignment, and for e.g. placing strings in memory.

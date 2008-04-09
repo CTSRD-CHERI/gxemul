@@ -155,8 +155,45 @@ private:
 
 	/**
 	 * \brief Completes the word at the current position in the input line.
+	 *
+	 * @param commandString A reference to the string to
+	 *	tab-complete.
+	 * @param cursorPosition A refernce to a size_t, which
+	 *	indicates the current cursor position within the string.
+	 * @param visibleShowAvailable True if available words should be
+	 *	echoed back via the UI.
+	 * @return True if there was a single match, false otherwise.
 	 */
-	void TabComplete();
+	bool TabComplete(string& commandString, size_t& cursorPosition,
+		bool visibleShowAvailable = false);
+
+	/**
+	 * \brief Runs a method on a Component.
+	 *
+	 * Note: The componentPathAndMethod argument may contain an optional
+	 * ".method" suffix. The part before the method may need to be
+	 * tab-completed.
+	 *
+	 * Some examples of componentPathAndMethod:
+	 * <ul>
+	 *	<li>cpu
+	 *	<li>cpu.u
+	 *	<li>cpu.unassemble
+	 *	<li>root.machine0.mainbus0.cpu
+	 *	<li>root.machine0.mainbus0.cpu0
+	 *	<li>root.machine0.mainbus0.cpu.u
+	 *	<li>root.machine0.mainbus0.cpu0.unassemble
+	 * </ul>
+	 *
+	 * If the method name is missing, a default method will be executed.
+	 *
+	 * @param componentPathAndMethod The path to the component, plus a
+	 *	possible ".method" suffix.
+	 * @param arguments A vector of string arguments.
+	 * @return True if a component method was executed, false otherwise.
+	 */
+	bool RunComponentMethod(const string& componentPathAndMethod,
+		const vector<string>& arguments);
 
 	/**
 	 * \brief Prints a list of available words (for tab completion).

@@ -8,8 +8,7 @@ LIBS=$(XLIB) $(OTHERLIBS)
 OBJS=AddComponentCommand.o CloseCommand.o ContinueCommand.o HelpCommand.o \
 	LoadCommand.o ListComponentsCommand.o \
 	QuitCommand.o RedoCommand.o RemoveComponentCommand.o \
-	SaveCommand.o StatusCommand.o TreeCommand.o UndoCommand.o \
-	VersionCommand.o
+	SaveCommand.o StatusCommand.o UndoCommand.o VersionCommand.o
 
 all: $(OBJS)
 

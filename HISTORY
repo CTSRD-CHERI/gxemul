@@ -4021,3 +4021,10 @@ Changelog for GXemul:
 		user-accessible yet).
 20080407	Continuing on the instruction disassembly stuff; importing
 		some MIPS defines from GXemul 0.4.6.3.
+20080409	Implementing support in the CommandInterpreter for running
+		methods on components. If a component name is "executed" with
+		no method name given, the component tree is dumped. (This means
+		that there is no need for the 'tree' command anymore, so it
+		has been removed.)
+		Implementing the first component method: "unassemble" for the
+		CPUComponent.

@@ -97,33 +97,35 @@ string CommandInterpreter::GetHistoryLine(int nStepsBack) const
 }
 
 
-void CommandInterpreter::TabComplete()
+bool CommandInterpreter::TabComplete(string& commandString,
+	size_t& cursorPosition, bool visibleShowAvailable)
 {
 	string wordToComplete;
 	bool firstWordOnLine = true;
 
-	size_t pos = m_currentCommandCursorPosition;
+	size_t pos = cursorPosition;
 	while (pos > 0) {
 		pos --;
-		if (m_currentCommandString[pos] == ' ')
+		if (commandString[pos] == ' ')
 			break;
-		wordToComplete = m_currentCommandString[pos] + wordToComplete;
+		wordToComplete = commandString[pos] + wordToComplete;
 	}
 
 	while (pos > 0) {
 		pos --;
-		if (m_currentCommandString[pos] != ' ') {
+		if (commandString[pos] != ' ') {
 			firstWordOnLine = false;
 			break;
 		}
 	}
 
 	bool completeCommands = firstWordOnLine;
-	bool completeComponents = !firstWordOnLine;
-	// TODO: StateVariables, etc. Generalize this.
 
 	if (wordToComplete == "") {
-		// Show all available words.
+		if (!visibleShowAvailable)
+			return false;
+
+		// Show all available words:
 
 		if (completeCommands) {
 			// All available commands:
@@ -135,15 +137,16 @@ void CommandInterpreter::TabComplete()
 			ShowAvailableWords(allCommands);
 		}
 
-		if (completeComponents) {
-			ShowAvailableWords(m_GXemul->GetRootComponent()->
-			    FindPathByPartialMatch(""));
-		}
+		ShowAvailableWords(m_GXemul->GetRootComponent()->
+		    FindPathByPartialMatch(""));
 
-		return;
+		return false;
 	}
 
 	vector<string> matches;
+
+	matches = m_GXemul->GetRootComponent()->
+	    FindPathByPartialMatch(wordToComplete);
 
 	if (completeCommands) {
 		Commands::const_iterator it = m_commands.begin();
@@ -156,15 +159,8 @@ void CommandInterpreter::TabComplete()
 		}
 	}
 
-	if (completeComponents) {
-		matches = m_GXemul->GetRootComponent()->
-		    FindPathByPartialMatch(wordToComplete);
-	}
-
-	// TODO: Check for matches among StateVariable names...
-
 	if (matches.size() == 0)
-		return;
+		return false;
 
 	string completedWord;
 
@@ -176,6 +172,8 @@ void CommandInterpreter::TabComplete()
 		// Figure out the longest possible match, and add that:
 		size_t i, n = matches.size();
 		for (size_t pos = 0; ; pos ++) {
+			if (pos >= matches[0].length())
+				break;
 			stringchar ch = matches[0][pos];
 			for (i=1; i<n; i++) {
 				if (matches[i][pos] != ch)
@@ -189,25 +187,38 @@ void CommandInterpreter::TabComplete()
 		
 		// Show available words, so the user knows what there
 		// is to choose from.
-		ShowAvailableWords(matches);
+		if (visibleShowAvailable)
+			ShowAvailableWords(matches);
 	}
 
 	// Erase the old (incomplete) word, and insert the completed word:
-	m_currentCommandCursorPosition -= wordToComplete.length();
-	m_currentCommandString.erase(m_currentCommandCursorPosition,
-	    wordToComplete.length());	
-	m_currentCommandString.insert(m_currentCommandCursorPosition,
-	    completedWord);
-	m_currentCommandCursorPosition += completedWord.length();
+	if (!completedWord.empty()) {
+		cursorPosition -= wordToComplete.length();
+		commandString.erase(cursorPosition, wordToComplete.length());	
+		commandString.insert(cursorPosition, completedWord);
+		cursorPosition += completedWord.length();
+	}
 
 	// Special case: If there was a single match, and we are at the end
-	// of the line, add a space (" "). This behaviour feels better, and
-	// this is how other tab completors seems to work.
-	if (matches.size() == 1 && m_currentCommandCursorPosition
-	    == m_currentCommandString.length()) {
-		m_currentCommandString += " ";
-		m_currentCommandCursorPosition ++;
+	// of the line, and this was a command, then add a space (" "). This
+	// behaviour feels better, and this is how other tab completors seems
+	// to work.
+	//
+	// HOWEVER: Don't add a space after component paths. Usually the user
+	// will want to type e.g. "cpu" + TAB, and get
+	// "root.machine0.mainbus0.cpu0" with no space, and then be able to
+	// add ".unassemble" or so manually.
+	if (matches.size() == 1 && cursorPosition == commandString.length()) {
+		// Ugly hack: Instead of checking if this is a command, we
+		// can probably assume that anything without a period (.) in
+		// it is a command name.
+		if (matches[0].find(".") == string::npos) {
+			commandString += " ";
+			cursorPosition ++;
+		}
 	}
+
+	return matches.size() == 1;
 }
 
 
@@ -377,8 +388,9 @@ bool CommandInterpreter::AddKey(stringchar key)
 		break;
 
 	case '\t':
-		// Tab completion:
-		TabComplete();
+		// Tab completion, with visible word hints:
+		TabComplete(m_currentCommandString,
+		    m_currentCommandCursorPosition, true);
 		break;
 
 	case '\n':
@@ -511,6 +523,104 @@ static void SplitIntoWords(const string& command,
 }
 
 
+bool CommandInterpreter::RunComponentMethod(
+	const string& componentPathAndMethod, const vector<string>& arguments)
+{
+	// Note: componentPathAndMethod may or may not have a method at
+	// the end!
+
+	// Make several "smart" guesses:
+	refcount_ptr<Component> component;
+	string componentPath;
+	string methodName;
+
+	do {
+		// 1. Assume that componentPathAndMethod is a full component
+		// path:
+		component = m_GXemul->GetRootComponent()->
+		    LookupPath(componentPathAndMethod);
+		if (!component.IsNULL())
+			break;
+
+		// 2. Assume that componentPathAndMethod is a component
+		// path, but it is not tab-completed yet:
+		string tabcompleted = componentPathAndMethod;
+		size_t tmpLen = tabcompleted.length();
+		if (TabComplete(tabcompleted, tmpLen)) {
+			component = m_GXemul->GetRootComponent()->
+			    LookupPath(tabcompleted);
+			if (!component.IsNULL())
+				break;
+		}
+		
+		// If there is no period in the name, we can't continue
+		// with the following guesses.
+		if (componentPathAndMethod.find(".") == string::npos)
+			break;
+
+		size_t pos = componentPathAndMethod.find_last_of('.');
+
+		// 3. Assume full component path + ".method":
+		componentPath = componentPathAndMethod.substr(0, pos);
+		component = m_GXemul->GetRootComponent()->
+		    LookupPath(componentPath);
+		if (!component.IsNULL()) {
+			methodName = componentPathAndMethod.substr(pos+1);
+			break;
+		}
+
+		// 4. Assume non-tab-completed component path + ".method":
+		tabcompleted = componentPath;
+		tmpLen = tabcompleted.length();
+		if (TabComplete(tabcompleted, tmpLen)) {
+			component = m_GXemul->GetRootComponent()->
+			    LookupPath(tabcompleted);
+			if (!component.IsNULL()) {
+				methodName =
+				    componentPathAndMethod.substr(pos+1);
+				break;
+			}
+		}
+	} while (false);
+
+	if (component.IsNULL())
+		return false;
+
+	// No method given? Then show the component tree and return.
+	if (methodName.empty()) {
+		m_GXemul->GetUI()->ShowDebugMessage(
+		    component->GenerateTreeDump(""));
+		return true;
+	}
+
+	// Now, it is possible that methodName is incomplete, so it has to
+	// be looked up as well:
+	vector<string> names;
+	component->GetMethodNames(names);
+	int nrOfMatches = 0;
+	string fullMatch;
+	for (size_t i=0; i<names.size(); ++i) {
+		if (names[i].substr(0, methodName.length()) == methodName) {
+			++ nrOfMatches;
+			fullMatch = names[i];
+		}
+	}
+
+	if (nrOfMatches == 1) {
+		// Execute it!
+		component->ExecuteMethod(m_GXemul, fullMatch, arguments);
+		return true;
+	} else {
+		stringstream ss;
+		ss << "Available methods on " << component->GeneratePath()
+		    << ":";
+		m_GXemul->GetUI()->ShowDebugMessage(ss.str());
+		ShowAvailableWords(names);
+		return false;
+	}
+}
+
+
 bool CommandInterpreter::RunCommand(const string& command)
 {
 	string commandName;
@@ -522,9 +632,27 @@ bool CommandInterpreter::RunCommand(const string& command)
 	// Find the command...
 	Commands::iterator it = m_commands.find(commandName);
 	if (it == m_commands.end()) {
-		m_GXemul->GetUI()->ShowDebugMessage(commandName +
-		    ": unknown command. Type  help  for help.\n");
-		return false;
+		// Not found? Then try to tab-complete the name...
+		string commandTabCompleted = commandName;
+		size_t tmpCursorPos = commandTabCompleted.length();
+		TabComplete(commandTabCompleted, tmpCursorPos);
+
+		// remove any trailing space(s):
+		while (commandTabCompleted.length() > 0 &&
+		    commandTabCompleted[commandTabCompleted.length() - 1] == ' ')
+			commandTabCompleted.erase(commandTabCompleted.length() - 1);
+
+		// ... and try again:
+		it = m_commands.find(commandTabCompleted);
+		if (it == m_commands.end()) {
+			// If this is a component name [with an optional
+			// method name], then execute a method on it.
+			if (RunComponentMethod(commandName, arguments))
+				return true;
+			m_GXemul->GetUI()->ShowDebugMessage(commandName +
+			    ": unknown command. Type  help  for help.\n");
+			return false;
+		}
 	}
 
 	if (arguments.size() != 0 && (it->second)->GetArgumentFormat() == "") {
@@ -1014,6 +1142,23 @@ static void Test_CommandInterpreter_TabCompletion_Partial()
 	    ci.GetCurrentCommandBuffer(), "dummycZ");
 }
 
+static void Test_CommandInterpreter_TabCompletion_C()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.AddKey('c');
+	UnitTest::Assert("initial buffer contents mismatch",
+	    ci.GetCurrentCommandBuffer(), "c");
+
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should not have modified command",
+	    ci.GetCurrentCommandBuffer(), "c");
+
+	// ... because there are at least two possible commands on the
+	// letter c: close and continue.
+}
+
 static void Test_CommandInterpreter_TabCompletion_OnlyCommandAsFirstWord()
 {
 	GXemul gxemul(false);
@@ -1047,6 +1192,25 @@ static void Test_CommandInterpreter_TabCompletion_ComponentName()
 	GXemul gxemul(false);
 	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
 
+	ci.RunCommand("add testmips");
+	UnitTest::Assert("initial buffer should be empty",
+	    ci.GetCurrentCommandBuffer(), "");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have completed the "
+		"component name",
+	    ci.GetCurrentCommandBuffer(), "root.machine0.mainbus0.cpu0");
+
+	// Note: No space after component tab completion.
+}
+
+static void Test_CommandInterpreter_TabCompletion_ComponentNameAsArgument()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
 	ci.RunCommand("add dummy root");
 	UnitTest::Assert("initial buffer should be empty",
 	    ci.GetCurrentCommandBuffer(), "");
@@ -1069,7 +1233,42 @@ static void Test_CommandInterpreter_TabCompletion_ComponentName()
 	ci.AddKey('\t');
 	UnitTest::Assert("tab completion should have completed the "
 		"component name",
-	    ci.GetCurrentCommandBuffer(), "add dummy root.dummy0 ");
+	    ci.GetCurrentCommandBuffer(), "add dummy root.dummy0");
+
+	// Note: No space after component tab completion.
+}
+
+static void Test_CommandInterpreter_TabCompletion_CWithComponents()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+
+	ci.AddKey('c');
+	UnitTest::Assert("initial buffer contents mismatch",
+	    ci.GetCurrentCommandBuffer(), "c");
+
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should not have modified command",
+	    ci.GetCurrentCommandBuffer(), "c");
+
+	// ... because there are at least two possible commands on the
+	// letter c: close and continue.
+}
+
+static void Test_CommandInterpreter_TabCompletion_roWithComponents()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+
+	ci.AddKey('r');
+	ci.AddKey('o');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have expanded to 'root'",
+	    ci.GetCurrentCommandBuffer(), "root");
 }
 
 static void Test_CommandInterpreter_NonExistingCommand()
@@ -1106,6 +1305,32 @@ static void Test_CommandInterpreter_SimpleCommand_NoArgsAllowed()
 	    ci.RunCommand("version hello") == false);
 }
 
+static void Test_CommandInterpreter_ComponentMethods()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	UnitTest::Assert("Huh? Could not add testmips.",
+	    ci.RunCommand("add testmips") == true);
+
+	UnitTest::Assert("component method 1",
+	    ci.RunCommand("cpu") == true);
+	UnitTest::Assert("component method 2",
+	    ci.RunCommand("cpu.u") == true);
+	UnitTest::Assert("component method 3",
+	    ci.RunCommand("cpu.urk") == false);
+	UnitTest::Assert("component method 4",
+	    ci.RunCommand("cpu.unassemble") == true);
+	UnitTest::Assert("component method 5",
+	    ci.RunCommand("root.machine0.mainbus0.cpu") == true);
+	UnitTest::Assert("component method 6",
+	    ci.RunCommand("root.machine0.mainbus0.cpu0") == true);
+	UnitTest::Assert("component method 7",
+	    ci.RunCommand("root.machine0.mainbus0.cpu.u") == true);
+	UnitTest::Assert("component method 8",
+	    ci.RunCommand("root.machine0.mainbus0.cpu0.unassemble") == true);
+}
+
 UNITTESTS(CommandInterpreter)
 {
 	// Key and current buffer:
@@ -1125,13 +1350,18 @@ UNITTESTS(CommandInterpreter)
 	UNITTEST(Test_CommandInterpreter_TabCompletion_FullWord);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_SpacesFirstOnLine);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_Partial);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_C);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_OnlyCommandAsFirstWord);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentName);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameAsArgument);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_CWithComponents);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_roWithComponents);
 
 	// RunCommand:
 	UNITTEST(Test_CommandInterpreter_NonExistingCommand);
 	UNITTEST(Test_CommandInterpreter_SimpleCommand);
 	UNITTEST(Test_CommandInterpreter_SimpleCommand_NoArgsAllowed);
+	UNITTEST(Test_CommandInterpreter_ComponentMethods);
 }
 
 #endif

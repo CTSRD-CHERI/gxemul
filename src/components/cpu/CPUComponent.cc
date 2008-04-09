@@ -28,6 +28,7 @@
 #include <assert.h>
 #include "AddressDataBus.h"
 #include "components/CPUComponent.h"
+#include "GXemul.h"
 
 
 CPUComponent::CPUComponent(const string& className, const string& cpuKind)
@@ -64,6 +65,54 @@ double CPUComponent::GetCurrentFrequency() const
 CPUComponent * CPUComponent::AsCPUComponent()
 {
         return this;
+}
+
+
+void CPUComponent::GetMethodNames(vector<string>& names) const
+{
+	// Add our method names...
+	names.push_back("unassemble");
+
+	// ... and make sure to call the base class implementation:
+	Component::GetMethodNames(names);
+}
+
+
+void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
+	const vector<string>& arguments)
+{
+	if (methodName == "unassemble") {
+		uint64_t vaddr = m_pc;
+		for (int i=0; i<20; i++) {
+			// TODO: GENERALIZE! Some archs will have longer
+			// instructions, or unaligned, or over page boundaries!
+			const size_t maxLen = 4;
+			unsigned char instruction[maxLen];
+			vector<string> result;
+			
+			for (size_t k=0; k<maxLen; ++k) {
+				AddressSelect(vaddr + k);
+				ReadData(instruction[k]);
+			}
+			
+			size_t len = DisassembleInstruction(vaddr,
+			    maxLen, instruction, result);
+			vaddr += len;
+
+			stringstream ss;
+			ss.flags(std::ios::hex | std::ios::showbase);
+			ss << vaddr;
+			for (size_t j=0; j<result.size(); ++j)
+				ss << "\t" << result[j];
+			ss << "\n";
+			
+			gxemul->GetUI()->ShowDebugMessage(ss.str());
+		}
+		return;
+	}
+	
+	// Huh? Unimplemented method. Shouldn't be here.
+	throw std::exception();
 }
 
 

@@ -36,9 +36,10 @@
 
 
 class AddressDataBus;
-class CPUComponent;
-
 class Component;
+class CPUComponent;
+class GXemul;
+
 typedef vector< refcount_ptr<Component> > Components;
 
 
@@ -203,6 +204,35 @@ public:
 	 * @return the pointer to the parent component, or NULL
 	 */
 	Component* GetParent();
+
+	/**
+	 * \brief Retrieves a component's implemented method names.
+	 *
+	 * Note that a component's implementation should call its
+	 * base class' GetMethodNames(vector<string>&) too.
+	 *
+	 * @param names A vector of strings, where method names
+	 *	should be added.
+	 */
+	virtual void GetMethodNames(vector<string>& names) const;
+
+	/**
+	 * \brief Executes a method on the component.
+	 *
+	 * Note 1: The method name must be one of those returned
+	 *	by GetMethodNames(vector<string>&).
+	 *
+	 * Note 2: The base class' member function should <i>not</i>
+	 *	be called. The default Component base class does
+	 *	not have any methods.
+	 *
+	 * @param gxemul A reference to the GXemul instance.
+	 * @param methodName The name of the method.
+	 * @param arguments A vector of arguments to the method.
+	 */
+	virtual void ExecuteMethod(GXemul* gxemul,
+		const string& methodName,
+		const vector<string>& arguments);
 
 	/**
 	 * \brief Generates a string representation of the path to the

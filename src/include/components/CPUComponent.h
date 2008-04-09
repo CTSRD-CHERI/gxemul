@@ -86,6 +86,17 @@ public:
 	virtual CPUComponent* AsCPUComponent();
 
 	/**
+	 * \brief Retrieves a CPUComponent's method names.
+	 *
+	 * @param names A vector where method names are added.
+	 */
+        virtual void GetMethodNames(vector<string>& names) const;
+
+	virtual void ExecuteMethod(GXemul* gxemul,
+		const string& methodName,
+		const vector<string>& arguments);
+
+	/**
 	 * \brief Returns the component's AddressDataBus interface.
 	 *
 	 * @return	A pointer to an AddressDataBus.

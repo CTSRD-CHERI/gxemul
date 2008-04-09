@@ -207,6 +207,23 @@ Component* Component::GetParent()
 }
 
 
+void Component::GetMethodNames(vector<string>& names) const
+{
+	// The default component has no implemented methods.
+}
+
+
+void Component::ExecuteMethod(GXemul* gxemul,
+	const string& methodName,
+	const vector<string>& arguments)
+{
+	std::cerr << "Internal error: someone tried to execute "
+	    "method '" << methodName << "' on the Component base"
+	    " class. Perhaps you are missing an override?\n";
+	throw std::exception();
+}
+
+
 string Component::GenerateTreeDump(const string& branchTemplate,
 	bool htmlLinksForClassNames) const
 {
