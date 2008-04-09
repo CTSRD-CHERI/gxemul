@@ -41,7 +41,7 @@ msgstr ""
 #: src/main/commands/LoadCommand.cc:82
 #, fuzzy
 msgid "Loads an emulation from a file."
-msgstr "Laddar in en emulering from en fil."
+msgstr "Laddar in en emulering från en fil."
 
 #: src/main/commands/LoadCommand.cc:88
 msgid ""
@@ -72,6 +72,10 @@ msgid ""
 "See also:  add     (to add new components)\n"
 "           tree    (to inspect the current emulation setup)\n"
 msgstr ""
+"Tar bort en komponent (givet en sökväg) från emuleringen.\n"
+"\n"
+"Se även:  add     för att lägga till komponenter\n"
+"          tree    för att se nuvarande emuleringens komponentträd\n"
 
 #: src/main/commands/ListComponentsCommand.cc:67
 msgid "Displays all available components."
@@ -94,6 +98,8 @@ msgid ""
 "Shows the current status. This currently includes:\n"
 "  o)  Runstate (Running or Paused)\n"
 msgstr ""
+"Visar körstatus. För närvarande visas följande:\n"
+"  o)  Runstate (Kör eller Pausad)\n"
 
 #: src/main/commands/ContinueCommand.cc:54
 msgid "Continues the current emulation."
@@ -146,6 +152,8 @@ msgid ""
 "command\n"
 "name as an argument, shows a detailed description about that command.\n"
 msgstr ""
+"Visar en översikt över alla tillgängliga kommandon. Om ett specifikt kommando"
+"\nanges som argument visas en detaljerad beskrivning av det kommandot.\n"
 
 #: src/main/commands/RedoCommand.cc:59
 msgid "Redoes the next action, if possible."
@@ -157,6 +165,9 @@ msgid ""
 "\n"
 "See also:  undo"
 msgstr ""
+"Gör om nästa ändring, om möjligt.\n"
+"\n"
+"Se även:   undo"
 
 #: src/main/commands/AddComponentCommand.cc:110
 #, fuzzy
@@ -223,6 +234,13 @@ msgid ""
 "     with no emulation loaded at all.\n"
 "  4. Run  gxemul-gui  which starts the GUI version of GXemul.\n"
 msgstr ""
+"  1. Kör  gxemul  med argument för maskinval (-E), som skapar en standard-\n"
+"     emulering från ett templat.\n"
+"  2. Kör  gxemul  med en konfigurationfil (.gxemul).\n"
+"  3. Kör  gxemul -V  utan övriga argument; detta startar GXemul utan att "
+"ladda\n"
+"     någon emulering.\n"
+"  4. Kör  gxemul-gui  för att starta GXemul med grafiskt användargränssnitt.\n"
 
 #: src/main/GXemul.cc:617
 msgid ""
