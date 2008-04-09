@@ -4028,3 +4028,7 @@ Changelog for GXemul:
 		has been removed.)
 		Implementing the first component method: "unassemble" for the
 		CPUComponent.
+		GTKMM GUI test: Connecting to the "activate" signal of a text
+		entry, so that commands are executed once ENTER is pressed;
+		this does not work with tab-completion and command line
+		editing though, since only ENTER is signaled.

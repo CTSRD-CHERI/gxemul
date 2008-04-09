@@ -29,9 +29,11 @@
 
 #include "misc.h"
 #include "ui/gtkmm/DebugConsoleWidget.h"
+#include "GXemul.h"
 
 
-DebugConsoleWidget::DebugConsoleWidget()
+DebugConsoleWidget::DebugConsoleWidget(GXemul* gxemul)
+	: m_GXemul(gxemul)
 {
 	Gtk::VBox *const pVBox = new Gtk::VBox();
 	add(*Gtk::manage(pVBox));
@@ -43,6 +45,9 @@ DebugConsoleWidget::DebugConsoleWidget()
 	m_TextView.set_buffer(m_refTextBuffer);
 	m_TextView.set_cursor_visible(false);
 	m_TextView.set_editable(false);
+
+	m_Entry.signal_activate().connect(sigc::mem_fun(*this,
+	    &DebugConsoleWidget::on_entry_activate));
 
 	m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC,
 	    Gtk::POLICY_AUTOMATIC);
@@ -62,7 +67,17 @@ void DebugConsoleWidget::InsertText(const string& msg)
 {
 	m_textBufferIterator = m_refTextBuffer->insert(
 	    m_textBufferIterator, msg);
-}	    
+	
+	// TODO: Scroll to end of buffer!
+}
+
+
+void DebugConsoleWidget::on_entry_activate()
+{
+	string command = m_Entry.get_text();
+	m_Entry.set_text("");
+	m_GXemul->GetCommandInterpreter().RunCommand(command);
+}
 
 
 #endif	// WITH_GTKMM

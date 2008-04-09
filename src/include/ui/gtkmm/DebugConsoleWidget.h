@@ -30,15 +30,23 @@
 
 #include <gtkmm.h>
 
+
+class GXemul;
+
 class DebugConsoleWidget : public Gtk::VBox
 {
 public:
-	DebugConsoleWidget();
+	DebugConsoleWidget(GXemul* gxemul);
 	virtual ~DebugConsoleWidget();
 
 	void InsertText(const string& msg);
 
+private:
+	void on_entry_activate();
+
 protected:
+	GXemul*			m_GXemul;
+
 	Gtk::ScrolledWindow	m_ScrolledWindow;
 
 	Gtk::TextView		m_TextView;

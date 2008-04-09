@@ -38,6 +38,7 @@
 GXemulWindow::GXemulWindow(GXemul* gxemul)
 	: m_gxemul(gxemul)
 	, m_EmulationDesignArea(gxemul)
+	, m_DebugConsoleWidget(gxemul)
 {
 	set_title("GXemul");
 
