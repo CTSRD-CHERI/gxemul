@@ -175,6 +175,8 @@ protected:
 	string			m_cpuKind;
 	int			m_pageSize;
 	uint64_t		m_pc;
+	uint64_t		m_lastUnassembleVaddr;
+	bool			m_hasUsedUnassemble;
 	enum Endianness		m_endianness;
 
 	// Cached state:

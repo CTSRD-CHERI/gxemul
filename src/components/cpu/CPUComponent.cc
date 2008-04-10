@@ -39,12 +39,16 @@ CPUComponent::CPUComponent(const string& className, const string& cpuKind)
 	, m_cpuKind(cpuKind)
 	, m_pageSize(0)
 	, m_pc(0)
+	, m_lastUnassembleVaddr(0)
+	, m_hasUsedUnassemble(false)
 	, m_endianness(BigEndian)
 	, m_addressDataBus(NULL)
 	, m_currentCodePage(NULL)
 {
 	AddVariableString("kind", &m_cpuKind);
 	AddVariableUInt64("pc", &m_pc);
+	AddVariableUInt64("lastUnassembleVaddr", &m_lastUnassembleVaddr);
+	AddVariableBool("hasUsedUnassemble", &m_hasUsedUnassemble);
 	AddVariableDouble("frequency", &m_frequency);
 	// TODO: Endianness as a variable!
 }
@@ -82,7 +86,10 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 	const vector<string>& arguments)
 {
 	if (methodName == "unassemble") {
-		uint64_t vaddr = m_pc;
+		uint64_t vaddr = m_lastUnassembleVaddr;
+		if (!m_hasUsedUnassemble)
+			vaddr = m_pc;
+
 		for (int i=0; i<20; i++) {
 			// TODO: GENERALIZE! Some archs will have longer
 			// instructions, or unaligned, or over page boundaries!
@@ -108,6 +115,9 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 			
 			gxemul->GetUI()->ShowDebugMessage(ss.str());
 		}
+
+		m_hasUsedUnassemble = true;
+		m_lastUnassembleVaddr = vaddr;
 		return;
 	}
 	
