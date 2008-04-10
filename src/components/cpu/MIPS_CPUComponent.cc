@@ -28,23 +28,56 @@
 #include <assert.h>
 #include "components/MIPS_CPUComponent.h"
 
+#include "mips_cpu_types.h"
 #include "opcodes_mips.h"
 
 static const char* hi6_names[] = HI6_NAMES;
 static const char* regnames[] = MIPS_REGISTER_NAMES;
+static const char* special_names[] = SPECIAL_NAMES;
+static mips_cpu_type_def cpu_type_defs[] = MIPS_CPU_TYPE_DEFS;
 
 
 MIPS_CPUComponent::MIPS_CPUComponent()
 	: CPUComponent("mips_cpu", "MIPS")
+	, m_mips_type("5KE")	// defaults to a MIPS64 rev 2 cpu
+	, m_hi(0)
+	, m_lo(0)
 {
+	AddVariableString("mips_type", &m_mips_type);
+
+	AddVariableUInt64("hi", &m_hi);
+	AddVariableUInt64("lo", &m_lo);
+
+	// TODO: GPR 0 (ZERO) is NOT writable!
+	for (size_t i=0; i<N_MIPS_GPRS; i++)
+		AddVariableUInt64(regnames[i], &m_gpr[i]);
+
+
 	// MIPS CPUs are hardwired to start at 0xffffffffbfc00000:
-	m_pc = (int32_t) 0xbfc00000;
+	m_pc = MIPS_INITIAL_PC;
+
+	// Reasonable initial stack pointer.
+	m_gpr[MIPS_GPR_SP] = MIPS_INITIAL_STACK_POINTER;
 
 	// Most MIPS CPUs use 4 KB native page size.
 	// TODO: A few use 1 KB pages; this should be supported as well.
 	m_pageSize = 4096;
 
 	m_frequency = 100e6;
+
+	// Find (and cache) the cpu type in m_type:
+	memset((void*) &m_type, 0, sizeof(m_type));
+	for (size_t j=0; cpu_type_defs[j].name != NULL; j++) {
+		if (m_mips_type == cpu_type_defs[j].name) {
+			m_type = cpu_type_defs[j];
+			break;
+		}
+	}
+
+	if (m_type.name == NULL) {
+		std::cerr << "Internal error: Unimplemented MIPS type?\n";
+		throw std::exception();
+	}
 }
 
 
@@ -174,6 +207,62 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 
 	switch (hi6) {
 
+	case HI6_SPECIAL:
+		{
+			int special = iword & 0x3f;
+			switch (special) {
+
+			default:
+				{
+					stringstream ss;
+					ss << "unimplemented instruction: " <<
+					    special_names[special];
+					result.push_back(ss.str());
+				}
+				break;
+			}
+		}
+		break;
+
+	case HI6_BEQ:
+	case HI6_BEQL:
+	case HI6_BNE:
+	case HI6_BNEL:
+	case HI6_BGTZ:
+	case HI6_BGTZL:
+	case HI6_BLEZ:
+	case HI6_BLEZL:
+		{
+			int imm = (int16_t) iword;
+			uint64_t addr = vaddr + 4 + (imm << 2);
+
+			stringstream ss;
+
+			if (hi6 == HI6_BEQ && rt == MIPS_GPR_ZERO &&
+			    rs == MIPS_GPR_ZERO) {
+				result.push_back("b");
+			} else {
+				result.push_back(hi6_names[hi6]);
+
+				switch (hi6) {
+				case HI6_BEQ:
+				case HI6_BEQL:
+				case HI6_BNE:
+				case HI6_BNEL:
+					ss << regnames[rt] << ",";
+				}
+
+				ss << regnames[rs] << ",";
+			}
+
+			ss.flags(std::ios::hex | std::ios::showbase);
+			ss << addr;
+			result.push_back(ss.str());
+
+			// TODO: symbol lookup
+		}
+		break;
+
 	case HI6_ADDI:
 	case HI6_ADDIU:
 	case HI6_DADDI:
@@ -183,8 +272,9 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	case HI6_ANDI:
 	case HI6_ORI:
 	case HI6_XORI:
-		result.push_back(hi6_names[hi6]);
 		{
+			result.push_back(hi6_names[hi6]);
+			
 			stringstream ss;
 			ss << regnames[rt] << "," << regnames[rs] << ",";
 			if (hi6 == HI6_ANDI || hi6 == HI6_ORI ||
@@ -198,7 +288,128 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		}
 		break;
 
-	default:result.push_back("unimplemented instruction");
+	case HI6_LUI:
+		{
+			result.push_back(hi6_names[hi6]);
+			
+			stringstream ss;
+			ss << regnames[rt] << ",";
+			ss.flags(std::ios::hex | std::ios::showbase);
+			ss << (uint16_t) iword;
+			result.push_back(ss.str());
+		}
+		break;
+
+	case HI6_LB:
+	case HI6_LBU:
+	case HI6_LH:
+	case HI6_LHU:
+	case HI6_LW:
+	case HI6_LWU:
+	case HI6_LD:
+	case HI6_LQ_MDMX:
+	case HI6_LWC1:
+	case HI6_LWC2:
+	case HI6_LWC3:
+	case HI6_LDC1:
+	case HI6_LDC2:
+	case HI6_LL:
+	case HI6_LLD:
+	case HI6_SB:
+	case HI6_SH:
+	case HI6_SW:
+	case HI6_SD:
+	case HI6_SQ_SPECIAL3:
+	case HI6_SC:
+	case HI6_SCD:
+	case HI6_SWC1:
+	case HI6_SWC2:
+	case HI6_SWC3:
+	case HI6_SDC1:
+	case HI6_SDC2:
+	case HI6_LWL:   
+	case HI6_LWR:
+	case HI6_LDL:
+	case HI6_LDR:
+	case HI6_SWL:
+	case HI6_SWR:
+	case HI6_SDL:
+	case HI6_SDR:
+		{
+		
+			if (hi6 == HI6_LQ_MDMX && m_type.rev != MIPS_R5900) {
+				result.push_back("mdmx (UNIMPLEMENTED)");
+				break;
+			}
+			if (hi6 == HI6_SQ_SPECIAL3 && m_type.rev!=MIPS_R5900) {
+				result.push_back("special3 (UNIMPLEMENTED)");
+				break;
+			}
+
+
+			int imm = (int16_t) iword;
+			stringstream ss;
+
+			/*  LWC3 is PREF in the newer ISA levels:  */
+			/*  TODO: Which ISAs? IV? V? 32? 64?  */
+			if (m_type.isa_level >= 4 && hi6 == HI6_LWC3) {
+				result.push_back("pref");
+				
+				ss << rt << "," << imm <<
+				    "(" << regnames[rs] << ")";
+				result.push_back(ss.str());
+				break;
+			}
+
+			result.push_back(hi6_names[hi6]);
+
+			if (hi6 == HI6_SWC1 || hi6 == HI6_SWC2 ||
+			    hi6 == HI6_SWC3 ||
+			    hi6 == HI6_SDC1 || hi6 == HI6_SDC2 ||
+			    hi6 == HI6_LWC1 || hi6 == HI6_LWC2 ||
+			    hi6 == HI6_LWC3 ||
+			    hi6 == HI6_LDC1 || hi6 == HI6_LDC2)
+				ss << "r" << rt;
+			else
+				ss << regnames[rt];
+
+			ss << "," << imm << "(" << regnames[rs] << ")";
+
+			result.push_back(ss.str());
+
+			// TODO: Symbol lookup, if running.
+		}
+		break;
+
+	case HI6_J:
+	case HI6_JAL:
+		{
+			result.push_back(hi6_names[hi6]);
+			
+			int imm = (iword & 0x03ffffff) << 2;
+			uint64_t addr = (vaddr + 4) & ~((1 << 28) - 1);
+			addr |= imm;
+
+			stringstream ss;
+			ss.flags(std::ios::hex | std::ios::showbase);
+			ss << addr;
+			result.push_back(ss.str());
+			
+			// TODO: Symbol lookup.
+		}
+		break;
+
+	// CopX here. TODO
+	// Cache
+	// Special2
+	// Regimm
+
+	default:
+		{
+			stringstream ss;
+			ss << "unimplemented instruction: " << hi6_names[hi6];
+			result.push_back(ss.str());
+		}
 		break;
 	}
 

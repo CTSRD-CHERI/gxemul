@@ -86,8 +86,10 @@ Misc.
 			[ ]  save/load should include those files,
 			     so that loading apa.gxemul will load the
 			     files that were used in that setup!
-		[ ]  Don't hardcode the CPU path in GXemul.cc:
+		[ ]  Don't hardcode the CPU path in GXemul.cc?
 			    LookupPath("root.machine0.mainbus0.cpu0");
+			Or perhaps all template machines have to have this
+			structure?
 
 	[/]  testmips
 		[/]  Work on MIPS_CPUComponent::Run() and the generic
@@ -95,14 +97,11 @@ Misc.
 			[X]  Connect the CPU to an AddressDataBus.
 			[/]  virtual to physical translation
 			[ ]  Handling of read/write errors?
-			[/]  Disassembler:
-				Given a virtual address and an instruction
-				word/buffer, return a vector of strings.
-				e.g.
-				"27bfffd0", "addiu", "sp,sp-48", "; comment"
+			[/]  Disassembler: Migrate most/all functionality
+				from GXemul 0.4.6.3.
 			[ ]  Start interpreting instructions!
+				[ ]  MIPS16: Convert to 32-bit instructions (?)
 				[ ]  32-bit instruction words
-				[ ]  MIPS16
 			[ ]  Unit tests!
 		[ ]  Framebuffer device :-)
 		[ ]  Start with SMP early on.

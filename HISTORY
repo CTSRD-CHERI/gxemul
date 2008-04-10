@@ -4035,3 +4035,5 @@ Changelog for GXemul:
 20080410	CPUComponent's unassemble method now remembers where it last
 		unassembled, and starts at m_pc if it is the first time it
 		is executed.
+		Porting more MIPS-related code from GXemul 0.4.6.3; some
+		more instructions can be disassembled now.
