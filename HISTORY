@@ -4032,3 +4032,6 @@ Changelog for GXemul:
 		entry, so that commands are executed once ENTER is pressed;
 		this does not work with tab-completion and command line
 		editing though, since only ENTER is signaled.
+20080410	CPUComponent's unassemble method now remembers where it last
+		unassembled, and starts at m_pc if it is the first time it
+		is executed.

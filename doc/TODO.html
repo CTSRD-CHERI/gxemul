@@ -56,6 +56,7 @@ Misc.
 -----
 	[/]  CommandInterpreter:
 		[ ]  Tab completion of methods!
+		[ ]  Tab completion for the 'add' command: component-name
 		[X]  "Methods" on objects? E.g.
 			[/]  cpu.unassemble		disassemble
 			[ ]  cpu.registers		show registers
@@ -80,6 +81,11 @@ Misc.
 			[ ]  symbols
 			[ ]  line number information
 			[ ]  data type information, etc.
+		[ ]  Files loaded at startup should be part of the
+			emulation setup!
+			[ ]  save/load should include those files,
+			     so that loading apa.gxemul will load the
+			     files that were used in that setup!
 		[ ]  Don't hardcode the CPU path in GXemul.cc:
 			    LookupPath("root.machine0.mainbus0.cpu0");
 
