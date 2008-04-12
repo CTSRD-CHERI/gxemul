@@ -249,6 +249,14 @@ void GXemulWindow::UpdateUI()
 		title = emulationFilename + " - " + title;
 
 	set_title(title);
+
+	// Force the design area to be redrawn:
+	Glib::RefPtr<Gdk::Window> win = m_EmulationDesignArea.get_window();
+	if (win != NULL) {
+		Gdk::Rectangle r(0, 0, get_allocation().get_width(),
+		    get_allocation().get_height());
+		win->invalidate_rect(r, true);
+	}
 }
 
 
