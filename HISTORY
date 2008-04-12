@@ -4038,3 +4038,6 @@ Changelog for GXemul:
 		Porting more MIPS-related code from GXemul 0.4.6.3; some
 		more instructions can be disassembled now.
 20080412	Implementing tab-completion of methods on components.
+		Executing a component name without any method name, which
+		results in the component tree being dumped, will now also
+		dump all of the component's state variables.

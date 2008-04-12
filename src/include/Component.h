@@ -337,6 +337,14 @@ public:
 	const Components& GetChildren() const;
 
 	/**
+	 * \brief Retrieves a component's state variable names.
+	 *
+	 * @param names A vector of strings, where method names
+	 *	should be added.
+	 */
+	void GetVariableNames(vector<string>& names) const;
+
+	/**
 	 * \brief Gets a pointer to a state variable.
 	 *
 	 * NOTE: The returned pointer should be used immediately after the

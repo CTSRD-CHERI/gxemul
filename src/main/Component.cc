@@ -604,6 +604,14 @@ vector<string> Component::FindPathByPartialMatch(
 }
 
 
+void Component::GetVariableNames(vector<string>& names) const
+{
+	for (StateVariableMap::const_iterator it = m_stateVariables.begin();
+	    it != m_stateVariables.end(); ++it)
+		names.push_back(it->first);
+}
+
+
 StateVariable* Component::GetVariable(const string& name)
 {
 	StateVariableMap::iterator it = m_stateVariables.find(name);

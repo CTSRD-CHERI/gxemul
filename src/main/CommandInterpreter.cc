@@ -691,10 +691,45 @@ bool CommandInterpreter::RunComponentMethod(
 	if (component.IsNULL())
 		return false;
 
-	// No method given? Then show the component tree and return.
+	// No method given? Then show the component tree, and the component's
+	// state variables, and return.
 	if (methodName.empty()) {
 		m_GXemul->GetUI()->ShowDebugMessage(
 		    component->GenerateTreeDump(""));
+		
+		// Retrieve the names of all the state variables:
+		vector<string> variableNames;
+		component->GetVariableNames(variableNames);
+
+		stringstream ss;
+		ss << "\n";
+
+		size_t maxLen = 0;
+		size_t i;
+		for (i=0; i<variableNames.size(); i++)
+			if (variableNames[i].length() > maxLen)
+				maxLen = variableNames[i].length();
+
+		for (i=0; i<variableNames.size(); i++) {
+			const string& name = variableNames[i];
+			if (name == "name" || name == "template")
+				continue;
+
+			ss << "  " << name;
+			for (size_t j=name.length(); j<=maxLen; j++)
+				ss << " ";
+
+			const StateVariable* var = component->GetVariable(name);
+			if (var == NULL)
+				ss << "= (unknown?)";
+			else
+				ss << "= " << var->ToString();
+
+			ss << "\n";
+		}
+
+		m_GXemul->GetUI()->ShowDebugMessage(ss.str());
+		
 		return true;
 	}
 
@@ -744,8 +779,9 @@ bool CommandInterpreter::RunCommand(const string& command)
 
 		// remove any trailing space(s):
 		while (commandTabCompleted.length() > 0 &&
-		    commandTabCompleted[commandTabCompleted.length() - 1] == ' ')
-			commandTabCompleted.erase(commandTabCompleted.length() - 1);
+		    commandTabCompleted[commandTabCompleted.length()-1] == ' ')
+			commandTabCompleted.erase(
+			    commandTabCompleted.length() - 1);
 
 		// ... and try again:
 		it = m_commands.find(commandTabCompleted);
