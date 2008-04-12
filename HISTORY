@@ -4042,3 +4042,4 @@ Changelog for GXemul:
 		results in the component tree being dumped, will now also
 		dump all of the component's state variables.
 		Continuing on porting GXemul 0.4.6.3's MIPS disassembly code.
+		The GTKMM GUI can now be shut down by the "quit" command.

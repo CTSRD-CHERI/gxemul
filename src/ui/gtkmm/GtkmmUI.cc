@@ -106,6 +106,13 @@ void GtkmmUI::RedisplayInputLine(const string& inputline,
 }
 
 
+void GtkmmUI::Shutdown()
+{
+	if (m_window != NULL)
+		m_window->ShutdownUI();
+}
+
+
 int GtkmmUI::MainLoop()
 {
 	if (m_window != NULL) {

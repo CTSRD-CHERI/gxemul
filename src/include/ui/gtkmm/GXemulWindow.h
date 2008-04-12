@@ -56,6 +56,14 @@ public:
 	void UpdateUI();
 
 	/**
+	 * \brief Shuts down the GXemulWindow.
+	 *
+	 * Should be called by the GtkmmUI when e.g. the "quit"
+	 * command is executed.
+	 */
+	void ShutdownUI();
+
+	/**
 	 * \brief Add a message to the debug window text output
 	 * area.
 	 *

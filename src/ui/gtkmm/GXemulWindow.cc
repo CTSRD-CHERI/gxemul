@@ -274,6 +274,12 @@ static void TodoDialog(Gtk::Window *w, const char *msg)
 }
 
 
+void GXemulWindow::ShutdownUI()
+{
+	hide();
+}
+
+
 void GXemulWindow::on_menu_copy()
 {
 	TodoDialog(this, "GXemulWindow::on_menu_copy(): TODO");
@@ -378,7 +384,7 @@ void GXemulWindow::on_menu_preferences()
 
 void GXemulWindow::on_menu_quit()
 {
-	hide();
+	m_gxemul->GetCommandInterpreter().RunCommand("quit");
 }
 
 
@@ -390,7 +396,7 @@ void GXemulWindow::on_menu_redo()
 
 void GXemulWindow::on_menu_reset()
 {
-	TodoDialog(this, "GXemulWindow::on_menu_reset(): TODO");
+	m_gxemul->GetCommandInterpreter().RunCommand("reset");
 }
 
 

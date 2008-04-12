@@ -107,6 +107,8 @@ public:
 	 * The NullUI returns 0 immediately.
 	 */
 	virtual int MainLoop();
+
+	virtual void Shutdown();
 };
 
 

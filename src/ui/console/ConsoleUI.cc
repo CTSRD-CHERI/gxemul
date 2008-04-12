@@ -190,6 +190,11 @@ void ConsoleUI::InputLineDone()
 }
 
 
+void ConsoleUI::Shutdown() 
+{
+}
+
+
 int ConsoleUI::MainLoop()
 {
 	enum GXemul::RunState oldRunState = m_gxemul->GetRunState();

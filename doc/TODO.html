@@ -297,15 +297,11 @@ CommandInterpreter
 				assert() in place, so that unknown arg types
 				are caught during development!
 
-	[ ]	dump		Dump memory (or, any address data bus contents)
 	[ ]	move  		Move a component from one path to another.
 	[ ]	clearundo	Clears the undo/redo stack (can be used to
 				reclaim memory, perhaps... or automatic
 				freeing of some of the oldest entries in the
 				undo history...?)
-	[ ]	inspect component-path	A raw dump of a component's state.
-				How about RAM devices? Perhaps "dump" is a
-				better command name. "dump ram 0x1234" etc?
 	[ ]	copy		copy a component (and its children)
 				to the clipboard
 	[ ]	paste		paste a component from the clipboard
@@ -316,9 +312,6 @@ CommandInterpreter
 	[ ]	expr = value	Sets a state variable
 	[ ]	pause		sets RunState to Paused
 	[ ]	step		single-step (Paused)
-	[ ]?	trace		toggle function call tracing (cpu.trace?)
-
-	[ ]  c, s, r  as abbreviated commands for continue, step, and registers?
 
 	[ ]  Strings should be supported, both for e.g. variable
 	     assignment, and for e.g. placing strings in memory.

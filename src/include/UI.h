@@ -135,6 +135,13 @@ public:
 	 */
 	virtual int MainLoop() = 0;
 
+	/**
+	 * \brief Shuts down the UI.
+	 *
+	 * Called from e.g. the "quit" command.
+	 */
+	virtual void Shutdown() = 0;
+
 protected:
 	GXemul*		m_gxemul;
 };

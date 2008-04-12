@@ -80,6 +80,11 @@ void NullUI::InputLineDone()
 }
 
 
+void NullUI::Shutdown()
+{
+}
+
+
 int NullUI::MainLoop()
 {
 	return 0;

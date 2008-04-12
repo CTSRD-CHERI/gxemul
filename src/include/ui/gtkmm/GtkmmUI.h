@@ -63,6 +63,8 @@ public:
 
 	virtual int MainLoop();
 
+	virtual void Shutdown();
+
 private:
 	GXemulWindow *	m_window;
 };

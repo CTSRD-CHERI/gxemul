@@ -121,6 +121,8 @@ public:
 	 */
 	virtual int MainLoop();
 
+	virtual void Shutdown();
+
 private:
 	/**
 	 * \brief Shows the %GXemul&gt; prompt, reads characters from stdin
