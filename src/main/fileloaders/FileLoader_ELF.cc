@@ -147,11 +147,6 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component)
 		if (p_type != PT_LOAD)
 			continue;
 
-		if (p_filesz != p_memsz) {
-			// Skipping strangely-sized segment.
-			continue;
-		}
-
 		file.seekg(p_offset, std::ios::beg);
 		char databuf[65536];
 		uint64_t bytesRead = 0;
