@@ -34,6 +34,7 @@
 static const char* hi6_names[] = HI6_NAMES;
 static const char* regnames[] = MIPS_REGISTER_NAMES;
 static const char* special_names[] = SPECIAL_NAMES;
+static const char* regimm_names[] = REGIMM_NAMES;
 static mips_cpu_type_def cpu_type_defs[] = MIPS_CPU_TYPE_DEFS;
 
 
@@ -402,7 +403,48 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	// CopX here. TODO
 	// Cache
 	// Special2
-	// Regimm
+
+	case HI6_REGIMM:
+		{
+			int regimm5 = (iword >> 16) & 0x1f;
+			int imm = (int16_t) iword;
+			uint64_t addr = (vaddr + 4) + (imm << 2);
+
+			stringstream ss;
+			ss.flags(std::ios::hex | std::ios::showbase);
+
+			switch (regimm5) {
+
+			case REGIMM_BLTZ:
+			case REGIMM_BGEZ:
+			case REGIMM_BLTZL:
+			case REGIMM_BGEZL:
+			case REGIMM_BLTZAL:
+			case REGIMM_BLTZALL:
+			case REGIMM_BGEZAL:
+			case REGIMM_BGEZALL:
+				result.push_back(regimm_names[regimm5]);
+
+				ss << regnames[rs] << "," << addr;
+				result.push_back(ss.str());
+				break;
+
+			case REGIMM_SYNCI:
+				result.push_back(regimm_names[regimm5]);
+
+				ss << imm << "(" << regnames[rs] << ")";
+				result.push_back(ss.str());
+				break;
+
+			default:
+				{
+					ss << "unimplemented instruction: " <<
+					    regimm_names[regimm5];
+					result.push_back(ss.str());
+				}
+			}
+		}
+		break;
 
 	default:
 		{
