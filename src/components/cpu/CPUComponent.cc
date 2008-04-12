@@ -102,13 +102,14 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 				ReadData(instruction[k]);
 			}
 			
+			stringstream ss;
+			ss.flags(std::ios::hex | std::ios::showbase);
+			ss << vaddr;
+
 			size_t len = DisassembleInstruction(vaddr,
 			    maxLen, instruction, result);
 			vaddr += len;
 
-			stringstream ss;
-			ss.flags(std::ios::hex | std::ios::showbase);
-			ss << vaddr;
 			for (size_t j=0; j<result.size(); ++j)
 				ss << "\t" << result[j];
 			ss << "\n";
