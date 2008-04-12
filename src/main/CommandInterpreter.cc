@@ -1213,6 +1213,16 @@ static void Test_CommandInterpreter_AddCommand()
 	    ci.GetCommands().size() == nCommands + 1);
 }
 
+static void Test_CommandInterpreter_TabCompletion_EmptyLine()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should not have produced anything",
+	    ci.GetCurrentCommandBuffer(), "");
+}
+
 static void Test_CommandInterpreter_TabCompletion_FullWord()
 {
 	GXemul gxemul(false);
@@ -1580,6 +1590,7 @@ UNITTESTS(CommandInterpreter)
 	UNITTEST(Test_CommandInterpreter_AddCommand);
 
 	// Tab completion:
+	UNITTEST(Test_CommandInterpreter_TabCompletion_EmptyLine);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_FullWord);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_SpacesFirstOnLine);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_Partial);
