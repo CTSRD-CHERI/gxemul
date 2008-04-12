@@ -4041,3 +4041,4 @@ Changelog for GXemul:
 		Executing a component name without any method name, which
 		results in the component tree being dumped, will now also
 		dump all of the component's state variables.
+		Continuing on porting GXemul 0.4.6.3's MIPS disassembly code.

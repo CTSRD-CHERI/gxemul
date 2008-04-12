@@ -34,6 +34,7 @@
 static const char* hi6_names[] = HI6_NAMES;
 static const char* regnames[] = MIPS_REGISTER_NAMES;
 static const char* special_names[] = SPECIAL_NAMES;
+static const char* special_rot_names[] = SPECIAL_ROT_NAMES;
 static const char* regimm_names[] = REGIMM_NAMES;
 static mips_cpu_type_def cpu_type_defs[] = MIPS_CPU_TYPE_DEFS;
 
@@ -205,21 +206,215 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	int hi6 = iword >> 26;
 	int rs = (iword >> 21) & 31;
 	int rt = (iword >> 16) & 31;
+	int rd = (iword >> 11) & 31;
+	int sa = (iword >>  6) & 31;
 
 	switch (hi6) {
 
 	case HI6_SPECIAL:
 		{
-			int special = iword & 0x3f;
-			switch (special) {
+			int special6 = iword & 0x3f;
+			int sub = rs;
+			stringstream ss;
 
-			default:
-				{
-					stringstream ss;
-					ss << "unimplemented instruction: " <<
-					    special_names[special];
+			switch (special6) {
+
+			case SPECIAL_SLL:
+			case SPECIAL_SRL:
+			case SPECIAL_SRA:
+			case SPECIAL_DSLL:
+			case SPECIAL_DSRL:
+			case SPECIAL_DSRA:
+			case SPECIAL_DSLL32:
+			case SPECIAL_DSRL32:
+			case SPECIAL_DSRA32:
+				if (rd == 0 && special6 == SPECIAL_SLL) {
+					if (sa == 0)
+						ss << "nop";
+					else if (sa == 1)
+						ss << "ssnop";
+					else if (sa == 3)
+						ss << "ehb";
+					else
+						ss << "nop (weird, sa="
+						    << sa << ")";
+
+					result.push_back(ss.str());
+					break;
+				}
+
+				switch (sub) {
+				case 0x00:
+					result.push_back(special_names[special6]);
+					ss << regnames[rd] << "," <<
+					    regnames[rt] << "," << sa;
+					result.push_back(ss.str());
+					break;
+				case 0x01:
+					result.push_back(special_rot_names[special6]);
+					ss << regnames[rd] << "," <<
+					    regnames[rt] << "," << sa;
+					result.push_back(ss.str());
+					break;
+				default:ss << "unimplemented special, sub="
+					    << sub;
 					result.push_back(ss.str());
 				}
+				break;
+
+			case SPECIAL_DSRLV:
+			case SPECIAL_DSRAV:
+			case SPECIAL_DSLLV:
+			case SPECIAL_SLLV:
+			case SPECIAL_SRAV:
+			case SPECIAL_SRLV:
+				sub = sa;
+
+				switch (sub) {
+				case 0x00:
+					result.push_back(special_names[special6]);
+					ss << regnames[rd] << "," <<
+					    regnames[rt] << "," << regnames[rs];
+					result.push_back(ss.str());
+					break;
+				case 0x01:
+					result.push_back(special_rot_names[special6]);
+					ss << regnames[rd] << "," <<
+					    regnames[rt] << "," << regnames[rs];
+					result.push_back(ss.str());
+					break;
+				default:ss << "unimplemented special, sub="
+					    << sub;
+					result.push_back(ss.str());
+				}
+				break;
+
+			case SPECIAL_JR:
+				/*  .hb = hazard barrier hint on MIPS32/64
+				    rev 2  */
+				if ((iword >> 10) & 1)
+					result.push_back("jr.hb");
+				else
+					result.push_back("jr");
+				ss << regnames[rs];
+				result.push_back(ss.str());
+				break;
+				
+			case SPECIAL_JALR:
+				/*  .hb = hazard barrier hint on
+				     MIPS32/64 rev 2  */
+				if ((iword >> 10) & 1)
+					result.push_back("jalr.hb");
+				else
+					result.push_back("jalr");
+				ss << regnames[rd] << "," << regnames[rs];
+				result.push_back(ss.str());
+				break;
+
+			case SPECIAL_MFHI:
+			case SPECIAL_MFLO:
+				result.push_back(special_names[special6]);
+				result.push_back(regnames[rd]);
+				break;
+
+			case SPECIAL_MTLO:
+			case SPECIAL_MTHI:
+				result.push_back(special_names[special6]);
+				result.push_back(regnames[rs]);
+				break;
+
+			case SPECIAL_ADD:
+			case SPECIAL_ADDU:
+			case SPECIAL_SUB:
+			case SPECIAL_SUBU:
+			case SPECIAL_AND:
+			case SPECIAL_OR:
+			case SPECIAL_XOR:
+			case SPECIAL_NOR:
+			case SPECIAL_SLT:
+			case SPECIAL_SLTU: 
+			case SPECIAL_DADD:
+			case SPECIAL_DADDU:
+			case SPECIAL_DSUB:
+			case SPECIAL_DSUBU:
+			case SPECIAL_MOVZ:
+			case SPECIAL_MOVN:
+				result.push_back(special_names[special6]);
+				ss << regnames[rd] << "," <<
+				    regnames[rs] << "," << regnames[rt];
+				result.push_back(ss.str());
+				break;
+
+			case SPECIAL_MULT:
+			case SPECIAL_MULTU:
+			case SPECIAL_DMULT:
+			case SPECIAL_DMULTU:
+			case SPECIAL_DIV:
+			case SPECIAL_DIVU:
+			case SPECIAL_DDIV:  
+			case SPECIAL_DDIVU:
+			case SPECIAL_TGE:                
+			case SPECIAL_TGEU:
+			case SPECIAL_TLT:
+			case SPECIAL_TLTU:
+			case SPECIAL_TEQ:
+			case SPECIAL_TNE:
+				result.push_back(special_names[special6]);
+				if (rd != 0) {
+					if (m_type.rev == MIPS_R5900) {
+						if (special6 == SPECIAL_MULT ||
+						    special6 == SPECIAL_MULTU)
+							ss << regnames[rd]<<",";
+						else
+							ss << "WEIRD_R5900_RD,";
+					} else {
+						ss << "WEIRD_R5900_RD,";
+					}
+				}
+
+				ss << regnames[rs] << "," << regnames[rt];
+				result.push_back(ss.str());
+				break;
+
+			case SPECIAL_SYNC:
+				result.push_back(special_names[special6]);
+				ss << ((iword >> 6) & 31);
+				result.push_back(ss.str());
+				break;
+
+			case SPECIAL_SYSCALL:
+			case SPECIAL_BREAK:
+				result.push_back(special_names[special6]);
+				if (((iword >> 6) & 0xfffff) != 0) {
+					ss << ((iword >> 6) & 0xfffff);
+					result.push_back(ss.str());
+				}
+				break;
+				
+			case SPECIAL_MFSA:
+				if (m_type.rev == MIPS_R5900) {
+					result.push_back("mfsa");
+					result.push_back(regnames[rd]);
+				} else {
+					result.push_back(
+					    "unimplemented special 0x28");
+				}
+				break;
+
+			case SPECIAL_MTSA:
+				if (m_type.rev == MIPS_R5900) {
+					result.push_back("mtsa");
+					result.push_back(regnames[rs]);
+				} else {
+					result.push_back(
+					    "unimplemented special 0x29");
+				}
+				break;
+
+			default:
+				ss << "unimplemented instruction: " <<
+				    special_names[special6];
+				result.push_back(ss.str());
 				break;
 			}
 		}
