@@ -324,7 +324,10 @@ void GXemulWindow::on_menu_new_from_template()
 {
 	// TODO: List available templates?
 
-	TodoDialog(this, "GXemulWindow::on_menu_new_from_template(): TODO");
+	m_gxemul->GetCommandInterpreter().RunCommand("close");
+
+	// TODO: DON't hardcore this!
+	m_gxemul->GetCommandInterpreter().RunCommand("add testmips");
 }
 
 
