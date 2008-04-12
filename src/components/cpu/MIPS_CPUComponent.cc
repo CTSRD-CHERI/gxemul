@@ -51,9 +51,10 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 	AddVariableUInt64("lo", &m_lo);
 
 	// TODO: GPR 0 (ZERO) is NOT writable!
-	for (size_t i=0; i<N_MIPS_GPRS; i++)
+	for (size_t i=0; i<N_MIPS_GPRS; i++) {
+		m_gpr[i] = 0;
 		AddVariableUInt64(regnames[i], &m_gpr[i]);
-
+	}
 
 	// MIPS CPUs are hardwired to start at 0xffffffffbfc00000:
 	m_pc = MIPS_INITIAL_PC;
