@@ -168,6 +168,25 @@ private:
 		bool visibleShowAvailable = false);
 
 	/**
+	 * \brief Tab-completes; takes optional method or state variable
+	 *	name into account.
+	 *
+	 * Strings such as "cpu." and "cpu.u" should e.g. be expanded to
+	 * "root.machine0.mainbus0.cpu." and
+	 * "root.machine0.mainbus0.cpu.unassemble", respectively.
+	 *
+	 * @param commandString A reference to the string to
+	 *	tab-complete.
+	 * @param cursorPosition A refernce to a size_t, which
+	 *	indicates the current cursor position within the string.
+	 * @param visibleShowAvailable True if available words should be
+	 *	echoed back via the UI.
+	 * @return True if there was a single match, false otherwise.
+	 */
+	bool TabCompleteWithSubname(string& commandString,
+		size_t& cursorPosition, bool visibleShowAvailable = false);
+
+	/**
 	 * \brief Runs a method on a Component.
 	 *
 	 * Note: The componentPathAndMethod argument may contain an optional

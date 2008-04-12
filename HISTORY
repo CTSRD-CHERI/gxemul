@@ -4037,3 +4037,4 @@ Changelog for GXemul:
 		is executed.
 		Porting more MIPS-related code from GXemul 0.4.6.3; some
 		more instructions can be disassembled now.
+20080412	Implementing tab-completion of methods on components.

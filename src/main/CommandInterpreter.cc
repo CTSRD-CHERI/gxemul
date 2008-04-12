@@ -211,14 +211,109 @@ bool CommandInterpreter::TabComplete(string& commandString,
 	if (matches.size() == 1 && cursorPosition == commandString.length()) {
 		// Ugly hack: Instead of checking if this is a command, we
 		// can probably assume that anything without a period (.) in
-		// it is a command name.
-		if (matches[0].find(".") == string::npos) {
+		// it is a command name. (Except for "root".)
+		if (matches[0].find(".") == string::npos &&
+		    matches[0] != "root") {
 			commandString += " ";
 			cursorPosition ++;
 		}
 	}
 
 	return matches.size() == 1;
+}
+
+
+bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
+	size_t& cursorPosition, bool visibleShowAvailable)
+{
+	int nStepsBack = 1;
+	size_t pos = cursorPosition - 1;
+
+	while (pos > 0 && commandString[pos] != '.') {
+		pos --;
+		nStepsBack ++;
+	}
+
+	if (pos == 0)
+		return false;
+
+	// Here, pos is the position of the dot:
+	//
+	//	cpu.u
+	//	   ^
+
+	bool success = TabComplete(commandString, pos, visibleShowAvailable);
+	if (!success)
+		return false;
+
+	// pos is now the new position of the dot:
+	//
+	//	root.machine0.mainbus0.cpu.u
+	//	                          ^
+
+	// Look up the component:
+	int startOfComponentName = pos;
+	while (startOfComponentName >= 0 &&
+	    commandString[startOfComponentName] != ' ')
+		-- startOfComponentName;
+
+	if (startOfComponentName < 0)
+		startOfComponentName = 0;
+
+	string componentName = commandString.substr(startOfComponentName,
+	    pos - startOfComponentName);
+
+	// std::cerr << "[" << componentName << "]\n";
+	refcount_ptr<Component> component = m_GXemul->GetRootComponent()->
+	    LookupPath(componentName);
+
+	cursorPosition = pos + nStepsBack;
+
+	if (component.IsNULL())
+		return false;
+
+	// Figure out the method or state name to expand:
+	size_t startOfMethodName = pos + 1;
+	size_t methodNameLen = 0;
+	while (startOfMethodName + methodNameLen < cursorPosition &&
+	    commandString[startOfMethodName+methodNameLen] != ' ')
+		methodNameLen ++;
+
+	string methodName = commandString.substr(startOfMethodName,
+	    methodNameLen);
+
+	// std::cerr << "{" << methodName << "}\n";
+
+	vector<string> names;
+	component->GetMethodNames(names);
+	int nrOfMatches = 0;
+	string fullMatch;
+	if (methodName.length() != 0) {
+		for (size_t i=0; i<names.size(); ++i) {
+			if (names[i].substr(0, methodName.length()) ==
+			    methodName) {
+				++ nrOfMatches;
+				fullMatch = names[i];
+			}
+		}
+	}
+	
+	if (nrOfMatches == 1) {
+		// Replace the short name with the full match:
+		commandString.replace(startOfMethodName, methodNameLen,
+		    fullMatch);
+		cursorPosition += fullMatch.length() - methodNameLen;
+		return true;
+	} else {
+		if (visibleShowAvailable) {
+			stringstream ss;
+			ss << "\nAvailable methods on " <<
+			    component->GeneratePath() << ":";
+			m_GXemul->GetUI()->ShowDebugMessage(ss.str());
+			ShowAvailableWords(names);
+		}
+		return false;
+	}
 }
 
 
@@ -389,8 +484,18 @@ bool CommandInterpreter::AddKey(stringchar key)
 
 	case '\t':
 		// Tab completion, with visible word hints:
-		TabComplete(m_currentCommandString,
-		    m_currentCommandCursorPosition, true);
+		{
+			bool success = TabComplete(m_currentCommandString,
+			    m_currentCommandCursorPosition, true);
+
+			// Attempt to expand component-name + "." + optional
+			// method or variable name, "cpu.u", if the first
+			// tab-completion failed.
+			if (!success) {
+				TabCompleteWithSubname(m_currentCommandString,
+				    m_currentCommandCursorPosition, true);
+			}
+		}
 		break;
 
 	case '\n':
@@ -612,7 +717,7 @@ bool CommandInterpreter::RunComponentMethod(
 		return true;
 	} else {
 		stringstream ss;
-		ss << "Available methods on " << component->GeneratePath()
+		ss << "\nAvailable methods on " << component->GeneratePath()
 		    << ":";
 		m_GXemul->GetUI()->ShowDebugMessage(ss.str());
 		ShowAvailableWords(names);
@@ -1271,6 +1376,95 @@ static void Test_CommandInterpreter_TabCompletion_roWithComponents()
 	    ci.GetCurrentCommandBuffer(), "root");
 }
 
+static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Empty()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('u');
+	ci.AddKey('.');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have caused expansion",
+	    ci.GetCurrentCommandBuffer(),
+	    "root.machine0.mainbus0.cpu0.");
+}
+
+static void Test_CommandInterpreter_TabCompletion_ComponentMethods()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('u');
+	ci.AddKey('.');
+	ci.AddKey('u');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have caused expansion",
+	    ci.GetCurrentCommandBuffer(),
+	    "root.machine0.mainbus0.cpu0.unassemble");
+}
+
+static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Middle()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('u');
+	ci.AddKey('.');
+	ci.AddKey('u');
+	ci.AddKey('n');
+	ci.AddKey('a');
+	ci.AddKey('b');
+	ci.AddKey('c');
+	ci.AddKey('d');
+	ci.AddKey('\2');
+	ci.AddKey('\2');
+	ci.AddKey('\2');	// cursor placed after "una"
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have caused expansion",
+	    ci.GetCurrentCommandBuffer(),
+	    "root.machine0.mainbus0.cpu0.unassemblebcd");
+}
+
+static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Arg()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('u');
+	ci.AddKey('.');
+	ci.AddKey('u');
+	ci.AddKey(' ');
+	ci.AddKey('a');
+	ci.AddKey('d');
+	ci.AddKey('d');
+	ci.AddKey('r');
+	ci.AddKey('\2');
+	ci.AddKey('\2');
+	ci.AddKey('\2');
+	ci.AddKey('\2');
+	ci.AddKey('\2');	// cursor placed after "u"
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have caused expansion",
+	    ci.GetCurrentCommandBuffer(),
+	    "root.machine0.mainbus0.cpu0.unassemble addr");
+}
+
 static void Test_CommandInterpreter_NonExistingCommand()
 {
 	GXemul gxemul(false);
@@ -1356,6 +1550,10 @@ UNITTESTS(CommandInterpreter)
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameAsArgument);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_CWithComponents);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_roWithComponents);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods_Empty);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods_Middle);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods_Arg);
 
 	// RunCommand:
 	UNITTEST(Test_CommandInterpreter_NonExistingCommand);
