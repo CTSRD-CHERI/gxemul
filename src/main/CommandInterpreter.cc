@@ -226,6 +226,9 @@ bool CommandInterpreter::TabComplete(string& commandString,
 bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
 	size_t& cursorPosition, bool visibleShowAvailable)
 {
+	if (cursorPosition == 0)
+		return false;
+
 	int nStepsBack = 1;
 	size_t pos = cursorPosition - 1;
 
