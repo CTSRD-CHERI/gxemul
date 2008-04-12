@@ -96,6 +96,13 @@ bool EmulationDesignArea::on_expose_event(GdkEventExpose* event)
 	const int width = allocation.get_width();
 	const int height = allocation.get_height();
 
+	// White background:
+	cr->save();
+	cr->rectangle(0,0, width, height);
+	cr->set_source_rgba(1.0, 1.0, 1.0, 1.0);
+	cr->fill();
+	cr->restore();
+
 	// Draw all components:
 	Components components = m_gxemul->GetRootComponent()->GetChildren();
 	for (size_t i=0; i<components.size(); ++i) {
