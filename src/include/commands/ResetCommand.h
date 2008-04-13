@@ -1,3 +1,6 @@
+#ifndef RESETCOMMAND_H
+#define	RESETCOMMAND_H
+
 /*
  *  Copyright (C) 2008  Anders Gavare.  All rights reserved.
  *
@@ -25,65 +28,50 @@
  *  SUCH DAMAGE.
  */
 
-#include "commands/QuitCommand.h"
-#include "GXemul.h"
+#include "misc.h"
+
+#include "Command.h"
+#include "UnitTest.h"
 
 
-QuitCommand::QuitCommand()
-	: Command("quit", "")
+/**
+ * \brief A Command which resets the current emulation.
+ *
+ * The emulation is reset by resetting all components' state variables to
+ * their initial state, and by changing the current RunState to NotRunning.
+ */
+class ResetCommand
+	: public Command
 {
-}
+public:
+	/**
+	 * \brief Constructs a %ResetCommand.
+	 */
+	ResetCommand();
+
+	virtual ~ResetCommand();
+
+	/**
+	 * \brief Executes the command: Resets execution
+	 *	by setting the GXemul instance' RunState to NotRunning,
+	 *	and resetting all components' state variables to their
+	 *	initial ("reset") state.
+	 *
+	 * @param gxemul A reference to the GXemul instance.
+	 * @param arguments A vector of zero or more string arguments.
+	 */
+	virtual void Execute(GXemul& gxemul,
+		const vector<string>& arguments);
+
+	virtual string GetShortDescription() const;
+
+	virtual string GetLongDescription() const;
 
 
-QuitCommand::~QuitCommand()
-{
-}
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+};
 
 
-void QuitCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
-{
-	gxemul.SetRunState(GXemul::Quitting);
-	gxemul.GetUI()->Shutdown();
-}
-
-
-string QuitCommand::GetShortDescription() const
-{
-	return _("Quits the application.");
-}
-
-
-string QuitCommand::GetLongDescription() const
-{
-	return _("Quits the application.");
-}
-
-
-/*****************************************************************************/
-
-
-#ifndef WITHOUTUNITTESTS
-
-static void Test_QuitCommand_Affect_RunState()
-{
-	refcount_ptr<Command> cmd = new QuitCommand;
-	vector<string> dummyArguments;
-	
-	GXemul gxemul(false);
-
-	UnitTest::Assert(
-	    "the default GXemul instance should be NotRunning",
-	    gxemul.GetRunState() == GXemul::NotRunning);
-
-	cmd->Execute(gxemul, dummyArguments);
-
-	UnitTest::Assert("runstate should have been changed to Quitting",
-	    gxemul.GetRunState() == GXemul::Quitting);
-}
-
-UNITTESTS(QuitCommand)
-{
-	UNITTEST(Test_QuitCommand_Affect_RunState);
-}
-
-#endif
+#endif	// RESETCOMMAND_H

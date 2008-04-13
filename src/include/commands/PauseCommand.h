@@ -1,3 +1,6 @@
+#ifndef PAUSECOMMAND_H
+#define	PAUSECOMMAND_H
+
 /*
  *  Copyright (C) 2008  Anders Gavare.  All rights reserved.
  *
@@ -25,65 +28,46 @@
  *  SUCH DAMAGE.
  */
 
-#include "commands/QuitCommand.h"
-#include "GXemul.h"
+#include "misc.h"
+
+#include "Command.h"
+#include "UnitTest.h"
 
 
-QuitCommand::QuitCommand()
-	: Command("quit", "")
+/**
+ * \brief A Command which pauses execution, by changing the
+ *	current RunState to Paused.
+ */
+class PauseCommand
+	: public Command
 {
-}
+public:
+	/**
+	 * \brief Constructs a %PauseCommand.
+	 */
+	PauseCommand();
+
+	virtual ~PauseCommand();
+
+	/**
+	 * \brief Executes the command: Pauses execution
+	 *	by setting the GXemul instance' RunState to Paused.
+	 *
+	 * @param gxemul A reference to the GXemul instance.
+	 * @param arguments A vector of zero or more string arguments.
+	 */
+	virtual void Execute(GXemul& gxemul,
+		const vector<string>& arguments);
+
+	virtual string GetShortDescription() const;
+
+	virtual string GetLongDescription() const;
 
 
-QuitCommand::~QuitCommand()
-{
-}
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+};
 
 
-void QuitCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
-{
-	gxemul.SetRunState(GXemul::Quitting);
-	gxemul.GetUI()->Shutdown();
-}
-
-
-string QuitCommand::GetShortDescription() const
-{
-	return _("Quits the application.");
-}
-
-
-string QuitCommand::GetLongDescription() const
-{
-	return _("Quits the application.");
-}
-
-
-/*****************************************************************************/
-
-
-#ifndef WITHOUTUNITTESTS
-
-static void Test_QuitCommand_Affect_RunState()
-{
-	refcount_ptr<Command> cmd = new QuitCommand;
-	vector<string> dummyArguments;
-	
-	GXemul gxemul(false);
-
-	UnitTest::Assert(
-	    "the default GXemul instance should be NotRunning",
-	    gxemul.GetRunState() == GXemul::NotRunning);
-
-	cmd->Execute(gxemul, dummyArguments);
-
-	UnitTest::Assert("runstate should have been changed to Quitting",
-	    gxemul.GetRunState() == GXemul::Quitting);
-}
-
-UNITTESTS(QuitCommand)
-{
-	UNITTEST(Test_QuitCommand_Affect_RunState);
-}
-
-#endif
+#endif	// PAUSECOMMAND_H

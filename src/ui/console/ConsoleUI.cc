@@ -215,6 +215,7 @@ int ConsoleUI::MainLoop()
 		case GXemul::Quitting:
 			break;
 
+		case GXemul::NotRunning:
 		case GXemul::Paused:
 			ReadAndExecuteCommand();
 			break;

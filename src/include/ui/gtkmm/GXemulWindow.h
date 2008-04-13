@@ -98,8 +98,15 @@ private:
 	EmulationDesignArea m_EmulationDesignArea;
 	DebugConsoleWidget m_DebugConsoleWidget;
 
+	// Menubar and toolbar:
 	Glib::RefPtr<Gtk::UIManager> m_refUIManager;
 	Glib::RefPtr<Gtk::ActionGroup> m_refActionGroup;
+
+	// Togglable buttons:
+	Glib::RefPtr<Gtk::ToggleAction> m_toggleActionGo;
+	Glib::RefPtr<Gtk::ToggleAction> m_toggleActionPause;
+
+	bool		m_updating;
 };
 
 #endif	// GXEMULWINDOW_H

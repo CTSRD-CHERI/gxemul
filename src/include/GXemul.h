@@ -62,6 +62,7 @@ class GXemul
 public:
 	enum RunState
 	{
+		NotRunning,
 		Paused,
 		Running,
 		Quitting

@@ -87,13 +87,13 @@ void ActionStack::PushActionAndExecute(refcount_ptr<Action>& pAction)
 		Clear();
 	}
 
-	if (m_gxemul != NULL)
-		m_gxemul->GetUI()->UpdateUI();
-
 	// Note that the action is executed after any modification to the
 	// stack itself is done. This is because the Execute function may
 	// modify the stack too (e.g. by calling Clear()).
 	pAction->Execute();
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 }
 
 

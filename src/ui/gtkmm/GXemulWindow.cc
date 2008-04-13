@@ -39,6 +39,7 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	: m_gxemul(gxemul)
 	, m_EmulationDesignArea(gxemul)
 	, m_DebugConsoleWidget(gxemul)
+	, m_updating(false)
 {
 	set_title("GXemul");
 
@@ -48,30 +49,37 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 
 	// File|New sub menu:
 	m_refActionGroup->add(Gtk::Action::create("FileNewBlack",
-	    Gtk::Stock::NEW, _("_Blank emulation")),
+	    Gtk::Stock::NEW, _("_Blank emulation"),
+	    _("Create a new blank emulation")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_new_blank));
 	m_refActionGroup->add(Gtk::Action::create("FileNewFromTemplate",
-	    _("From _template")),
+	    _("From _template"), _("Create a new emulation from a template")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_new_from_template));
 
 	// File menu:
 	m_refActionGroup->add(Gtk::Action::create("FileMenu", _("_File")));
 	m_refActionGroup->add(Gtk::Action::create("FileNew", _("_New")));
-	m_refActionGroup->add(Gtk::Action::create("FileOpen", Gtk::Stock::OPEN),
+	m_refActionGroup->add(Gtk::Action::create("FileOpen", Gtk::Stock::OPEN,
+	     _("_Open"), _("Open an emulation setup")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_open));
-	m_refActionGroup->add(Gtk::Action::create("FileSave", Gtk::Stock::SAVE),
+	m_refActionGroup->add(Gtk::Action::create("FileSave", Gtk::Stock::SAVE,
+	    _("_Save"), _("Save the emulation setup")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_save));
 	m_refActionGroup->add(Gtk::Action::create("FileSaveAs",
-	    Gtk::Stock::SAVE_AS),
+	    Gtk::Stock::SAVE_AS, _("Save _as"),
+	    _("Save the emulation setup under a different filename")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_save_as));
-	m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
+	m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT,
+	    _("_Quit"), _("Quit the application")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_quit));
 
 	// Edit menu:
 	m_refActionGroup->add(Gtk::Action::create("EditMenu", _("_Edit")));
-	m_refActionGroup->add(Gtk::Action::create("EditUndo", Gtk::Stock::UNDO),
+	m_refActionGroup->add(Gtk::Action::create("EditUndo", Gtk::Stock::UNDO,
+	    _("_Undo"), _("Undo the last action")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_undo));
-	m_refActionGroup->add(Gtk::Action::create("EditRedo", Gtk::Stock::REDO),
+	m_refActionGroup->add(Gtk::Action::create("EditRedo", Gtk::Stock::REDO,
+	    _("_Redo"), _("Redo the next action, if possible")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_redo));
 	m_refActionGroup->add(Gtk::Action::create("EditCut", Gtk::Stock::CUT),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_cut));
@@ -84,20 +92,23 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    Gtk::Stock::DELETE),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_delete));
 	m_refActionGroup->add(Gtk::Action::create("EditPreferences",
-	    Gtk::Stock::PREFERENCES),
+	    Gtk::Stock::PREFERENCES, _("Pre_ferences")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_preferences));
 
 	// Emulation menu:
+	m_toggleActionGo = Gtk::ToggleAction::create("EmulationGo",
+	    Gtk::Stock::MEDIA_PLAY, _("_Run"), _("Run the emulation"));
+	m_toggleActionPause = Gtk::ToggleAction::create("EmulationPause",
+	    Gtk::Stock::MEDIA_PAUSE, _("_Pause"), _("Pause the emulation"));
+
 	m_refActionGroup->add(Gtk::Action::create("EmulationMenu",
 	    _("E_mulation")));
-	m_refActionGroup->add(Gtk::Action::create("EmulationGo",
-	    Gtk::Stock::MEDIA_PLAY),
+	m_refActionGroup->add(m_toggleActionGo,
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_go));
-	m_refActionGroup->add(Gtk::Action::create("EmulationPause",
-	    Gtk::Stock::MEDIA_PAUSE),
+	m_refActionGroup->add(m_toggleActionPause,
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_pause));
 	m_refActionGroup->add(Gtk::Action::create("EmulationReset",
-	    _("_Reset")),
+	    _("R_eset"), _("Reset the emulation to its initial state")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_reset));
 
 	// Help menu:
@@ -149,6 +160,7 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    "  </menubar>"
 	    "  <toolbar name='ToolBar'>"
 	    "    <toolitem action='FileOpen'/>"
+	    "    <toolitem action='FileSave'/>"
 	    "    <separator/>"
 	    "    <toolitem action='EditUndo'/>"
 	    "    <toolitem action='EditRedo'/>"
@@ -177,9 +189,13 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 		m_Box.pack_start(*pMenubar, Gtk::PACK_SHRINK);
 
 	Gtk::Widget* pToolbar = m_refUIManager->get_widget("/ToolBar");
-	if (pToolbar != NULL)
+	if (pToolbar != NULL) {
+		((Gtk::Toolbar*)pToolbar)->
+		    set_toolbar_style(Gtk::TOOLBAR_ICONS);
+		((Gtk::Toolbar*)pToolbar)->set_tooltips(true);
 		m_Box.pack_start(*pToolbar, Gtk::PACK_SHRINK);
-
+	}
+	
 	Gtk::VBox *const pVBox = new Gtk::VBox();
 	m_Box.add(*Gtk::manage(pVBox));
 
@@ -224,6 +240,8 @@ void GXemulWindow::InsertText(const string& msg)
 
 void GXemulWindow::UpdateUI()
 {
+	m_updating = true;
+
 	// Undo and Redo:
 	// (These only work if the action stack contains undoable
 	// and redoable actions, respectively.)
@@ -233,14 +251,24 @@ void GXemulWindow::UpdateUI()
 	    m_gxemul->GetActionStack().IsRedoPossible());
 
 	// RunState affects the Play/Pause buttons:
-	bool playAndPauseEnabled =
+	bool nonEmptyEmulation =
 	    ( m_gxemul->GetRootComponent()->GetChildren().size() > 0 );
 	m_refActionGroup->get_action("EmulationGo")->set_sensitive(
-	    playAndPauseEnabled);
+	    nonEmptyEmulation);
 	m_refActionGroup->get_action("EmulationPause")->set_sensitive(
-	    playAndPauseEnabled);
+	    nonEmptyEmulation);
 
-	// TODO: Play (and Pause?) should stay down while Running!
+	// It's also quite meaningless to be able to save an empty setup:
+	m_refActionGroup->get_action("FileSave")->set_sensitive(
+	    nonEmptyEmulation);
+	m_refActionGroup->get_action("FileSaveAs")->set_sensitive(
+	    nonEmptyEmulation);
+
+	// Make the Play or Pause button stay down:
+	const GXemul::RunState runState = m_gxemul->GetRunState();
+
+	m_toggleActionGo->set_active(runState == GXemul::Running);
+	m_toggleActionPause->set_active(runState == GXemul::Paused);
 
 	// Main window Title:
 	string title = "GXemul";
@@ -257,6 +285,8 @@ void GXemulWindow::UpdateUI()
 		    get_allocation().get_height());
 		win->invalidate_rect(r, true);
 	}
+
+	m_updating = false;
 }
 
 
@@ -308,7 +338,8 @@ void GXemulWindow::on_menu_delete()
 
 void GXemulWindow::on_menu_go()
 {
-	m_gxemul->GetCommandInterpreter().RunCommand("continue");
+	if (!m_updating)
+		m_gxemul->GetCommandInterpreter().RunCommand("continue");
 }
 
 
@@ -383,7 +414,8 @@ void GXemulWindow::on_menu_paste()
 
 void GXemulWindow::on_menu_pause()
 {
-	TodoDialog(this, "GXemulWindow::on_menu_pause(): TODO");
+	if (!m_updating)
+		m_gxemul->GetCommandInterpreter().RunCommand("pause");
 }
 
 

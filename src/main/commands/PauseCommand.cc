@@ -25,37 +25,37 @@
  *  SUCH DAMAGE.
  */
 
-#include "commands/QuitCommand.h"
+#include "commands/PauseCommand.h"
 #include "GXemul.h"
 
 
-QuitCommand::QuitCommand()
-	: Command("quit", "")
+PauseCommand::PauseCommand()
+	: Command("pause", "")
 {
 }
 
 
-QuitCommand::~QuitCommand()
+PauseCommand::~PauseCommand()
 {
 }
 
 
-void QuitCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+void PauseCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
-	gxemul.SetRunState(GXemul::Quitting);
-	gxemul.GetUI()->Shutdown();
+	gxemul.SetRunState(GXemul::Paused);
 }
 
 
-string QuitCommand::GetShortDescription() const
+string PauseCommand::GetShortDescription() const
 {
-	return _("Quits the application.");
+	return _("Pauses the current emulation.");
 }
 
 
-string QuitCommand::GetLongDescription() const
+string PauseCommand::GetLongDescription() const
 {
-	return _("Quits the application.");
+	return _("Pauses the emulation, by setting the "
+	    "current RunState to Paused.");
 }
 
 
@@ -64,26 +64,30 @@ string QuitCommand::GetLongDescription() const
 
 #ifndef WITHOUTUNITTESTS
 
-static void Test_QuitCommand_Affect_RunState()
+static void Test_PauseCommand_Affect_RunState()
 {
-	refcount_ptr<Command> cmd = new QuitCommand;
+	refcount_ptr<Command> cmd = new PauseCommand;
 	vector<string> dummyArguments;
 	
 	GXemul gxemul(false);
 
-	UnitTest::Assert(
-	    "the default GXemul instance should be NotRunning",
+	UnitTest::Assert("the default GXemul instance should be NotRunning",
 	    gxemul.GetRunState() == GXemul::NotRunning);
+
+	gxemul.SetRunState(GXemul::Running);
+
+	UnitTest::Assert("the runstate should now be Running",
+	    gxemul.GetRunState() == GXemul::Running);
 
 	cmd->Execute(gxemul, dummyArguments);
 
-	UnitTest::Assert("runstate should have been changed to Quitting",
-	    gxemul.GetRunState() == GXemul::Quitting);
+	UnitTest::Assert("runstate should have been changed to Paused",
+	    gxemul.GetRunState() == GXemul::Paused);
 }
 
-UNITTESTS(QuitCommand)
+UNITTESTS(PauseCommand)
 {
-	UNITTEST(Test_QuitCommand_Affect_RunState);
+	UNITTEST(Test_PauseCommand_Affect_RunState);
 }
 
 #endif

@@ -71,8 +71,8 @@ static void Test_ContinueCommand_Affect_RunState()
 	
 	GXemul gxemul(false);
 
-	UnitTest::Assert("the default GXemul instance should be Running",
-	    gxemul.GetRunState() == GXemul::Running);
+	UnitTest::Assert("the default GXemul instance should be NotRunning",
+	    gxemul.GetRunState() == GXemul::NotRunning);
 
 	gxemul.SetRunState(GXemul::Paused);
 

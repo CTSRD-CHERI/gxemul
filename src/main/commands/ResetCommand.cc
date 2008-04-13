@@ -25,37 +25,39 @@
  *  SUCH DAMAGE.
  */
 
-#include "commands/QuitCommand.h"
+#include "commands/ResetCommand.h"
 #include "GXemul.h"
 
 
-QuitCommand::QuitCommand()
-	: Command("quit", "")
+ResetCommand::ResetCommand()
+	: Command("reset", "")
 {
 }
 
 
-QuitCommand::~QuitCommand()
+ResetCommand::~ResetCommand()
 {
 }
 
 
-void QuitCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+void ResetCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
-	gxemul.SetRunState(GXemul::Quitting);
-	gxemul.GetUI()->Shutdown();
+	gxemul.SetRunState(GXemul::NotRunning);
+
+	// TODO: Reset all components.
 }
 
 
-string QuitCommand::GetShortDescription() const
+string ResetCommand::GetShortDescription() const
 {
-	return _("Quits the application.");
+	return _("Resets the current emulation.");
 }
 
 
-string QuitCommand::GetLongDescription() const
+string ResetCommand::GetLongDescription() const
 {
-	return _("Quits the application.");
+	return _("Resets the emulation, by clearing the state of all\n"
+	    "components, and setting the current RunState to NotRunning.");
 }
 
 
@@ -64,26 +66,30 @@ string QuitCommand::GetLongDescription() const
 
 #ifndef WITHOUTUNITTESTS
 
-static void Test_QuitCommand_Affect_RunState()
+static void Test_ResetCommand_Affect_RunState()
 {
-	refcount_ptr<Command> cmd = new QuitCommand;
+	refcount_ptr<Command> cmd = new ResetCommand;
 	vector<string> dummyArguments;
 	
 	GXemul gxemul(false);
 
-	UnitTest::Assert(
-	    "the default GXemul instance should be NotRunning",
+	UnitTest::Assert("the default GXemul instance should be NotRunning",
 	    gxemul.GetRunState() == GXemul::NotRunning);
+
+	gxemul.SetRunState(GXemul::Paused);
+
+	UnitTest::Assert("the runstate should now be Paused",
+	    gxemul.GetRunState() == GXemul::Paused);
 
 	cmd->Execute(gxemul, dummyArguments);
 
-	UnitTest::Assert("runstate should have been changed to Quitting",
-	    gxemul.GetRunState() == GXemul::Quitting);
+	UnitTest::Assert("runstate should have been changed to NotRunning",
+	    gxemul.GetRunState() == GXemul::NotRunning);
 }
 
-UNITTESTS(QuitCommand)
+UNITTESTS(ResetCommand)
 {
-	UNITTEST(Test_QuitCommand_Affect_RunState);
+	UNITTEST(Test_ResetCommand_Affect_RunState);
 }
 
 #endif

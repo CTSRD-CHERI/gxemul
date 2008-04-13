@@ -310,7 +310,7 @@ extern int optind;
 
 
 GXemul::GXemul(bool bWithGUI)
-	: m_runState(Running)
+	: m_runState(NotRunning)
 	, m_bWithGUI(bWithGUI)
 	, m_bRunUnitTests(false)
 	, m_quietMode(false)
@@ -325,6 +325,7 @@ GXemul::GXemul(bool bWithGUI)
 
 void GXemul::ClearEmulation()
 {
+	SetRunState(NotRunning);
 	m_globalTime = 0.0;
 	m_rootComponent = new DummyComponent;
 	m_rootComponent->SetVariableValue("name", "root");
@@ -651,6 +652,11 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 		optionsEnoughToStartRunning = true;
 
 	if (optionsEnoughToStartRunning) {
+		// Automatically start running, if the -V option was not
+		// supplied, and we're running without the GUI:
+		if (!m_bWithGUI && GetRunState() == NotRunning)
+			SetRunState(Running);
+
 		return true;
 	} else {
 		if (templateMachine != "") {
@@ -848,6 +854,8 @@ GXemul::RunState GXemul::GetRunState() const
 string GXemul::GetRunStateAsString() const
 {
 	switch (m_runState) {
+	case NotRunning:
+		return _("Not running");
 	case Paused:
 		return _("Paused");
 	case Running:

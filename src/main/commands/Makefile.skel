@@ -6,8 +6,8 @@ CXXFLAGS=$(CXXFLAGSBASE) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
 LIBS=$(XLIB) $(OTHERLIBS)
 
 OBJS=AddComponentCommand.o CloseCommand.o ContinueCommand.o HelpCommand.o \
-	LoadCommand.o ListComponentsCommand.o \
-	QuitCommand.o RedoCommand.o RemoveComponentCommand.o \
+	LoadCommand.o ListComponentsCommand.o PauseCommand.o \
+	QuitCommand.o RedoCommand.o RemoveComponentCommand.o ResetCommand.o \
 	SaveCommand.o StatusCommand.o UndoCommand.o VersionCommand.o
 
 all: $(OBJS)

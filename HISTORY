@@ -4043,3 +4043,7 @@ Changelog for GXemul:
 		dump all of the component's state variables.
 		Continuing on porting GXemul 0.4.6.3's MIPS disassembly code.
 		The GTKMM GUI can now be shut down by the "quit" command.
+20080413	Introducing a new RunState (NotRunning). Making the GTKMM GUI
+		Run/Pause buttons stay down while in the Running/Paused
+		runstates. (Also making the icons smaller by not showing text
+		labels, and enabling tooltips instead. Looks/feels nicer.)
