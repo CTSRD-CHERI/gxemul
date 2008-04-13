@@ -157,13 +157,9 @@ public:
 	 */
 	static refcount_ptr<Component> Create();
 
-	/**
-	 * \brief Get attribute information about the MIPS_CPUComponent class.
-	 *
-	 * @param attributeName The attribute name.
-	 * @return A string representing the attribute value.
-	 */
 	static string GetAttribute(const string& attributeName);
+
+	virtual void ResetState();
 
 	virtual int Run(int nrOfCycles);
 

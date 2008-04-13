@@ -25,41 +25,36 @@
  *  SUCH DAMAGE.
  */
 
+#include <assert.h>
+
 #include "actions/ResetAction.h"
-#include "commands/ResetCommand.h"
+#include "components/DummyComponent.h"
 #include "GXemul.h"
 
 
-ResetCommand::ResetCommand()
-	: Command("reset", "")
+ResetAction::ResetAction(GXemul& gxemul)
+	: Action("reset emulation")
+	, m_gxemul(gxemul)
 {
 }
 
 
-ResetCommand::~ResetCommand()
+ResetAction::~ResetAction()
 {
 }
 
 
-void ResetCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+void ResetAction::Execute()
 {
-	gxemul.SetRunState(GXemul::NotRunning);
-
-	refcount_ptr<Action> resetAction = new ResetAction(gxemul);
-	gxemul.GetActionStack().PushActionAndExecute(resetAction);
+	refcount_ptr<Component> root = m_gxemul.GetRootComponent();
+	m_oldComponentTree = root->Clone();
+	root->Reset();
 }
 
 
-string ResetCommand::GetShortDescription() const
+void ResetAction::Undo()
 {
-	return _("Resets the current emulation.");
-}
-
-
-string ResetCommand::GetLongDescription() const
-{
-	return _("Resets the emulation, by clearing the state of all\n"
-	    "components, and setting the current RunState to NotRunning.");
+	m_gxemul.SetRootComponent(m_oldComponentTree);
 }
 
 
@@ -68,30 +63,60 @@ string ResetCommand::GetLongDescription() const
 
 #ifndef WITHOUTUNITTESTS
 
-static void Test_ResetCommand_Affect_RunState()
+static void Test_ResetAction_WithUndoRedo()
 {
-	refcount_ptr<Command> cmd = new ResetCommand;
-	vector<string> dummyArguments;
-	
+	refcount_ptr<Component> dummy = new DummyComponent;
+	refcount_ptr<Component> dummyChildA = new DummyComponent;
+
+	dummy->AddChild(dummyChildA);
+
+	Checksum checksum0;
+	dummy->AddChecksum(checksum0);
+
+	// Change some state variables:
+	dummy->SetVariableValue("x", "value 1");
+	dummyChildA->SetVariableValue("y", "value 2");
+
+	Checksum checksum1;
+	dummy->AddChecksum(checksum1);
+
+	UnitTest::Assert("changing state variables should have changed the"
+		" checksum!", checksum0 == checksum1);
+
 	GXemul gxemul(false);
+	refcount_ptr<Action> actionA = new ResetAction(gxemul);
 
-	UnitTest::Assert("the default GXemul instance should be NotRunning",
-	    gxemul.GetRunState() == GXemul::NotRunning);
+	gxemul.GetActionStack().PushActionAndExecute(actionA);
 
-	gxemul.SetRunState(GXemul::Paused);
+	// Resetting should have caused the state to be reset:
+	Checksum checksum2;
+	dummy->AddChecksum(checksum2);
 
-	UnitTest::Assert("the runstate should now be Paused",
-	    gxemul.GetRunState() == GXemul::Paused);
+	UnitTest::Assert("reset should have succeeded in resetting the state",
+	    checksum0 == checksum2);
 
-	cmd->Execute(gxemul, dummyArguments);
+	// Undo should restore state:
+	gxemul.GetActionStack().Undo();
 
-	UnitTest::Assert("runstate should have been changed to NotRunning",
-	    gxemul.GetRunState() == GXemul::NotRunning);
+	Checksum checksum3;
+	dummy->AddChecksum(checksum3);
+
+	UnitTest::Assert("reset should have succeeded in resetting the state",
+	    checksum1 == checksum3);
+
+	// Redo should reset again:
+	gxemul.GetActionStack().Redo();
+
+	Checksum checksum4;
+	dummy->AddChecksum(checksum4);
+
+	UnitTest::Assert("redo should have succeeded in resetting the state",
+	    checksum0 == checksum4);
 }
 
-UNITTESTS(ResetCommand)
+UNITTESTS(ResetAction)
 {
-	UNITTEST(Test_ResetCommand_Affect_RunState);
+	UNITTEST(Test_ResetAction_WithUndoRedo);
 }
 
 #endif

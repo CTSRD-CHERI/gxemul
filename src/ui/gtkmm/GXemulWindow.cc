@@ -338,8 +338,16 @@ void GXemulWindow::on_menu_delete()
 
 void GXemulWindow::on_menu_go()
 {
-	if (!m_updating)
-		m_gxemul->GetCommandInterpreter().RunCommand("continue");
+	const GXemul::RunState runState = m_gxemul->GetRunState();
+
+	if (!m_updating) {
+		if (runState != GXemul::Running)
+			m_gxemul->GetCommandInterpreter().
+			    RunCommand("continue");
+		else
+			m_toggleActionGo->set_active(
+			    runState == GXemul::Running);
+	}
 }
 
 
@@ -353,10 +361,12 @@ void GXemulWindow::on_menu_new_blank()
 
 void GXemulWindow::on_menu_new_from_template()
 {
+	bool nonEmptyEmulation =
+	    ( m_gxemul->GetRootComponent()->GetChildren().size() > 0 );
+	if (nonEmptyEmulation)
+		m_gxemul->GetCommandInterpreter().RunCommand("close");
+
 	// TODO: List available templates?
-
-	m_gxemul->GetCommandInterpreter().RunCommand("close");
-
 	// TODO: DON't hardcore this!
 	m_gxemul->GetCommandInterpreter().RunCommand("add testmips");
 }
@@ -414,8 +424,15 @@ void GXemulWindow::on_menu_paste()
 
 void GXemulWindow::on_menu_pause()
 {
-	if (!m_updating)
-		m_gxemul->GetCommandInterpreter().RunCommand("pause");
+	const GXemul::RunState runState = m_gxemul->GetRunState();
+
+	if (!m_updating) {
+		if (runState != GXemul::Paused)
+			m_gxemul->GetCommandInterpreter().RunCommand("pause");
+		else
+			m_toggleActionPause->set_active(
+			    runState == GXemul::Paused);
+	}
 }
 
 

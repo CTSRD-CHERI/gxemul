@@ -42,25 +42,17 @@ static mips_cpu_type_def cpu_type_defs[] = MIPS_CPU_TYPE_DEFS;
 MIPS_CPUComponent::MIPS_CPUComponent()
 	: CPUComponent("mips_cpu", "MIPS")
 	, m_mips_type("5KE")	// defaults to a MIPS64 rev 2 cpu
-	, m_hi(0)
-	, m_lo(0)
 {
+	ResetState();
+
 	AddVariableString("mips_type", &m_mips_type);
 
 	AddVariableUInt64("hi", &m_hi);
 	AddVariableUInt64("lo", &m_lo);
 
 	// TODO: GPR 0 (ZERO) is NOT writable!
-	for (size_t i=0; i<N_MIPS_GPRS; i++) {
-		m_gpr[i] = 0;
+	for (size_t i=0; i<N_MIPS_GPRS; i++)
 		AddVariableUInt64(regnames[i], &m_gpr[i]);
-	}
-
-	// MIPS CPUs are hardwired to start at 0xffffffffbfc00000:
-	m_pc = MIPS_INITIAL_PC;
-
-	// Reasonable initial stack pointer.
-	m_gpr[MIPS_GPR_SP] = MIPS_INITIAL_STACK_POINTER;
 
 	// Most MIPS CPUs use 4 KB native page size.
 	// TODO: A few use 1 KB pages; this should be supported as well.
@@ -87,6 +79,24 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 refcount_ptr<Component> MIPS_CPUComponent::Create()
 {
 	return new MIPS_CPUComponent();
+}
+
+
+void MIPS_CPUComponent::ResetState()
+{
+	m_hi = 0;
+	m_lo = 0;
+
+	for (size_t i=0; i<N_MIPS_GPRS; i++)
+		m_gpr[i] = 0;
+
+	// MIPS CPUs are hardwired to start at 0xffffffffbfc00000:
+	m_pc = MIPS_INITIAL_PC;
+
+	// Reasonable initial stack pointer.
+	m_gpr[MIPS_GPR_SP] = MIPS_INITIAL_STACK_POINTER;
+
+	CPUComponent::ResetState();
 }
 
 

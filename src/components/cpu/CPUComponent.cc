@@ -50,6 +50,7 @@ CPUComponent::CPUComponent(const string& className, const string& cpuKind)
 	AddVariableUInt64("lastUnassembleVaddr", &m_lastUnassembleVaddr);
 	AddVariableBool("hasUsedUnassemble", &m_hasUsedUnassemble);
 	AddVariableDouble("frequency", &m_frequency);
+
 	// TODO: Endianness as a variable!
 }
 
