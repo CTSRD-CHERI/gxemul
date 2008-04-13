@@ -97,25 +97,32 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 			const size_t maxLen = 4;
 			unsigned char instruction[maxLen];
 			vector<string> result;
-			
+
+			bool readOk = true;			
 			for (size_t k=0; k<maxLen; ++k) {
 				AddressSelect(vaddr + k);
-				ReadData(instruction[k]);
+				readOk &= ReadData(instruction[k]);
 			}
 			
 			stringstream ss;
 			ss.flags(std::ios::hex | std::ios::showbase);
 			ss << vaddr;
 
-			size_t len = DisassembleInstruction(vaddr,
-			    maxLen, instruction, result);
-			vaddr += len;
+			if (!readOk) {
+				ss << "\t" << _("memory could not be read")
+				    << "\n";
+				gxemul->GetUI()->ShowDebugMessage(ss.str());
+				break;
+			} else {
+				size_t len = DisassembleInstruction(vaddr,
+				    maxLen, instruction, result);
+				vaddr += len;
 
-			for (size_t j=0; j<result.size(); ++j)
-				ss << "\t" << result[j];
-			ss << "\n";
-			
-			gxemul->GetUI()->ShowDebugMessage(ss.str());
+				for (size_t j=0; j<result.size(); ++j)
+					ss << "\t" << result[j];
+				ss << "\n";
+				gxemul->GetUI()->ShowDebugMessage(ss.str());
+			}
 		}
 
 		m_hasUsedUnassemble = true;
