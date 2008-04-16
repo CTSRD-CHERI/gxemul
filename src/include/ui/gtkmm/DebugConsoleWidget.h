@@ -51,6 +51,7 @@ protected:
 
 	Gtk::TextView		m_TextView;
 	Glib::RefPtr<Gtk::TextBuffer> m_refTextBuffer;
+	Glib::RefPtr<Gtk::TextBuffer::Mark> m_endMark;
 	Gtk::TextBuffer::iterator m_textBufferIterator;
 
 	Gtk::Entry		m_Entry;

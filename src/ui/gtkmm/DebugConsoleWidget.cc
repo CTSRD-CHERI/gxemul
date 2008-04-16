@@ -40,14 +40,19 @@ DebugConsoleWidget::DebugConsoleWidget(GXemul* gxemul)
 
 	m_refTextBuffer = Gtk::TextBuffer::create();
 	m_textBufferIterator = m_refTextBuffer->begin();
-	InsertText("GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n");
+	m_endMark = m_refTextBuffer->create_mark("bottom", m_refTextBuffer->end());
 
 	m_TextView.set_buffer(m_refTextBuffer);
 	m_TextView.set_cursor_visible(false);
 	m_TextView.set_editable(false);
+	m_TextView.property_can_focus().set_value(false);
+
+	Pango::FontDescription fontDesc("Courier 10");
+	m_TextView.modify_font(fontDesc);
 
 	m_Entry.signal_activate().connect(sigc::mem_fun(*this,
 	    &DebugConsoleWidget::on_entry_activate));
+	m_Entry.modify_font(fontDesc);
 
 	m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC,
 	    Gtk::POLICY_AUTOMATIC);
@@ -55,6 +60,8 @@ DebugConsoleWidget::DebugConsoleWidget(GXemul* gxemul)
 
 	pVBox->pack_start(m_ScrolledWindow);
 	pVBox->pack_start(m_Entry, Gtk::PACK_SHRINK);
+
+	InsertText("GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n");
 }
 
 
@@ -67,8 +74,9 @@ void DebugConsoleWidget::InsertText(const string& msg)
 {
 	m_textBufferIterator = m_refTextBuffer->insert(
 	    m_textBufferIterator, msg);
-	
-	// TODO: Scroll to end of buffer!
+
+	m_refTextBuffer->move_mark(m_endMark, m_refTextBuffer->end());
+	m_TextView.scroll_to(m_endMark, 0.0);
 }
 
 
@@ -76,7 +84,9 @@ void DebugConsoleWidget::on_entry_activate()
 {
 	string command = m_Entry.get_text();
 	m_Entry.set_text("");
-	m_GXemul->GetCommandInterpreter().RunCommand(command);
+
+	if (!command.empty())
+		m_GXemul->GetCommandInterpreter().RunCommand(command);
 }
 
 

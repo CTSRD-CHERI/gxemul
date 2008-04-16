@@ -54,6 +54,17 @@ Legacy (0.4.x) series
 
 Misc.
 -----
+	[ ]  AddComponentAction::Undo() should remove the path given by
+	     a string, not by a component reference!
+	     Repro-steps:
+		add testmips
+		reset
+		undo
+		undo
+	     This should be the same as
+		add testmips
+		undo
+
 	[/]  CommandInterpreter:
 		[X]  Tab completion of methods!
 		[ ]  Tab completion of state variables!
@@ -133,8 +144,8 @@ Misc.
 			[ ]  Scaling/position of the input line vs text window
 			[X]  Show text in the text window
 			[X]  Scrollbar on text window
-			[ ]  Scroll on text output!
-			[ ]  Fixed-width font in both the text window and input
+			[X]  Scroll on text output!
+			[X]  Fixed-width font in both the text window and input
 			     line.
 			[ ]  Accept INDIVIDUAL keypresses in the input line :)
 			     to support e.g. tab completion.
