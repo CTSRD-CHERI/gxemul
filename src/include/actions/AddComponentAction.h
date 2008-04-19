@@ -50,13 +50,16 @@ public:
 	/**
 	 * \brief Constructs an %AddComponentAction.
 	 *
+	 * @param gxemul GXemul instance (to be able to find the root
+	 *	component).
 	 * @param componentToAdd A reference counted pointer to the Component
 	 *	to add.
 	 * @param whereToAddIt A reference counted pointer to the Component
 	 *	which will be the parent of the newly added Component.
 	 */
-	AddComponentAction(refcount_ptr<Component> componentToAdd,
-			   refcount_ptr<Component> whereToAddIt);
+	AddComponentAction(GXemul& gxemul,
+		refcount_ptr<Component> componentToAdd,
+		refcount_ptr<Component> whereToAddIt);
 
 	virtual ~AddComponentAction();
 
@@ -77,8 +80,10 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
+	GXemul&				m_gxemul;
 	refcount_ptr<Component>		m_componentToAdd;
-	refcount_ptr<Component>		m_whereToAddIt;	
+	string				m_whereToAddIt;
+	string				m_addedComponent;
 };
 
 

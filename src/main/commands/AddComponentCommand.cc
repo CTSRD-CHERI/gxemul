@@ -96,7 +96,7 @@ void AddComponentCommand::Execute(GXemul& gxemul,
 	}
 
 	refcount_ptr<Action> addComponentAction =
-	    new AddComponentAction(componentToAdd, whereToAddIt);
+	    new AddComponentAction(gxemul, componentToAdd, whereToAddIt);
 
 	gxemul.GetActionStack().PushActionAndExecute(addComponentAction);
 }

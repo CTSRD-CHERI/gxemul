@@ -4050,3 +4050,5 @@ Changelog for GXemul:
 		Implementing an undoable ResetAction.
 20080416	GUI updates: Fixed-width font in the debug console, and it
 		now scrolls to bottom on text output.
+20080419	AddComponentAction must not remember component references
+		(for undo/redo); instead it now remember paths.

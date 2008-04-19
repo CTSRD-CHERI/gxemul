@@ -54,17 +54,6 @@ Legacy (0.4.x) series
 
 Misc.
 -----
-	[ ]  AddComponentAction::Undo() should remove the path given by
-	     a string, not by a component reference!
-	     Repro-steps:
-		add testmips
-		reset
-		undo
-		undo
-	     This should be the same as
-		add testmips
-		undo
-
 	[/]  CommandInterpreter:
 		[X]  Tab completion of methods!
 		[ ]  Tab completion of state variables!
@@ -537,8 +526,11 @@ Think about
 		   backwards" button?) and the debugger.
 	     A kind of "exponential decay"-kind of discarding of old states is
 	     probably the best way to do it.
-	     Not necessary to be able to save the "Backward state"; saving
-	     the state will only save the latest state.
+	     Typical use case: something bad has happened (a NULL crash or
+	     similar in a kernel), and you ask "Who was the last one to
+	     write to this variable?". Running backwards/replaying the emulation
+	     will then be able to find the instruction which write the NULL
+	     value.
 
 	[ ]  "Live migration" might be possible. Or at least migrating while
 	     the emulation is being paused. (Not very live-ish, but perhaps
@@ -547,6 +539,7 @@ Think about
 	[ ]  Actual machines being emulated 1 per process/thread? Or all in the
 	     same process/thread?
 	     [ ] Try to take advantage of SMP hosts.
+	     [ ] The GUI needs the be threaded anyway, for responsiveness.
 	     [ ] Prepare early on for emulation using multiple hosts (or
 	     	 GXemul instances)
 

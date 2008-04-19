@@ -25,18 +25,22 @@
  *  SUCH DAMAGE.
  */
 
+#include <assert.h>
+
 #include "actions/AddComponentAction.h"
 #include "components/DummyComponent.h"
 #include "GXemul.h"
 
 
 AddComponentAction::AddComponentAction(
+		GXemul& gxemul,
 		refcount_ptr<Component> componentToAdd,
 		refcount_ptr<Component> whereToAddIt)
 	: Action("add component")
+	, m_gxemul(gxemul)
 	, m_componentToAdd(componentToAdd)
-	, m_whereToAddIt(whereToAddIt)
 {
+	m_whereToAddIt = whereToAddIt->GeneratePath();
 }
 
 
@@ -47,13 +51,29 @@ AddComponentAction::~AddComponentAction()
 
 void AddComponentAction::Execute()
 {
-	m_whereToAddIt->AddChild(m_componentToAdd);
+	assert(m_componentToAdd->GetParent() == NULL);
+
+	refcount_ptr<Component> whereToAdd =
+	    m_gxemul.GetRootComponent()->LookupPath(m_whereToAddIt);
+
+	whereToAdd->AddChild(m_componentToAdd);
+
+	m_addedComponent = m_componentToAdd->GeneratePath();
+
+	assert(m_componentToAdd->GetParent() != NULL);
 }
 
 
 void AddComponentAction::Undo()
 {
-	m_whereToAddIt->RemoveChild(m_componentToAdd);
+	// Remove the child from its parent.
+	refcount_ptr<Component> componentToRemove =
+	    m_gxemul.GetRootComponent()->LookupPath(m_addedComponent);
+
+	componentToRemove->GetParent()->RemoveChild(componentToRemove);
+	assert(componentToRemove->GetParent() == NULL);
+
+	m_componentToAdd = componentToRemove;
 }
 
 
@@ -61,6 +81,8 @@ void AddComponentAction::Undo()
 
 
 #ifndef WITHOUTUNITTESTS
+
+#include "actions/ResetAction.h"
 
 static void Test_AddComponentAction_WithUndoRedo()
 {
@@ -72,9 +94,9 @@ static void Test_AddComponentAction_WithUndoRedo()
 	dummyComponentB->SetVariableValue("x", "456");
 
 	refcount_ptr<Action> actionA = new AddComponentAction(
-	    dummyComponentA, gxemulDummy.GetRootComponent());
+	    gxemulDummy, dummyComponentA, gxemulDummy.GetRootComponent());
 	refcount_ptr<Action> actionB = new AddComponentAction(
-	    dummyComponentB, gxemulDummy.GetRootComponent());
+	    gxemulDummy, dummyComponentB, gxemulDummy.GetRootComponent());
 
 	UnitTest::Assert("the root component should initially have no children",
 	    gxemulDummy.GetRootComponent()->GetChildren().size(), 0);
@@ -132,9 +154,61 @@ static void Test_AddComponentAction_WithUndoRedo()
 	UnitTest::Assert("checksums fail? AB = AB3", checksumAB == checksumAB3);
 }
 
+static void Test_AddComponentAction_UndoAfterReset()
+{
+	GXemul gxemulDummy(false);
+	refcount_ptr<Component> dummyComponentA = new DummyComponent;
+
+	refcount_ptr<Action> actionA = new AddComponentAction(
+	    gxemulDummy, dummyComponentA, gxemulDummy.GetRootComponent());
+
+	UnitTest::Assert("the root component should initially have no children",
+	    gxemulDummy.GetRootComponent()->GetChildren().size(), 0);
+	Checksum checksum0;
+	gxemulDummy.GetRootComponent()->AddChecksum(checksum0);
+
+	ActionStack& actionStack = gxemulDummy.GetActionStack();
+
+	actionStack.PushActionAndExecute(actionA);
+	UnitTest::Assert("the root component should have child A",
+	    gxemulDummy.GetRootComponent()->GetChildren().size(), 1);
+
+	Checksum checksumA;
+	gxemulDummy.GetRootComponent()->AddChecksum(checksumA);
+
+	// Reset
+	refcount_ptr<Action> actionReset = new ResetAction(gxemulDummy);
+	actionStack.PushActionAndExecute(actionReset);
+	actionStack.Undo();
+
+	UnitTest::Assert("the root component should have only child A",
+	    gxemulDummy.GetRootComponent()->GetChildren().size(), 1);
+
+	Checksum checksumA2;
+	gxemulDummy.GetRootComponent()->AddChecksum(checksumA2);
+	UnitTest::Assert("checksums fail? A = A2", checksumA == checksumA2);
+
+	actionStack.Undo();
+	UnitTest::Assert("the root component should have no children",
+	    gxemulDummy.GetRootComponent()->GetChildren().size(), 0);
+
+	Checksum checksum02;
+	gxemulDummy.GetRootComponent()->AddChecksum(checksum02);
+	UnitTest::Assert("checksums fail? 0 = 02", checksum0 == checksum02);
+
+	actionStack.Redo();
+	UnitTest::Assert("the children should be there again",
+	    gxemulDummy.GetRootComponent()->GetChildren().size(), 1);
+
+	Checksum checksumA3;
+	gxemulDummy.GetRootComponent()->AddChecksum(checksumA3);
+	UnitTest::Assert("checksums fail? A = A3", checksumA == checksumA3);
+}
+
 UNITTESTS(AddComponentAction)
 {
 	UNITTEST(Test_AddComponentAction_WithUndoRedo);
+	UNITTEST(Test_AddComponentAction_UndoAfterReset);
 }
 
 #endif
