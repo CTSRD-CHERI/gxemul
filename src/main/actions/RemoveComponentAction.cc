@@ -33,11 +33,13 @@
 
 
 RemoveComponentAction::RemoveComponentAction(
+		GXemul& gxemul,
 		refcount_ptr<Component> componentToRemove,
 		refcount_ptr<Component> whereToRemoveItFrom)
 	: Action("remove component")
-	, m_componentToRemove(componentToRemove)
-	, m_whereToRemoveItFrom(whereToRemoveItFrom)
+	, m_gxemul(gxemul)
+	, m_componentToRemove(componentToRemove->GeneratePath())
+	, m_whereToRemoveItFrom(whereToRemoveItFrom->GeneratePath())
 	, m_insertPositionForUndo((size_t) -1)
 {
 }
@@ -50,16 +52,27 @@ RemoveComponentAction::~RemoveComponentAction()
 
 void RemoveComponentAction::Execute()
 {
+	refcount_ptr<Component> whereToRemoveItFrom =
+	    m_gxemul.GetRootComponent()->LookupPath(m_whereToRemoveItFrom);
+	m_componentToAddOnUndo =
+	    m_gxemul.GetRootComponent()->LookupPath(m_componentToRemove);
+
 	m_insertPositionForUndo =
-	    m_whereToRemoveItFrom->RemoveChild(m_componentToRemove);
+	    whereToRemoveItFrom->RemoveChild(m_componentToAddOnUndo);
+
+	assert(m_componentToAddOnUndo->GetParent() == NULL);
 }
 
 
 void RemoveComponentAction::Undo()
 {
-	if (m_insertPositionForUndo != (size_t) -1)
-		m_whereToRemoveItFrom->AddChild(m_componentToRemove,
-		    m_insertPositionForUndo);
+	refcount_ptr<Component> whereToRemoveItFrom =
+	    m_gxemul.GetRootComponent()->LookupPath(m_whereToRemoveItFrom);
+
+	whereToRemoveItFrom->AddChild(m_componentToAddOnUndo,
+	    m_insertPositionForUndo);
+
+	m_componentToAddOnUndo = NULL;
 }
 
 
@@ -68,8 +81,12 @@ void RemoveComponentAction::Undo()
 
 #ifndef WITHOUTUNITTESTS
 
+#include "actions/ResetAction.h"
+
 static void Test_RemoveComponentAction_WithUndoRedo()
 {
+	GXemul gxemulDummy(false);
+
 	refcount_ptr<Component> dummy = new DummyComponent;
 	refcount_ptr<Component> dummyChildA = new DummyComponent;
 	refcount_ptr<Component> dummyChildA1 = new DummyComponent;
@@ -86,14 +103,15 @@ static void Test_RemoveComponentAction_WithUndoRedo()
 	dummyChildA->AddChild(dummyChildA1);
 	dummyChildA->AddChild(dummyChildA2);
 	dummy->AddChild(dummyChildA);
+	gxemulDummy.GetRootComponent()->AddChild(dummy);
 
 	Checksum checksum0;
 	dummy->AddChecksum(checksum0);
 
-	ActionStack actionStack;
+	ActionStack& actionStack = gxemulDummy.GetActionStack();
 
 	refcount_ptr<Action> actionA = new RemoveComponentAction(
-	    dummyChildA1, dummyChildA);
+	    gxemulDummy, dummyChildA1, dummyChildA);
 
 	UnitTest::Assert("dummyChildA should have two children initially",
 	    dummyChildA->GetChildren().size(), 2);
@@ -133,9 +151,43 @@ static void Test_RemoveComponentAction_WithUndoRedo()
 	    checksumAfterRedo == checksumAfterRemove);
 }
 
+static void Test_RemoveComponentAction_RemoveNotUsingReferences()
+{
+	GXemul gxemulDummy(false);
+	
+	refcount_ptr<Component> dummy = new DummyComponent;
+	refcount_ptr<Component> dummyChildA = new DummyComponent;
+
+	gxemulDummy.GetRootComponent()->AddChild(dummyChildA);
+	gxemulDummy.GetRootComponent()->AddChild(dummy);
+
+	UnitTest::Assert("there should be two children initially",
+	    gxemulDummy.GetRootComponent()->GetChildren().size(), 2);
+
+	ActionStack& actionStack = gxemulDummy.GetActionStack();
+
+	refcount_ptr<Action> actionA = new RemoveComponentAction(
+	    gxemulDummy, dummyChildA, gxemulDummy.GetRootComponent());
+
+	actionStack.PushActionAndExecute(actionA);
+
+	UnitTest::Assert("there should now be one child",
+	    gxemulDummy.GetRootComponent()->GetChildren().size(), 1);
+
+	refcount_ptr<Action> actionReset = new ResetAction(gxemulDummy);
+	actionStack.PushActionAndExecute(actionReset);
+
+	actionStack.Undo();
+	actionStack.Undo();
+
+	UnitTest::Assert("there should be two children again",
+	    gxemulDummy.GetRootComponent()->GetChildren().size(), 2);
+}
+
 UNITTESTS(RemoveComponentAction)
 {
 	UNITTEST(Test_RemoveComponentAction_WithUndoRedo);
+	UNITTEST(Test_RemoveComponentAction_RemoveNotUsingReferences);
 }
 
 #endif

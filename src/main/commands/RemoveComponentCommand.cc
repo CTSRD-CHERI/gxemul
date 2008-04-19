@@ -89,7 +89,7 @@ void RemoveComponentCommand::Execute(GXemul& gxemul,
 	}
 
 	refcount_ptr<Action> removeComponentAction =
-	    new RemoveComponentAction(whatToRemove, parent);
+	    new RemoveComponentAction(gxemul, whatToRemove, parent);
 
 	gxemul.GetActionStack().PushActionAndExecute(removeComponentAction);
 }

@@ -51,13 +51,16 @@ public:
 	/**
 	 * \brief Constructs an %RemoveComponentAction.
 	 *
+	 * @param gxemul The GXemul instance.
 	 * @param componentToRemove A reference counted pointer to the
 	 *	Component to remove.
 	 * @param whereToRemoveItFrom A reference counted pointer to the
 	 *	Component which is the parent of the %Component.
 	 */
-	RemoveComponentAction(refcount_ptr<Component> componentToRemove,
-			   refcount_ptr<Component> whereToRemoveItFrom);
+	RemoveComponentAction(
+		GXemul& gxemul,
+		refcount_ptr<Component> componentToRemove,
+		refcount_ptr<Component> whereToRemoveItFrom);
 
 	virtual ~RemoveComponentAction();
 
@@ -82,9 +85,11 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
-	refcount_ptr<Component>		m_componentToRemove;
-	refcount_ptr<Component>		m_whereToRemoveItFrom;
-	size_t				m_insertPositionForUndo;
+	GXemul&		m_gxemul;
+	string		m_componentToRemove;
+	string		m_whereToRemoveItFrom;
+	size_t		m_insertPositionForUndo;
+	refcount_ptr<Component>	m_componentToAddOnUndo;
 };
 
 

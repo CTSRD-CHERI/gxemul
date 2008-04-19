@@ -4052,3 +4052,4 @@ Changelog for GXemul:
 		now scrolls to bottom on text output.
 20080419	AddComponentAction must not remember component references
 		(for undo/redo); instead it now remember paths.
+		Also implementing a similar fix for RemoveComponentAction.
