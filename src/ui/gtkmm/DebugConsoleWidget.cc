@@ -47,7 +47,7 @@ DebugConsoleWidget::DebugConsoleWidget(GXemul* gxemul)
 	m_TextView.set_editable(false);
 	m_TextView.property_can_focus().set_value(false);
 
-	Pango::FontDescription fontDesc("Courier 10");
+	Pango::FontDescription fontDesc("Courier 9");
 	m_TextView.modify_font(fontDesc);
 
 	m_Entry.signal_activate().connect(sigc::mem_fun(*this,
