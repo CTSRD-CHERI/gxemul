@@ -53,6 +53,8 @@ Legacy (0.4.x) series
 
 Misc.
 -----
+	[ ]  "continue" should clear the undo stack (?).
+
 	[/]  CommandInterpreter:
 		[X]  Tab completion of methods!
 		[ ]  Tab completion of state variables!
@@ -87,6 +89,11 @@ Misc.
 			[ ]  save/load should include those files,
 			     so that loading apa.gxemul will load the
 			     files that were used in that setup!
+		[ ]  Add a method on the CPUComponent, "loadfile", so
+		     that files can be loaded during runtime, and not
+		     only at startup. How about multiple files?
+		     And how about "reset"? The list of files must be
+		     stored somewhere.
 		[ ]  Don't hardcode the CPU path in GXemul.cc?
 			    LookupPath("root.machine0.mainbus0.cpu0");
 			Or perhaps all template machines have to have this
