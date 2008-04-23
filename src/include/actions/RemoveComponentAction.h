@@ -64,6 +64,12 @@ public:
 
 	virtual ~RemoveComponentAction();
 
+
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
+private:
 	/**
 	 * \brief When called, removes the specified Component.
 	 *
@@ -78,11 +84,6 @@ public:
 	 *	it at the position where it was before it was removed).
 	 */
 	void Undo();
-
-
-	/********************************************************************/
-
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
 	GXemul&		m_gxemul;

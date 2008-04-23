@@ -58,6 +58,12 @@ public:
 
 	virtual ~ResetAction();
 
+
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
+private:
 	/**
 	 * \brief When called, resets the specified Component.
 	 *
@@ -72,11 +78,6 @@ public:
 	 *	it at the position where it was before it was reset).
 	 */
 	void Undo();
-
-
-	/********************************************************************/
-
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
 	GXemul&				m_gxemul;

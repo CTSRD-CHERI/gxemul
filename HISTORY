@@ -4053,3 +4053,5 @@ Changelog for GXemul:
 20080419	AddComponentAction must not remember component references
 		(for undo/redo); instead it now remember paths.
 		Also implementing a similar fix for RemoveComponentAction.
+20080423	Action::Execute and Undo are now private, and only reachable
+		from the ActionStack (now a friend class of Action).

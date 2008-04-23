@@ -31,6 +31,8 @@
 #include "misc.h"
 
 
+class ActionStack;
+
 /**
  * \brief Actions are wrappers around undoable/redoable function calls.
  *
@@ -57,16 +59,6 @@ public:
 	virtual ~Action();
 
 	/**
-	 * \brief Called to execute the %Action.
-	 */
-	virtual void Execute() = 0;
-
-	/**
-	 * \brief Called to execute the %Action in reverse, i.e. undo it.
-	 */
-	virtual void Undo() = 0;
-
-	/**
 	 * \brief Checks if the %Action is undoable.
 	 *
 	 * @return true if the action is undoable (i.e. if the Undo
@@ -81,6 +73,19 @@ public:
 	 * @return The description of the %Action.
 	 */
 	const string& GetDescription() const;
+
+private:
+	friend class ActionStack;
+
+	/**
+	 * \brief Called to execute the %Action.
+	 */
+	virtual void Execute() = 0;
+
+	/**
+	 * \brief Called to execute the %Action in reverse, i.e. undo it.
+	 */
+	virtual void Undo() = 0;
 
 private:
 	string	m_description;

@@ -76,6 +76,12 @@ public:
 
 	virtual ~LoadEmulationAction();
 
+
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
+private:
 	/**
 	 * \brief When called, loads a component from a file, and either
 	 *	replaces the GXemul instance' root component with it, or
@@ -87,11 +93,6 @@ public:
 	 * \brief Removes the added component, if possible.
 	 */
 	void Undo();
-
-
-	/********************************************************************/
-
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
 	GXemul&		m_gxemul;

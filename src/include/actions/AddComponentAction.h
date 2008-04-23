@@ -63,6 +63,11 @@ public:
 
 	virtual ~AddComponentAction();
 
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
+private:
 	/**
 	 * \brief When called, adds the specified component.
 	 */
@@ -73,11 +78,6 @@ public:
 	 *	the component, by removing the component.
 	 */
 	void Undo();
-
-
-	/********************************************************************/
-
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
 	GXemul&				m_gxemul;

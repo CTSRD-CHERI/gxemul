@@ -58,6 +58,12 @@ public:
 
 	virtual ~ClearEmulationAction();
 
+
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
+private:
 	/**
 	 * \brief When called, discards the GXemul instance' current
 	 *	emulation setup.
@@ -68,11 +74,6 @@ public:
 	 * \brief Should never be called.
 	 */
 	void Undo();
-
-
-	/********************************************************************/
-
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
 	GXemul&		m_gxemul;
