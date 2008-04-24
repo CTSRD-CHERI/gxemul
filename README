@@ -24,7 +24,7 @@ Unix-like systems. If it does not, then please mail me a bug report.
 
 Dependencies (optional):
 
-	gtkmm-2.4 >= 2.12.5	for the GUI
+	gtkmm-2.4 >= 2.12.7	for the GUI
 	doxygen			for building C++ class documentation
 
 You might want to experiment with various CC, CXX, and CFLAGS environment

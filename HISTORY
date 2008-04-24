@@ -4055,3 +4055,5 @@ Changelog for GXemul:
 		Also implementing a similar fix for RemoveComponentAction.
 20080423	Action::Execute and Undo are now private, and only reachable
 		from the ActionStack (now a friend class of Action).
+20080424	Upgrading configure script check for gtkmm-2.4 from version
+		2.12.5 to 2.12.7, to be in synch with my system.

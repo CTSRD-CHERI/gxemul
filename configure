@@ -841,7 +841,7 @@ fi
 
 ###############################################################################
 
-GTKMM_VER="2.12.5"
+GTKMM_VER="2.12.7"
 printf "checking for gtkmm-2.4 >= $GTKMM_VER... "
 
 if [ z$WITHOUTGTKMM = zYES ]; then
