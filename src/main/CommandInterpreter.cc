@@ -308,16 +308,44 @@ bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
 		    fullMatch);
 		cursorPosition += fullMatch.length() - methodNameLen;
 		return true;
-	} else {
-		if (visibleShowAvailable) {
-			stringstream ss;
-			ss << "\nAvailable methods and variables for " <<
-			    component->GeneratePath() << ":";
-			m_GXemul->GetUI()->ShowDebugMessage(ss.str());
-			ShowAvailableWords(names);
-		}
-		return false;
 	}
+
+	// Show available methods and variable names:		
+	if (visibleShowAvailable) {
+		vector<string> allNames;
+		vector<string> matchingNames;
+		component->GetMethodNames(allNames);
+		for (size_t i=0; i<allNames.size(); ++i) {
+			if (methodName.length() == 0 ||
+			    allNames[i].substr(0, methodName.length()) ==
+			    methodName)
+				matchingNames.push_back(allNames[i]);
+		}
+
+		if (matchingNames.size() > 0) {
+			m_GXemul->GetUI()->ShowDebugMessage(_("\nMethods:"));
+			ShowAvailableWords(matchingNames);
+		}
+	}
+	if (visibleShowAvailable) {
+		vector<string> allNames;
+		vector<string> matchingNames;
+		component->GetVariableNames(allNames);
+		for (size_t i=0; i<allNames.size(); ++i) {
+			if (methodName.length() == 0 ||
+			    allNames[i].substr(0, methodName.length()) ==
+			    methodName)
+				matchingNames.push_back(allNames[i]);
+		}
+
+		if (matchingNames.size() > 0) {
+			m_GXemul->GetUI()->ShowDebugMessage(
+			    _("\nVariables:"));
+			ShowAvailableWords(matchingNames);
+		}
+	}
+
+	return false;
 }
 
 
