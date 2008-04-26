@@ -256,13 +256,15 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 
 				switch (sub) {
 				case 0x00:
-					result.push_back(special_names[special6]);
+					result.push_back(
+					    special_names[special6]);
 					ss << regnames[rd] << "," <<
 					    regnames[rt] << "," << sa;
 					result.push_back(ss.str());
 					break;
 				case 0x01:
-					result.push_back(special_rot_names[special6]);
+					result.push_back(
+					    special_rot_names[special6]);
 					ss << regnames[rd] << "," <<
 					    regnames[rt] << "," << sa;
 					result.push_back(ss.str());
@@ -283,13 +285,15 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 
 				switch (sub) {
 				case 0x00:
-					result.push_back(special_names[special6]);
+					result.push_back(
+					    special_names[special6]);
 					ss << regnames[rd] << "," <<
 					    regnames[rt] << "," << regnames[rs];
 					result.push_back(ss.str());
 					break;
 				case 0x01:
-					result.push_back(special_rot_names[special6]);
+					result.push_back(
+					    special_rot_names[special6]);
 					ss << regnames[rd] << "," <<
 					    regnames[rt] << "," << regnames[rs];
 					result.push_back(ss.str());
