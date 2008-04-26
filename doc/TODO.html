@@ -53,22 +53,6 @@ Legacy (0.4.x) series
 
 Misc.
 -----
-	[/]  CommandInterpreter:
-		[X]  Tab completion of methods!
-		[X]  Tab completion of state variables!
-		[ ]  Tab completion for the 'add' command: component-name
-		[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
-		[X]  "Methods" on objects? E.g.
-			[/]  cpu.unassemble		disassemble
-			[ ]  cpu.registers		show registers
-			[ ]  ram.dump			dump memory
-		[X]  Short form:  cpu.u
-		     When searching for substrings, try e.g. "cpu.u" first,
-		     then "cpu".
-		[X]  Show state variable values when "executing" them
-		[ ]  State variable assignments? (causes an Action to be
-		     executed, which allows Undo.)
-
 	[/]  File loader: Load stuff into emulated RAM (or ROM) components.
 	     Note: Usually, ELFs contain _virtual_ addresses, so file loading
 	     needs to go through a CPU to be properly address translated!
@@ -249,15 +233,17 @@ Actions and undo/redo
 CommandInterpreter
 ------------------
 
+	[ ]  State variable assignments? (causes an Action to be
+	     executed, which allows Undo.)
+
+	[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
+
 	[/]  Tab completion for everything:
-		[X]  command names
-		[X]  component names
-		[ ]  components' state variables
-		[/]  "" + TAB = show available names, both commands, components,
-		     and variables!
 		[ ]  syntax based completion? e.g.:
 			help [cmd]   tab completes the first argument as a
 				     command
+			add component-name
+
 		     This will require a uniform way of describing arguments,
 		     and whether or not they should be optional. The tab
 		     completer must then parse the command line, including
@@ -285,12 +271,7 @@ CommandInterpreter
 	[ ]	copy		copy a component (and its children)
 				to the clipboard
 	[ ]	paste		paste a component from the clipboard
-	[ ]	reset [path]	Reset configuration (i.e. reset all components).
-				If no path is given, the root is used as a
-				starting point.
-	[ ]	print expr  	Prints expression (gets a state variable).
 	[ ]	expr = value	Sets a state variable
-	[ ]	pause		sets RunState to Paused
 	[ ]	step		single-step (Paused)
 
 	[ ]  Strings should be supported, both for e.g. variable
@@ -301,8 +282,6 @@ CommandInterpreter
 
 Components
 ----------
-
-	[ ]  Reset. Implement this in practice?
 
 	Start implementing suitable components (src/components/):
 
