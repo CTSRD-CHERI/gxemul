@@ -135,19 +135,16 @@ Misc.
 			     when starting the application, so that commands
 			     may be entered immediately.
 			[ ]  Scaling/position of the input line vs text window
-			[X]  Show text in the text window
-			[X]  Scrollbar on text window
-			[X]  Scroll on text output!
-			[X]  Fixed-width font in both the text window and input
-			     line.
 			[ ]  Accept INDIVIDUAL keypresses in the input line :)
 			     to support e.g. tab completion.
-		[X]  Undo/redo status update when necessary
 		[/]  Workspace = show current emulation setup.
-		     [ ]  Draw meaningful graphics.
-		     [ ]  Draw text labels for Components.
+			[ ]  Draw meaningful graphics.
+			[ ]  Draw text labels for Components.
+			[ ]  Implement drag-and-drop.
 		[ ]  Palette on the right-hand side of available components.
+			[ ]  Show components.
 			[ ]  Keep size when main window is resized!
+			[ ]  Implement drag-and-drop.
 
 	[ ]  Main run loop: Verify that both cycle accurate and larger chunks
 	     works well. Unit test?
@@ -179,16 +176,6 @@ Misc.
 				A pcibus can be added into a mainbus (in a machine.)
 				etc.
 			bool IsItOkToAddItToThisProposedParentComponent(propsedParent) const;
-
-	[ ]  Require binary file (or disk image) to be loaded,
-	     when starting a template based machine from the command line!
-	     	[ ]  Support for reading CD9660, EXT2FS, FFS/UFS, etc!!!
-	     	     and reading the binary from there. Autodetect common
-	     	     cases:  /netbsd, /bsd, /boot/kernel or /kernel,
-	     	     /vmlinu*, etc. If there is only one match, then boot
-	     	     that, otherwise require explicit filename on the
-	     	     command line (either for a file in an emulated
-	     	     filesystem, or a host file).
 
 	[/]  IR: this could be done separately from actual emulation
 	     code, and unit tested. src/ir/
@@ -234,13 +221,6 @@ Misc.
 			matches one of the supported targets.)
 			E.g. for each IR instruction, and/or for each
 			specific optimization.
-
-	[ ]  UnitTest::Assert => macro, so that the correct line number and
-		file name ends up in the output. Perhaps
-			ASSERT_BOOL(msg, boolexpression)
-			ASSERT_STRING(msg, string, expected)
-			ASSERT_INT(msg, value, expected)
-	     and remove the Assert function(s) entierly?
 
 
 Actions and undo/redo
