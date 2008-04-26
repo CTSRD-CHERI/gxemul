@@ -31,6 +31,7 @@
 #include <gtkmm.h>
 
 #include "GXemul.h"
+#include "ui/gtkmm/ComponentPalette.h"
 #include "ui/gtkmm/DebugConsoleWidget.h"
 #include "ui/gtkmm/EmulationDesignArea.h"
 
@@ -96,7 +97,8 @@ private:
 	Gtk::VBox	m_Box;
 
 	EmulationDesignArea m_EmulationDesignArea;
-	DebugConsoleWidget m_DebugConsoleWidget;
+	ComponentPalette    m_ComponentPalette;
+	DebugConsoleWidget  m_DebugConsoleWidget;
 
 	// Menubar and toolbar:
 	Glib::RefPtr<Gtk::UIManager> m_refUIManager;

@@ -4,7 +4,8 @@
 
 CXXFLAGS=$(CXXFLAGSBASE) $(CPEDANTIC) $(XINCLUDE) $(INCLUDE2)
 
-OBJS=DebugConsoleWidget.o EmulationDesignArea.o GtkmmUI.o GXemulWindow.o
+OBJS=ComponentPalette.o DebugConsoleWidget.o EmulationDesignArea.o \
+	GtkmmUI.o GXemulWindow.o
 
 all: $(OBJS)
 

@@ -38,11 +38,10 @@
 GXemulWindow::GXemulWindow(GXemul* gxemul)
 	: m_gxemul(gxemul)
 	, m_EmulationDesignArea(gxemul)
+	, m_ComponentPalette(gxemul)
 	, m_DebugConsoleWidget(gxemul)
 	, m_updating(false)
 {
-	set_title("GXemul");
-
 	add(m_Box);
 
 	m_refActionGroup = Gtk::ActionGroup::create();
@@ -208,17 +207,17 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 
 	Gtk::Frame *const pFrame1 = new Gtk::Frame();
 	pHPaned->add1(*Gtk::manage(pFrame1));
-	pFrame1->set_size_request(700, 400);
+	pFrame1->set_size_request(700, 280);
 	pFrame1->add(m_EmulationDesignArea);
 
 	Gtk::Frame *const pFrame2 = new Gtk::Frame();
 	pHPaned->add2(*Gtk::manage(pFrame2));
-	pFrame2->set_size_request(240, 400);
-	// TODO: Component Palette
+	pFrame2->set_size_request(220, 280);
+	pFrame2->add(m_ComponentPalette);
 
 	Gtk::Frame *const pFrame3 = new Gtk::Frame();
 	pVPaned->add2(*Gtk::manage(pFrame3));
-	pFrame3->set_size_request(650, 160);
+	pFrame3->set_size_request(650, 280);
 	pFrame3->add(m_DebugConsoleWidget);
 
 	UpdateUI();
