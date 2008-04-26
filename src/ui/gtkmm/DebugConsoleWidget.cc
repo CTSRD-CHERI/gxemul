@@ -40,7 +40,8 @@ DebugConsoleWidget::DebugConsoleWidget(GXemul* gxemul)
 
 	m_refTextBuffer = Gtk::TextBuffer::create();
 	m_textBufferIterator = m_refTextBuffer->begin();
-	m_endMark = m_refTextBuffer->create_mark("bottom", m_refTextBuffer->end());
+	m_endMark = m_refTextBuffer->create_mark(
+	    "bottom", m_refTextBuffer->end());
 
 	m_TextView.set_buffer(m_refTextBuffer);
 	m_TextView.set_cursor_visible(false);
