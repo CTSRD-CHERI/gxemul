@@ -42,6 +42,7 @@ ContinueCommand::~ContinueCommand()
 
 void ContinueCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
+	gxemul.GetActionStack().Clear();
 	gxemul.SetRunState(GXemul::Running);
 }
 
@@ -85,9 +86,27 @@ static void Test_ContinueCommand_Affect_RunState()
 	    gxemul.GetRunState() == GXemul::Running);
 }
 
+static void Test_ContinueCommand_ClearsActionStack()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	gxemul.SetRunState(GXemul::Paused);
+
+	ci.RunCommand("add dummy");
+	UnitTest::Assert("action stack should contain something",
+	    gxemul.GetActionStack().GetNrOfUndoableActions(), 1);
+
+	ci.RunCommand("continue");
+
+	UnitTest::Assert("action stack should have been cleared",
+	    gxemul.GetActionStack().GetNrOfUndoableActions(), 0);
+}
+
 UNITTESTS(ContinueCommand)
 {
 	UNITTEST(Test_ContinueCommand_Affect_RunState);
+	UNITTEST(Test_ContinueCommand_ClearsActionStack);
 }
 
 #endif
