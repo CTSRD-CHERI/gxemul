@@ -113,6 +113,20 @@ void HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 		gxemul.GetUI()->ShowDebugMessage(str + "\n");
 	}
+
+	// ... followed by a short description of other possible commands:
+	gxemul.GetUI()->ShowDebugMessage("  ------------------------------"
+	    "----------------------------------------------\n");
+	gxemul.GetUI()->ShowDebugMessage(_("  root                    "
+	"Shows the entire component tree.\n"));
+	gxemul.GetUI()->ShowDebugMessage(_("  <name>                  "
+	"Shows the component tree, from the named component.\n"));
+	gxemul.GetUI()->ShowDebugMessage(_("  <name>.<method>         "
+	    "Executes a method of a named component.\n"));
+	gxemul.GetUI()->ShowDebugMessage(_("  <name>.<var>            "
+	    "Prints the value of a variable of a named component.\n"));
+	gxemul.GetUI()->ShowDebugMessage(_("  <name>.<var> = <value>  "
+	    "Assigns a value to a variable of a named component.\n"));
 }
 
 
