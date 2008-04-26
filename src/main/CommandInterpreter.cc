@@ -289,6 +289,7 @@ bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
 
 	vector<string> names;
 	component->GetMethodNames(names);
+	component->GetVariableNames(names);
 	int nrOfMatches = 0;
 	string fullMatch;
 	if (methodName.length() != 0) {
@@ -310,7 +311,7 @@ bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
 	} else {
 		if (visibleShowAvailable) {
 			stringstream ss;
-			ss << "\nAvailable methods on " <<
+			ss << "\nAvailable methods and variables for " <<
 			    component->GeneratePath() << ":";
 			m_GXemul->GetUI()->ShowDebugMessage(ss.str());
 			ShowAvailableWords(names);
@@ -753,14 +754,50 @@ bool CommandInterpreter::RunComponentMethod(
 		// Execute it!
 		component->ExecuteMethod(m_GXemul, fullMatch, arguments);
 		return true;
-	} else {
-		stringstream ss;
-		ss << "\nAvailable methods on " << component->GeneratePath()
-		    << ":";
-		m_GXemul->GetUI()->ShowDebugMessage(ss.str());
-		ShowAvailableWords(names);
-		return false;
 	}
+
+	// Try variable names:
+	names.clear();
+	component->GetVariableNames(names);
+	nrOfMatches = 0;
+	fullMatch = "";
+	for (size_t i=0; i<names.size(); ++i) {
+		if (names[i].substr(0, methodName.length()) == methodName) {
+			++ nrOfMatches;
+			fullMatch = names[i];
+		}
+	}
+
+	stringstream ss;
+
+	if (nrOfMatches == 1) {
+		if (arguments.size() > 0) {
+			// TODO: Assignment!
+			m_GXemul->GetUI()->ShowDebugMessage(
+			    _("TODO: Variable assignment!\n"));
+		}
+
+		// Print the variable's name and value:
+		ss << fullMatch;
+
+		const StateVariable* var = component->GetVariable(fullMatch);
+		if (var == NULL)
+			ss << " = (unknown?)";
+		else
+			ss << " = " << var->ToString();
+
+		ss << "\n";
+
+		m_GXemul->GetUI()->ShowDebugMessage(ss.str());
+
+		return true;
+	}
+
+	ss << methodName << " is not a method or variable of "
+	    << component->GeneratePath() << ".\n";
+	m_GXemul->GetUI()->ShowDebugMessage(ss.str());
+
+	return false;
 }
 
 
@@ -1514,6 +1551,24 @@ static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Arg()
 	    "root.machine0.mainbus0.cpu0.unassemble addr");
 }
 
+static void Test_CommandInterpreter_TabCompletion_ComponentVariables()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('u');
+	ci.AddKey('.');
+	ci.AddKey('g');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have caused expansion",
+	    ci.GetCurrentCommandBuffer(),
+	    "root.machine0.mainbus0.cpu0.gp");
+}
+
 static void Test_CommandInterpreter_NonExistingCommand()
 {
 	GXemul gxemul(false);
@@ -1574,6 +1629,22 @@ static void Test_CommandInterpreter_ComponentMethods()
 	    ci.RunCommand("root.machine0.mainbus0.cpu0.unassemble") == true);
 }
 
+static void Test_CommandInterpreter_ComponentVariables_NoArgs()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	UnitTest::Assert("Huh? Could not add testmips.",
+	    ci.RunCommand("add testmips") == true);
+
+	UnitTest::Assert("component variable 1",
+	    ci.RunCommand("cpu.nonexistant") == false);
+	UnitTest::Assert("component variable 2",
+	    ci.RunCommand("cpu.gp") == true);
+	UnitTest::Assert("component variable 3",
+	    ci.RunCommand("root.machine0.mainbus0.cpu0.g") == true);
+}
+
 UNITTESTS(CommandInterpreter)
 {
 	// Key and current buffer:
@@ -1604,12 +1675,14 @@ UNITTESTS(CommandInterpreter)
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods_Middle);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods_Arg);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentVariables);
 
 	// RunCommand:
 	UNITTEST(Test_CommandInterpreter_NonExistingCommand);
 	UNITTEST(Test_CommandInterpreter_SimpleCommand);
 	UNITTEST(Test_CommandInterpreter_SimpleCommand_NoArgsAllowed);
 	UNITTEST(Test_CommandInterpreter_ComponentMethods);
+	UNITTEST(Test_CommandInterpreter_ComponentVariables_NoArgs);
 }
 
 #endif

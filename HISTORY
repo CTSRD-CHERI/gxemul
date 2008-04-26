@@ -4058,3 +4058,5 @@ Changelog for GXemul:
 20080424	Upgrading configure script check for gtkmm-2.4 from version
 		2.12.5 to 2.12.7, to be in synch with my system.
 20080426	The continue command now clears the Undo stack.
+		State variable names of components can now be tab completed.
+		"Running" a variable (e.g. cpu0.pc) will print its value.
