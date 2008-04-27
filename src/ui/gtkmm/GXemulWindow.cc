@@ -272,8 +272,11 @@ void GXemulWindow::UpdateUI()
 	// Main window Title:
 	string title = "GXemul";
 	string emulationFilename = m_gxemul->GetEmulationFilename();
-	if (!emulationFilename.empty())
+	if (!emulationFilename.empty()) {
 		title = emulationFilename + " - " + title;
+		if (m_gxemul->GetDirtyFlag())
+			title = "*" + title;
+	}
 
 	set_title(title);
 
@@ -352,7 +355,11 @@ void GXemulWindow::on_menu_go()
 
 void GXemulWindow::on_menu_new_blank()
 {
-	// TODO: Confirmation if the current emulation is "dirty"?
+	if (!SaveIfDirty(_("New blank emulation"),
+	    _("Choose Save to save your work, "
+	    "or New to start with a blank emulation without saving."),
+	    Gtk::Stock::NEW))
+		return;
 
 	m_gxemul->GetCommandInterpreter().RunCommand("close");
 }
@@ -360,20 +367,27 @@ void GXemulWindow::on_menu_new_blank()
 
 void GXemulWindow::on_menu_new_from_template()
 {
-	bool nonEmptyEmulation =
-	    ( m_gxemul->GetRootComponent()->GetChildren().size() > 0 );
-	if (nonEmptyEmulation)
-		m_gxemul->GetCommandInterpreter().RunCommand("close");
+	if (!SaveIfDirty(_("New emulation from template"),
+	    _("Choose Save to save your work, "
+	    "or New to create an emulation from a template without saving."),
+	    Gtk::Stock::NEW))
+		return;
 
-	// TODO: List available templates?
-	// TODO: DON't hardcore this!
+	// TODO: List available templates.
+	TodoDialog(this, "TODO: Defaulting to 'testmips' for now.");
+
+	m_gxemul->GetCommandInterpreter().RunCommand("close");
 	m_gxemul->GetCommandInterpreter().RunCommand("add testmips");
 }
 
 
 void GXemulWindow::on_menu_open()
 {
-	// TODO: Confirmation if the current emulation is "dirty"?
+	if (!SaveIfDirty(_("Open emulation"),
+	    _("Choose Save to save your work, "
+	    "or Open to open a new emulation without saving."),
+	    Gtk::Stock::OPEN))
+		return;
 
 	// Mostly inspired by the GTKMM example for a File->Open handler.
 
@@ -443,6 +457,12 @@ void GXemulWindow::on_menu_preferences()
 
 void GXemulWindow::on_menu_quit()
 {
+	if (!SaveIfDirty(_("Quit"),
+	    _("Choose Save to save your work, "
+	    "or Quit to quit the application without saving."),
+	    Gtk::Stock::QUIT))
+		return;
+
 	m_gxemul->GetCommandInterpreter().RunCommand("quit");
 }
 
@@ -470,12 +490,57 @@ void GXemulWindow::on_menu_save()
 
 void GXemulWindow::on_menu_save_as()
 {
+	SaveAs();
+}
+
+
+void GXemulWindow::on_menu_undo()
+{
+	m_gxemul->GetCommandInterpreter().RunCommand("undo");
+}
+
+
+bool GXemulWindow::SaveIfDirty(string title, string msg,
+	const Gtk::BuiltinStockID& dontSaveButton)
+{
+	if (m_gxemul->GetDirtyFlag()) {
+		Gtk::MessageDialog dialog(*this,
+		    _("Your current emulation setup has not been saved."),
+		    false, Gtk::MESSAGE_WARNING,
+		    Gtk::BUTTONS_NONE);
+
+		dialog.set_title(title);
+		dialog.set_secondary_text(msg);
+
+		dialog.add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_YES);
+		dialog.add_button(dontSaveButton, Gtk::RESPONSE_NO);
+		dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+
+		int result = dialog.run();
+
+		if (result == Gtk::RESPONSE_CANCEL)
+			return false;
+
+		if (result == Gtk::RESPONSE_YES) {
+			if (!SaveAs())
+				return false;
+		}
+	}
+
+	return true;
+}
+
+
+bool GXemulWindow::SaveAs()
+{
 	// Mostly inspired by the GTKMM example for a File->Open handler.
 
 	Gtk::FileChooserDialog dialog(
 	    _("Choose a name for the emulation (.gxemul)"),
 	    Gtk::FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_transient_for(*this);
+
+	dialog.set_current_name(m_gxemul->GetEmulationFilename());
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
@@ -498,7 +563,7 @@ void GXemulWindow::on_menu_save_as()
 	case Gtk::RESPONSE_OK:
 		filename = dialog.get_filename();
 		m_gxemul->GetCommandInterpreter().RunCommand("save "+filename);
-		break;
+		return true;
 
 	case Gtk::RESPONSE_CANCEL:
 		// Do nothing.
@@ -508,12 +573,8 @@ void GXemulWindow::on_menu_save_as()
 		// Unexpected button clicked. TODO
 		break;
 	}
-}
 
-
-void GXemulWindow::on_menu_undo()
-{
-	m_gxemul->GetCommandInterpreter().RunCommand("undo");
+	return false;
 }
 
 

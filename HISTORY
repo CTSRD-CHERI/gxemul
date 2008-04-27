@@ -4061,3 +4061,6 @@ Changelog for GXemul:
 		State variable names of components can now be tab completed.
 		"Running" a variable (e.g. cpu0.pc) will print its value.
 20080427	Continuing a little on tab completion of variable names.
+		Implementing a "dirty flag" for the emulation; the GTKMM GUI
+		now asks for confirmation before quitting, opening a new
+		emulation, etc, if the model is dirty.

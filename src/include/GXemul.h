@@ -103,6 +103,22 @@ public:
 	int Run();
 
 	/**
+	 * \brief Returns whether the emulation is dirty/modified or not.
+	 *
+	 * @return True if the emulation model has been modified in any way
+	 *	since it was last loaded or saved, false if it is untouched.
+	 */
+	bool GetDirtyFlag() const;
+
+	/**
+	 * \brief Sets whether the emulation is dirty/modified or not.
+	 *
+	 * @param dirtyFlag True if the emulation model has been modified in
+	 * any way since it was last loaded or saved, false if it is untouched.
+	 */
+	void SetDirtyFlag(bool dirtyFlag);
+
+	/**
 	 * \brief Gets the current emulation setup's filename.
 	 *
 	 * @return The name of the file that is used for the current emulation
@@ -237,16 +253,22 @@ private:
 	void PrintUsage(bool longUsage) const;
 
 private:
-	string			m_emulationFileName;
-	RunState		m_runState;
+	// Base:
 	bool			m_bWithGUI;
 	bool			m_bRunUnitTests;
 	bool			m_quietMode;
-	double			m_globalTime;
 	refcount_ptr<UI>	m_ui;
-	refcount_ptr<Component>	m_rootComponent;
 	ActionStack		m_actionStack;
 	CommandInterpreter	m_commandInterpreter;
+
+	// Runtime:
+	RunState		m_runState;
+	double			m_globalTime;	// TODO: Part of the model!
+
+	// Model:
+	string			m_emulationFileName;
+	bool			m_modelIsDirty;
+	refcount_ptr<Component>	m_rootComponent;
 };
 
 #endif	// GXEMUL_H

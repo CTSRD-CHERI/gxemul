@@ -91,6 +91,7 @@ private:
 	string		m_whereToRemoveItFrom;
 	size_t		m_insertPositionForUndo;
 	refcount_ptr<Component>	m_componentToAddOnUndo;
+	bool		m_oldDirtyFlag;
 };
 
 

@@ -53,6 +53,9 @@ Legacy (0.4.x) series
 
 Misc.
 -----
+	[ ]  Load action is incorrect! Should use path names instead of
+	     component references!
+
 	[/]  File loader: Load stuff into emulated RAM (or ROM) components.
 	     Note: Usually, ELFs contain _virtual_ addresses, so file loading
 	     needs to go through a CPU to be properly address translated!
@@ -133,8 +136,6 @@ Misc.
 
 	[ ]  Main run loop: Verify that both cycle accurate and larger chunks
 	     works well. Unit test?
-
-	[ ]  Keep track of whether the document/emulation is "dirty"?
 
 	[ ]  Components
 		[ ]  "help" about components could show a file:/// link to
@@ -338,7 +339,7 @@ GTKMM GUI
 	[/]  Menu bar:
 		File
 			[/]  New ->
-				[/]  Blank emulation
+				[X]  Blank emulation
 				[/]  From template      (e.g. "testmips")
 				-----------------------
 				[ ]  GXemul instance
@@ -370,9 +371,9 @@ GTKMM GUI
 			[ ]  Show debug console
 			[ ]  Full screen mode (F11, CTRL-ALT-F11 to get out)
 		Emulation
-			[/]  Play/Go
-			[/]  Pause
-			[ ]  Reset
+			[X]  Play/Go
+			[X]  Pause
+			[X]  Reset
 		Help
 			[ ]  Contents  (installed html files)
 			[X]  About
@@ -383,7 +384,7 @@ GTKMM GUI
 	     [ ]  Run backwards...
 	     [X]  Run (start emulation)
 	     [X]  Pause (pause emulation, button kept down until unpaused)
-	     [ ]  Reset (with a dialog asking for confirmation)
+	     [ ]  Reset
 	     [X]  Undo/Redo!
 	     (Optional plug-in-ability/extensibility. Buttons should
 	     be bound to debugger commands.)
@@ -397,8 +398,6 @@ GTKMM GUI
 		[/]  Main workspace:
 			[/]  Draw all components in the emulation tree,
 			     using cairo.
-			     [ ]  Invalidate the EmulationDrawingArea when
-			          the Component tree changes!
 			[ ]  Scrollbars if the whole design area isn't possible
 			     to fit in the designated rectangle?
 			[ ]  Tooltips for components? (A "summary" of the entire

@@ -310,14 +310,14 @@ extern int optind;
 
 
 GXemul::GXemul(bool bWithGUI)
-	: m_runState(NotRunning)
-	, m_bWithGUI(bWithGUI)
+	: m_bWithGUI(bWithGUI)
 	, m_bRunUnitTests(false)
 	, m_quietMode(false)
 	, m_ui(new NullUI(this))
-	, m_rootComponent(new DummyComponent)
 	, m_actionStack(this)
 	, m_commandInterpreter(this)
+	, m_runState(NotRunning)
+	, m_rootComponent(new DummyComponent)
 {
 	ClearEmulation();
 }
@@ -330,6 +330,7 @@ void GXemul::ClearEmulation()
 	m_rootComponent = new DummyComponent;
 	m_rootComponent->SetVariableValue("name", "root");
 	m_emulationFileName = "";
+	m_modelIsDirty = false;
 
 	m_ui->UpdateUI();
 }
@@ -775,6 +776,19 @@ int GXemul::Run()
 	}
 
 	return 0;
+}
+
+
+bool GXemul::GetDirtyFlag() const
+{
+	return m_modelIsDirty;
+}
+
+
+void GXemul::SetDirtyFlag(bool dirtyFlag)
+{
+	m_modelIsDirty = dirtyFlag;
+	m_ui->UpdateUI();
 }
 
 

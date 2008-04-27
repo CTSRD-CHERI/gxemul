@@ -84,6 +84,7 @@ private:
 	refcount_ptr<Component>		m_componentToAdd;
 	string				m_whereToAddIt;
 	string				m_addedComponent;
+	bool				m_oldDirtyFlag;
 };
 
 

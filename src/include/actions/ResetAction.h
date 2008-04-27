@@ -82,6 +82,7 @@ private:
 private:
 	GXemul&				m_gxemul;
 	refcount_ptr<Component>		m_oldComponentTree;
+	bool				m_oldDirtyFlag;
 };
 
 

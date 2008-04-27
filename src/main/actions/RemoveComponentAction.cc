@@ -61,6 +61,9 @@ void RemoveComponentAction::Execute()
 	    whereToRemoveItFrom->RemoveChild(m_componentToAddOnUndo);
 
 	assert(m_componentToAddOnUndo->GetParent() == NULL);
+
+	m_oldDirtyFlag = m_gxemul.GetDirtyFlag();
+	m_gxemul.SetDirtyFlag(true);
 }
 
 
@@ -73,6 +76,8 @@ void RemoveComponentAction::Undo()
 	    m_insertPositionForUndo);
 
 	m_componentToAddOnUndo = NULL;
+
+	m_gxemul.SetDirtyFlag(m_oldDirtyFlag);
 }
 
 

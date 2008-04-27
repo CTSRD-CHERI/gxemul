@@ -49,12 +49,16 @@ void ResetAction::Execute()
 	refcount_ptr<Component> root = m_gxemul.GetRootComponent();
 	m_oldComponentTree = root->Clone();
 	root->Reset();
+
+	m_oldDirtyFlag = m_gxemul.GetDirtyFlag();
+	m_gxemul.SetDirtyFlag(true);
 }
 
 
 void ResetAction::Undo()
 {
 	m_gxemul.SetRootComponent(m_oldComponentTree);
+	m_gxemul.SetDirtyFlag(m_oldDirtyFlag);
 }
 
 

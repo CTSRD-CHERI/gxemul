@@ -61,6 +61,9 @@ void AddComponentAction::Execute()
 	m_addedComponent = m_componentToAdd->GeneratePath();
 
 	assert(m_componentToAdd->GetParent() != NULL);
+
+	m_oldDirtyFlag = m_gxemul.GetDirtyFlag();
+	m_gxemul.SetDirtyFlag(true);
 }
 
 
@@ -74,6 +77,8 @@ void AddComponentAction::Undo()
 	assert(componentToRemove->GetParent() == NULL);
 
 	m_componentToAdd = componentToRemove;
+
+	m_gxemul.SetDirtyFlag(m_oldDirtyFlag);
 }
 
 
@@ -103,11 +108,16 @@ static void Test_AddComponentAction_WithUndoRedo()
 	Checksum checksum0;
 	gxemulDummy.GetRootComponent()->AddChecksum(checksum0);
 
+	UnitTest::Assert("the model should initially not be dirty",
+	    gxemulDummy.GetDirtyFlag() == false);
+
 	ActionStack& actionStack = gxemulDummy.GetActionStack();
 
 	actionStack.PushActionAndExecute(actionA);
 	UnitTest::Assert("the root component should have child A",
 	    gxemulDummy.GetRootComponent()->GetChildren().size(), 1);
+	UnitTest::Assert("the model should now be dirty",
+	    gxemulDummy.GetDirtyFlag() == true);
 
 	Checksum checksumA;
 	gxemulDummy.GetRootComponent()->AddChecksum(checksumA);
@@ -139,12 +149,18 @@ static void Test_AddComponentAction_WithUndoRedo()
 	actionStack.Undo();
 	UnitTest::Assert("the root component should have no children",
 	    gxemulDummy.GetRootComponent()->GetChildren().size(), 0);
+	UnitTest::Assert("the model should again be not dirty",
+	    gxemulDummy.GetDirtyFlag() == false);
 
 	Checksum checksum02;
 	gxemulDummy.GetRootComponent()->AddChecksum(checksum02);
 	UnitTest::Assert("checksums fail? 0 = 02", checksum0 == checksum02);
 
 	actionStack.Redo();
+
+	UnitTest::Assert("the model should again be dirty",
+	    gxemulDummy.GetDirtyFlag() == true);
+
 	actionStack.Redo();
 	UnitTest::Assert("both children should be there again",
 	    gxemulDummy.GetRootComponent()->GetChildren().size(), 2);

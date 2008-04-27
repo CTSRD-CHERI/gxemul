@@ -140,11 +140,15 @@ void LoadEmulationAction::Execute()
 
 		m_gxemul.SetEmulationFilename(m_filename);
 		m_gxemul.GetActionStack().Clear();
+		m_gxemul.SetDirtyFlag(false);
 	} else {
 		whereToAddIt->AddChild(component);
 		
 		m_addedComponent = component;
 		m_whereItWasAdded = whereToAddIt;
+
+		m_oldDirtyFlag = m_gxemul.GetDirtyFlag();
+		m_gxemul.SetDirtyFlag(true);
 	}
 }
 
@@ -153,6 +157,7 @@ void LoadEmulationAction::Undo()
 {
 	if (!m_whereItWasAdded.IsNULL()) {
 		m_whereItWasAdded->RemoveChild(m_addedComponent);
+		m_gxemul.SetDirtyFlag(m_oldDirtyFlag);
 	} else {
 		assert(false);
 	}

@@ -102,6 +102,7 @@ private:
 	// For Undo:
 	refcount_ptr<Component>		m_addedComponent;
 	refcount_ptr<Component>		m_whereItWasAdded;
+	bool				m_oldDirtyFlag;
 };
 
 

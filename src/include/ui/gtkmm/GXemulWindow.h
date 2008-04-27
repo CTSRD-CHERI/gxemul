@@ -91,6 +91,10 @@ private:
 	virtual void on_menu_save_as();
 	virtual void on_menu_undo();
 
+	bool SaveIfDirty(string title, string msg,
+	    const Gtk::BuiltinStockID& dontSaveButton);
+	bool SaveAs();
+
 private:
 	GXemul*		m_gxemul;
 
