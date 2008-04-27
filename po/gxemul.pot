@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-04 22:03+0200\n"
+"POT-Creation-Date: 2008-04-27 12:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,11 +16,11 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/main/commands/SaveCommand.cc:133
+#: src/main/commands/SaveCommand.cc:132
 msgid "Saves the emulation to a file."
 msgstr ""
 
-#: src/main/commands/SaveCommand.cc:139
+#: src/main/commands/SaveCommand.cc:138
 msgid ""
 "Saves the entire emulation setup, or a part of it, to a file in the "
 "filesystem.\n"
@@ -31,11 +31,11 @@ msgid ""
 "See also:  load    (to load an emulation setup)\n"
 msgstr ""
 
-#: src/main/commands/LoadCommand.cc:82
+#: src/main/commands/LoadCommand.cc:79
 msgid "Loads an emulation from a file."
 msgstr ""
 
-#: src/main/commands/LoadCommand.cc:88
+#: src/main/commands/LoadCommand.cc:85
 msgid ""
 "Loads an entire emulation setup, or a part of it, from a file in the "
 "filesystem.\n"
@@ -48,15 +48,11 @@ msgid ""
 "See also:  save    (to save an emulation to a file)\n"
 msgstr ""
 
-#: src/main/commands/TreeCommand.cc:66 src/main/commands/TreeCommand.cc:72
-msgid "Shows the component configuration tree."
-msgstr ""
-
-#: src/main/commands/RemoveComponentCommand.cc:103
+#: src/main/commands/RemoveComponentCommand.cc:100
 msgid "Removes a component from the emulation."
 msgstr ""
 
-#: src/main/commands/RemoveComponentCommand.cc:109
+#: src/main/commands/RemoveComponentCommand.cc:106
 msgid ""
 "Removes a component (given a path) from the current emulation setup.\n"
 "\n"
@@ -64,90 +60,116 @@ msgid ""
 "           tree    (to inspect the current emulation setup)\n"
 msgstr ""
 
-#: src/main/commands/ListComponentsCommand.cc:67
+#: src/main/commands/ListComponentsCommand.cc:77
 msgid "Displays all available components."
 msgstr ""
 
-#: src/main/commands/ListComponentsCommand.cc:73
+#: src/main/commands/ListComponentsCommand.cc:83
 msgid "Displays a list of all available components."
 msgstr ""
 
-#: src/main/commands/QuitCommand.cc:54 src/main/commands/QuitCommand.cc:60
+#: src/main/commands/QuitCommand.cc:52 src/main/commands/QuitCommand.cc:58
 msgid "Quits the application."
 msgstr ""
 
-#: src/main/commands/StatusCommand.cc:57
+#: src/main/commands/StatusCommand.cc:54
 msgid "Shows the current status (runstate etc)."
 msgstr ""
 
-#: src/main/commands/StatusCommand.cc:63
+#: src/main/commands/StatusCommand.cc:60
 msgid ""
 "Shows the current status. This currently includes:\n"
 "  o)  Runstate (Running or Paused)\n"
 msgstr ""
 
-#: src/main/commands/ContinueCommand.cc:54
+#: src/main/commands/ContinueCommand.cc:53
 msgid "Continues the current emulation."
 msgstr ""
 
-#: src/main/commands/ContinueCommand.cc:60
+#: src/main/commands/ContinueCommand.cc:59
 msgid "Continues the emulation, by setting the current RunState to Running."
 msgstr ""
 
-#: src/main/commands/CloseCommand.cc:60
+#: src/main/commands/CloseCommand.cc:57
 msgid "Discards (closes) the current emulation."
 msgstr ""
 
-#: src/main/commands/CloseCommand.cc:66
+#: src/main/commands/CloseCommand.cc:63
 msgid ""
 "Closes (discards) the current emulation.\n"
 "\n"
 "See also:  load    (to load an existing emulation)\n"
 msgstr ""
 
-#: src/main/commands/UndoCommand.cc:59
+#: src/main/commands/UndoCommand.cc:56
 msgid "Undoes the last action."
 msgstr ""
 
-#: src/main/commands/UndoCommand.cc:65
+#: src/main/commands/UndoCommand.cc:62
 msgid ""
 "Undoes the last action, if possible.\n"
 "\n"
 "See also:  redo"
 msgstr ""
 
-#: src/main/commands/VersionCommand.cc:55
-#: src/main/commands/VersionCommand.cc:61
+#: src/main/commands/VersionCommand.cc:52
+#: src/main/commands/VersionCommand.cc:58
 msgid "Prints version information."
 msgstr ""
 
+#: src/main/commands/HelpCommand.cc:120
+msgid "  root                    Shows the entire component tree.\n"
+msgstr ""
+
+#: src/main/commands/HelpCommand.cc:122
+msgid ""
+"  <name>                  Shows the component tree, from the named "
+"component.\n"
+msgstr ""
+
 #: src/main/commands/HelpCommand.cc:124
+msgid "  <name>.<method>         Executes a method of a named component.\n"
+msgstr ""
+
+#: src/main/commands/HelpCommand.cc:126
+msgid ""
+"  <name>.<var>            Prints the value of a variable of a named "
+"component.\n"
+msgstr ""
+
+#: src/main/commands/HelpCommand.cc:128
+msgid ""
+"  <name>.<var> = <value>  Assigns a value to a variable of a named "
+"component.\n"
+msgstr ""
+
+#: src/main/commands/HelpCommand.cc:135
 msgid "Shows a help message."
 msgstr ""
 
-#: src/main/commands/HelpCommand.cc:130
+#: src/main/commands/HelpCommand.cc:141
 msgid ""
 "Shows a summary of all available commands, or, when given a specific "
 "command\n"
 "name as an argument, shows a detailed description about that command.\n"
 msgstr ""
 
-#: src/main/commands/RedoCommand.cc:59
+#: src/main/commands/RedoCommand.cc:56
 msgid "Redoes the next action, if possible."
 msgstr ""
 
-#: src/main/commands/RedoCommand.cc:65
+#: src/main/commands/RedoCommand.cc:62
 msgid ""
 "Redoes the next action on the action stack, if possible.\n"
 "\n"
 "See also:  undo"
 msgstr ""
 
-#: src/main/commands/AddComponentCommand.cc:110
+#: src/main/commands/AddComponentCommand.cc:107
 msgid "Adds a component to the emulation."
 msgstr ""
 
-#: src/main/commands/AddComponentCommand.cc:116
+#: src/main/commands/AddComponentCommand.cc:113
 msgid ""
 "Adds a component (given by the component-name) to the current emulation "
 "setup.\n"
@@ -158,11 +180,29 @@ msgid ""
 "           tree    (to inspect the current emulation setup)\n"
 msgstr ""
 
-#: src/main/GXemul.cc:480
+#: src/main/commands/ResetCommand.cc:55
+msgid "Resets the current emulation."
+msgstr ""
+
+#: src/main/commands/ResetCommand.cc:61
+msgid ""
+"Resets the emulation, by clearing the state of all\n"
+"components, and setting the current RunState to NotRunning."
+msgstr ""
+
+#: src/main/commands/PauseCommand.cc:51
+msgid "Pauses the current emulation."
+msgstr ""
+
+#: src/main/commands/PauseCommand.cc:57
+msgid "Pauses the emulation, by setting the current RunState to Paused."
+msgstr ""
+
+#: src/main/GXemul.cc:525
 msgid "The -e option is deprecated. Use -E instead.\n"
 msgstr ""
 
-#: src/main/GXemul.cc:521
+#: src/main/GXemul.cc:566
 msgid ""
 "\n"
 "It is possible that you are attempting to use an option which was available\n"
@@ -173,29 +213,38 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/main/GXemul.cc:538
+#: src/main/GXemul.cc:582
 msgid "Failed to create configuration from template: "
 msgstr ""
 
-#: src/main/GXemul.cc:540 src/main/GXemul.cc:573 src/main/GXemul.cc:579
+#: src/main/GXemul.cc:584 src/main/GXemul.cc:613 src/main/GXemul.cc:639
+#: src/main/GXemul.cc:645
 msgid "Aborting."
 msgstr ""
 
-#: src/main/GXemul.cc:570
+#: src/main/GXemul.cc:610
+msgid "Failed to load binary: "
+msgstr ""
+
+#: src/main/GXemul.cc:636
 msgid "Failed to load configuration: "
 msgstr ""
 
-#: src/main/GXemul.cc:577
+#: src/main/GXemul.cc:643
 msgid "More than one configfile name supplied on the command line?"
 msgstr ""
 
-#: src/main/GXemul.cc:603
+#: src/main/GXemul.cc:664
+msgid "No binary specified. Aborting.\n"
+msgstr ""
+
+#: src/main/GXemul.cc:679
 msgid ""
 "Insufficient command line arguments given to start an emulation. You have\n"
 "the following alternatives:\n"
 msgstr ""
 
-#: src/main/GXemul.cc:607
+#: src/main/GXemul.cc:683
 msgid ""
 "  1. Run  gxemul  with machine selection options (-E), which creates a\n"
 "     default emulation from a template machine.\n"
@@ -206,22 +255,23 @@ msgid ""
 "  4. Run  gxemul-gui  which starts the GUI version of GXemul.\n"
 msgstr ""
 
-#: src/main/GXemul.cc:617
+#: src/main/GXemul.cc:693
 msgid ""
 "Run  gxemul -h  for help on command line options.\n"
 "\n"
 msgstr ""
 
-#: src/main/GXemul.cc:622
+#: src/main/GXemul.cc:698
 msgid ""
 "Usage: gxemul [general options] [configfile]\n"
-"       gxemul [general options] [machine selection options] [binary...]\n"
+"       gxemul [general options] [machine selection options] binary [...]\n"
 "       gxemul-gui [general options] [configfile]\n"
-"       gxemul-gui [general options] [machine selection options] [binary...]\n"
+"       gxemul-gui [general options] [machine selection options] binary "
+"[...]\n"
 "\n"
 msgstr ""
 
-#: src/main/GXemul.cc:637
+#: src/main/GXemul.cc:713
 msgid ""
 "Machine selection options:\n"
 "  -E t       Starts an emulation based on template t. (Use -H to get a "
@@ -240,76 +290,235 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/main/GXemul.cc:677
+#: src/main/GXemul.cc:753
 msgid "Sorry, this installation of GXemul was compiled without GUI support.\n"
 msgstr ""
 
-#: src/main/GXemul.cc:765
-msgid "Paused"
-msgstr ""
-
-#: src/main/GXemul.cc:767
-msgid "Running"
+#: src/main/GXemul.cc:768
+msgid ""
+"\n"
+"### FATAL ERROR ###\n"
+"\n"
 msgstr ""
 
 #: src/main/GXemul.cc:769
+msgid ""
+"If you are able to reproduce this crash, please send detailed repro-steps "
+"to\n"
+"the author, to the gxemul-devel mailing list, or ask in #GXemul on the\n"
+"FreeNode IRC network.\n"
+msgstr ""
+
+#: src/main/GXemul.cc:872
+msgid "Not running"
+msgstr ""
+
+#: src/main/GXemul.cc:874
+msgid "Paused"
+msgstr ""
+
+#: src/main/GXemul.cc:876
+msgid "Running"
+msgstr ""
+
+#: src/main/GXemul.cc:878
 msgid "Quitting"
 msgstr ""
 
-#: src/main/GXemul.cc:772
+#: src/main/GXemul.cc:881
 msgid "Unknown RunState"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:47
+#: src/main/CommandInterpreter.cc:347
+msgid ""
+"\n"
+"Methods:"
+msgstr ""
+
+#: src/main/CommandInterpreter.cc:364
+msgid ""
+"\n"
+"Variables:"
+msgstr ""
+
+#: src/main/CommandInterpreter.cc:826
+msgid "TODO: Variable assignment!\n"
+msgstr ""
+
+#: src/components/cpu/CPUComponent.cc:112
+msgid "memory could not be read"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:51
 msgid "_Blank emulation"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:50
-msgid "From _template"
-msgstr ""
-
-#: src/ui/gtkmm/GXemulWindow.cc:54
-msgid "_File"
+#: src/ui/gtkmm/GXemulWindow.cc:52
+msgid "Create a new blank emulation"
 msgstr ""
 
 #: src/ui/gtkmm/GXemulWindow.cc:55
+msgid "From _template"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:55
+msgid "Create a new emulation from a template"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:59
+msgid "_File"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:60
 msgid "_New"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:67
+#: src/ui/gtkmm/GXemulWindow.cc:62
+msgid "_Open"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:62
+msgid "Open an emulation setup"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:65
+msgid "_Save"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:65 src/ui/gtkmm/GXemulWindow.cc:69
+msgid "Save the emulation setup"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:68
+msgid "Save _as"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:72
+msgid "_Quit"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:72
+msgid "Quit the application"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:76
 msgid "_Edit"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:88
+#: src/ui/gtkmm/GXemulWindow.cc:78
+msgid "_Undo"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:78
+msgid "Undo the last action"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:81
+msgid "_Redo"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:81
+msgid "Redo the next action, if possible"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:94
+msgid "Pre_ferences"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:99
+msgid "_Run"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:99
+msgid "Run the emulation"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:101
+msgid "_Pause"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:101
+msgid "Pause the emulation"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:104
 msgid "E_mulation"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:96
-msgid "_Reset"
+#: src/ui/gtkmm/GXemulWindow.cc:110
+msgid "R_eset"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:100
+#: src/ui/gtkmm/GXemulWindow.cc:110
+msgid "Reset the emulation to its initial state"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:114
 msgid "_Help"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:215
+#: src/ui/gtkmm/GXemulWindow.cc:301
 msgid ""
 "If you have questions or feedback, don't hesitate to mail me.\n"
 "anders@gavare.se"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:277
+#: src/ui/gtkmm/GXemulWindow.cc:358
+msgid "New blank emulation"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:359
+msgid ""
+"Choose Save to save your work, or New to start with a blank emulation "
+"without saving."
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:370
+msgid "New emulation from template"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:371
+msgid ""
+"Choose Save to save your work, or New to create an emulation from a template "
+"without saving."
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:386
+msgid "Open emulation"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:387
+msgid ""
+"Choose Save to save your work, or Open to open a new emulation without "
+"saving."
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:394
 msgid "Choose an emulation to open"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:285 src/ui/gtkmm/GXemulWindow.cc:372
+#: src/ui/gtkmm/GXemulWindow.cc:402 src/ui/gtkmm/GXemulWindow.cc:549
 msgid "GXemul files"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:290 src/ui/gtkmm/GXemulWindow.cc:377
+#: src/ui/gtkmm/GXemulWindow.cc:407 src/ui/gtkmm/GXemulWindow.cc:554
 msgid "Any files"
 msgstr ""
 
-#: src/ui/gtkmm/GXemulWindow.cc:364
+#: src/ui/gtkmm/GXemulWindow.cc:460
+msgid "Quit"
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:461
+msgid ""
+"Choose Save to save your work, or Quit to quit the application without "
+"saving."
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:508
+msgid "Your current emulation setup has not been saved."
+msgstr ""
+
+#: src/ui/gtkmm/GXemulWindow.cc:539
 msgid "Choose a name for the emulation (.gxemul)"
 msgstr ""
