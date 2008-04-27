@@ -288,27 +288,48 @@ bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
 	// std::cerr << "{" << methodName << "}\n";
 
 	vector<string> names;
+	vector<string> matchingNames;
 	component->GetMethodNames(names);
 	component->GetVariableNames(names);
 	int nrOfMatches = 0;
-	string fullMatch;
 	if (methodName.length() != 0) {
 		for (size_t i=0; i<names.size(); ++i) {
 			if (names[i].substr(0, methodName.length()) ==
 			    methodName) {
 				++ nrOfMatches;
-				fullMatch = names[i];
+				matchingNames.push_back(names[i]);
 			}
 		}
+	} else {
+		matchingNames = names;
 	}
-	
-	if (nrOfMatches == 1) {
-		// Replace the short name with the full match:
-		commandString.replace(startOfMethodName, methodNameLen,
-		    fullMatch);
-		cursorPosition += fullMatch.length() - methodNameLen;
+
+	// Replace the short name with a match as long as possible, e.g.
+	// "memo" will be replaced by "memoryMapped", if names
+	// "memoryMappedAddr" and "memoryMappedSize" are available.
+	string longestPossibleMatch = "";
+	size_t i, n = matchingNames.size();
+	for (size_t pos = 0; ; pos ++) {
+		if (pos >= matchingNames[0].length())
+			break;
+		stringchar ch = matchingNames[0][pos];
+		for (i=1; i<n; i++) {
+			if (matchingNames[i][pos] != ch)
+				break;
+		}
+		if (i == n)
+			longestPossibleMatch += ch;
+		else
+			break;
+	}
+
+	commandString.replace(startOfMethodName, methodNameLen,
+	    longestPossibleMatch);
+	cursorPosition += longestPossibleMatch.length() - methodNameLen;
+
+	// A single match? Then we succeeded.
+	if (nrOfMatches == 1)
 		return true;
-	}
 
 	// Show available methods and variable names:		
 	if (visibleShowAvailable) {
@@ -1597,6 +1618,57 @@ static void Test_CommandInterpreter_TabCompletion_ComponentVariables()
 	    "root.machine0.mainbus0.cpu0.gp");
 }
 
+static void Test_CommandInterpreter_TabCompletion_ComponentVariables_Max()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add ram");
+
+	ci.AddKey('r');
+	ci.AddKey('a');
+	ci.AddKey('m');
+	ci.AddKey('.');
+	ci.AddKey('m');
+	ci.AddKey('e');
+	ci.AddKey('m');
+	ci.AddKey('o');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have caused expansion",
+	    ci.GetCurrentCommandBuffer(),
+	    "root.ram0.memoryMapped");
+}
+
+static void Test_CommandInterpreter_TabCompletion_ComponentVariables_Max2()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add ram");
+
+	ci.AddKey('r');
+	ci.AddKey('a');
+	ci.AddKey('m');
+	ci.AddKey('.');
+	ci.AddKey('m');
+	ci.AddKey('e');
+	ci.AddKey('m');
+	ci.AddKey('o');
+	ci.AddKey(' ');
+	ci.AddKey('2');
+	ci.AddKey('\2');
+	ci.AddKey('\2');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should have caused expansion",
+	    ci.GetCurrentCommandBuffer(),
+	    "root.ram0.memoryMapped 2");
+
+	ci.AddKey('X');
+	UnitTest::Assert("cursor position after tab completion was wrong?",
+	    ci.GetCurrentCommandBuffer(),
+	    "root.ram0.memoryMappedX 2");
+}
+
 static void Test_CommandInterpreter_NonExistingCommand()
 {
 	GXemul gxemul(false);
@@ -1704,6 +1776,8 @@ UNITTESTS(CommandInterpreter)
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods_Middle);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentMethods_Arg);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentVariables);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentVariables_Max);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentVariables_Max2);
 
 	// RunCommand:
 	UNITTEST(Test_CommandInterpreter_NonExistingCommand);

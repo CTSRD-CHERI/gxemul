@@ -4060,3 +4060,4 @@ Changelog for GXemul:
 20080426	The continue command now clears the Undo stack.
 		State variable names of components can now be tab completed.
 		"Running" a variable (e.g. cpu0.pc) will print its value.
+20080427	Continuing a little on tab completion of variable names.
