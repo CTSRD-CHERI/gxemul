@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-27 12:32+0200\n"
+"POT-Creation-Date: 2008-04-27 13:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -343,6 +343,14 @@ msgstr ""
 
 #: src/main/CommandInterpreter.cc:826
 msgid "TODO: Variable assignment!\n"
+msgstr ""
+
+#: src/main/Component.cc:333
+msgid " bytes"
+msgstr ""
+
+#: src/main/Component.cc:335
+msgid " at offset "
 msgstr ""
 
 #: src/components/cpu/CPUComponent.cc:112

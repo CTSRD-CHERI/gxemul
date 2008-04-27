@@ -66,7 +66,7 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_save));
 	m_refActionGroup->add(Gtk::Action::create("FileSaveAs",
 	    Gtk::Stock::SAVE_AS, _("Save _as"),
-	    _("Save the emulation setup under a different filename")),
+	    _("Save the emulation setup")),
 	    sigc::mem_fun(*this, &GXemulWindow::on_menu_save_as));
 	m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT,
 	    _("_Quit"), _("Quit the application")),
@@ -159,7 +159,7 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	    "  </menubar>"
 	    "  <toolbar name='ToolBar'>"
 	    "    <toolitem action='FileOpen'/>"
-	    "    <toolitem action='FileSave'/>"
+	    "    <toolitem action='FileSaveAs'/>"
 	    "    <separator/>"
 	    "    <toolitem action='EditUndo'/>"
 	    "    <toolitem action='EditRedo'/>"

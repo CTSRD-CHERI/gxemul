@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GXemul 0.5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-27 12:32+0200\n"
+"POT-Creation-Date: 2008-04-27 13:17+0200\n"
 "PO-Revision-Date: 2008-04-02 23:01+0200\n"
 "Last-Translator: GXemul <gxemul-devel@lists.sourceforge.net>\n"
 "Language-Team: GXemul <gxemul-devel@lists.sourceforge.net>\n"
@@ -52,6 +52,14 @@ msgid ""
 "\n"
 "See also:  save    (to save an emulation to a file)\n"
 msgstr ""
+"Laddar en emulering, eller en del av en emulering, från en fil.\n"
+"Filnamnet kan hoppas över, om ett filnamn är känt från ett tidigare 'load'-\n"
+"eller 'save'-kommando. Om komponentsökvägen hoppas över så ersätts hela\n"
+"nuvarande komponentträdet med det som laddas, annars läggs det laddade "
+"trädet\n"
+"till på den givna komponentsökvägen.\n"
+"\n"
+"Se även:  save    (för att spara emuleringen till en fil)\n"
 
 #: src/main/commands/RemoveComponentCommand.cc:100
 msgid "Removes a component from the emulation."
@@ -239,6 +247,14 @@ msgid ""
 "options.\n"
 "\n"
 msgstr ""
+"\n"
+"Möjligen försöker du använda kommandoradsargument som fanns i en tidigare\n"
+"version av GXemul, men inte ännu har hunnit reimplementeras i den här\n"
+"versionen.\n"
+"\n"
+"Var god läs manual-sidan eller kör  gxemul -h  för att få hjälp om\n"
+"tillgängliga kommandoradsargument.\n"
+"\n"
 
 #: src/main/GXemul.cc:582
 msgid "Failed to create configuration from template: "
@@ -401,9 +417,17 @@ msgstr ""
 msgid "TODO: Variable assignment!\n"
 msgstr ""
 
+#: src/main/Component.cc:333
+msgid " bytes"
+msgstr " byte"
+
+#: src/main/Component.cc:335
+msgid " at offset "
+msgstr " på offset "
+
 #: src/components/cpu/CPUComponent.cc:112
 msgid "memory could not be read"
-msgstr ""
+msgstr "minnet kunde inte läsas"
 
 #: src/ui/gtkmm/GXemulWindow.cc:51
 msgid "_Blank emulation"
