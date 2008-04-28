@@ -31,7 +31,7 @@
 
 
 LoadCommand::LoadCommand()
-	: Command("load", "[filename [component-path]]")
+	: Command("load", _("[filename [component-path]]"))
 {
 }
 

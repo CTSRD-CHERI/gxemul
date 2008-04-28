@@ -30,7 +30,7 @@
 
 
 HelpCommand::HelpCommand()
-	: Command("help", "[command-name]")
+	: Command("help", _("[command-name]"))
 {
 }
 
@@ -109,7 +109,7 @@ void HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		while (str.length() < longest + nLeadingSpaces)
 			str += " ";
 		
-		str += "    " + command.GetShortDescription();
+		str += "   " + command.GetShortDescription();
 
 		gxemul.GetUI()->ShowDebugMessage(str + "\n");
 	}

@@ -8,13 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-27 13:17+0200\n"
+"POT-Creation-Date: 2008-04-28 06:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/main/commands/SaveCommand.cc:35 src/main/commands/LoadCommand.cc:34
+msgid "[filename [component-path]]"
+msgstr ""
 
 #: src/main/commands/SaveCommand.cc:132
 msgid "Saves the emulation to a file."
@@ -46,6 +50,10 @@ msgid ""
 "component is added as a child to that path.\n"
 "\n"
 "See also:  save    (to save an emulation to a file)\n"
+msgstr ""
+
+#: src/main/commands/RemoveComponentCommand.cc:34
+msgid "path"
 msgstr ""
 
 #: src/main/commands/RemoveComponentCommand.cc:100
@@ -101,11 +109,15 @@ msgid ""
 "See also:  load    (to load an existing emulation)\n"
 msgstr ""
 
-#: src/main/commands/UndoCommand.cc:56
+#: src/main/commands/UndoCommand.cc:51
+msgid "Undo is not possible.\n"
+msgstr ""
+
+#: src/main/commands/UndoCommand.cc:57
 msgid "Undoes the last action."
 msgstr ""
 
-#: src/main/commands/UndoCommand.cc:62
+#: src/main/commands/UndoCommand.cc:63
 msgid ""
 "Undoes the last action, if possible.\n"
 "\n"
@@ -115,6 +127,10 @@ msgstr ""
 #: src/main/commands/VersionCommand.cc:52
 #: src/main/commands/VersionCommand.cc:58
 msgid "Prints version information."
+msgstr ""
+
+#: src/main/commands/HelpCommand.cc:33
+msgid "[command-name]"
 msgstr ""
 
 #: src/main/commands/HelpCommand.cc:120
@@ -154,22 +170,54 @@ msgid ""
 "name as an argument, shows a detailed description about that command.\n"
 msgstr ""
 
-#: src/main/commands/RedoCommand.cc:56
+#: src/main/commands/RedoCommand.cc:51
+msgid "Redo is not possible.\n"
+msgstr ""
+
+#: src/main/commands/RedoCommand.cc:57
 msgid "Redoes the next action, if possible."
 msgstr ""
 
-#: src/main/commands/RedoCommand.cc:62
+#: src/main/commands/RedoCommand.cc:63
 msgid ""
 "Redoes the next action on the action stack, if possible.\n"
 "\n"
 "See also:  undo"
 msgstr ""
 
-#: src/main/commands/AddComponentCommand.cc:107
+#: src/main/commands/AddComponentCommand.cc:35
+msgid "component-name [path]"
+msgstr ""
+
+#: src/main/commands/AddComponentCommand.cc:55
+msgid "No component-name given.\n"
+msgstr ""
+
+#: src/main/commands/AddComponentCommand.cc:60
+msgid "Too many arguments.\n"
+msgstr ""
+
+#: src/main/commands/AddComponentCommand.cc:71
+msgid ": unknown component.\n"
+msgstr ""
+
+#: src/main/commands/AddComponentCommand.cc:83
+msgid ": not a path to a known component.\n"
+msgstr ""
+
+#: src/main/commands/AddComponentCommand.cc:88
+msgid " matches multiple components:\n"
+msgstr ""
+
+#: src/main/commands/AddComponentCommand.cc:97
+msgid ": lookup of path failed.\n"
+msgstr ""
+
+#: src/main/commands/AddComponentCommand.cc:110
 msgid "Adds a component to the emulation."
 msgstr ""
 
-#: src/main/commands/AddComponentCommand.cc:113
+#: src/main/commands/AddComponentCommand.cc:116
 msgid ""
 "Adds a component (given by the component-name) to the current emulation "
 "setup.\n"
@@ -350,6 +398,10 @@ msgid " bytes"
 msgstr ""
 
 #: src/main/Component.cc:335
+msgid " byte"
+msgstr ""
+
+#: src/main/Component.cc:337
 msgid " at offset "
 msgstr ""
 

@@ -31,7 +31,7 @@
 
 
 RemoveComponentCommand::RemoveComponentCommand()
-	: Command("remove", "path")
+	: Command("remove", _("path"))
 {
 }
 

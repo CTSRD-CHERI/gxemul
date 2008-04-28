@@ -47,7 +47,8 @@ void UndoCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 	if (actionStack.IsUndoPossible())
 		actionStack.Undo();
 	else
-		gxemul.GetUI()->ShowDebugMessage("Undo is not possible.\n");
+		gxemul.GetUI()->ShowDebugMessage(
+		    _("Undo is not possible.\n"));
 }
 
 

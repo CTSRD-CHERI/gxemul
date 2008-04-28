@@ -32,7 +32,7 @@
 
 
 SaveCommand::SaveCommand()
-	: Command("save", "[filename [component-path]]")
+	: Command("save", _("[filename [component-path]]"))
 {
 }
 

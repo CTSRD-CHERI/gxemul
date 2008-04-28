@@ -47,7 +47,8 @@ void RedoCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 	if (actionStack.IsRedoPossible())
 		actionStack.Redo();
 	else
-		gxemul.GetUI()->ShowDebugMessage("Redo is not possible.\n");
+		gxemul.GetUI()->ShowDebugMessage(
+		    _("Redo is not possible.\n"));
 }
 
 

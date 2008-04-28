@@ -6,13 +6,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GXemul 0.5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-27 13:17+0200\n"
+"POT-Creation-Date: 2008-04-28 06:12+0200\n"
 "PO-Revision-Date: 2008-04-02 23:01+0200\n"
 "Last-Translator: GXemul <gxemul-devel@lists.sourceforge.net>\n"
 "Language-Team: GXemul <gxemul-devel@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/main/commands/SaveCommand.cc:35 src/main/commands/LoadCommand.cc:34
+msgid "[filename [component-path]]"
+msgstr "[filnamn [komponentsökväg]]"
 
 #: src/main/commands/SaveCommand.cc:132
 msgid "Saves the emulation to a file."
@@ -60,6 +64,10 @@ msgstr ""
 "till på den givna komponentsökvägen.\n"
 "\n"
 "Se även:  save    (för att spara emuleringen till en fil)\n"
+
+#: src/main/commands/RemoveComponentCommand.cc:34
+msgid "path"
+msgstr "komponentsökväg"
 
 #: src/main/commands/RemoveComponentCommand.cc:100
 msgid "Removes a component from the emulation."
@@ -123,11 +131,15 @@ msgstr ""
 "\n"
 "Se även:  load    (för att ladda en existerande emulering)\n"
 
-#: src/main/commands/UndoCommand.cc:56
+#: src/main/commands/UndoCommand.cc:51
+msgid "Undo is not possible.\n"
+msgstr "Det är inte möjligt att ångra någon ändring.\n"
+
+#: src/main/commands/UndoCommand.cc:57
 msgid "Undoes the last action."
 msgstr "Ångrar senaste ändringen."
 
-#: src/main/commands/UndoCommand.cc:62
+#: src/main/commands/UndoCommand.cc:63
 msgid ""
 "Undoes the last action, if possible.\n"
 "\n"
@@ -141,6 +153,10 @@ msgstr ""
 #: src/main/commands/VersionCommand.cc:58
 msgid "Prints version information."
 msgstr "Skriver ut versionsinformation."
+
+#: src/main/commands/HelpCommand.cc:33
+msgid "[command-name]"
+msgstr "[kommando]"
 
 #: src/main/commands/HelpCommand.cc:120
 msgid "  root                    Shows the entire component tree.\n"
@@ -186,11 +202,15 @@ msgstr ""
 "kommando\n"
 "anges som argument visas en detaljerad beskrivning av det kommandot.\n"
 
-#: src/main/commands/RedoCommand.cc:56
+#: src/main/commands/RedoCommand.cc:51
+msgid "Redo is not possible.\n"
+msgstr "Det är inte möjligt att gör om någon ändring.\n"
+
+#: src/main/commands/RedoCommand.cc:57
 msgid "Redoes the next action, if possible."
 msgstr "Gör om nästa ändring, om möjligt."
 
-#: src/main/commands/RedoCommand.cc:62
+#: src/main/commands/RedoCommand.cc:63
 msgid ""
 "Redoes the next action on the action stack, if possible.\n"
 "\n"
@@ -200,11 +220,39 @@ msgstr ""
 "\n"
 "Se även:   undo"
 
-#: src/main/commands/AddComponentCommand.cc:107
+#: src/main/commands/AddComponentCommand.cc:35
+msgid "component-name [path]"
+msgstr "komponentnamn [sökväg]"
+
+#: src/main/commands/AddComponentCommand.cc:55
+msgid "No component-name given.\n"
+msgstr "Komponentnamnet saknas.\n"
+
+#: src/main/commands/AddComponentCommand.cc:60
+msgid "Too many arguments.\n"
+msgstr "För många argument.\n"
+
+#: src/main/commands/AddComponentCommand.cc:71
+msgid ": unknown component.\n"
+msgstr ": okänd komponent.\n"
+
+#: src/main/commands/AddComponentCommand.cc:83
+msgid ": not a path to a known component.\n"
+msgstr ": okänd komponentsökväg.\n"
+
+#: src/main/commands/AddComponentCommand.cc:88
+msgid " matches multiple components:\n"
+msgstr " matchar flera komponenter:\n"
+
+#: src/main/commands/AddComponentCommand.cc:97
+msgid ": lookup of path failed.\n"
+msgstr ": uppslagning av komponentsökvägen misslyckades.\n"
+
+#: src/main/commands/AddComponentCommand.cc:110
 msgid "Adds a component to the emulation."
 msgstr "Lägger till en komponent till emuleringen."
 
-#: src/main/commands/AddComponentCommand.cc:113
+#: src/main/commands/AddComponentCommand.cc:116
 msgid ""
 "Adds a component (given by the component-name) to the current emulation "
 "setup.\n"
@@ -231,7 +279,7 @@ msgstr "Pausar körningen."
 
 #: src/main/commands/PauseCommand.cc:57
 msgid "Pauses the emulation, by setting the current RunState to Paused."
-msgstr ""
+msgstr "Pausar körningen."
 
 #: src/main/GXemul.cc:525
 msgid "The -e option is deprecated. Use -E instead.\n"
@@ -422,6 +470,10 @@ msgid " bytes"
 msgstr " byte"
 
 #: src/main/Component.cc:335
+msgid " byte"
+msgstr " byte"
+
+#: src/main/Component.cc:337
 msgid " at offset "
 msgstr " på offset "
 
