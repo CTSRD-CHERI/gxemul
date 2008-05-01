@@ -144,8 +144,8 @@ void LoadEmulationAction::Execute()
 	} else {
 		whereToAddIt->AddChild(component);
 		
-		m_addedComponent = component;
-		m_whereItWasAdded = whereToAddIt;
+		m_addedComponentPath = component->GeneratePath();
+		m_whereItWasAdded = whereToAddIt->GeneratePath();
 
 		m_oldDirtyFlag = m_gxemul.GetDirtyFlag();
 		m_gxemul.SetDirtyFlag(true);
@@ -155,8 +155,14 @@ void LoadEmulationAction::Execute()
 
 void LoadEmulationAction::Undo()
 {
-	if (!m_whereItWasAdded.IsNULL()) {
-		m_whereItWasAdded->RemoveChild(m_addedComponent);
+	if (!m_whereItWasAdded.empty()) {
+		refcount_ptr<Component> whereItWasAdded =
+		    m_gxemul.GetRootComponent()->LookupPath(m_whereItWasAdded);
+		refcount_ptr<Component> addedComponent =
+		    m_gxemul.GetRootComponent()->
+		    LookupPath(m_addedComponentPath);
+
+		whereItWasAdded->RemoveChild(addedComponent);
 		m_gxemul.SetDirtyFlag(m_oldDirtyFlag);
 	} else {
 		assert(false);
@@ -328,11 +334,45 @@ static void Test_LoadEmulationAction_WithComponentTargetPath()
 	    dummyComponentB->GetChildren().size(), 0);
 }
 
+static void Test_LoadEmulationAction_UndoAfterReset()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	// Generate temporary file:
+	string tmpFilename = "/tmp/hello.gxemul";
+	std::ofstream file(tmpFilename.c_str());
+	file << "component dummy {\n"
+		"string name \"root\"\n"
+		"component dummy {\n"
+		"  string name \"apa\"\n"
+		"  string x \"y\"\n"
+		"} }\n";
+	file.close();
+
+	UnitTest::Assert("the root component should initially have no children",
+	    gxemul.GetRootComponent()->GetChildren().size(), 0);
+
+	// Load using the command interpreter:
+	ci.RunCommand("load /tmp/hello.gxemul root");
+
+	UnitTest::Assert("the root component should have 1 child",
+	    gxemul.GetRootComponent()->GetChildren().size(), 1);
+
+	ci.RunCommand("reset");
+	ci.RunCommand("undo");
+	ci.RunCommand("undo");
+
+	UnitTest::Assert("the root component should again have 0 children",
+	    gxemul.GetRootComponent()->GetChildren().size(), 0);
+}
+
 UNITTESTS(LoadEmulationAction)
 {
 	UNITTEST(Test_LoadEmulationAction_ReplaceRoot);
 	UNITTEST(Test_LoadEmulationAction_ReplaceRootNoRootInFile);
 	UNITTEST(Test_LoadEmulationAction_WithComponentTargetPath);
+	UNITTEST(Test_LoadEmulationAction_UndoAfterReset);
 }
 
 #endif

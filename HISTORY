@@ -4064,3 +4064,5 @@ Changelog for GXemul:
 		Implementing a "dirty flag" for the emulation; the GTKMM GUI
 		now asks for confirmation before quitting, opening a new
 		emulation, etc, if the model is dirty.
+20080501	Fixing LoadComponentAction so that it uses path names for
+		Undo, and not reference pointers to components.

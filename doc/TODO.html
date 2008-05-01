@@ -53,9 +53,6 @@ Legacy (0.4.x) series
 
 Misc.
 -----
-	[ ]  Load action is incorrect! Should use path names instead of
-	     component references!
-
 	[/]  File loader: Load stuff into emulated RAM (or ROM) components.
 	     Note: Usually, ELFs contain _virtual_ addresses, so file loading
 	     needs to go through a CPU to be properly address translated!
@@ -116,23 +113,6 @@ Misc.
 		[ ]  AddressDataBus should be extended to allow for direct
 		     page mapping.
 		[ ]  Unit tests for the above!
-
-	[/]  Make some initial things in the GUI work:
-		[/]  A window for the text console, including Input line!
-			[ ]  The input line should be focused by default,
-			     when starting the application, so that commands
-			     may be entered immediately.
-			[ ]  Scaling/position of the input line vs text window
-			[ ]  Accept INDIVIDUAL keypresses in the input line :)
-			     to support e.g. tab completion.
-		[/]  Workspace = show current emulation setup.
-			[ ]  Draw meaningful graphics.
-			[ ]  Draw text labels for Components.
-			[ ]  Implement drag-and-drop.
-		[ ]  Palette on the right-hand side of available components.
-			[ ]  Show components.
-			[ ]  Keep size when main window is resized!
-			[ ]  Implement drag-and-drop.
 
 	[ ]  Main run loop: Verify that both cycle accurate and larger chunks
 	     works well. Unit test?
@@ -212,6 +192,12 @@ Misc.
 Actions and undo/redo
 ---------------------
 
+	[ ]  Undo/redo commands should show what they are doing, e.g.
+		Undoing "add component"
+	     or
+	        Redoing "remove component".
+	     Preferably even including arguments. :-) Think about this.
+
 	[ ]  CompoundAction
 		Contains multiple actions in a row. If ALL actions inside
 		are undoable, then the action is undoable, and executing
@@ -223,12 +209,6 @@ Actions and undo/redo
 	[ ]  MoveComponentAction
 		Undoable by remembering position, similar to Remove, where
 		the component was before.
-
-	[ ]  Undo/redo commands should show what they are doing, e.g.
-		Undoing "add component"
-	     or
-	        Redoing "remove component".
-	     Preferably even including arguments. :-) Think about this.
 
 
 CommandInterpreter
@@ -331,10 +311,15 @@ Error handling
 GTKMM GUI
 ---------
 
-	[ ]  Command input window!  Make it look nice.
+	[ ]  The input line should be focused by default,
+	     when starting the application, so that commands
+	     may be entered immediately.
+	[ ]  Scaling/position of the input line vs text window
+	[ ]  Accept INDIVIDUAL keypresses in the input line :)
+	     to support e.g. tab completion.
 
-	[ ]  Open and Save should have Open/Save as the default button, so that
-		pressing Enter works!
+	[ ]  Closing the main window using the close button should work
+	     the same was as Quit.
 
 	[/]  Menu bar:
 		File
@@ -354,7 +339,7 @@ GTKMM GUI
 			-----------
 			[ ]  list of recently used files
 			-----------
-			[/]  Quit
+			[X]  Quit
 		Edit
 			[/]  Undo
 			[/]  Redo
@@ -396,13 +381,17 @@ GTKMM GUI
 	     palette to the right, and the command window below it.
 
 		[/]  Main workspace:
-			[/]  Draw all components in the emulation tree,
-			     using cairo.
+			[ ]  Draw meaningful graphics.
+			[ ]  Draw text labels for Components.
+			[ ]  Implement drag-and-drop.
 			[ ]  Scrollbars if the whole design area isn't possible
 			     to fit in the designated rectangle?
 			[ ]  Tooltips for components? (A "summary" of the entire
 			     state window.)
 		[ ]  Palette window, of all available components.
+			[ ]  Show components.
+			[ ]  Keep size when main window is resized!
+			[ ]  Implement drag-and-drop.
 
 	[ ]  Copy/Paste of components! Both inside one GXemul instance,
 	     and _BETWEEN APPLICATIONS_!
@@ -644,7 +633,12 @@ General notes for ANY 0.5.x release
 			makefiles etc are not valid anymore.
 			Give example description?
 		x) Update FreshMeat
+			Both the 0.4.x branch and the 0.5.x branch.
 		x) Update WikiPedia
+			The Usage Example and Dynamic Translation sections
+			should probably be removed, and the screenshot
+			replaced. Also, comment about the new vs the old
+			version (archs, guest OSes).
 
 </pre>
 <hr>

@@ -100,9 +100,9 @@ private:
 	string		m_path;
 
 	// For Undo:
-	refcount_ptr<Component>		m_addedComponent;
-	refcount_ptr<Component>		m_whereItWasAdded;
-	bool				m_oldDirtyFlag;
+	string		m_addedComponentPath;
+	string		m_whereItWasAdded;
+	bool		m_oldDirtyFlag;
 };
 
 
