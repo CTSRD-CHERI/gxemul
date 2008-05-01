@@ -928,7 +928,13 @@ refcount_ptr<Component> Component::Deserialize(const string& str, size_t& pos)
 				break;
 			}
 
-			deserializedTree->SetVariableValue(name, varValue);
+			if (!deserializedTree->SetVariableValue(name,
+			    varValue)) {
+				// TODO: Report failure some other way.
+				std::cerr << "Warning: variable '" << name <<
+				    "' for component class " << className <<
+				    " could not be deserialized; skipping.\n";
+			}
 		}
 	}
 
