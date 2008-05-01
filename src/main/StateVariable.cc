@@ -706,12 +706,12 @@ static void Test_StateVariable_Bool_Serialize()
 	SerializationContext dummyContext;
 
 	UnitTest::Assert("variable serialization mismatch (1)",
-	    var.Serialize(dummyContext), "bool hello \"true\"\n");
+	    var.Serialize(dummyContext), "bool hello true\n");
 	
 	myBool = false;
 
 	UnitTest::Assert("variable serialization mismatch (2)",
-	    var.Serialize(dummyContext), "bool hello \"false\"\n");
+	    var.Serialize(dummyContext), "bool hello false\n");
 }
 
 static void Test_StateVariable_Numeric_Construct()
