@@ -206,12 +206,18 @@ public:
 	/**
 	 * \brief Set the variable's value.
 	 *
-	 * @param escapedStringValue The new value, as a C-style escaped
-	 *	string.
+	 * Note that the expression may be a single value (e.g. <tt>42</tt>),
+	 * or something more complex (e.g. <tt>123 + cpu0.pc * 4</tt>).
+	 *
+	 * When setting string values, the expression should be a C-style
+	 * escaped string, e.g.: <tt>"This is a string with a \" inside
+	 * it."</tt>
+	 *
+	 * @param expression The new value.
 	 * @return True if the value was set, false if e.g. there was a
 	 *	parse error.
 	 */
-	bool SetValue(const string& escapedStringValue);
+	bool SetValue(const string& expression);
 
 
 	/********************************************************************/
@@ -219,6 +225,18 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
+	/**
+	 * \brief Evaluates an expression, and returns it as a single value.
+	 *
+	 * @param expression The expression to evaluate.
+	 * @param success Set to true if the expression could be evaluated,
+	 *	false otherwise.
+	 * @return A string representation of the evaluated expression.
+	 *	(Only valid if <tt>success</tt> was set to true.)
+	 */
+	string EvaluateExpression(const string& expression,
+		bool &success) const;
+
 	/**
 	 * \brief Returns the type of the variable, as a string.
 	 *

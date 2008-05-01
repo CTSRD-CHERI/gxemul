@@ -36,7 +36,7 @@ refcount_ptr<Component> TestMIPSMachine::Create()
 	if (machine.IsNULL())
 		return NULL;
 
-	machine->SetVariableValue("template", "testmips");
+	machine->SetVariableValue("template", "\"testmips\"");
 
 	refcount_ptr<Component> mainbus =
 	    ComponentFactory::CreateComponent("mainbus");
@@ -60,7 +60,7 @@ refcount_ptr<Component> TestMIPSMachine::Create()
 
 	stringstream tmpss2;
 	tmpss2 << 16 * 1048576;
-	rom->SetVariableValue("name", "rom0");
+	rom->SetVariableValue("name", "\"rom0\"");
 	rom->SetVariableValue("memoryMappedBase", "0x1fc00000");
 	rom->SetVariableValue("memoryMappedSize", tmpss2.str());
 	mainbus->AddChild(rom);

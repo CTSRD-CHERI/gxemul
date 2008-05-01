@@ -328,7 +328,7 @@ void GXemul::ClearEmulation()
 	SetRunState(NotRunning);
 	m_globalTime = 0.0;
 	m_rootComponent = new DummyComponent;
-	m_rootComponent->SetVariableValue("name", "root");
+	m_rootComponent->SetVariableValue("name", "\"root\"");
 	m_emulationFileName = "";
 	m_modelIsDirty = false;
 

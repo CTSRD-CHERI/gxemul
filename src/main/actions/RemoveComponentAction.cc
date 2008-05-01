@@ -97,9 +97,9 @@ static void Test_RemoveComponentAction_WithUndoRedo()
 	refcount_ptr<Component> dummyChildA1 = new DummyComponent;
 	refcount_ptr<Component> dummyChildA2 = new DummyComponent;
 
-	dummy->SetVariableValue("x", "value 1");
-	dummy->SetVariableValue("y", "value 2");
-	dummyChildA1->SetVariableValue("x", "value\nhello");
+	dummy->SetVariableValue("x", "\"value 1\"");
+	dummy->SetVariableValue("y", "\"value 2\"");
+	dummyChildA1->SetVariableValue("x", "\"value\nhello\"");
 	dummyChildA2->SetVariableValue("something", "");
 	dummyChildA2->SetVariableValue("numericTest", "123");
 	dummyChildA2->SetVariableValue("numericTest2", "0");

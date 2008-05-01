@@ -247,7 +247,7 @@ static void Test_DummyComponent_LookupPath()
 {
 	refcount_ptr<Component> dummyA = new DummyComponent;
 
-	dummyA->SetVariableValue("name", "hello");
+	dummyA->SetVariableValue("name", "\"hello\"");
 
 	refcount_ptr<Component> component1 = dummyA->LookupPath("nonsense");
 	UnitTest::Assert("nonsense lookup should fail",
@@ -259,8 +259,8 @@ static void Test_DummyComponent_LookupPath()
 
 	refcount_ptr<Component> child = new DummyComponent;
 	refcount_ptr<Component> childchild = new DummyComponent;
-	child->SetVariableValue("name", "x");
-	childchild->SetVariableValue("name", "y");
+	child->SetVariableValue("name", "\"x\"");
+	childchild->SetVariableValue("name", "\"y\"");
 	dummyA->AddChild(child);
 	child->AddChild(childchild);
 
@@ -295,16 +295,16 @@ static void Test_DummyComponent_FindPathByPartialMatch()
 	refcount_ptr<Component> m2pcibus0 = new DummyComponent;
 	refcount_ptr<Component> m3otherpci = new DummyComponent;
 
-	root->GetVariable("name")->SetValue("root");
-	machine0->GetVariable("name")->SetValue("machine0");
-	machine1->GetVariable("name")->SetValue("machine1");
-	machine2->GetVariable("name")->SetValue("machine2");
-	machine3->GetVariable("name")->SetValue("machine3");
-	m0isabus0->GetVariable("name")->SetValue("isabus0");
-	m1pcibus0->GetVariable("name")->SetValue("pcibus0");
-	m1pcibus1->GetVariable("name")->SetValue("pcibus1");
-	m2pcibus0->GetVariable("name")->SetValue("pcibus0");
-	m3otherpci->GetVariable("name")->SetValue("otherpci");
+	root->GetVariable("name")->SetValue("\"root\"");
+	machine0->GetVariable("name")->SetValue("\"machine0\"");
+	machine1->GetVariable("name")->SetValue("\"machine1\"");
+	machine2->GetVariable("name")->SetValue("\"machine2\"");
+	machine3->GetVariable("name")->SetValue("\"machine3\"");
+	m0isabus0->GetVariable("name")->SetValue("\"isabus0\"");
+	m1pcibus0->GetVariable("name")->SetValue("\"pcibus0\"");
+	m1pcibus1->GetVariable("name")->SetValue("\"pcibus1\"");
+	m2pcibus0->GetVariable("name")->SetValue("\"pcibus0\"");
+	m3otherpci->GetVariable("name")->SetValue("\"otherpci\"");
 
 	root->AddChild(machine0);
 	root->AddChild(machine1);
@@ -384,7 +384,7 @@ static void Test_DummyComponent_Clone_Basic()
 	UnitTest::Assert("clone should have same checksum",
 	    originalChecksum == cloneChecksum);
 
-	dummy->SetVariableValue("name", "modified");
+	dummy->SetVariableValue("name", "\"modified\"");
 
 	Checksum originalChecksumAfterModifyingOriginal;
 	dummy->AddChecksum(originalChecksumAfterModifyingOriginal);
@@ -396,7 +396,7 @@ static void Test_DummyComponent_Clone_Basic()
 	UnitTest::Assert("clone should have same checksum",
 	    cloneChecksum == cloneChecksumAfterModifyingOriginal);
 
-	clone->SetVariableValue("name", "modified");
+	clone->SetVariableValue("name", "\"modified\"");
 
 	Checksum originalChecksumAfterModifyingClone;
 	dummy->AddChecksum(originalChecksumAfterModifyingClone);
@@ -485,7 +485,7 @@ static void Test_DummyComponent_Clone_AllVariableTypes()
 	UnitTest::Assert("clone should have same checksum",
 	    originalChecksum == cloneChecksum);
 
-	dummy->SetVariableValue("name", "modified");
+	dummy->SetVariableValue("name", "\"modified\"");
 
 	Checksum originalChecksumAfterModifyingOriginal;
 	dummy->AddChecksum(originalChecksumAfterModifyingOriginal);
@@ -497,7 +497,7 @@ static void Test_DummyComponent_Clone_AllVariableTypes()
 	UnitTest::Assert("clone should have same checksum",
 	    cloneChecksum == cloneChecksumAfterModifyingOriginal);
 
-	clone->SetVariableValue("name", "modified");
+	clone->SetVariableValue("name", "\"modified\"");
 
 	Checksum originalChecksumAfterModifyingClone;
 	dummy->AddChecksum(originalChecksumAfterModifyingClone);

@@ -28,6 +28,7 @@
 #include "assert.h"
 #include <iostream>
 
+#include "actions/VariableAssignmentAction.h"
 #include "GXemul.h"
 #include "CommandInterpreter.h"
 
@@ -652,14 +653,27 @@ void CommandInterpreter::ClearCurrentCommandBuffer()
 }
 
 
-static void SplitIntoWords(const string& command,
+static void SplitIntoWords(const string& commandOrig,
 	string& commandName, vector<string>& arguments)
 {
-	// Split command into words, ignoring all whitespace:
+	string command = commandOrig;
+
 	arguments.clear();
 	commandName = "";
 	size_t pos = 0;
 
+	// Surround '=' with white spaces:
+	while (pos < command.length()) {
+		if (command[pos] == '=') {
+			command.replace(pos, 1, " = ");
+			pos ++;
+		}
+
+		pos ++;
+	}
+
+	// Split command into words, ignoring all whitespace:
+	pos = 0;
 	while (pos < command.length()) {
 		// Skip initial whitespace:
 		while (pos < command.length() && command[pos] == ' ')
@@ -824,9 +838,33 @@ bool CommandInterpreter::RunComponentMethod(
 
 	if (nrOfMatches == 1) {
 		if (arguments.size() > 0) {
-			// TODO: Assignment!
-			m_GXemul->GetUI()->ShowDebugMessage(
-			    _("TODO: Variable assignment!\n"));
+			if (arguments.size() == 1 ||
+			    arguments[0] != "=") {
+				m_GXemul->GetUI()->ShowDebugMessage(
+				    _("Syntax error. Variable assignment syntax"
+				    " is:\n  <variable> = <expression>\n"));
+				return true;
+			}
+
+			const StateVariable* var =
+			    component->GetVariable(fullMatch);
+			if (var == NULL) {
+				m_GXemul->GetUI()->ShowDebugMessage(
+				    _("Unknown variable.\n"));
+				return true;
+			}
+
+			string assignment;
+			for (size_t i=1; i<arguments.size(); ++i)
+				assignment += arguments[i] + " ";
+
+			refcount_ptr<Action> variableAssignmentAction =
+			    new VariableAssignmentAction(*m_GXemul,
+			    component->GeneratePath(), fullMatch, assignment);
+			m_GXemul->GetActionStack().PushActionAndExecute(
+			    variableAssignmentAction);
+
+			return true;
 		}
 
 		// Print the variable's name and value:
@@ -834,7 +872,7 @@ bool CommandInterpreter::RunComponentMethod(
 
 		const StateVariable* var = component->GetVariable(fullMatch);
 		if (var == NULL)
-			ss << " = (unknown?)";
+			ss << _(" = (unknown variable?)");
 		else
 			ss << " = " << var->ToString();
 
@@ -845,7 +883,7 @@ bool CommandInterpreter::RunComponentMethod(
 		return true;
 	}
 
-	ss << methodName << " is not a method or variable of "
+	ss << methodName << _(": not a method or variable of ")
 	    << component->GeneratePath() << ".\n";
 	m_GXemul->GetUI()->ShowDebugMessage(ss.str());
 

@@ -181,10 +181,14 @@ static void Test_LoadEmulationAction_ReplaceRoot()
 
 	refcount_ptr<Component> dummyComponentA = new DummyComponent;
 	refcount_ptr<Component> dummyComponentB = new DummyComponent;
-	dummyComponentA->SetVariableValue("x", "123");
-	dummyComponentB->SetVariableValue("x", "456");
+	UnitTest::Assert("could not set variable value? (1)",
+	    dummyComponentA->SetVariableValue("name", "\"123\"") == true);
+	UnitTest::Assert("could not set variable value? (2)",
+	    dummyComponentB->SetVariableValue("name", "\"monkey\"") == true);
+
 	gxemul.GetRootComponent()->AddChild(dummyComponentA);
 	gxemul.GetRootComponent()->AddChild(dummyComponentB);
+
 	UnitTest::Assert("the root component should have children",
 	    gxemul.GetRootComponent()->GetChildren().size(), 2);
 	UnitTest::Assert("the dummy1 component should have no children",
@@ -201,8 +205,7 @@ static void Test_LoadEmulationAction_ReplaceRoot()
 	file << "component dummy {\n"
 		" string name \"root\"\n"
 		" component dummy {\n"
-		"  string name \"apa\"\n"
-		"  string x \"y\"\n"
+		"  string name \"someName\"\n"
 		"} }\n";
 	file.close();
 
@@ -233,8 +236,8 @@ static void Test_LoadEmulationAction_ReplaceRootNoRootInFile()
 
 	refcount_ptr<Component> dummyComponentA = new DummyComponent;
 	refcount_ptr<Component> dummyComponentB = new DummyComponent;
-	dummyComponentA->SetVariableValue("x", "123");
-	dummyComponentB->SetVariableValue("x", "456");
+	dummyComponentA->SetVariableValue("name", "\"123\"");
+	dummyComponentB->SetVariableValue("name", "\"456\"");
 	gxemul.GetRootComponent()->AddChild(dummyComponentA);
 	gxemul.GetRootComponent()->AddChild(dummyComponentB);
 	UnitTest::Assert("the root component should have children",
@@ -251,8 +254,7 @@ static void Test_LoadEmulationAction_ReplaceRootNoRootInFile()
 	string tmpFilename = "/tmp/hello.gxemul";
 	std::ofstream file(tmpFilename.c_str());
 	file << "component dummy {\n"
-		"  string name \"apa\"\n"
-		"  string x \"y\"\n"
+		"  string name \"hello\"\n"
 		"}\n";
 	file.close();
 
@@ -286,8 +288,8 @@ static void Test_LoadEmulationAction_WithComponentTargetPath()
 
 	refcount_ptr<Component> dummyComponentA = new DummyComponent;
 	refcount_ptr<Component> dummyComponentB = new DummyComponent;
-	dummyComponentA->SetVariableValue("x", "123");
-	dummyComponentB->SetVariableValue("x", "456");
+	dummyComponentA->SetVariableValue("name", "\"apa\"");
+	dummyComponentB->SetVariableValue("name", "\"bepa\"");
 	gxemul.GetRootComponent()->AddChild(dummyComponentA);
 	gxemul.GetRootComponent()->AddChild(dummyComponentB);
 	UnitTest::Assert("the root component should have children",
@@ -307,14 +309,13 @@ static void Test_LoadEmulationAction_WithComponentTargetPath()
 		"string name \"root\"\n"
 		"component dummy {\n"
 		"  string name \"apa\"\n"
-		"  string x \"y\"\n"
 		"} }\n";
 	file.close();
 
 	// Load with component target path:
 
 	refcount_ptr<Action> loadAction = new LoadEmulationAction(gxemul,
-	    tmpFilename, "root.dummy1");
+	    tmpFilename, "root.bepa");
 	actionStack.PushActionAndExecute(loadAction);
 
 	UnitTest::Assert("the root component should still have 2 children",
@@ -346,7 +347,6 @@ static void Test_LoadEmulationAction_UndoAfterReset()
 		"string name \"root\"\n"
 		"component dummy {\n"
 		"  string name \"apa\"\n"
-		"  string x \"y\"\n"
 		"} }\n";
 	file.close();
 

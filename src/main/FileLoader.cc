@@ -182,7 +182,7 @@ static void Test_FileLoader_Load_ELF32()
 	refcount_ptr<Component> machine =
 	    ComponentFactory::CreateComponent("testmips");
 
-	machine->SetVariableValue("name", "machine");
+	machine->SetVariableValue("name", "\"machine\"");
 	refcount_ptr<Component> component =
 	    machine->LookupPath("machine.mainbus0.cpu0");
 	UnitTest::Assert("could not look up CPU to load into?",

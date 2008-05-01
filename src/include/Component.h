@@ -374,12 +374,12 @@ public:
 	 * \brief Sets a variable to a new value.
 	 *
 	 * @param name The variable name.
-	 * @param escapedValue The new value, as a C-style escaped string.
+	 * @param expression The new value.
 	 * @return True if the value was set, false otherwise. (E.g. if
 	 *	the name was not known, or if there was a parse error
-	 *	when parsing the value.)
+	 *	when parsing the value expression.)
 	 */
-	bool SetVariableValue(const string& name, const string& escapedValue);
+	bool SetVariableValue(const string& name, const string& expression);
 
 	/**
 	 * \brief Serializes the %Component into a string stream.

@@ -214,8 +214,9 @@ Actions and undo/redo
 CommandInterpreter
 ------------------
 
-	[ ]  State variable assignments? (causes an Action to be
-	     executed, which allows Undo.)
+	[/]  State variable assignments:
+		[ ]  Action, to allow Undo.
+		[ ]  Expression evaluator, +-*/, string concatenation, etc.
 
 	[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
 
@@ -246,14 +247,9 @@ CommandInterpreter
 				are caught during development!
 
 	[ ]	move  		Move a component from one path to another.
-	[ ]	clearundo	Clears the undo/redo stack (can be used to
-				reclaim memory, perhaps... or automatic
-				freeing of some of the oldest entries in the
-				undo history...?)
 	[ ]	copy		copy a component (and its children)
 				to the clipboard
 	[ ]	paste		paste a component from the clipboard
-	[ ]	expr = value	Sets a state variable
 	[ ]	step		single-step (Paused)
 
 	[ ]  Strings should be supported, both for e.g. variable

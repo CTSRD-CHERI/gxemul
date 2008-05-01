@@ -33,6 +33,7 @@
 
 #include "Component.h"
 #include "ComponentFactory.h"
+#include "EscapedString.h"
 
 
 Component::Component(const string& className, const string& visibleClassName)
@@ -396,7 +397,9 @@ void Component::AddChild(refcount_ptr<Component> childComponent,
 			//	visibleclassname + postfix number
 			stringstream ss;
 			ss << childComponent->GetVisibleClassName() << postfix;
-			childComponent->SetVariableValue("name", ss.str());
+			EscapedString escaped(ss.str());
+			childComponent->SetVariableValue("name",
+			    escaped.Generate());
 
 			name = childComponent->GetVariable("name");
 		}
@@ -788,13 +791,13 @@ bool Component::AddVariableSInt64(const string& name, int64_t* variablePointer)
 }
 
 
-bool Component::SetVariableValue(const string& name, const string& escapedValue)
+bool Component::SetVariableValue(const string& name, const string& expression)
 {
 	StateVariableMap::iterator it = m_stateVariables.find(name);
 	if (it == m_stateVariables.end())
 		return false;
 
-	(it->second).SetValue(escapedValue);
+	(it->second).SetValue(expression);
 
 	return true;
 }
@@ -925,7 +928,6 @@ refcount_ptr<Component> Component::Deserialize(const string& str, size_t& pos)
 				break;
 			}
 
-			// TODO: use varType?			
 			deserializedTree->SetVariableValue(name, varValue);
 		}
 	}

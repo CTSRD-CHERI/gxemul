@@ -27,37 +27,75 @@
 
 #include <assert.h>
 
-#include "actions/ResetAction.h"
+#include "actions/VariableAssignmentAction.h"
 #include "components/DummyComponent.h"
+#include "EscapedString.h"
 #include "GXemul.h"
 
 
-ResetAction::ResetAction(GXemul& gxemul)
-	: Action("reset emulation")
+VariableAssignmentAction::VariableAssignmentAction(
+		GXemul& gxemul,
+		const string& componentPath,
+		const string& variableName,
+		const string& expression)
+	: Action("variable assignment")
 	, m_gxemul(gxemul)
+	, m_componentPath(componentPath)
+	, m_variableName(variableName)
+	, m_expression(expression)
 {
 }
 
 
-ResetAction::~ResetAction()
+VariableAssignmentAction::~VariableAssignmentAction()
 {
 }
 
 
-void ResetAction::Execute()
+void VariableAssignmentAction::Execute()
 {
-	refcount_ptr<Component> root = m_gxemul.GetRootComponent();
-	m_oldComponentTree = root->Clone();
-	root->Reset();
+	refcount_ptr<Component> component = m_gxemul.GetRootComponent()->
+	    LookupPath(m_componentPath);
+
+	StateVariable* var = component->GetVariable(m_variableName);
+	if (var == NULL) {
+		m_gxemul.GetUI()->ShowDebugMessage(
+		    _("Unknown variable? (Internal error.)\n"));
+		throw std::exception();
+	}
+
+	m_oldValue = var->ToString();
+	if (var->GetType() == StateVariable::String) {
+		EscapedString escaped(m_oldValue);
+		m_oldValue = escaped.Generate();
+	}
+
+	bool success = var->SetValue(m_expression);
+	if (!success) {
+		m_gxemul.GetUI()->ShowDebugMessage(
+		    _("Assignment failed. (Wrong "
+		    "type?)\n"));
+	}
 
 	m_oldDirtyFlag = m_gxemul.GetDirtyFlag();
 	m_gxemul.SetDirtyFlag(true);
 }
 
 
-void ResetAction::Undo()
+void VariableAssignmentAction::Undo()
 {
-	m_gxemul.SetRootComponent(m_oldComponentTree);
+	refcount_ptr<Component> component = m_gxemul.GetRootComponent()->
+	    LookupPath(m_componentPath);
+
+	StateVariable* var = component->GetVariable(m_variableName);
+
+	bool success = var->SetValue(m_oldValue);
+	if (!success) {
+		m_gxemul.GetUI()->ShowDebugMessage(
+		    _("Unable to Undo assignment. Internal error?\n"));
+		throw std::exception();
+	}
+
 	m_gxemul.SetDirtyFlag(m_oldDirtyFlag);
 }
 
@@ -67,60 +105,16 @@ void ResetAction::Undo()
 
 #ifndef WITHOUTUNITTESTS
 
-static void Test_ResetAction_WithUndoRedo()
+static void Test_VariableAssignmentAction_WithUndoRedo()
 {
-	refcount_ptr<Component> dummy = new DummyComponent;
-	refcount_ptr<Component> dummyChildA = new DummyComponent;
+//	GXemul gxemulDummy(false);
 
-	dummy->AddChild(dummyChildA);
-
-	Checksum checksum0;
-	dummy->AddChecksum(checksum0);
-
-	// Change some state variables:
-	dummy->SetVariableValue("x", "\"value 1\"");
-	dummyChildA->SetVariableValue("y", "\"value 2\"");
-
-	Checksum checksum1;
-	dummy->AddChecksum(checksum1);
-
-	UnitTest::Assert("changing state variables should have changed the"
-		" checksum!", checksum0 == checksum1);
-
-	GXemul gxemul(false);
-	refcount_ptr<Action> actionA = new ResetAction(gxemul);
-
-	gxemul.GetActionStack().PushActionAndExecute(actionA);
-
-	// Resetting should have caused the state to be reset:
-	Checksum checksum2;
-	dummy->AddChecksum(checksum2);
-
-	UnitTest::Assert("reset should have succeeded in resetting the state",
-	    checksum0 == checksum2);
-
-	// Undo should restore state:
-	gxemul.GetActionStack().Undo();
-
-	Checksum checksum3;
-	dummy->AddChecksum(checksum3);
-
-	UnitTest::Assert("reset should have succeeded in resetting the state",
-	    checksum1 == checksum3);
-
-	// Redo should reset again:
-	gxemul.GetActionStack().Redo();
-
-	Checksum checksum4;
-	dummy->AddChecksum(checksum4);
-
-	UnitTest::Assert("redo should have succeeded in resetting the state",
-	    checksum0 == checksum4);
+// TODO
 }
 
-UNITTESTS(ResetAction)
+UNITTESTS(VariableAssignmentAction)
 {
-	UNITTEST(Test_ResetAction_WithUndoRedo);
+	UNITTEST(Test_VariableAssignmentAction_WithUndoRedo);
 }
 
 #endif

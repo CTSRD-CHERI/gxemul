@@ -68,15 +68,19 @@ string EscapedString::Generate() const
 }
 
 
-string EscapedString::Decode() const
+string EscapedString::Decode(bool& success) const
 {
-	string result = "";
-	size_t offset = 0;
-	
-	if (m_str[0] == '"')
-		offset = 1;
+	success = false;
 
-	for (size_t i=offset; i<m_str.length()-offset; i++) {
+	// Not an escaped string? Then return failure.
+	if (m_str.size() < 2 || m_str[0] != '"'
+	    || m_str[m_str.size() - 1] != '"')
+		return "";
+
+	string result = "";
+	size_t i;
+	
+	for (i = 1; i < m_str.length() - 1; i++) {
 		char ch = m_str[i];
 
 		switch (ch) {
@@ -102,6 +106,9 @@ string EscapedString::Decode() const
 			result += ch;
 		}
 	}
+
+	if (i == m_str.length() - 1)
+		success = true;
 
 	return result;
 }
@@ -137,48 +144,46 @@ static void Test_EscapedString_Generate()
 
 static void Test_EscapedString_Decode()
 {
+	bool success = false;
+
 	UnitTest::Assert("trivial escape: normal text",
-	    EscapedString("\"hello world 123\"").Decode() ==
+	    EscapedString("\"hello world 123\"").Decode(success) ==
 	    "hello world 123");
+	UnitTest::Assert("success failed? (1)", success == true);
 
+	success = false;
 	UnitTest::Assert("escape tab",
-	    EscapedString("\"hi\\tworld\"").Decode() ==
+	    EscapedString("\"hi\\tworld\"").Decode(success) ==
 	    "hi\tworld");
+	UnitTest::Assert("success failed? (2)", success == true);
 
+	success = false;
 	UnitTest::Assert("escape newline and carriage return",
-	    EscapedString("\"hi\\nworld\\ragain\"").Decode() ==
+	    EscapedString("\"hi\\nworld\\ragain\"").Decode(success) ==
 	    "hi\nworld\ragain");
+	UnitTest::Assert("success failed? (3)", success == true);
 
+	success = false;
 	UnitTest::Assert("escape quotes",
-	    EscapedString("\"hi'123\\\"456\\\"789\"").Decode() ==
+	    EscapedString("\"hi'123\\\"456\\\"789\"").Decode(success) ==
 	    "hi'123\"456\"789");
+	UnitTest::Assert("success failed? (4)", success == true);
 
+	success = false;
 	UnitTest::Assert("escaped escape char",
-	    EscapedString("\"Hello\\\\world\"").Decode() ==
+	    EscapedString("\"Hello\\\\world\"").Decode(success) ==
 	    "Hello\\world");
+	UnitTest::Assert("success failed? (5)", success == true);
 }
 
 static void Test_EscapedString_Decode_WithoutQuotes()
 {
+	bool success = true;
+
 	UnitTest::Assert("trivial escape: normal text",
-	    EscapedString("hello world 123").Decode() ==
-	    "hello world 123");
-
-	UnitTest::Assert("escape tab",
-	    EscapedString("hi\\tworld").Decode() ==
-	    "hi\tworld");
-
-	UnitTest::Assert("escape newline and carriage return",
-	    EscapedString("hi\\nworld\\ragain").Decode() ==
-	    "hi\nworld\ragain");
-
-	UnitTest::Assert("escape quotes",
-	    EscapedString("hi'123\\\"456\\\"789").Decode() ==
-	    "hi'123\"456\"789");
-
-	UnitTest::Assert("escaped escape char",
-	    EscapedString("Hello\\\\world").Decode() ==
-	    "Hello\\world");
+	    EscapedString("hello world 123").Decode(success) ==
+	    "");
+	UnitTest::Assert("success should have failed", success == false);
 }
 
 UNITTESTS(EscapedString)

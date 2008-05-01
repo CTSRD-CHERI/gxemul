@@ -1,8 +1,8 @@
-#ifndef ESCAPEDSTRING_H
-#define	ESCAPEDSTRING_H
+#ifndef VARIABLEASSIGNMENTACTION_H
+#define	VARIABLEASSIGNMENTACTION_H
 
 /*
- *  Copyright (C) 2007-2008  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2008  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -30,45 +30,39 @@
 
 #include "misc.h"
 
+#include "Action.h"
 #include "UnitTest.h"
+
+class GXemul;
 
 
 /**
- * \brief A helper class for escaping strings using C-style escapes.
+ * \brief An Action which assigns a value to a StateVariable.
  *
- * TODO: It is ugly to use this for conversions in both directions! Should
- *	be fixed some day.
+ * The action is undoable. Undoing the action means restoring the
+ * previous value of the variable.
  */
-class EscapedString
-	: public UnitTestable
+class VariableAssignmentAction
+	: public Action
+	, public UnitTestable
 {
 public:
 	/**
-	 * \brief Constructs an EscapedString helper.
+	 * \brief Constructs an %VariableAssignmentAction.
 	 *
-	 * @param str	A string, either escaped or not escaped.
+	 * @param gxemul GXemul instance (to be able to find the root
+	 *	component).
+	 * @param componentPath The component whose variable is to be
+	 *	assigned to.
+	 * @param variableName The name of the variable.
+	 * @param expression The expression to assign to the variable.
 	 */
-	EscapedString(const string& str);
+	VariableAssignmentAction(GXemul& gxemul,
+		const string& componentPath,
+		const string& variableName,
+		const string& expression);
 
-	/**
-	 * \brief Generates an escaped string, from the original string.
-	 *
-	 * @return	an escaped string
-	 */
-	string Generate() const;
-
-	/**
-	 * \brief Decodes an escaped string, from the original string.
-	 *
-	 * The original string should be a C-style escaped string, with
-	 * or without surrounding quote (") characters.
-	 *
-	 * @param success Set to true if decoding was successful, false
-	 *	if there was an error.
-	 * @return A decoded (unescaped) string. (Only valid if
-	 *	<tt>success</tt> was set to true.)
-	 */
-	string Decode(bool& success) const;
+	virtual ~VariableAssignmentAction();
 
 
 	/********************************************************************/
@@ -76,8 +70,26 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
-	string		m_str;
+	/**
+	 * \brief When called, assigns the expression to the variable.
+	 */
+	void Execute();
+
+	/**
+	 * \brief When called, resets the variable's value to what is was
+	 *	before the expression was assigned to it.
+	 */
+	void Undo();
+
+private:
+	GXemul&				m_gxemul;
+	string				m_componentPath;
+	string				m_variableName;
+	string				m_expression;
+
+	string				m_oldValue;
+	bool				m_oldDirtyFlag;
 };
 
 
-#endif	// ESCAPEDSTRING_H
+#endif	// VARIABLEASSIGNMENTACTION_H

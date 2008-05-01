@@ -361,99 +361,175 @@ string StateVariable::Serialize(SerializationContext& context) const
 }
 
 
-bool StateVariable::SetValue(const string& escapedStringValue)
+string StateVariable::EvaluateExpression(const string& expression,
+	bool& success) const
 {
-	stringstream sstr;
-	bool error = false;
+	success = false;
 
+	string result = expression;
+	
+	// Remove leading and trailing spaces:
+	while (result.size() > 0 && result[0] == ' ')
+		result.erase(0);
+	while (result.size() > 0 && result[result.size() - 1] == ' ')
+		result.erase(result.size()-1);
+
+// TODO
+success = true;
+return result;
+
+	return "";
+}
+
+
+bool StateVariable::SetValue(const string& expression)
+{
+	// Nothing to assign to?
 	if (m_value.pstr == NULL)
 		return false;
 
-	if (m_type == String) {
-		*m_value.pstr = EscapedString(escapedStringValue).Decode();
-	} else if (m_type == Bool) {
-		string str = EscapedString(escapedStringValue).Decode();
-		if (str == "true")
-			*m_value.pbool = true;
-		else if (str == "false")
-			*m_value.pbool = false;
-		else
-			return false;
-	} else if (m_type == Double) {
-		string str = EscapedString(escapedStringValue).Decode();
-		double doubleTmp;
-		sstr << str;
-		sstr >> doubleTmp;
-		if (isnan(doubleTmp) || isinf(doubleTmp))
-			return false;
-		*m_value.pdouble = doubleTmp;
-	} else if (m_type == UInt8) {
-		string str = EscapedString(escapedStringValue).Decode();
-		uint64_t tmp64 = parse_number(str.c_str(), error);
-		uint8_t tmp = tmp64;
-		if (tmp == tmp64 && !error)
-			*m_value.puint8 = tmp;
-		else
-			return false;
-	} else if (m_type == UInt16) {
-		string str = EscapedString(escapedStringValue).Decode();
-		uint64_t tmp64 = parse_number(str.c_str(), error);
-		uint16_t tmp = tmp64;
-		if (tmp == tmp64 && !error)
-			*m_value.puint16 = tmp;
-		else
-			return false;
-	} else if (m_type == UInt32) {
-		string str = EscapedString(escapedStringValue).Decode();
-		uint64_t tmp64 = parse_number(str.c_str(), error);
-		uint32_t tmp = tmp64;
-		if (tmp == tmp64 && !error)
-			*m_value.puint32 = tmp;
-		else
-			return false;
-	} else if (m_type == UInt64) {
-		string str = EscapedString(escapedStringValue).Decode();
-		uint64_t tmp64 = parse_number(str.c_str(), error);
-		if (!error)
-			*m_value.puint64 = tmp64;
-		else
-			return false;
-	} else if (m_type == SInt8) {
-		string str = EscapedString(escapedStringValue).Decode();
-		int64_t tmp64 = parse_number(str.c_str(), error);
-		int8_t tmp = tmp64;
-		if (tmp == tmp64 && !error)
-			*m_value.psint8 = tmp;
-		else
-			return false;
-	} else if (m_type == SInt16) {
-		string str = EscapedString(escapedStringValue).Decode();
-		int64_t tmp64 = parse_number(str.c_str(), error);
-		int16_t tmp = tmp64;
-		if (tmp == tmp64 && !error)
-			*m_value.psint16 = tmp;
-		else
-			return false;
-	} else if (m_type == SInt32) {
-		string str = EscapedString(escapedStringValue).Decode();
-		int64_t tmp64 = parse_number(str.c_str(), error);
-		int32_t tmp = tmp64;
-		if (tmp == tmp64 && !error)
-			*m_value.psint32 = tmp;
-		else
-			return false;
-	} else if (m_type == SInt64) {
-		string str = EscapedString(escapedStringValue).Decode();
-		int64_t tmp64 = parse_number(str.c_str(), error);
-		if (!error)
-			*m_value.psint64 = tmp64;
-		else
-			return false;
-	} else {
+	// Reduce the expression to a single value.
+	bool success = false;
+	string value = EvaluateExpression(expression, success);
+	if (!success)
+		return false;
+
+	switch (m_type) {
+
+	case String:
+		{
+			bool success = false;
+			string newStr = EscapedString(value).Decode(success);
+			if (success)
+				*m_value.pstr = newStr;
+			else
+				return false;
+		}
+		return true;
+
+	case Bool:
+		{
+			if (value == "true")
+				*m_value.pbool = true;
+			else if (value == "false")
+				*m_value.pbool = false;
+			else
+				return false;
+		}
+		return true;
+
+	case Double:
+		{
+			double doubleTmp;
+			stringstream sstr;
+			sstr << value;
+			sstr >> doubleTmp;
+			if (isnan(doubleTmp) || isinf(doubleTmp))
+				return false;
+			*m_value.pdouble = doubleTmp;
+		}
+		return true;
+
+	case UInt8:
+		{
+			bool error = true;
+			uint64_t tmp64 = parse_number(value.c_str(), error);
+			uint8_t tmp = tmp64;
+			if (tmp == tmp64 && !error)
+				*m_value.puint8 = tmp;
+			else
+				return false;
+		}
+		return true;
+
+	case UInt16:
+		{
+			bool error = true;
+			uint64_t tmp64 = parse_number(value.c_str(), error);
+			uint16_t tmp = tmp64;
+			if (tmp == tmp64 && !error)
+				*m_value.puint16 = tmp;
+			else
+				return false;
+		}
+		return true;
+		
+	case UInt32:
+		{
+			bool error = true;
+			uint64_t tmp64 = parse_number(value.c_str(), error);
+			uint32_t tmp = tmp64;
+			if (tmp == tmp64 && !error)
+				*m_value.puint32 = tmp;
+			else
+				return false;
+		}
+		return true;
+
+	case UInt64:
+		{
+			bool error = true;
+			uint64_t tmp64 = parse_number(value.c_str(), error);
+			if (!error)
+				*m_value.puint64 = tmp64;
+			else
+				return false;
+		}
+		return true;
+
+	case SInt8:
+		{
+			bool error = true;
+			int64_t tmp64 = parse_number(value.c_str(), error);
+			int8_t tmp = tmp64;
+			if (tmp == tmp64 && !error)
+				*m_value.psint8 = tmp;
+			else
+				return false;
+		}
+		return true;
+
+	case SInt16:
+		{
+			bool error = true;
+			int64_t tmp64 = parse_number(value.c_str(), error);
+			int16_t tmp = tmp64;
+			if (tmp == tmp64 && !error)
+				*m_value.psint16 = tmp;
+			else
+				return false;
+		}
+		return true;
+		
+	case SInt32:
+		{
+			bool error = true;
+			int64_t tmp64 = parse_number(value.c_str(), error);
+			int32_t tmp = tmp64;
+			if (tmp == tmp64 && !error)
+				*m_value.psint32 = tmp;
+			else
+				return false;
+		}
+		return true;
+
+	case SInt64:
+		{
+			bool error = true;
+			int64_t tmp64 = parse_number(value.c_str(), error);
+			if (!error)
+				*m_value.psint64 = tmp64;
+			else
+				return false;
+		}
+		return true;
+
+	default:
+		// Unimplemented variable type?
+		assert(false);
+
 		return false;
 	}
-	
-	return true;
 }
 
 
@@ -482,7 +558,10 @@ static void Test_StateVariable_String_SetValue()
 
 	StateVariable var("hello", &myString);
 
-	var.SetValue("value2");
+	UnitTest::Assert("setting string value without quotes should not work",
+	    var.SetValue("value2") == false);
+	UnitTest::Assert("setting string value with quotes should work",
+	    var.SetValue("\"value2\"") == true);
 
 	UnitTest::Assert("type should still be String",
 	    var.GetType() == StateVariable::String);
