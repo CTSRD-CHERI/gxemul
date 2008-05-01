@@ -355,9 +355,18 @@ uint64_t StateVariable::ToInteger() const
 
 string StateVariable::Serialize(SerializationContext& context) const
 {
-	return
-	    context.Tabs() + GetTypeString() + " " + m_name + " " +
-	    EscapedString(ToString()).Generate() + "\n";
+	stringstream ss;
+	ss << context.Tabs() << GetTypeString() << " " << m_name + " ";
+
+	string value = ToString();
+	if (m_type == String) {
+		EscapedString escaped(value);
+		value = escaped.Generate();
+	}
+
+	ss << value << "\n";
+
+	return ss.str();
 }
 
 
