@@ -215,7 +215,14 @@ CommandInterpreter
 ------------------
 
 	[/]  State variable assignments:
-		[ ]  Action, to allow Undo.
+		[X]  Action, to allow Undo.
+			[ ]  Assignment of Component names! Currently bugs out!
+				cpu0.name = "monkey"
+			     must be undone by
+				monkey.name = "cpu0"
+		[ ]  Handlers for specific registers, e.g. bits fixed to
+			0 or 1 in registers...
+		[ ]  Handler for 'name' should verify the name.
 		[ ]  Expression evaluator, +-*/, string concatenation, etc.
 
 	[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
@@ -250,12 +257,8 @@ CommandInterpreter
 	[ ]	copy		copy a component (and its children)
 				to the clipboard
 	[ ]	paste		paste a component from the clipboard
+
 	[ ]	step		single-step (Paused)
-
-	[ ]  Strings should be supported, both for e.g. variable
-	     assignment, and for e.g. placing strings in memory.
-
-	[ ]  Arrays?
 
 
 Components
