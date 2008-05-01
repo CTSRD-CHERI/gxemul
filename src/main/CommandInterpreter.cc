@@ -304,6 +304,9 @@ bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
 		matchingNames = names;
 	}
 
+	if (matchingNames.size() == 0)
+		return false;
+
 	// Replace the short name with a match as long as possible, e.g.
 	// "memo" will be replaced by "memoryMapped", if names
 	// "memoryMappedAddr" and "memoryMappedSize" are available.
@@ -1446,6 +1449,26 @@ static void Test_CommandInterpreter_TabCompletion_ComponentName()
 	// Note: No space after component tab completion.
 }
 
+static void Test_CommandInterpreter_TabCompletion_ComponentNameNonexist()
+{
+	GXemul gxemul(false);
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add dummy");
+	UnitTest::Assert("initial buffer should be empty",
+	    ci.GetCurrentCommandBuffer(), "");
+
+	ci.AddKey('r');
+	ci.AddKey('o');
+	ci.AddKey('o');
+	ci.AddKey('t');
+	ci.AddKey('.');
+	ci.AddKey('X');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should not have succeeded",
+	    ci.GetCurrentCommandBuffer(), "root.X");
+}
+
 static void Test_CommandInterpreter_TabCompletion_ComponentNameAsArgument()
 {
 	GXemul gxemul(false);
@@ -1768,6 +1791,7 @@ UNITTESTS(CommandInterpreter)
 	UNITTEST(Test_CommandInterpreter_TabCompletion_C);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_OnlyCommandAsFirstWord);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentName);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameNonexist);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameAsArgument);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_CWithComponents);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_roWithComponents);

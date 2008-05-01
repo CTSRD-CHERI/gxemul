@@ -4066,3 +4066,5 @@ Changelog for GXemul:
 		emulation, etc, if the model is dirty.
 20080501	Fixing LoadComponentAction so that it uses path names for
 		Undo, and not reference pointers to components.
+		Fixing a crash bug in CommandInterpreter when tab completing
+		non-existant component names.
