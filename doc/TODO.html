@@ -46,6 +46,7 @@ Legacy (0.4.x) series
 ---------------------
 
 	[ ]  Perhaps release 0.4.6.4, with:
+		[ ]  New OpenBSD 4.x install instructions?
 		[ ]  Fixes for PPC instructions?
 		[ ]  OF fixes... Try to get FreeBSD/macppc to boot further?
 
@@ -203,8 +204,16 @@ Actions and undo/redo
 		are undoable, then the action is undoable, and executing
 		Undo should undo them all (in reverse order).
 
-	[ ]  ModifyStateAction
-		Undoable by remembering old value of a state variable.
+	[/]  VariableAssignmentAction
+		[X]  Undoable by remembering old value of a state variable.
+		[ ]  Assignment of Component names! Currently bugs out!
+			cpu0.name = "monkey"
+		     must be undone by
+			monkey.name = "cpu0"
+		[ ]  Handler for 'name' should verify the name.
+		[ ]  Handlers for specific registers, e.g. bits fixed to
+			0 or 1 in registers...
+		[ ]  Assignment of arrays? Or elements in arrays...
 
 	[ ]  MoveComponentAction
 		Undoable by remembering position, similar to Remove, where
@@ -216,14 +225,11 @@ CommandInterpreter
 
 	[/]  State variable assignments:
 		[X]  Action, to allow Undo.
-			[ ]  Assignment of Component names! Currently bugs out!
-				cpu0.name = "monkey"
-			     must be undone by
-				monkey.name = "cpu0"
-		[ ]  Handlers for specific registers, e.g. bits fixed to
-			0 or 1 in registers...
-		[ ]  Handler for 'name' should verify the name.
 		[ ]  Expression evaluator, +-*/, string concatenation, etc.
+		[ ]  Execution of _expressions_, not just variables. e.g.:
+			cpu.pc		prints the pc value
+			cpu.pc+4	should print the _expression_ pc+4
+			cpu.pc=expr	assignment
 
 	[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
 

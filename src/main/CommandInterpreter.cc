@@ -840,6 +840,9 @@ bool CommandInterpreter::RunComponentMethod(
 		if (arguments.size() > 0) {
 			if (arguments.size() == 1 ||
 			    arguments[0] != "=") {
+				// TODO: Printing expressions, such as
+				//	cpu.pc + 4
+
 				m_GXemul->GetUI()->ShowDebugMessage(
 				    _("Syntax error. Variable assignment syntax"
 				    " is:\n  <variable> = <expression>\n"));
