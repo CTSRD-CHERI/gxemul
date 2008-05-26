@@ -324,8 +324,12 @@ GTKMM GUI
 	[ ]  Accept INDIVIDUAL keypresses in the input line :)
 	     to support e.g. tab completion.
 
-	[ ]  Closing the main window using the close button should work
-	     the same was as Quit.
+	[ ]  Quit:
+		[ ]  Closing the main window using the _close button_
+		     should work the same was as Quit.
+		[ ]  Quitting by executing the command "quit" in the
+		     text input line should work the same as Quit, i.e.
+		     dirty flag question etc.
 
 	[/]  Menu bar:
 		File
@@ -362,8 +366,10 @@ GTKMM GUI
 			[ ]  Show debug console
 			[ ]  Full screen mode (F11, CTRL-ALT-F11 to get out)
 		Emulation
-			[X]  Play/Go
-			[X]  Pause
+			[/]  Play/Go
+				It would be nicer if Go/Pause were radio
+				button style, not checkbox style...
+			[/]  Pause
 			[X]  Reset
 		Help
 			[ ]  Contents  (installed html files)
@@ -608,6 +614,23 @@ Preparation for release 0.5.0
 	x) Make sure that the web page looks reasonable. There should be
 	   clear ways to download the old 0.4.x version in addition to
 	   the 0.5.0 release, even when 0.5.0 has been released.
+
+
+After releae 0.5.0
+------------------
+
+	x) More archs:
+		Add the old ones again:
+			[ ]  ARM
+			[ ]  PowerPC/POWER
+			[ ]  SuperH
+		Add the old non-finished or legacy ones:
+			[ ]  Alpha
+			[ ]  Motorola M88K
+			[ ]  AVR
+			[ ]  amd64
+		Continue on other skeletons:
+			[ ]  SPARC
 
 
 General notes for ANY 0.5.x release
