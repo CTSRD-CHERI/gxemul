@@ -317,6 +317,10 @@ Error handling
 GTKMM GUI
 ---------
 
+	[ ]  Glib::Thread, think about which main threads there should be
+	     in the emulator, when running with the GUI (GTKMM). If GTKMM
+	     is not used, Glib::Thread should NOT be assumed to be available!
+
 	[ ]  The input line should be focused by default,
 	     when starting the application, so that commands
 	     may be entered immediately.
