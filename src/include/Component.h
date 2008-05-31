@@ -349,7 +349,7 @@ public:
 	 *
 	 * NOTE: The returned pointer should be used immediately after the
 	 *	call. It will in general not be valid after e.g. an
-	 *	AddVariable* call.
+	 *	AddVariable call.
 	 *
 	 * @param name The variable name.
 	 * @return A pointer to the variable, it the name was
@@ -362,7 +362,7 @@ public:
 	 *
 	 * NOTE: The returned pointer should be used immediately after the
 	 *	call. It will in general not be valid after e.g. an
-	 *	AddVariable* call.
+	 *	AddVariable call.
 	 *
 	 * @param name The variable name.
 	 * @return A pointer to the variable, it the name was
@@ -423,7 +423,7 @@ public:
 	
 protected:
 	/**
-	 * \brief Adds a string state variable to the %Component.
+	 * \brief Adds a state variable of type T to the %Component.
 	 *
 	 * This function is only meant to be called from the component's
 	 * constructor.
@@ -434,147 +434,16 @@ protected:
 	 * @return True if the state variable was added, false if the name
 	 *	was already in use.
 	 */
-	bool AddVariableString(const string& name, string* variablePointer);
+	template<class T>
+	bool AddVariable(const string& name, T* variablePointer)
+	{
+		StateVariableMap::iterator it = m_stateVariables.find(name);
+		if (it != m_stateVariables.end())
+			return false;
 
-	/**
-	 * \brief Adds a 'double' state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable that the name should
-	 *	be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableDouble(const string& name, double* variablePointer);
-
-	/**
-	 * \brief Adds a bool state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable that the name should
-	 *	be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableBool(const string& name, bool* variablePointer);
-
-	/**
-	 * \brief Adds a uint8 state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable that the name should
-	 *	be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableUInt8(const string& name, uint8_t* variablePointer);
-
-	/**
-	 * \brief Adds a uint16 state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable that 
-	 *	the name should be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableUInt16(const string& name, uint16_t* variablePointer);
-
-	/**
-	 * \brief Adds a uint32 state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable 
-	 *	that the name should be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableUInt32(const string& name, uint32_t* variablePointer);
-
-	/**
-	 * \brief Adds a uint64 state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the 
-	 *	variable that the name should be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableUInt64(const string& name, uint64_t* variablePointer);
-
-	/**
-	 * \brief Adds a sint8 state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable that the name
-	 *	should be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableSInt8(const string& name, int8_t* variablePointer);
-
-	/**
-	 * \brief Adds a sint16 state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable that the name
-	 *	should be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableSInt16(const string& name, int16_t* variablePointer);
-
-	/**
-	 * \brief Adds a sint32 state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable that the
-	 *	name should be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableSInt32(const string& name, int32_t* variablePointer);
-
-	/**
-	 * \brief Adds a sint64 state variable to the %Component.
-	 *
-	 * This function is only meant to be called from the component's
-	 * constructor.
-	 *
-	 * @param name The variable name.
-	 * @param variablePointer A pointer to the variable that the name
-	 *	should be connected to.
-	 * @return True if the state variable was added, false if the name
-	 *	was already in use.
-	 */
-	bool AddVariableSInt64(const string& name, int64_t* variablePointer);
+		m_stateVariables[name] = StateVariable(name, variablePointer);
+		return true;
+	}
 
 	/**
 	 * \brief Resets the state variables of this component.

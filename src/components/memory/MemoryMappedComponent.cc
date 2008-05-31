@@ -35,9 +35,9 @@ MemoryMappedComponent::MemoryMappedComponent(const string& className,
 	, m_memoryMappedSize(0)
 	, m_memoryMappedAddrMul(1)
 {
-	AddVariableUInt64("memoryMappedBase", &m_memoryMappedBase);
-	AddVariableUInt64("memoryMappedSize", &m_memoryMappedSize);
-	AddVariableUInt64("memoryMappedAddrMul", &m_memoryMappedAddrMul);
+	AddVariable("memoryMappedBase", &m_memoryMappedBase);
+	AddVariable("memoryMappedSize", &m_memoryMappedSize);
+	AddVariable("memoryMappedAddrMul", &m_memoryMappedAddrMul);
 }
 
 

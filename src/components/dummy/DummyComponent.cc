@@ -420,15 +420,15 @@ public:
 	DummyComponentWithAllVariableTypes()
 		: DummyComponent("dummy2")
 	{
-		AddVariableString("m_string", &m_string);
-		AddVariableUInt8 ("m_uint8",  &m_uint8);
-		AddVariableUInt16("m_uint16", &m_uint16);
-		AddVariableUInt32("m_uint32", &m_uint32);
-		AddVariableUInt64("m_uint64", &m_uint64);
-		AddVariableSInt8 ("m_sint8",  &m_sint8);
-		AddVariableSInt16("m_sint16", &m_sint16);
-		AddVariableSInt32("m_sint32", &m_sint32);
-		AddVariableSInt64("m_sint64", &m_sint64);
+		AddVariable("m_string", &m_string);
+		AddVariable("m_uint8",  &m_uint8);
+		AddVariable("m_uint16", &m_uint16);
+		AddVariable("m_uint32", &m_uint32);
+		AddVariable("m_uint64", &m_uint64);
+		AddVariable("m_sint8",  &m_sint8);
+		AddVariable("m_sint16", &m_sint16);
+		AddVariable("m_sint32", &m_sint32);
+		AddVariable("m_sint64", &m_sint64);
 	}
 
 	virtual void ResetState()

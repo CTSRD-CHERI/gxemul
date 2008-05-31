@@ -45,11 +45,11 @@ CPUComponent::CPUComponent(const string& className, const string& cpuKind)
 	, m_addressDataBus(NULL)
 	, m_currentCodePage(NULL)
 {
-	AddVariableString("kind", &m_cpuKind);
-	AddVariableUInt64("pc", &m_pc);
-	AddVariableUInt64("lastUnassembleVaddr", &m_lastUnassembleVaddr);
-	AddVariableBool("hasUsedUnassemble", &m_hasUsedUnassemble);
-	AddVariableDouble("frequency", &m_frequency);
+	AddVariable("kind", &m_cpuKind);
+	AddVariable("pc", &m_pc);
+	AddVariable("lastUnassembleVaddr", &m_lastUnassembleVaddr);
+	AddVariable("hasUsedUnassemble", &m_hasUsedUnassemble);
+	AddVariable("frequency", &m_frequency);
 
 	// TODO: Endianness as a variable!
 }

@@ -26,6 +26,10 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
+ *
+ *
+ *  Note/TODO: This class could perhaps be rewritten in a nicer way by
+ *             using C++ templates.
  */
 
 #include "misc.h"
@@ -272,4 +276,3 @@ private:
 
 
 #endif	// STATEVARIABLE_H
-

@@ -4070,3 +4070,5 @@ Changelog for GXemul:
 		non-existant component names.
 		Implementing a VariableAssignmentAction. No expressions yet,
 		only simple values (numeric, strings, and boolean values).
+20080531	Refactoring the Component::AddVariable* functions into a
+		single template function.

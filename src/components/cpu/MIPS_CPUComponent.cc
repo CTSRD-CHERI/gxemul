@@ -45,14 +45,14 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 {
 	ResetState();
 
-	AddVariableString("mips_type", &m_mips_type);
+	AddVariable("mips_type", &m_mips_type);
 
-	AddVariableUInt64("hi", &m_hi);
-	AddVariableUInt64("lo", &m_lo);
+	AddVariable("hi", &m_hi);
+	AddVariable("lo", &m_lo);
 
 	// TODO: GPR 0 (ZERO) is NOT writable!
 	for (size_t i=0; i<N_MIPS_GPRS; i++)
-		AddVariableUInt64(regnames[i], &m_gpr[i]);
+		AddVariable(regnames[i], &m_gpr[i]);
 
 	// Most MIPS CPUs use 4 KB native page size.
 	// TODO: A few use 1 KB pages; this should be supported as well.

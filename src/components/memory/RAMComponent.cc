@@ -40,7 +40,7 @@ RAMComponent::RAMComponent(const string& visibleClassName)
 	, m_selectedHostMemoryBlock(NULL)
 	, m_selectedOffsetWithinBlock(0)
 {
-	AddVariableBool("writeProtect", &m_writeProtected);
+	AddVariable("writeProtect", &m_writeProtected);
 }
 
 
