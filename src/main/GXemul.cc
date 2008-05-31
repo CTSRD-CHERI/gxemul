@@ -1015,7 +1015,7 @@ int main(int argc, char *argv[])
 	const char *progname = argv[0];
 
 #ifdef I18N
-	// Initialize stuff to make gettext work:
+	// Initialize gettext, for Internationalization support:
 	bindtextdomain(I18N_PACKAGE_NAME, NULL);
 	bind_textdomain_codeset(I18N_PACKAGE_NAME, "UTF-8");
 	textdomain(I18N_PACKAGE_NAME);
