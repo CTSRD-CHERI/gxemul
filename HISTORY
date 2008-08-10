@@ -4102,4 +4102,4 @@ Changelog for GXemul:
 		word 0xe6000011, which is needed by gdb when running inside the
 		emulator. Also enabling ARM UND exceptions for ARM floating
 		point instructions (needed by both Linux and NetBSD/arm).
-
+20080810	Implementing a basic Trigger framework.

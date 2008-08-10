@@ -7,7 +7,7 @@ LIBS=$(XLIB) $(OTHERLIBS)
 
 OBJS=Action.o ActionStack.o Checksum.o Command.o CommandInterpreter.o \
 	Component.o ComponentFactory.o debug_new.o EscapedString.o \
-	FileLoader.o GXemul.o StateVariable.o UnitTest.o
+	FileLoader.o GXemul.o StateVariable.o Trigger.o Triggers.o UnitTest.o
 
 all: $(OBJS) do_actions do_commands do_fileloaders
 

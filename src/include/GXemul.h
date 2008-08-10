@@ -33,6 +33,7 @@
 #include "ActionStack.h"
 #include "CommandInterpreter.h"
 #include "Component.h"
+#include "Triggers.h"
 #include "UI.h"
 
 
@@ -48,6 +49,7 @@
  *	<li>a tree of components, which make up the full
  *		state of the current emulation setup
  *	<li>an ActionStack, for undo/redo functionality
+ *	<li>a Triggers collection
  *	<li>a UI
  *	<li>a CommandInterpreter
  *	<li>a RunState
@@ -259,6 +261,7 @@ private:
 	bool			m_quietMode;
 	refcount_ptr<UI>	m_ui;
 	ActionStack		m_actionStack;
+	Triggers		m_triggers;
 	CommandInterpreter	m_commandInterpreter;
 
 	// Runtime:

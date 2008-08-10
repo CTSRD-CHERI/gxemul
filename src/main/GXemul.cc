@@ -100,6 +100,23 @@
  * <a href="../../machines.html">template machines</a> (because they have
  * special meaning to the end-user).
  *
+ * \subsection triggers_subsec Triggers
+ *
+ * To detect changes in components' state variables, or other variables in the
+ * application, triggers are used. Given a path to a component or component
+ * state variable, and a callback function, a Trigger waits for that component
+ * or variable to be written to, and then calls the callback function.
+ *
+ * The full collection of triggers in the application is handled by a Triggers
+ * collection; a GXemul instance has one such %Triggers collection.
+ *
+ * Examples of non-component variables are the RunState and the undo/redo
+ * stacks. If a UI e.g. has a toolbar button for "undo", then that button should
+ * be enabled/disabled (grayed out) depending on whether the undo stack is
+ * empty or not. By setting up a trigger for the undo stack, and a callback
+ * function which updates only that toolbar button, the UI will be kept in
+ * synch with the underlying application state. 
+ *
  * \subsection undostack_subsec Actions, and the Undo stack
  *
  * Most actions that the user performs in %GXemul can be seen as reversible.

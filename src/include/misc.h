@@ -79,6 +79,7 @@ using std::list;
 
 #include <map>
 using std::map;
+using std::multimap;
 
 #include <set>
 using std::set;
@@ -91,6 +92,7 @@ using std::vector;
 
 using std::min;
 using std::max;
+using std::pair;
 
 
 // Generic and vector-specific foreach, which work the way I want it.

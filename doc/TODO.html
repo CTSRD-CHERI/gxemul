@@ -42,13 +42,14 @@ Legend:
 [X] = completed (but these are usually removed from the TODO list)
 </i>
 <hr>
-Legacy (0.4.x) series
----------------------
+gxemul-legacy (0.4.6.x)
+-----------------------
 
-	[ ]  Perhaps release 0.4.6.4, with:
-		[ ]  New OpenBSD 4.x install instructions?
-		[ ]  Fixes for PPC instructions?
-		[ ]  OF fixes... Try to get FreeBSD/macppc to boot further?
+(Only stable bug fixes go into this branch.)
+
+	[ ]  New OpenBSD 4.x install instructions?
+	[ ]  Fixes for PPC instructions?
+	[ ]  OF fixes... Try to get FreeBSD/macppc to boot further?
 
 <hr>
 
@@ -203,6 +204,8 @@ Actions and undo/redo
 		Contains multiple actions in a row. If ALL actions inside
 		are undoable, then the action is undoable, and executing
 		Undo should undo them all (in reverse order).
+		Constructor should probably take a vector of other
+		Actions (?).
 
 	[/]  VariableAssignmentAction
 		[X]  Undoable by remembering old value of a state variable.
@@ -214,14 +217,43 @@ Actions and undo/redo
 		[ ]  Handlers for specific registers, e.g. bits fixed to
 			0 or 1 in registers...
 		[ ]  Assignment of arrays? Or elements in arrays...
+		[ ]  Call trigger's callback (?).
 
 	[ ]  MoveComponentAction
 		Undoable by remembering position, similar to Remove, where
 		the component was before.
 
 
+Triggers
+--------
+
+	[X]  GXemul should hold one Triggers instance.
+
+	[ ]  Command available only in DEBUG builds:
+	     Dump all triggers' names? (During development.)
+
+	[ ]  "Aggregate" multiple changes by holding back the actual
+	     call to callback functions, until the aggregate lock is
+	     released. Changed |= changed for each, etc...
+
+	[ ]  Triggers on Component StateVariables, i.e. writes to state
+	     variables should trigger triggers.
+
+	[ ]  Renaming components should update names of all triggers!
+	     Move all triggers to a new temporary map? Then swap.
+
+	[ ]  Non-document triggers, i.e.:
+		[ ]  UI::UpdateUI should be refactored away:
+			[ ]  Undo/Redo applicability changes
+			[ ]  RunState changes
+			[ ]  The name of the emulation changes
+
+
 CommandInterpreter
 ------------------
+
+	[ ]  Some commands only available in DEBUG builds? E.g. for
+	     dumping internal state during development.
 
 	[/]  State variable assignments:
 		[X]  Action, to allow Undo.
