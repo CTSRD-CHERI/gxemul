@@ -65,18 +65,6 @@ public:
 	virtual void ShowStartupBanner() = 0;
 
 	/**
-	 * \brief Updates various UI elements.
-	 *
-	 * Called whenever:
-	 * <ul>
-	 *   <li>the undo/redo-applicability changes
-	 *   <li>the name of the emulation changes
-	 *   <li>the RunState changes
-	 * </ul>
-	 */
-	virtual void UpdateUI() = 0;
-
-	/**
 	 * \brief Shows a debug message.
 	 *
 	 * @param msg The message to show.

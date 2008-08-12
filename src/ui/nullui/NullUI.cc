@@ -50,11 +50,6 @@ void NullUI::ShowStartupBanner()
 }
 
 
-void NullUI::UpdateUI()
-{
-}
-
-
 void NullUI::ShowDebugMessage(const string& msg)
 {
 }

@@ -220,7 +220,11 @@ GXemulWindow::GXemulWindow(GXemul* gxemul)
 	pFrame3->set_size_request(650, 280);
 	pFrame3->add(m_DebugConsoleWidget);
 
-	UpdateUI();
+	UpdateToolbarButtons();
+	UpdateWindowTitle();
+	UpdateDesignArea();
+
+	AddTriggers();
 
 	show_all_children();
 }
@@ -231,13 +235,32 @@ GXemulWindow::~GXemulWindow()
 }
 
 
+void GXemulWindow::ToolbarButtonTrigger(void* object,
+	const string& propertyName, bool propertyChanged)
+{
+	GXemulWindow* self = (GXemulWindow*) object;
+	self->UpdateToolbarButtons();
+}
+
+
+void GXemulWindow::AddTriggers()
+{
+	m_gxemul->GetTriggers().Add(
+	    new Trigger("undo", ToolbarButtonTrigger, true, this));
+	m_gxemul->GetTriggers().Add(
+	    new Trigger("redo", ToolbarButtonTrigger, true, this));
+	m_gxemul->GetTriggers().Add(
+	    new Trigger("runState", ToolbarButtonTrigger, true, this));
+}
+
+
 void GXemulWindow::InsertText(const string& msg)
 {
 	m_DebugConsoleWidget.InsertText(msg);
 }
 
 
-void GXemulWindow::UpdateUI()
+void GXemulWindow::UpdateToolbarButtons()
 {
 	m_updating = true;
 
@@ -257,6 +280,7 @@ void GXemulWindow::UpdateUI()
 	m_refActionGroup->get_action("EmulationPause")->set_sensitive(
 	    nonEmptyEmulation);
 
+// TODO: listen to correct trigger
 	// It's also quite meaningless to be able to save an empty setup:
 	m_refActionGroup->get_action("FileSave")->set_sensitive(
 	    nonEmptyEmulation);
@@ -269,6 +293,14 @@ void GXemulWindow::UpdateUI()
 	m_toggleActionGo->set_active(runState == GXemul::Running);
 	m_toggleActionPause->set_active(runState == GXemul::Paused);
 
+	m_updating = false;
+}
+
+
+void GXemulWindow::UpdateWindowTitle()
+{
+	m_updating = true;
+
 	// Main window Title:
 	string title = "GXemul";
 	string emulationFilename = m_gxemul->GetEmulationFilename();
@@ -279,6 +311,14 @@ void GXemulWindow::UpdateUI()
 	}
 
 	set_title(title);
+
+	m_updating = false;
+}
+
+
+void GXemulWindow::UpdateDesignArea()
+{
+	m_updating = true;
 
 	// Force the design area to be redrawn:
 	Glib::RefPtr<Gdk::Window> win = m_EmulationDesignArea.get_window();

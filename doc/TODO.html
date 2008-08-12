@@ -229,6 +229,15 @@ Triggers
 
 	[X]  GXemul should hold one Triggers instance.
 
+	[ ]  ActionStack unit tests: test that correct triggers are triggered :)
+
+	[ ]  Renaming components should update names of all triggers!
+	     Move all triggers to a new temporary map? Then swap.
+
+	[ ]  When removing (parts of) the component tree, triggers should be
+	     removed as well. When undoing the remove, triggers should be
+	     added again (?).
+
 	[ ]  Command available only in DEBUG builds:
 	     Dump all triggers' names? (During development.)
 
@@ -238,9 +247,6 @@ Triggers
 
 	[ ]  Triggers on Component StateVariables, i.e. writes to state
 	     variables should trigger triggers.
-
-	[ ]  Renaming components should update names of all triggers!
-	     Move all triggers to a new temporary map? Then swap.
 
 	[ ]  Non-document triggers, i.e.:
 		[ ]  UI::UpdateUI should be refactored away:

@@ -51,13 +51,6 @@ void GtkmmUI::Initialize()
 }
 
 
-void GtkmmUI::UpdateUI()
-{
-	if (m_window != NULL)
-		m_window->UpdateUI();
-}
-
-
 void GtkmmUI::ShowStartupBanner()
 {
 	// No startup banner.

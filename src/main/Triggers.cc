@@ -81,7 +81,7 @@ int Triggers::GetNumberOfTriggers(const string& propertyName) const
 
 static int myCallbackTestVariable;
 
-static void myCallbackFunc(string a, bool b)
+static void myCallbackFunc(void* obj, const string& a, bool b)
 {
 	myCallbackTestVariable ++;
 }

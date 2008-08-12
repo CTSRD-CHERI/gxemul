@@ -55,11 +55,6 @@ public:
 	/**
 	 * \brief Does nothing, for the dummy UI.
 	 */
-	virtual void UpdateUI();
-
-	/**
-	 * \brief Does nothing, for the dummy UI.
-	 */
 	virtual void ShowStartupBanner();
 
 	/**

@@ -116,12 +116,6 @@ void ConsoleUI::Initialize()
 }
 
 
-void ConsoleUI::UpdateUI()
-{
-	// Empty.
-}
-
-
 void ConsoleUI::ShowStartupBanner()
 {
 	std::cout << "GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n";

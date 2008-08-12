@@ -48,13 +48,16 @@ public:
 	/**
 	 * \brief A type defining a callback function for triggers.
 	 *
+	 * @param object  For callbacks into member functions of objects,
+	 *	this is the object pointer. NULL if no object is involved.
 	 * @param propertyName  This is the name of the property which
 	 *	was written to.
 	 * @param propertyChanged  True if the property was changed,
 	 *	false if it was not changed (i.e. it was written to,
 	 *	but the value was the same as before).
 	 */
-	typedef void (CallbackFunction)(string propertyName,
+	typedef void (CallbackFunction)(void *object,
+		const string& propertyName,
 		bool propertyChanged);
 
 public:
@@ -69,10 +72,13 @@ public:
 	 *	only when the property <i>changes</i> (i.e. to something
 	 *	else than it was), false if all writes to the property
 	 *	should trigger the trigger.
+	 * @param object  Non-NULL for callbacks into member functions,
+	 *	null for non-member callback functions.
 	 */
 	Trigger(const string& propertyName,
 		CallbackFunction* callbackFunction,
-		bool changesOnly);
+		bool changesOnly,
+		void *object = NULL);
 
 	virtual ~Trigger();
 
@@ -97,9 +103,10 @@ public:
 
 
 private:
-	string			m_propertyName;
+	const string		m_propertyName;
 	CallbackFunction*	m_callbackFunction;
-	bool			m_changesOnly;
+	const bool		m_changesOnly;
+	void*			m_object;
 };
 
 

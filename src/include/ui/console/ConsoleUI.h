@@ -55,11 +55,6 @@ public:
 	virtual void Initialize();
 
 	/**
-	 * \brief Updates UI items. Not used for %ConsoleUI.
-	 */
-	virtual void UpdateUI();
-
-	/**
 	 * \brief Prints the text console startup banner.
 	 */
 	virtual void ShowStartupBanner();

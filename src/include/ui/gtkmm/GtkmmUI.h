@@ -46,8 +46,6 @@ public:
 
 	virtual void Initialize();
 
-	virtual void UpdateUI();
-
 	virtual void ShowStartupBanner();
 
 	virtual void ShowDebugMessage(const string& msg);

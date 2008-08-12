@@ -30,10 +30,12 @@
 
 Trigger::Trigger(const string& propertyName,
 		CallbackFunction* callbackFunction,
-		bool changesOnly)
+		bool changesOnly,
+		void* object)
 	: m_propertyName(propertyName)
 	, m_callbackFunction(callbackFunction)
 	, m_changesOnly(changesOnly)
+	, m_object(object)
 {
 }
 
@@ -56,7 +58,7 @@ void Trigger::ExecuteCallbackFunction(bool propertyChanged) const
 	if (m_changesOnly && !propertyChanged)
 		return;
 
-	m_callbackFunction(m_propertyName, propertyChanged);
+	m_callbackFunction(m_object, m_propertyName, propertyChanged);
 }
 
 
@@ -67,7 +69,7 @@ void Trigger::ExecuteCallbackFunction(bool propertyChanged) const
 
 static int myCallbackTestVariable;
 
-static void myCallbackFunc(string a, bool b)
+static void myCallbackFunc(void* obj, const string& a, bool b)
 {
 	myCallbackTestVariable ++;
 }

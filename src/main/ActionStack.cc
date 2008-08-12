@@ -37,20 +37,30 @@ ActionStack::ActionStack(GXemul *gxemul)
 
 void ActionStack::Clear()
 {
+	bool undoActionsWasNonEmpty = !m_undoActions.empty();
+	bool redoActionsWasNonEmpty = !m_redoActions.empty();
+
 	m_undoActions.clear();
 	m_redoActions.clear();
 
-	if (m_gxemul != NULL)
-		m_gxemul->GetUI()->UpdateUI();
+	if (m_gxemul != NULL) {
+		m_gxemul->GetTriggers().PropertyWrittenTo(
+		    "undo", undoActionsWasNonEmpty);
+		m_gxemul->GetTriggers().PropertyWrittenTo(
+		    "redo", redoActionsWasNonEmpty);
+	}
 }
 
 
 void ActionStack::ClearRedo()
 {
+	bool redoActionsWasNonEmpty = !m_redoActions.empty();
+
 	m_redoActions.clear();
 
 	if (m_gxemul != NULL)
-		m_gxemul->GetUI()->UpdateUI();
+		m_gxemul->GetTriggers().PropertyWrittenTo(
+		    "redo", redoActionsWasNonEmpty);
 }
 
 
@@ -81,7 +91,14 @@ int ActionStack::GetNrOfRedoableActions() const
 void ActionStack::PushActionAndExecute(refcount_ptr<Action>& pAction)
 {
 	if (pAction->IsUndoable()) {
+		bool undoActionsWasEmpty = m_undoActions.empty();
+
 		m_undoActions.push_back(pAction);
+
+		if (m_gxemul != NULL)
+			m_gxemul->GetTriggers().PropertyWrittenTo(
+			    "undo", undoActionsWasEmpty);
+
 		ClearRedo();
 	} else {
 		Clear();
@@ -91,9 +108,6 @@ void ActionStack::PushActionAndExecute(refcount_ptr<Action>& pAction)
 	// stack itself is done. This is because the Execute function may
 	// modify the stack too (e.g. by calling Clear()).
 	pAction->Execute();
-
-	if (m_gxemul != NULL)
-		m_gxemul->GetUI()->UpdateUI();
 }
 
 
@@ -107,10 +121,15 @@ bool ActionStack::Undo()
 
 	pAction->Undo();
 
+	bool redoActionsWasEmpty = m_redoActions.empty();
 	m_redoActions.push_back(pAction);
 
-	if (m_gxemul != NULL)
-		m_gxemul->GetUI()->UpdateUI();
+	if (m_gxemul != NULL) {
+		m_gxemul->GetTriggers().PropertyWrittenTo(
+		    "undo", m_undoActions.empty());
+		m_gxemul->GetTriggers().PropertyWrittenTo(
+		    "redo", redoActionsWasEmpty);
+	}
 
 	return true;
 }
@@ -126,11 +145,16 @@ bool ActionStack::Redo()
 
 	pAction->Execute();
 
+	bool undoActionsWasEmpty = m_undoActions.empty();
 	m_undoActions.push_back(pAction);
 
-	if (m_gxemul != NULL)
-		m_gxemul->GetUI()->UpdateUI();
-
+	if (m_gxemul != NULL) {
+		m_gxemul->GetTriggers().PropertyWrittenTo("redo",
+		    m_redoActions.empty());
+		m_gxemul->GetTriggers().PropertyWrittenTo("undo",
+		    undoActionsWasEmpty);
+	}
+	
 	return true;
 }
 

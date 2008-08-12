@@ -144,6 +144,13 @@ public:
 	CommandInterpreter& GetCommandInterpreter();
 
 	/**
+	 * \brief Gets a reference to the Triggers collection.
+	 *
+	 * @return A reference to the %GXemul instance' Triggers collection.
+	 */
+	Triggers& GetTriggers();
+
+	/**
 	 * \brief Gets a reference to the ActionStack.
 	 *
 	 * @return A reference to the %GXemul instance' ActionStack.

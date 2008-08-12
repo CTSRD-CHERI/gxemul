@@ -343,13 +343,16 @@ GXemul::GXemul(bool bWithGUI)
 void GXemul::ClearEmulation()
 {
 	SetRunState(NotRunning);
-	m_globalTime = 0.0;
-	m_rootComponent = new DummyComponent;
-	m_rootComponent->SetVariableValue("name", "\"root\"");
-	m_emulationFileName = "";
-	m_modelIsDirty = false;
 
-	m_ui->UpdateUI();
+	// TODO: GetTriggers().PropertyWrittenTo("globalTime");
+	m_globalTime = 0.0;
+
+	SetRootComponent(new DummyComponent);
+	m_rootComponent->SetVariableValue("name", "\"root\"");
+
+	SetEmulationFilename("");
+	
+	SetDirtyFlag(false);
 }
 
 
@@ -804,8 +807,11 @@ bool GXemul::GetDirtyFlag() const
 
 void GXemul::SetDirtyFlag(bool dirtyFlag)
 {
+	bool changed = dirtyFlag != m_modelIsDirty;
+
 	m_modelIsDirty = dirtyFlag;
-	m_ui->UpdateUI();
+
+	GetTriggers().PropertyWrittenTo("dirtyFlag", changed);
 }
 
 
@@ -817,9 +823,17 @@ const string& GXemul::GetEmulationFilename() const
 
 void GXemul::SetEmulationFilename(const string& filename)
 {
+	bool changed = filename != m_emulationFileName;
+
 	m_emulationFileName = filename;
 
-	m_ui->UpdateUI();
+	GetTriggers().PropertyWrittenTo("emulationFileName", changed);
+}
+
+
+Triggers& GXemul::GetTriggers()
+{
+	return m_triggers;
 }
 
 
@@ -864,15 +878,17 @@ void GXemul::SetRootComponent(refcount_ptr<Component> newRootComponent)
 	assert(!newRootComponent.IsNULL());
 	m_rootComponent = newRootComponent;
 
-	m_ui->UpdateUI();
+	GetTriggers().PropertyWrittenTo("root", true);
 }
 
 
 void GXemul::SetRunState(RunState newState)
 {
+	bool changed = newState != m_runState;
+
 	m_runState = newState;
 
-	m_ui->UpdateUI();
+	GetTriggers().PropertyWrittenTo("runState", changed);
 }
 
 

@@ -4103,3 +4103,6 @@ Changelog for GXemul:
 		emulator. Also enabling ARM UND exceptions for ARM floating
 		point instructions (needed by both Linux and NetBSD/arm).
 20080810	Implementing a basic Trigger framework.
+20080812	Continuing on Triggers; it's now possible to use static
+		member functions as callback functions. Beginning to connect
+		triggers to the GTKMM GUI.

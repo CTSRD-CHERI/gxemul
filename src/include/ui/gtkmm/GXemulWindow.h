@@ -31,6 +31,7 @@
 #include <gtkmm.h>
 
 #include "GXemul.h"
+#include "Trigger.h"
 #include "ui/gtkmm/ComponentPalette.h"
 #include "ui/gtkmm/DebugConsoleWidget.h"
 #include "ui/gtkmm/EmulationDesignArea.h"
@@ -45,16 +46,6 @@ class GXemulWindow
 public:
 	GXemulWindow(GXemul* gxemul);
 	virtual ~GXemulWindow();
-
-	/**
-	 * \brief Update volatile UI components.
-	 *
-	 * Components updated include Undo/Redo button sensibility,
-	 * the main window's title, etc.
-	 *
-	 * Should be called from the GtkmmUI instance.
-	 */
-	void UpdateUI();
 
 	/**
 	 * \brief Shuts down the GXemulWindow.
@@ -73,6 +64,13 @@ public:
 	void InsertText(const string& msg);
 
 private:
+	void UpdateToolbarButtons();
+	void UpdateWindowTitle();
+	void UpdateDesignArea();
+
+	static Trigger::CallbackFunction ToolbarButtonTrigger;
+	void AddTriggers();
+
 	virtual void on_menu_about();
 	virtual void on_menu_copy();
 	virtual void on_menu_cut();
