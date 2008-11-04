@@ -1,0 +1,21 @@
+#
+#  $Id: Makefile.skel,v 1.2 2006-09-02 06:21:55 debug Exp $
+#
+#  Makefile for GXemul src/net
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+
+OBJS=net.o net_ip.o net_misc.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+
+clean:
+	rm -f $(OBJS) *core
+
+clean_all: clean
+	rm -f Makefile
+

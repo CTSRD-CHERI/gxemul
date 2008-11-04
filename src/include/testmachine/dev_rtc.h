@@ -4,6 +4,7 @@
 /*
  *  Definitions used by the "rtc" device in GXemul.
  *
+ *  $Id: dev_rtc.h,v 1.3 2007-05-26 03:47:34 debug Exp $
  *  This file is in the public domain.
  */
 

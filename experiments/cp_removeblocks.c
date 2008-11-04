@@ -25,6 +25,8 @@
  *  SUCH DAMAGE.
  *
  *
+ *  $Id: cp_removeblocks.c,v 1.11 2005-01-09 01:55:27 debug Exp $
+ *
  *  This program copies a file, but only those blocks that are not zero-
  *  filled.  Typical usage would be if you have a harddisk image stored
  *  as a file, which has all its zeroed blocks explicitly saved on disk,

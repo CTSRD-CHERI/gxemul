@@ -4,6 +4,7 @@
 /*
  *  Definitions used by the "mp" device in GXemul.
  *
+ *  $Id: dev_mp.h,v 1.2 2006-07-05 05:38:36 debug Exp $
  *  This file is in the public domain.
  */
 
@@ -19,8 +20,8 @@
  *  Default (physical) base address and length:
  */
 
-#define	DEV_MP_ADDRESS			0x11000000
-#define	DEV_MP_LENGTH			0x00000100
+#define	DEV_MP_ADDRESS			0x0000000011000000ULL
+#define	DEV_MP_LENGTH			0x0000000000000100ULL
 
 
 /*

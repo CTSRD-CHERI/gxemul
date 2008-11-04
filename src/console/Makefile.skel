@@ -1,0 +1,24 @@
+#
+#  $Id: Makefile.skel,v 1.1 2007-06-20 14:25:14 debug Exp $
+#
+#  Makefile for GXemul src/console
+#
+#  This directory contains code that is related to console and framebuffer
+#  handling.
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+
+OBJS=console.o x11.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+
+clean:
+	rm -f $(OBJS) *core
+
+clean_all: clean
+	rm -f Makefile
+

@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+#  $Id: test_openbsd_landisk_install.sh,v 1.1 2007-05-26 09:04:03 debug Exp $
+#
 #  Litet enkelt test för att mäta hur lång tid det tar att installera
 #  OpenBSD/landisk 4.1, utan interaktion.
 #

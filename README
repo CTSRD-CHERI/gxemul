@@ -1,11 +1,11 @@
-            ------------------------------------------------------
-
-                                 GXemul 0.5.0
-
-            ------------------------------------------------------
 
 
-                    Copyright (C) 2003-2008  Anders Gavare
+          --------------------------------------------------------
+            Gavare's eXperimental Emulator   --   GXemul 0.4.6.5
+          --------------------------------------------------------
+
+
+Copyright (C) 2003-2008  Anders Gavare
 
 
 
@@ -13,6 +13,62 @@ Overview  --  What is GXemul?
 -----------------------------
 
 GXemul is a framework for full-system computer architecture emulation. 
+Several processor architectures and machine types have been implemented. 
+It is working well enough to allow unmodified "guest" operating systems to 
+run inside the emulator, as if they were running on real hardware.
+
+The emulator emulates (networks of) real machines. The machines may 
+consist of ARM, MIPS, PowerPC, and SuperH processors, and various 
+surrounding hardware components such as framebuffers, busses, interrupt 
+controllers, ethernet controllers, disk controllers, and serial port 
+controllers.
+
+GXemul, including the dynamic translation system, is implemented in 
+portable C, which means that the emulator will run on practically any host 
+architecture.
+
+The documentation lists the machines and guest operating systems that can 
+be regarded as "working" in GXemul. The best working guest operating 
+systems are probably NetBSD/pmax and NetBSD/cats.
+
+Possible uses of GXemul include:
+
+ o)  running guest operating systems in a "sandboxed" environment
+
+ o)  compiling your source code inside a guest operating system which you
+     otherwise would not have access to (e.g. various exotic ports of
+     NetBSD), to make sure that your source code is portable to those
+     platforms
+
+ o)  educational purposes, e.g. to learn how to write code for MIPS
+
+ o)  hobby operating system development; the emulator can be used as a
+     complement to testing your code on real hardware
+
+ o)  simulating (ethernet) networks of computers running various
+     operating systems, to study their interaction with each other
+
+ o)  debugging code in general
+
+Use your imagination :-)
+
+
+
+GXemul's limitations
+--------------------
+
+ o)  GXemul is not a cycle-accurate simulator, because it does not simulate
+     things smaller than an instruction. Pipe-line stalls, instruction latency
+     effects etc. are more or less completely ignored.
+
+ o)  Hardware devices have been implemented in an ad-hoc and as-needed manner,
+     usually only enough to fool certain guest operating systems, e.g. NetBSD,
+     that the hardware devices exist and function well enough for those guest
+     operating systems to use them.
+
+     (A consequence of this is that a machine mode may be implemented well
+     enough to run NetBSD for that machine mode, but other guest operating
+     systems may not run at all, or behave strangely.)
 
 
 
@@ -22,13 +78,15 @@ Quick start
 To compile, type './configure' and then 'make'. This should work on most
 Unix-like systems. If it does not, then please mail me a bug report.
 
-Dependencies (optional):
-
-	gtkmm-2.4 >= 2.12.7	for the GUI
-	doxygen			for building C++ class documentation
-
-You might want to experiment with various CC, CXX, and CFLAGS environment
+You might want to experiment with various CC and CFLAGS environment
 variable settings, to get optimum performance.
+
+If you are impatient, and want to try out running a guest operating system 
+inside GXemul, read this:  doc/guestoses.html#netbsdpmaxinstall
+
+If you want to use GXemul for experimenting with code of your own, 
+then I suggest you compile a Hello World program according to the tips 
+listed here:  doc/experiments.html#hello
 
 Please read the rest of the documentation in the doc/ sub-directory for
 more detailed information on how to use the emulator.

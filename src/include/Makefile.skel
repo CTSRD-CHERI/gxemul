@@ -1,0 +1,17 @@
+#
+#  $Id: Makefile.skel,v 1.2 2005-11-17 22:51:02 debug Exp $
+#
+#  Makefile for GXemul include files
+#
+
+all: ppc_spr_strings.h
+
+ppc_spr_strings.h: make_ppc_spr_strings ppc_spr.h
+	grep '#define.SPR_' ppc_spr.h |cut -d _ -f 2- | ./make_ppc_spr_strings > ppc_spr_strings.h
+
+clean:
+	rm -f *core ppc_spr_strings.h make_ppc_spr_strings
+
+clean_all: clean
+	rm -f Makefile
+

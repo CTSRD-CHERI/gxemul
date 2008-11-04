@@ -28,13 +28,15 @@
  *  SUCH DAMAGE.
  *
  *
+ *  $Id: mips_cpu_types.h,v 1.20.2.1 2008-01-18 19:12:32 debug Exp $
+ *
  *  MIPS CPU types.
  */
 
 #include <misc.h>
 
 /*  MIPS CPU types:  */
-#include "thirdparty/mips_cpuregs.h"
+#include "mips_cpuregs.h"
 
 #define	EXC3K		3
 #define	EXC4K		4

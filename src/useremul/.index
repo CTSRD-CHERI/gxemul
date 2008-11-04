@@ -1,0 +1,4 @@
+useremul.c  Userland (syscall) emulation framework
+useremul_freebsd.c  FreeBSD userland (syscall) emulation implementation
+useremul_netbsd.c  NetBSD userland (syscall) emulation implementation
+useremul_syscalls.c  Common syscall code for all userland emulation modes

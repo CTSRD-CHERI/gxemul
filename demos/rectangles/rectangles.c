@@ -1,4 +1,6 @@
 /*
+ *  $Id: rectangles.c,v 1.5 2006-07-09 07:53:33 debug Exp $
+ *
  *  GXemul demo:  Random rectangles
  *
  *  This file is in the Public Domain.

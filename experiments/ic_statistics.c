@@ -25,6 +25,8 @@
  *  SUCH DAMAGE.
  *
  *
+ *  $Id: ic_statistics.c,v 1.4 2006-07-15 09:44:13 debug Exp $
+ *
  *  This program is not optimized for speed, but it should work.
  *
  *  Run  gxemul -s i:log.txt blahblahblah, and then

@@ -28,6 +28,8 @@
  *  SUCH DAMAGE.
  *
  *
+ *  $Id: opcodes_mips.h,v 1.16.2.1 2008-01-18 19:12:32 debug Exp $
+ *
  *  MIPS opcodes, gathered from various sources.
  *
  *  There are quite a number of different MIPS instruction sets, some are

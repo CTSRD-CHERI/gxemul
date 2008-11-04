@@ -1,93 +1,43 @@
 #
+#  $Id: Makefile.skel,v 1.53 2007-06-28 13:36:45 debug Exp $
+#
 #  Makefile for GXemul
 #
 
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XDEF) $(XINCLUDE)
 BIN=gxemul
-BINGUI=gxemul-gui
 LIBS=$(XLIB) $(OTHERLIBS)
-
 
 all: build
 
-build: buildsrc
-	$(CXX) src/components/*/*.o src/ir/*.o src/main/*.o src/main/*/*.o src/ui/*/*.o $(LIBS) -o $(BIN) && ln -f $(BIN) $(BINGUI)
+build:
+	cd src; $(MAKE); cd ..
+	$(CC) $(COPTIM) src/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/net/*.o src/promemul/*.o src/symbol/*.o src/useremul/*.o $(LIBS) -o $(BIN)
 
-buildsrc:
-	cd src; $(MAKE)
-
-test: build
-	./$(BIN) -W unittest > /dev/null
-
-documentation: build
-	sed s/PAGETITLE/Machines/g < doc/head.html > doc/machines.html
-	./$(BIN) -W machines >> doc/machines.html
-	cat doc/tail.html >> doc/machines.html
-	sed s/PAGETITLE/Components/g < doc/head.html > doc/components.html
-	./$(BIN) -W components >> doc/components.html
-	cat doc/tail.html >> doc/components.html
-	$(DOXYGEN) doc/Doxyfile
-
-translations:
-	cd po; make install
-
-translations_uninstall:
-	cd po; make uninstall
-
-install: test documentation $(TRANSLATIONS)
+install: build
 	@echo
-	@echo Installing binaries...
-	mkdir -p $(PREFIX)/bin
-	cp -f $(BIN) $(PREFIX)/bin/
-	ln -f $(PREFIX)/bin/$(BIN) $(PREFIX)/bin/$(BINGUI)
+	@echo "There is no automatic 'make install'. You need to manually copy the gxemul"
+	@echo "binary and any other files you need to where you want them to reside. The man/"
+	@echo "subdirectory contains a small man-page, it should probably be placed in"
+	@echo "'/usr/.../man/man1' on most systems, and the contents of the doc/ subdirectory"
+	@echo "could be placed in '/usr/.../share/doc/gxemul'."
 	@echo
-	@echo Installing man pages...
-	mkdir -p $(PREFIX)/man/man1
-	cp -f man/gxemul.1 $(PREFIX)/man/man1/
-	ln -f $(PREFIX)/man/man1/gxemul.1 $(PREFIX)/man/man1/gxemul-gui.1
-	@echo
-	@echo Installing documentation...
-	mkdir -p $(PREFIX)/share/doc/gxemul
-	cp -R doc/* $(PREFIX)/share/doc/gxemul/
-	@echo
-	@echo Installing Application .desktop entry and icon...
-	mkdir -p $(PREFIX)/share/pixmaps
-	cp misc/gxemul-gui.png $(PREFIX)/share/pixmaps
-	mkdir -p $(PREFIX)/share/applications
-	cp misc/gxemul-gui.desktop $(PREFIX)/share/applications
-	@echo
-	@echo "Done!"
-
-uninstall: $(TRANSLATIONSUNINSTALL)
-	@echo Removing binaries, man pages, and documentation...
-	rm -f $(PREFIX)/bin/gxemul
-	rm -f $(PREFIX)/bin/gxemul-gui
-	rm -f $(PREFIX)/man/man1/gxemul.1
-	rm -f $(PREFIX)/man/man1/gxemul-gui.1
-	rm -rf $(PREFIX)/share/doc/gxemul
-	rm -f $(PREFIX)/share/pixmaps/gxemul-gui.png
-	rm -f $(PREFIX)/share/applications/gxemul-gui.desktop
-	@echo "Done!"
 
 clean:
-	rm -f $(BIN) $(BINGUI) *core core.* *.gmon _* *.exe ktrace.out
-	rm -rf doc/doxygen
-	cd po; $(MAKE) clean
-	cd src; $(MAKE) clean
+	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out
+	cd src; $(MAKE) clean; cd ..
 
 #  experiments and demos are not cleaned on a normal clean, only on a clean_all.
 
 clean_all: clean
-	cd experiments; $(MAKE) clean_all
-	cd demos; $(MAKE) clean
-	cd po; $(MAKE) clean_all
-	rm -f _unittests.tmp unittest.h unittest_h.h commands.h commands_h.h
-	rm -f _components.tmp _commands.tmp components.h components_h.h
-	rm -f config.h Makefile src/Makefile src/*/Makefile src/*/*/Makefile
-
-
-update_pot:
-	xgettext -o po/gxemul.pot --keyword=_ `find src|grep \\.cc|grep -v \\.svn` 
-
-todo:
-	@grep -nR TODO src|grep -v \\.svn
+	cd experiments; $(MAKE) clean_all; cd ..
+	cd demos; $(MAKE) clean; cd ..
+	rm -f config.h Makefile src/Makefile src/cpus/Makefile
+	rm -f src/debugger/Makefile src/devices/Makefile
+	rm -f src/devices/fonts/Makefile src/disk/Makefile
+	rm -f src/file/Makefile src/machines/Makefile
+	rm -f src/net/Makefile
+	rm -f src/promemul/Makefile src/include/Makefile
+	rm -f src/useremul/Makefile src/include/Makefile
+	rm -f src/console/Makefile src/symbol/Makefile
 

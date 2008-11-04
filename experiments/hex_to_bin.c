@@ -1,4 +1,6 @@
 /*
+ *  $Id: hex_to_bin.c,v 1.2 2007-05-11 07:51:56 debug Exp $
+ *
  *  Quick hack to convert .hex files (such as the AVR Hello World program at
  *  http://www.tfs.net/~petek/atmel/hiworld/hiworld.hex) into raw binaries.
  *

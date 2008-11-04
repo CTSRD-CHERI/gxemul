@@ -1,0 +1,23 @@
+#
+#  $Id: Makefile.skel,v 1.9 2007-06-19 02:11:46 debug Exp $
+#
+#  Makefile for GXemul src/promemul
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+
+OBJS=arcbios.o dec_prom.o dreamcast.o dreamcast_scramble.o \
+	mvmeprom.o of.o ps2_bios.o sh_ipl_g.o yamon.o
+
+all: $(OBJS)
+	../../experiments/make_index.sh
+
+$(OBJS): Makefile
+
+
+clean:
+	rm -f $(OBJS) *core
+
+clean_all: clean
+	rm -f Makefile
+

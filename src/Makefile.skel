@@ -1,32 +1,85 @@
 #
+#  $Id: Makefile.skel,v 1.103 2007-06-28 13:36:45 debug Exp $
+#
 #  Makefile for GXemul src
 #
 
-all: do_components do_ir do_main do_ui
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 
-do_components:
-	cd components; $(MAKE)
+OBJS=emul.o emul_parse.o float_emul.o interrupt.o main.o memory.o misc.o \
+	net.o settings.o timer.o useremul.o
 
-do_ir:
-	cd ir; $(MAKE)
+all: do_include
+	$(MAKE) do_src do_console do_cpus do_debugger do_devices do_disk \
+	    do_file do_machines do_net do_promemul do_symbol do_useremul
 
-do_main:
-	cd main; $(MAKE)
+do_include:
+	cd include; $(MAKE); cd ..
 
-do_ui:
-	cd ui; $(MAKE)
+do_console:
+	cd console; $(MAKE); cd ..
 
+do_cpus:
+	cd cpus; $(MAKE); cd ..
+
+do_debugger:
+	cd debugger; $(MAKE); cd ..
+
+do_devices:
+	cd devices; $(MAKE); cd ..
+
+do_disk:
+	cd disk; $(MAKE); cd ..
+
+do_file:
+	cd file; $(MAKE); cd ..
+
+do_machines:
+	cd machines; $(MAKE); cd ..
+
+do_net:
+	cd net; $(MAKE); cd ..
+
+do_promemul:
+	cd promemul; $(MAKE); cd ..
+
+do_symbol:
+	cd symbol; $(MAKE); cd ..
+
+do_useremul:
+	cd useremul; $(MAKE); cd ..
+
+do_src: $(OBJS)
+
+$(OBJS): Makefile
 
 clean:
-	cd components; $(MAKE) clean
-	cd ir; $(MAKE) clean
-	cd main; $(MAKE) clean
-	cd ui; $(MAKE) clean
+	rm -f $(OBJS) *core tmp_*.c
+	cd include; $(MAKE) clean; cd ..
+	cd console; $(MAKE) clean; cd ..
+	cd cpus; $(MAKE) clean; cd ..
+	cd debugger; $(MAKE) clean; cd ..
+	cd devices; $(MAKE) clean; cd ..
+	cd disk; $(MAKE) clean; cd ..
+	cd file; $(MAKE) clean; cd ..
+	cd machines; $(MAKE) clean; cd ..
+	cd net; $(MAKE) clean; cd ..
+	cd promemul; $(MAKE) clean; cd ..
+	cd symbol; $(MAKE) clean; cd ..
+	cd useremul; $(MAKE) clean; cd ..
 
 clean_all: clean
-	cd components; $(MAKE) clean_all
-	cd ir; $(MAKE) clean_all
-	cd main; $(MAKE) clean_all
-	cd ui; $(MAKE) clean_all
+	cd include; $(MAKE) clean_all; cd ..
+	cd console; $(MAKE) clean_all; cd ..
+	cd cpus; $(MAKE) clean_all; cd ..
+	cd debugger; $(MAKE) clean_all; cd ..
+	cd devices; $(MAKE) clean_all; cd ..
+	cd disk; $(MAKE) clean_all; cd ..
+	cd file; $(MAKE) clean_all; cd ..
+	cd machines; $(MAKE) clean_all; cd ..
+	cd net; $(MAKE) clean_all; cd ..
+	cd promemul; $(MAKE) clean_all; cd ..
+	cd symbol; $(MAKE) clean_all; cd ..
+	cd useremul; $(MAKE) clean_all; cd ..
 	rm -f Makefile
 

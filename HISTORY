@@ -1,3 +1,5 @@
+$Id: HISTORY,v 1.1635.2.9 2008-06-10 00:18:37 debug Exp $
+
 Changelog for GXemul:
 ---------------------
 
@@ -3673,436 +3675,53 @@ Changelog for GXemul:
 		guestoses.html from OpenBSD 4.1 to 4.2.
 20071112	Branching in CVS to a 0.4.6.1 version, separate from the main
 		development.
-		(This is the main development branch.)
-		EXPERIMENTALLY beginning to convert various source code
-		files to C++ (.c to .cc); it will of course be a major
-		undertaking to redesign the code so that it fits C++, but I
-		think it will be worth it. (main.c => main.cc only so far.)
-		Note: Release 0.4.6.1 will most likely be made from the code
-		base as it was yesterday, plus perhaps some documentation
-		updates.
-		Adding configure options "--with-gui" and "--without-gui";
-		autodetection of gtkmm-2.4 >= 2.12.1. A binary "gxemul-gui"
-		is hardlinked to "gxemul"; when started, it should (in the
-		future) bring up a GUI version of GXemul. For now, it just
-		displays a dummy GTK+ window.
-20071113	The dummy GUI now includes a menu bar.
-20071114	Minor manpage and Makefile updates.
-		Building and running GXemul now requires both X11 and gtkmm.
-		debug/fatal are moved from main.cc to misc.cc.
-		main.cc now just calls the main emulator, which is moved to
-		src/GXemul.cc.
-20071116	Reverting the stuff I did two days ago: gtkmm/X11 are now
-		optional again.
-		Finally adding "install" and "uninstall" Makefile targets. :)
-		Moving the rest of main.cc (the main function) into GXemul.cc.
-		Removing the old config file parser (src/emul_parse.c),
-		and doc/configfiles.html.
-		Moving remaining src/*.c{,c} into a new src/main/ directory.
-		Beginning on separating the main GUI window into a "workspace"
-		and a "debug console" area.
-20071117	Removing the dummy M32R skeleton again.
-		Converting some .c files to .cc (without redesigning the code,
-		just to make it use the C++ compiler): cpu_sparc.c,
-		cpu_mips_coproc.c, memory_*.c.
-		Converting most of src/cpus/.
-		Converting src/net/*.c and src/promemul/*.c to *.cc.
-20071119	Converting src/file/*.c to *.cc.
-20071120	Removing remaining references to the old config file stuff in
-		the documentaion.
-20071121	Converting src/useremul/*.c, src/symbol/*.c, and some
-		remaining files in src/main/ to *.cc. (Still no redesign,
-		simply converting to use the C++ compiler.)
-20071123	Beginning to converting src/machines/*.c to *.cc.
-20071124	Planning a new configuration file format; beginning on
-		ConfigNode.{cc,h}. Adding doc/fileformat.html.
-		Adding a "test" makefile target, for unit testing. "make
-		install" runs the test target.
-		Implementing a simple refcount_ptr class.
-20071127	configure now uses -g also for non-development builds.
-		Incorporating Wu Yongwei's debug_new, for memory leak
-		detection.
-20071209	Converting the remaining src/machine/*.c to *.cc.
-		Converting src/debugger/*.c to *.cc.
-20071212	Including a Doxyfile, for doxygen generation (source code
-		comments to HTML).
-20071213	Performing a VERY bold move: Removing pretty much everything of
-		the old code. All CPUs, devices, documentation, PROM emulation
-		modes, disk and file handling, console handling, the old
-		debugger, etc.
-		Thinking about the new Component framework.
-20071214	Updating the TODO (basically removing all 0.4.x stuff).
-		Beginning on some Doxygen documentation for simple classes.
-20071217	Moving Doxygen documentation to doc/doxygen/html....
-		src/main/GXemul.cc is used for the "main page" of the
-		generated Doxygen HTML documentation, so that is where all the
-		general code concepts should be documented.
-		Adding skeleton Action, ActionStack, and UnitTest frameworks.
-20071218	Continuing on the ActionStack and the UnitTest framework.
-		Adding a small intro.html documentation page.
+		(This is the 0.4.6.1 branch.)
+20071219	NetBSD 4.0 has been released. Doing regression testing of
+		some systems listed on guestoses.html.
+		Fixing an alignment bug in dev_vga, when allocating 1 byte.
 
-==============  RELEASE 0.4.6.1 (gxemul-legacy branch)  ==============
+==============  RELEASE 0.4.6.1  ==============
 
-20071221	Some extremely minor Doxygen comment updates.
-20071227	Adding StateVariable and StateVariableValue classes; writing
-		unit tests, etc.
-		The ActionStack now uses lists instead of vectors, for the
-		undo and redo stack. (For O(1) undo/redo operations.)
-		Continuing on the Component infrastructure: parent/child
-		relationships, state variables, and serialization.
-		Adding a simple Checksum class; useful as a helper for unit
-		tests.
-20071228	Implementing a CreateComponent function, which when given a
-		"component class name" creates a Component.
-		Adding a simple EscapedString helper class, for generating and
-		decoding C-style escaped strings.
-		Simple deserialization works. :)
-20071229	Beginning on the CommandInterpreter class.
-20071231	Moving src/gui to src/ui/gtkmm, and creating src/ui/console.
-		The idea is that all UIs, not only graphical ones, will share
-		a common base class (the UI class), making it reasonably easy
-		to add other GUIs later on if necessary.
-		Moving printing of the startup "banner" to a UI member
-		function. (No banner is currently displayed for the GTKMM UI
-		though, because it would feel too heavy-weight.)
-		The ConsoleUI shows a "GXemul> " prompt, but does not support
-		input yet.
-20080101	Continuing on the ConsoleUI; it now reads input from stdin and
-		sends it to a CommandInterpreter. Simple handling of CTRL-C,
-		CTRL-Z, and treating DEL as backspace.
-		Adding a Command base class, and adding the first command,
-		which is "quit" :-).
-		Simplifying the syntax of the UNITTEST macro.
-20080102	Adding a section about GXemul being Free Software to intro.html
-		(same as in previous versions of GXemul).
-		Implementing CommandInterpreter::RunCommand, so that commands
-		can be executed. "help", "quit", and "version" work
-		interactively now :)
-20080103	CTRL-A/E (for start/end of line) and CTRL-B/F (for back/
-		forward cursor movement) now work in the console UI.
-		Mapping ANSI/VTxxx/xterm cursor keys (escape + [ + misc) to
-		CTRL-A/E/B/F/N/P.
-		Adding command history support to the CommandInterpreter.
-		Classes that perform unit tests using the UNITTESTS(classname)
-		macro are now tested (almost) automagically by
-		UnitTest::RunTests(). (.h files must still be included.)
-20080104	Connecting cursor up/down keys to the command history.
-		Adding Component::Clone. (Not really used yet.)
-		Adding CTRL-D support to the command interpreter (remove
-		character to the right).
-		Actions will now be placed in src/main/actions/.
-		Implementing an AddComponentAction.
-20080105	Beginning on TAB completion in the CommandInterpreter.
-		Implementing the UndoCommand and the RedoCommand.
-		Adding CTRL-K (kill end of line) to the command interpreter.
-		Implementing RemoveComponentAction.
-20080106	Classes that use UNITTESTS(classname) are now fully auto
-		tested, no need to manually include .h files anymore. (This
-		relies on the fact that .h files have names that are exactly
-		the same as the class name they represent, otherwise it would
-		not work that well.) Updating some Doxygen comments to reflect
-		the current state of automagic unit testing.
-		Renaming TODO to doc/TODO.html.
-		Changing the Doxyfile to include full .cc source code in
-		the built documentation.
-20080107	The "tree" command now shows a fancy ASCII tree of components.
-		Beginning on the "add" command (AddComponentCommand).
-		Components now get names based on their class name, followed
-		by a zero-based increasing integer, e.g. dummy0, dummy1, etc.
-		when added (if they don't already have a unique name).
-20080108	TAB complete of empty string now shows all available commands.
-		Implementing Component helpers: GeneratePath and LookupPath.
-		The "add" command now takes path into account, but it must be
-		a complete path from the root component (i.e. "root.blahblah").
-		Component::Serialize now serializes into a std::stringstream
-		instead of returning a plain string.
-20080109	Implementing Component::FindPathByPartialMatch (helper func.).
-		The "add" command now uses FindPathByPartialMatch for the
-		where-to-add argument.
-		Tab completion now expands component names :)  also using
-		FindPathByPartialMatch. (Syntax of different parts of a
-		command line are not taken into account yet, though, so it
-		also for example tries to expand the argument of the "help"
-		command as a component name.)
-		Component::Serialize now serializes into an ostream instead
-		of a stringstream.
-		Implementing the "save" command.
-		CTRL-T now runs a "status" command (not yet implemented),
-		instead of using a status line hack of its own.
-		Implementing ClearEmulationAction and LoadEmulationAction.
-		Implementing the "close" and "load" commands.
-20080110	Making the LoadEmulationAction undo-able (in the case the new
-		component was added to the tree, and did not entierly
-		replace the root component).
-20080112	The gxemul binary can now be started with a config file as
-		an argument, which causes it to be loaded. The default RunState
-		is now Running on startup, and -V is used to set it to Paused.
-		Adding a NullUI, so that the result of GXemul::GetUI() does
-		not have to be checked all the time.
-		Creating a ComponentFactory; moving Component::CreateComponent
-		to ComponentFactory::CreateComponent.
-		Reworking how components are created, in preparation for
-		getting "templates" (such as the testmips machine) to work.
-		A list of Components is now generated by the configure script,
-		so that all .h files with a COMPONENT(name) command in
-		src/include/components/ (including template machines, etc) will
-		be creatable using ComponentFactory::CreateComponent.
-		The -E command line option now works :-)
-20080113	Adding a "quiet mode" to the GXemul class, set to true by the
-		-q command line option.
-		Adding some more simple commands: continue, list-components.
-20080118        [0.4.x branch]  Applying a WDC patch from Oleksandr Tymoshenko
-		(dev_wdc.c and bus_pci.c), fixing the order of 16-bit words
-		within 32-bit words in the identify struct, and not clearing
-		the error on reads from the error register anymore.
+20080118	Applying a WDC patch from Oleksandr Tymoshenko (dev_wdc.c and
+		bus_pci.c), fixing the order of 16-bit words within 32-bit
+		words in the identify struct, and not clearing the error on
+		reads from the error register anymore.
 
-==============  RELEASE 0.4.6.2 (gxemul-legacy branch)  ==============
+==============  RELEASE 0.4.6.2  ==============
 
-20080119	Adding a generic GetAttribute function to components. Planned
-		attributes are "template", "stable", "machine", "description",
-		and "contributors". Unimplemented attributes result in an empty
-		string being returned from GetAttribute.
-		Moving the ASCII tree generator from TreeCommand.cc to
-		Component::GenerateTreeDump.
-		Documentation of available machine templates and all components
-		is now automagically generated on a "make documentation".
-		(doc/machines.html and doc/components.html.)
-20080120	[0.4.x branch]  Some minor OpenFirmware fixes: Adding a
-		"memory" property to "/chosen", adding a dummy claim() service.
-		Adding CTRL-W handling (remove current/last word) to the
-		CommandInterpreter.
-		The machines.html and components.html documentation pages now
-		point to individual doc/machine_XXX.html and component_XXX.html
-		pages, if they exist.
-20080122	Beginning to rewrite the component state variable
-		implementation a bit, in preparation for serialization/
-		deserialization, undo/redo, and "run backwards" with data
-		tightly tied to components.
-20080123	Continuing on the state variable stuff. Both strings and
-		integers (8-bit through 64-bit, signed and unsigned) can be
-		used as state variables so far, but more unit tests are needed.
-		Component classes can now also be registered runtime. (This is
-		needed to enable meaningful unit testing of some things,
-		such as cloning of dummy unit test components.)
-20080124	Moving doc/machine_*.html and component_*.html into subdirs.
-20080129	Re-adding detection of host arch (ABI) to the configure script.
-20080203	Continuing on state variables (unit tests etc).
-20080205        [0.4.x branch]  Switching order of DINCLUDE and XINCLUDE in
+20080120	Some minor OpenFirmware fixes: Adding a "memory" property to
+		"/chosen", adding a dummy claim() service.
+20080205	Switching order of DINCLUDE and XINCLUDE in
 		src/devices/Makefile (thanks to Ning Zhao for the tip).
-20080210	Adding -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC to CFLAGS for
-		debug builds.
-20080222	Beginning on the main run loop, GXemul::ExecuteCycles.
-		[0.4.x branch]  Adding a DEV_DISK_OFFSET_HIGH32 register, for
-		reading/writing the top 32 bits of the offset register (useful
-		for emulated 32-bit archs), as suggested by Julian Elischer.
+20080222	Adding a DEV_DISK_OFFSET_HIGH32 register, for reading/writing
+		the top 32 bits of the offset register (useful for emulated
+		32-bit archs), as suggested by Julian Elischer.
 
-==============  RELEASE 0.4.6.3 (gxemul-legacy branch)  ==============
+==============  RELEASE 0.4.6.3  ==============
 
-20080226	Implementing an IRInstruction base class, and some initial
-		IR instructions (simple adds, moves, stores).
-20080227	Continuing on IRInstruction stuff; unit tests to see that
-		automatic native code generation kicks in, etc.
-		Implementing a simple IRBlockCache, which is just a linear
-		memory range with PROT_EXEC, which is reset when it overflows.
-		Beginning on a (so far dummy) IRNativeAMD64 code generator.
-		Adding a configure option for disabling native code generation
-		support completely.
-20080229	Rethinking how the IR stuff should work: I'll probably use
-		simple and traditional interpretation by default (read instr,
-		decode, execute), and only let native code generation via some
-		form of IR kick in when necessary. Two advantages: it will be
-		easier to add new cpu types (because an interpretation switch/
-		case block is very easy to understand), and there will be no
-		waste of memory (for IR data) for code which is not commonly
-		used.
-		Removing IRBlock and IRInstruction, but keeping IRBlockCache
-		and IRNativeAMD64 for later.
-		The IRBlockCache can now be resized during runtime (and it
-		expands automatically if necessary).
-20080314	Working on the main loop, GXemul::ExecuteCycles(), which should
-		call each component's Run function in suitable proportions.
-		Adding a CPUComponent base class, from which MIPS_CPUComponent
-		inherits.
-20080316	Switching from CVS to SVN.
-		Adding a test to the configure script for the "-ansi" compiler
-		option; implementing a simple parse_number to replace strtoull
-		to make everything build with -ansi. Various minor fixes to
-		make -ansi work on a Debian GNU/Linux system (using CXXFLAGS
-		instead of CFLAGS in Makefiles, and probe MAP_ANON in the
-		configure script using $CXX, not $CC).
-		Moving NativeTranslationExists and LookupCurrentCodePage from
-		MIPS_CPUComponent to CPUComponent; these are intended to be
-		used from most CPU components.
-		Removing lots of "cd .." stuff from the Makefiles; GNU make
-		did not work too well with them. Hopefully this will make
-		tracking down compile problems on GNU/Linux machines easier.
-20080317	Beginning on an AddressDataBus abstract class/interface, which
-		e.g. the RAM component will implement.
-20080320	Continuing on the RAMComponent class.
-20080321	"make install" now installs .desktop and icon files.
-		More work on the RAMComponent class: endianness for loads and
-		stores larger than 8 bits, some simple unit tests.
-20080322	Adding a preliminary toolbar to the GTKMM GUI.
-		Upgrading configure script check for gtkmm-2.4 from version
-		2.12.1 to 2.12.5. (Maybe not stricly necessary, but that's what
-		I am currently using for development.)
-20080323	Experimenting with graying out the Undo and Redo actions in
-		the GUI (by querying the ActionStack).
-20080324	Making the code compile cleanly with GNU C++' -pedantic. The
-		only module where -pedantic is not used is src/ir/, which needs
-		to cast e.g. uint8_t* to function pointer (for runtime
-		generated code).
-		Beginning on a mainbus (MainbusComponent), which will forward
-		reads and writes to other devices (such as RAM).
-20080325	Making the counter in the ReferenceCountable class mutable,
-		because const objects also need to be reference countable.
-		Attempting to fix a bug related to the integer types passed
-		to UnitTest::Assert. (Problem noticed by Hollis Blanchard.)
-		Fixing arguments to and return handling of mmap(). (Also
-		noticed by Hollis.)
-20080328	Making everything build using SunStudio (Sun C++ 5.9).
-		Implementing support for Double state variables.
-		CPU speed is now a state variable, in CPUComponent.
-		Cleaning up the CFLAGS/CXXFLAGS/COPTIM/CWARNINGS mess in the
-		configure script and Makefile.skel files; only CXXFLAGS (and
-		CXXFLAGSBASE) are used from now on. Also removing some other
-		unused legacy stuff from the configure script.
-20080329	Minor fixes to make the source code build with a 20080321
-		snapshot of GCC 4.4.
-20080330	Continuing on the GTKMM GUI (File->Open/Save/Save As show
-		file chooser dialogs, and Edit->Undo/Redo execute the "undo"
-		and "redo" commands). "File->New from Blank" and "Go/Continue"
-		also have bare-bones implementations.
-		Continuing on mainbus related things; moving the mips_cpu in
-		the testmips machine so that it is placed on the mainbus.
-		Adding a MemoryMappedComponent base class, which all memory-
-		mapped components should inherit. (The canonical example is
-		the RAMComponent class.)
-		The mainbus can now forward reads and writes to memory-mapped
-		child components.
-20080401	Continuing on the mainbus (writing unit tests).
-		Reintroduce the 'bool' state variable type.
-		Adding a 'writeProtected' state bool for the RAMComponent, to
-		emulate ROM behavior in a simple way.
-20080402	Creating a src/include/thirdparty directory. Moving debug_new.h
-		etc there. Also importing exec_elf.h from NetBSD [HEAD], and
-		updating doc/RELEASE.html to reflect the location of thirdparty
-		imports.
-		Implementing the initial framework for I18N/localization. The
-		first translation is Swedish. :-)
-20080404	Making it possible to build with GTKMM 2.15.5 with --debug;
-		note, however, that this produces memory leak warnings, so
-		the GTKMM with --debug combination is not very useful yet.
-		Implementing basic support for updating the UI when some things
-		change: Undo/Redo-applicability, the name of the emulation, and
-		the RunState. (As UI::UpdateUI().)
-		Removing all old CVS $Id$ tags; they are not useful anymore.
-		The GTKMM GUI EmulationDesignArea now shows some dummy circles
-		(one for each component in the emulation setup).
-20080405	Beginning on a FileLoader class, for loading binaries (e.g.
-		ELFs). Also adding a test/ directory, where small test files
-		used for unit tests may be stored. ELF program segments are
-		loaded, but no additional information yet (entry point etc.).
-		Catching std::exception at the outermost level, in order to
-		print a reasonable message if the application crashes.
-		Instead of loading binaries into an AddressDataBus, they are
-		now loaded into a Component, which, if it has a "pc" state
-		variable, is set to the entry point. Starting gxemul with
-		-E testmips test/FileLoader_ELF_MIPS actually attempts to
-		start running the binary now :-)
-		Some more work on the GTKMM GUI: the debug output window now
-		shows debug messages and commands being executed.
-20080406	Adding a section about Model-View-Controller to the source
-		code documentation main page, and a simple picture of what the
-		component tree may look like.
-		Introducing "visible class names" in addition to the normal
-		class name, for components. This makes mips_cpu0 show up as
-		just cpu0, which is much nicer.
-		uint16_t, 32_t, and 64_t state variables are now outputted in
-		hexadecimal form in ToString(), for readability.
-		The ListComponents command now shows the short description of
-		each command.
-		Links are now generated from component names in machines.html
-		to corresponding component_xxx.html pages.
-		Beginning on internal support for instruction disassembly (not
-		user-accessible yet).
-20080407	Continuing on the instruction disassembly stuff; importing
-		some MIPS defines from GXemul 0.4.6.3.
-20080409	Implementing support in the CommandInterpreter for running
-		methods on components. If a component name is "executed" with
-		no method name given, the component tree is dumped. (This means
-		that there is no need for the 'tree' command anymore, so it
-		has been removed.)
-		Implementing the first component method: "unassemble" for the
-		CPUComponent.
-		GTKMM GUI test: Connecting to the "activate" signal of a text
-		entry, so that commands are executed once ENTER is pressed;
-		this does not work with tab-completion and command line
-		editing though, since only ENTER is signaled.
-20080410	CPUComponent's unassemble method now remembers where it last
-		unassembled, and starts at m_pc if it is the first time it
-		is executed.
-		Porting more MIPS-related code from GXemul 0.4.6.3; some
-		more instructions can be disassembled now.
-20080412	Implementing tab-completion of methods on components.
-		Executing a component name without any method name, which
-		results in the component tree being dumped, will now also
-		dump all of the component's state variables.
-		Continuing on porting GXemul 0.4.6.3's MIPS disassembly code.
-		The GTKMM GUI can now be shut down by the "quit" command.
-20080413	Introducing a new RunState (NotRunning). Making the GTKMM GUI
-		Run/Pause buttons stay down while in the Running/Paused
-		runstates. (Also making the icons smaller by not showing text
-		labels, and enabling tooltips instead. Looks/feels nicer.)
-		Implementing an undoable ResetAction.
-20080416	GUI updates: Fixed-width font in the debug console, and it
-		now scrolls to bottom on text output.
-20080419	AddComponentAction must not remember component references
-		(for undo/redo); instead it now remember paths.
-		Also implementing a similar fix for RemoveComponentAction.
-20080423	Action::Execute and Undo are now private, and only reachable
-		from the ActionStack (now a friend class of Action).
-20080424	Upgrading configure script check for gtkmm-2.4 from version
-		2.12.5 to 2.12.7, to be in synch with my system.
-20080426	The continue command now clears the Undo stack.
-		State variable names of components can now be tab completed.
-		"Running" a variable (e.g. cpu0.pc) will print its value.
-20080427	Continuing a little on tab completion of variable names.
-		Implementing a "dirty flag" for the emulation; the GTKMM GUI
-		now asks for confirmation before quitting, opening a new
-		emulation, etc, if the model is dirty.
-20080501	Fixing LoadComponentAction so that it uses path names for
-		Undo, and not reference pointers to components.
-		Fixing a crash bug in CommandInterpreter when tab completing
-		non-existant component names.
-		Implementing a VariableAssignmentAction. No expressions yet,
-		only simple values (numeric, strings, and boolean values).
-20080531	Refactoring the Component::AddVariable* functions into a
-		single template function.
-20080605	[0.4.x branch]  Fixing a corner case in ARM pc-relative loads,
-		which was unimplemented before. (Triggered by doing builds of
-		pkgsrc stuff inside emulated NetBSD/cats.)
-20080610	[0.4.x branch]  Applying a patch from Jiri Svoboda, which
-		implements the ARM "bkpt" instruction.
+20080605	Fixing a corner case in ARM pc-relative loads, which was
+		unimplemented before. (Triggered by doing builds of pkgsrc
+		stuff inside emulated NetBSD/cats.)
+20080610	Applying a patch from Jiri Svoboda, which implements the
+		ARM "bkpt" instruction.
 
-==============  RELEASE 0.4.6.4 (gxemul-legacy branch)  ==============
+==============  RELEASE 0.4.6.4  ==============
 
-20080611	[0.4.x branch]  Correcting the ARM pc-relative load fix; the
-		wrong address variable was used. Also, the pc-relative _load_
-		code was used for stores as well, which was completely
-		incorrect. On ARM, since pc-relative loads are converted into
-		immediate movs, on writes to pages that contain such
-		translations, the ENTIRE page must be invalidated, not just the
-		1/32th that was code. This has now been implemented.
+20080611	Correcting the ARM pc-relative load fix; the wrong address
+		variable was used. Also, the pc-relative _load_ code was
+		used for stores as well, which was completely incorrect.
+		On ARM, since pc-relative loads are converted into immediate
+		movs, on writes to pages that contain such translations, the
+		ENTIRE page must be invalidated, not just the 1/32th that
+		was code. This has now been implemented.
 
-==============  RELEASE 0.4.6.5 (gxemul-legacy branch)  ==============
+==============  RELEASE 0.4.6.5  ==============
 
-20080808	[0.4.x branch]  Applying a patch from Kiyotaka Inaba which
-		causes an ARM UND exception to be generated by the instruction
-		word 0xe6000011, which is needed by gdb when running inside the
-		emulator. Also enabling ARM UND exceptions for ARM floating
-		point instructions (needed by both Linux and NetBSD/arm).
-20080810	Implementing a basic Trigger framework.
-20080812	Continuing on Triggers; it's now possible to use static
-		member functions as callback functions. Beginning to connect
-		triggers to the GTKMM GUI.
+20080808	Applying a patch from Kiyotaka Inaba which causes an ARM UND
+		exception to be generated by the instruction word 0xe6000011,
+		which is needed by gdb when running inside the emulator.
+		Also enabling ARM UND exceptions for ARM floating point
+		instructions (needed by both Linux and NetBSD/arm).
+20081103	Fix for a free() bug in bootblock_iso9660.c.
+		Updating the OpenBSD/landisk installation instructions from
+		4.2 to 4.4, after verifying that it works.

@@ -1,0 +1,23 @@
+#
+#  $Id: Makefile.skel,v 1.1 2007-06-20 14:25:14 debug Exp $
+#
+#  Makefile for GXemul src/symbol
+#
+#  Symbol handling support.
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+
+OBJS=symbol.o symbol_demangle.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+
+clean:
+	rm -f $(OBJS) *core
+
+clean_all: clean
+	rm -f Makefile
+

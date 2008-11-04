@@ -14,6 +14,14 @@ file rectangles_arm
 ../../gxemul -X -E testarm rectangles_arm
 
 
+M32R
+----
+m32r-elf-gcc -I../../src/include/testmachine -g rectangles.c -O2 -c -o rectangles_m32r.o
+m32r-elf-ld -e f rectangles_m32r.o -o rectangles_m32r
+file rectangles_m32r
+../../gxemul -X -E testm32r rectangles_m32r
+
+
 MIPS (64-bit)
 -------------
 mips64-unknown-elf-gcc -I../../src/include/testmachine -g -DMIPS rectangles.c -O2 -mips4 -mabi=64 -c -o rectangles_mips.o

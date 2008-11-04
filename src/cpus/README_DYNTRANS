@@ -1,0 +1,39 @@
+$Id: README_DYNTRANS,v 1.17 2007-05-12 08:25:43 debug Exp $
+
+This README is old. Hm.
+
+---------------------
+
+Dyntrans TODO:
+
+  x)  Make sure that all of these could work, at least in theory:
+
+			Instruction			Word		Delay
+	Arch.:		length:				size:		slot:
+	------		-------				-----		-----
+	Alpha		32-bit				64		no
+	ARM		32-bit, 16-bit (Thumb)		32		no
+	AVR		16-bit + variable		8		no
+	AVR32		16-bit + variable		32		?
+	F-CPU		?				?		?
+	H8		16-bit				8/16		no
+	HPPA		32-bit				64/32		yes
+	i860		?				?		yes(?)
+	i960		32-bit + variable		32		?
+	IA64		128-bit				64		no
+	M68K		16-bit + variable		32		no
+	M88K		32-bit				32		yes
+	MIPS		32-bit, 16-bit (MIPS16)		64/32		yes
+	OpenRISC	?				?		?
+	PC532		?				32 (?)		?
+	POWER/PPC	32-bit				64/32		no
+	RCA180x		8-bit (+ variable on 1805)	8-16 (?)	no
+	SH		32-bit, 16-bit (SHcompact)	64/32		yes(*)
+	SPARC		32-bit				64/32		yes
+	Transputer	8-bit				32/16		no
+	x86/AMD64	8-bit + variable		64/32/16	no
+	Z80000		16-bit + variable		32		no(?)
+	VAX		8-bit + variable		32		no
+
+	(*) Delay slot in SHcompact/32-bit-mode
+
