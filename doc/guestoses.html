@@ -50,7 +50,7 @@ SUCH DAMAGE.
   <li><a href="#generalnotes">General notes on running "guest OSes"</a>
   <li><a href="#netbsdpmaxinstall">NetBSD/pmax 4.0.1</a>
   <li><a href="#netbsdarcinstall">NetBSD/arc 4.0.1</a>
-  <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 4.0</a>
+  <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 4.0.1</a>
   <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 3.1</a>
   <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 4.0</a>
   <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
@@ -284,16 +284,16 @@ NetBSD/hpcmips on an emulated MobilePro 770:
 	<b>dd if=/dev/zero of=nbsd_hpcmips.img bs=1024 count=1 seek=3000000</b>
 
 </pre>
-  <li>Download the NetBSD/hpcmips 4.0 ISO image, a generic kernel,
+  <li>Download the NetBSD/hpcmips 4.0.1 ISO image, a generic kernel,
 	and the installer kernel:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0</a>/<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/hpcmipscd-4.0.iso">hpcmipscd-4.0.iso</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/hpcmips/binary/kernel/">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/hpcmips/binary/kernel</a>/<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/hpcmips/binary/kernel/netbsd-GENERIC.gz">netbsd-GENERIC.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/hpcmips/installation/netbsd.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/hpcmips/installation/netbsd.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1</a>/<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/hpcmipscd-4.0.1.iso">hpcmipscd-4.0.1.iso</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/hpcmips/binary/kernel/">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/hpcmips/binary/kernel</a>/<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/hpcmips/binary/kernel/netbsd-GENERIC.gz">netbsd-GENERIC.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/hpcmips/installation/netbsd.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/hpcmips/installation/netbsd.gz</a>
 
 </pre>
   <p>
   <li>Start the installation like this:<pre>
-	<b>gxemul -e mobilepro770 -X -d nbsd_hpcmips.img -d b:hpcmipscd-4.0.iso netbsd.gz</b>
+	<b>gxemul -e mobilepro770 -X -d nbsd_hpcmips.img -d b:hpcmipscd-4.0.1.iso netbsd.gz</b>
 
 </pre>
 	and proceed like you would do if you were installing NetBSD on a real
