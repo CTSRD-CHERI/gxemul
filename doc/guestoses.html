@@ -48,8 +48,8 @@ SUCH DAMAGE.
 <p>
 <ul>
   <li><a href="#generalnotes">General notes on running "guest OSes"</a>
-  <li><a href="#netbsdpmaxinstall">NetBSD/pmax 4.0</a>
-  <li><a href="#netbsdarcinstall">NetBSD/arc 4.0</a>
+  <li><a href="#netbsdpmaxinstall">NetBSD/pmax 4.0.1</a>
+  <li><a href="#netbsdarcinstall">NetBSD/arc 4.0.1</a>
   <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 4.0</a>
   <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 3.1</a>
   <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 4.0</a>
@@ -153,11 +153,11 @@ follow these instructions:
 
 </pre>
   <li>Download a NetBSD CD-ROM iso image:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/pmaxcd-4.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/pmaxcd-4.0.iso</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/pmaxcd-4.0.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/pmaxcd-4.0.1.iso</a>
 
 </pre>
   <li>Start the emulator like this:<pre>
-	<b>gxemul -X -e 3max -d nbsd_pmax.img -d b:pmaxcd-4.0.iso</b>
+	<b>gxemul -X -e 3max -d nbsd_pmax.img -d b:pmaxcd-4.0.1.iso</b>
 </pre>
 </ol>
 
@@ -210,19 +210,19 @@ harddisk image, follow these instructions:
 </pre>
   <li>Download a NetBSD/arc 4.0 CDROM image, and the generic + ramdisk
 	NetBSD/arc kernels:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/arccd-4.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/arccd-4.0.iso</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/arc/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/arc/binary/kernel/netbsd-GENERIC.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/arc/binary/kernel/netbsd-RAMDISK.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/arc/binary/kernel/netbsd-RAMDISK.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/arccd-4.0.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/arccd-4.0.1.iso</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/arc/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/arc/binary/kernel/netbsd-GENERIC.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/arc/binary/kernel/netbsd-RAMDISK.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/arc/binary/kernel/netbsd-RAMDISK.gz</a>
 
 </pre>
   <li>Start the emulator using this command line:<pre>
-	<b>gxemul -e pica -x -d nbsd_arc.img -d b:arccd-4.0.iso netbsd-RAMDISK.gz</b>
+	<b>gxemul -e pica -x -d nbsd_arc.img -d b:arccd-4.0.1.iso netbsd-RAMDISK.gz</b>
 
 </pre>
 	(Try removing <tt>-x</tt> if you have problems with the xterm.)
     <p>
   <li>From now on, you have to use your imagination, as there is no
-	automatic installation program for NetBSD/arc 4.0. Here are
+	automatic installation program for NetBSD/arc 4.0.1. Here are
 	some tips and hints on how you can proceed with the install:
 <p><table border="0"><tr><td><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td><pre>
 <b>mount /dev/cd0a /mnt2
