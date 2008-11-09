@@ -52,7 +52,7 @@ SUCH DAMAGE.
   <li><a href="#netbsdarcinstall">NetBSD/arc 4.0.1</a>
   <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 4.0.1</a>
   <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 3.1</a>
-  <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 4.0</a>
+  <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 4.0.1</a>
   <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
   <li><a href="#netbsdsgimips">NetBSD/sgimips 3.1</a>
   <li><a href="#netbsdcatsinstall">NetBSD/cats 4.0</a>
@@ -415,7 +415,7 @@ image, from an emulated DECstation 3MAX machine:
 <p>
 <ol>
   <li>Download a NetBSD/pmax (DECstation) install RAMDISK kernel:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/pmax/binary/kernel/netbsd-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/pmax/binary/kernel/netbsd-INSTALL.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/pmax/binary/kernel/netbsd-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/pmax/binary/kernel/netbsd-INSTALL.gz</a>
 </pre>
   <p>
   <li>Create an empty harddisk image, which will be the disk image
@@ -423,14 +423,14 @@ image, from an emulated DECstation 3MAX machine:
 	<b>dd if=/dev/zero of=nbsd_malta.img bs=1024 count=1 seek=700000</b>
 
 </pre>
-  <li>Download the Malta kernel and the 4.0 ISO image:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/evbmips/binary/kernel/netbsd-MALTA.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/evbmips/binary/kernel/netbsd-MALTA.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/iso/evbmips-mipselcd-4.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/iso/evbmips-mipselcd-4.0.iso</a>
+  <li>Download the Malta kernel and the 4.0.1 ISO image:<pre>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/evbmips/binary/kernel/netbsd-MALTA.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/evbmips/binary/kernel/netbsd-MALTA.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/iso/evbmips-mipselcd-4.0.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/iso/evbmips-mipselcd-4.0.1.iso</a>
 
 </pre>
   <p>
   <li>Start the emulated DECstation machine like this:<pre>
-	<b>gxemul -e 3max -d nbsd_malta.img -d evbmips-mipselcd-4.0.iso netbsd-INSTALL.gz</b>
+	<b>gxemul -e 3max -d nbsd_malta.img -d evbmips-mipselcd-4.0.1.iso netbsd-INSTALL.gz</b>
 
 </pre>
   <li>At the <tt>Terminal type? [vt100]</tt> prompt, type <b>CTRL-B</b>
@@ -455,7 +455,7 @@ cd /; umount /mnt; umount /mnt2; halt</b>
 
 <p>NOTE: To select a 4Kc (MIPS32) CPU instead of the default 5Kc 
 (MIPS64) CPU, add <tt><b>-C 4Kc</b></tt> to the command line. With NetBSD 
-4.0, however, there will be little or no difference in functionality, as
+4.0.1, however, there will be little or no difference in functionality, as
 NetBSD still runs in 32-bit mode on 64-bit MIPS CPUs. There are two things
 that differ:<ol>
   <li>The dynamic translation core runs faster when emulating 32-bit
