@@ -1,15 +1,4 @@
 
-NOTE!
-
-I have begun working on GXemul 0.5.0, which is a total rewrite of GXemul
-from scratch. This is the _OLD_ todo file.
-
-===============================================================================
-
-
-
-$Id: TODO,v 1.560.2.3 2008-06-10 00:18:37 debug Exp $
-
 Some things, in no specific order, that I'd like to fix:
 (Some items in this list are perhaps already fixed.)
 
@@ -109,13 +98,6 @@ SuperH:
 	x)  Floating point exception correctness.
 	x)  Exceptions for unaligned load/stores. OpenBSD/landisk uses
 	    this mechanism for its reboot code (machine_reset).
-
-Landisk SH4:
-	x)  When NetBSD/landisk 4.0 has been released, make sure it works
-	    in the emulator. (Update documentation, etc.)
-	    NetBSD HEAD (as of April 2007) hangs during bootup, because it
-	    turns on/off interrupts in an unfortunately synchronized way
-	    with dyntrans. This needs to be fixed.
 
 Dreamcast:
 	x)  G2 DMA
