@@ -55,11 +55,11 @@ SUCH DAMAGE.
   <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 4.0.1</a>
   <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
   <li><a href="#netbsdsgimips">NetBSD/sgimips 3.1</a>
-  <li><a href="#netbsdcatsinstall">NetBSD/cats 4.0</a>
+  <li><a href="#netbsdcatsinstall">NetBSD/cats 4.0.1</a>
   <li><a href="#netbsdevbarminstall">NetBSD/evbarm 2.1</a>
   <li><a href="#netbsdnetwinderinstall">NetBSD/netwinder 3.1</a>
   <li><a href="#netbsdprepinstall">NetBSD/prep 2.1</a>
-  <li><a href="#netbsdmacppcinstall">NetBSD/macppc 4.0</a>
+  <li><a href="#netbsdmacppcinstall">NetBSD/macppc 4.0.1</a>
   <li><a href="#netbsdpmppc">NetBSD/pmppc 3.1</a>
   <li><a href="#netbsdlandiskinstall">NetBSD/landisk 4.0</a>
   <li><a href="dreamcast.html#netbsd_generic_md">NetBSD/dreamcast 4.0</a>
@@ -771,23 +771,25 @@ To install NetBSD/cats onto a disk image, follow these instructions:
 	<b>dd if=/dev/zero of=nbsd_cats.img bs=1024 count=1 seek=3000000</b>
 
 </pre>
-  <li>Download the NetBSD/cats 4.0 ISO image and the generic and install kernels:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/catscd-4.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/catscd-4.0.iso</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/cats/binary/kernel/netbsd.aout-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/cats/binary/kernel/netbsd.aout-GENERIC.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/cats/binary/kernel/netbsd.aout-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/cats/binary/kernel/netbsd.aout-INSTALL.gz</a>
+  <li>Download the NetBSD/cats 4.0.1 ISO image and the generic and install kernels:<pre>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/catscd-4.0.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/catscd-4.0.1.iso</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/cats/binary/kernel/netbsd.aout-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/cats/binary/kernel/netbsd.aout-GENERIC.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/cats/binary/kernel/netbsd.aout-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/cats/binary/kernel/netbsd.aout-INSTALL.gz</a>
 
 </pre>
   <p>
   <li>Start the installation like this:<pre>
-	<b>gxemul -XEcats -d nbsd_cats.img -d catscd-4.0.iso netbsd.aout-INSTALL.gz</b>
+	<b>gxemul -XEcats -d nbsd_cats.img -d catscd-4.0.1.iso netbsd.aout-INSTALL.gz</b>
 
 </pre>
 	and proceed like you would do if you were installing NetBSD on a real
 	CATS from CDROM.
 </ol>
 
+<p>Note that there are <i>long</i> delays during bootup.
+
 <p>Alternatively, to install from FTP, you can skip downloading the ISO,
-and start the install without <tt>-d catscd-4.0.iso</tt>. Suitable network 
+and start the install without <tt>-d catscd-4.0.1.iso</tt>. Suitable network 
 settings are IP 10.0.0.1, gateway/default route 10.0.0.254, netmask 
 255.0.0.0, nameserver 10.0.0.254.
 
@@ -1090,14 +1092,14 @@ emulated, but it is enough to for NetBSD to recognize it.
     <b>dd if=/dev/zero of=nbsd_macppc.img bs=1024 count=1 seek=3000000</b>
 
 </pre>
-  <li>Download the NetBSD/macppc 4.0 ISO image and a generic kernel:<pre>
-    <a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/macppccd-4.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0/macppccd-4.0.iso</a>
-    <a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/macppc/binary/kernel/">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/macppc/binary/kernel</a>/<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0/macppc/binary/kernel/netbsd-GENERIC.MP.gz">netbsd-GENERIC.MP.gz</a>
+  <li>Download the NetBSD/macppc 4.0.1 ISO image and a generic kernel:<pre>
+    <a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/macppccd-4.0.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/macppccd-4.0.1.iso</a>
+    <a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/macppc/binary/kernel/">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/macppc/binary/kernel</a>/<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/macppc/binary/kernel/netbsd-GENERIC.MP.gz">netbsd-GENERIC.MP.gz</a>
 
 </pre>
   <p>
   <li>Start the installation like this:<pre>
-    <b>gxemul -x -e g4 -d nbsd_macppc.img -d b:macppccd-4.0.iso -j macppc/binary/kernel/netbsd-INSTALL</b>
+    <b>gxemul -x -e g4 -d nbsd_macppc.img -d b:macppccd-4.0.1.iso -j macppc/binary/kernel/netbsd-INSTALL</b>
 
 </pre>
 	and continue as you would do when installing NetBSD on a real
