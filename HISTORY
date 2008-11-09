@@ -3728,3 +3728,4 @@ Changelog for GXemul:
 20081104	NOTE: I'm throwing away the C++ rewrite attempt ("0.5.x"),
 		moving back gxemul-legacy to gxemul/trunk. The old C++
 		rewrite attempt is archived under gxemul/branches/.
+20081109	Updating most NetBSD 4.0 install instructions to 4.0.1.
