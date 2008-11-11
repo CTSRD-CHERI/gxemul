@@ -4,6 +4,20 @@ Some things, in no specific order, that I'd like to fix:
 
 -------------------------------------------------------------------------------
 
+0.4.6.6:
+	README
+	RELEASE NOTES
+	Send SVN dump to Sourceforge
+	Tarball creation
+	Sourceforge file release
+	Home page update
+	Freshmeat
+	Wikipedia page (version number and date)
+	#GXemul (version number in topic)
+	gxemul-users mail
+
+-------------------------------------------------------------------------------
+
 Play around with the SGI O2 PROM image again, from the real O2.
 
 0.3.7: Ok, starts up with graphics (_IF_ the cache detection is skipped)

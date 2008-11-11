@@ -3729,3 +3729,6 @@ Changelog for GXemul:
 		moving back gxemul-legacy to gxemul/trunk. The old C++
 		rewrite attempt is archived under gxemul/branches/.
 20081109	Updating most NetBSD 4.0 install instructions to 4.0.1.
+
+==============  RELEASE 0.4.6.6  ==============
+
