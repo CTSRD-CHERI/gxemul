@@ -29,7 +29,7 @@
  *
  *  COMMENT: VME bus
  *
- *  TODO
+ *  TODO: Probably almost everything.
  */
 
 #include <stdio.h>
@@ -47,7 +47,7 @@
 #include "mvme88k_vme.h"
 
 
-/*  #define debug fatal  */
+#define debug fatal
 
 
 #define	VME_LEN			0x1000
@@ -73,6 +73,18 @@ DEVICE_ACCESS(vme)
 	case 0:	/*  Used by OpenBSD/mvme88k when probing...  */
 		break;
 
+	case VME2_GCSRCTL:
+		debug("[ vme: unimplemented GCSRCTL ]\n");
+		break;
+
+	case VME2_TCR:
+		if (writeflag == MEM_READ)
+			debug("[ vme: unimplemented READ from TCR ]\n");
+		else
+			debug("[ vme: unimplemented WRITE to TCR: "
+			    "0x%x ]\n", (int)idata);
+		break;
+
 	case VME2_T1CMP:
 		if (writeflag == MEM_WRITE)
 			d->reg[relative_addr / sizeof(uint32_t)] = idata;
@@ -90,7 +102,39 @@ DEVICE_ACCESS(vme)
 	case VME2_TCTL:
 		if (writeflag == MEM_WRITE)
 			d->reg[relative_addr / sizeof(uint32_t)] = idata;
+
 		/*  TODO  */
+		/*  debug("[ vme: unimplemented TCTL ]\n");  */
+		break;
+
+	case VME2_IRQEN:
+		if (writeflag == MEM_READ)
+			debug("[ vme: unimplemented READ from IRQEN ]\n");
+		else
+			debug("[ vme: unimplemented WRITE to IRQEN: "
+			    "0x%x ]\n", (int)idata);
+		break;
+
+	case VME2_IRQL3:
+		if (writeflag == MEM_READ)
+			debug("[ vme: unimplemented READ from IRQL3 ]\n");
+		else
+			debug("[ vme: unimplemented WRITE to IRQL3: "
+			    "0x%x ]\n", (int)idata);
+		break;
+
+	case VME2_IRQL4:
+		if (writeflag == MEM_READ)
+			debug("[ vme: unimplemented READ from IRQL4 ]\n");
+		else
+			debug("[ vme: unimplemented WRITE to IRQL4: "
+			    "0x%x ]\n", (int)idata);
+		break;
+
+	case VME2_VBR:
+		/*  Vector Base Register.  */
+		if (writeflag == MEM_WRITE)
+			d->reg[relative_addr / sizeof(uint32_t)] = idata;
 		break;
 
 	default:if (writeflag == MEM_READ)
@@ -99,7 +143,7 @@ DEVICE_ACCESS(vme)
 		else
 			debug("[ vme: unimplemented WRITE to offset 0x%x: "
 			    "0x%x ]\n", (int)relative_addr, (int)idata);
-		/*  exit(1);  */
+		exit(1);
 	}
 
 	if (writeflag == MEM_READ)
@@ -115,6 +159,10 @@ DEVINIT(vme)
 
 	CHECK_ALLOCATION(d = malloc(sizeof(struct vme_data)));
 	memset(d, 0, sizeof(struct vme_data));
+
+	/*  According to OpenBSD/mvme88k:  */
+	d->reg[VME2_VBR / sizeof(uint32_t)] =
+	    VME2_SET_VBR0(6) + VME2_SET_VBR1(7);
 
 	memory_device_register(devinit->machine->memory, devinit->name,
 	    devinit->addr, VME_LEN, dev_vme_access, (void *)d,
