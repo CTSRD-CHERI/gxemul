@@ -1,41 +1,37 @@
+-------------------------------------------------------------------------------
 
 Some things, in no specific order, that I'd like to fix:
 (Some items in this list are perhaps already fixed.)
 
 -------------------------------------------------------------------------------
 
-0.4.6.6:
+Goals for 0.4.7:
+
+  [ ]	M88K: Make it possible to run OpenBSD/mvme88k! This would
+	be really cool.
+
+  [ ]	Go through ALL emulation modes, to find out which ones have
+	good timer code, and which ones have broken timers. Try to fix
+	those that are broken.
+
+Release:
 	README
 	RELEASE NOTES
 	Send SVN dump to Sourceforge
 	Tarball creation
 	Sourceforge file release
-	Home page update
-	Freshmeat
-	Wikipedia page (version number and date)
+	Home page update: version numbers
+	Home page News page update
 	#GXemul (version number in topic)
 	gxemul-users mail
-
--------------------------------------------------------------------------------
-
-Play around with the SGI O2 PROM image again, from the real O2.
-
-0.3.7: Ok, starts up with graphics (_IF_ the cache detection is skipped)
-
-20051112: Ok with graphics
-20051127: Ok
-20051201: Ok			<-- Somewhere between 20051201 and 20051203
-20051203: Not work.		    I apparently lost the graphical boot
-20051211: Does NOT work.
-
-0.3.8: Boots but switches to serial console ("could not open console") (also with
-       cache detection skipped manually)
-0.4.0: The cache detection breakpoint is not triggered :(
+	Freshmeat
+	Wikipedia page (version number and date)
 
 -------------------------------------------------------------------------------
 
 M88K:
-	o)  FIP != NIP + 4, in rte! (Simulate delayed branch stuff.)
+	o)  Correct handling of FIP != NIP + 4, in rte, to
+	    simulate delayed branch stuff.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	o)  xmem: Set transaction registers!
 	o)  CMMUs:
@@ -204,6 +200,21 @@ Malta:
 		1. PCI IDE; make Linux oops.
 		2. Implement the NIC.
 
+SGI O2:
+	Play around with the SGI O2 PROM image again, from the real O2.
+
+	0.3.7: Ok, starts up with graphics (_IF_ the cache detection is skipped)
+
+	20051112: Ok with graphics
+	20051127: Ok
+	20051201: Ok			<-- Somewhere between 20051201 and 20051203
+	20051203: Not work.		    I apparently lost the graphical boot
+	20051211: Does NOT work.
+
+	0.3.8: Boots but switches to serial console ("could not open console") (also with
+	       cache detection skipped manually)
+	0.4.0: The cache detection breakpoint is not triggered :(
+
 HPCmips:
 	x)  Mouse/pad support! :)
 	x)  A NIC? (As a PCMCIA device?)
@@ -219,8 +230,10 @@ ARM:
 	    fix this?
 
 Test machines:
-	o)  dev_fb block fill and copy
-	o)  dev_fb draw characters (from the built-in font)?
+	o)  dev_fb 2D acceleration functions, to make dev_fb useful for
+	    simple graphical OSes:
+		x) block fill and copy
+		x) draw characters (from the built-in font)?
 	o)  dev_fb input device? mouse pointer coordinates and buttons
 		(allow changes in these to cause interrupts as well?)
 	o)  Redefine the halt() function so that it stops "sometimes
@@ -228,6 +241,7 @@ Test machines:
 		for (;;) {
 			halt();
 		}
+	o)  More demos/examples.
 
 Debugger:
 	o)  How does SMP debugging work? Does it simply use "threads"?
