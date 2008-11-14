@@ -505,6 +505,7 @@ X(set)
  *  and_imm:    d = (s1 & imm) | (s1 & 0xffff0000)
  *  and_u_imm:  d = (s1 & imm) | (s1 & 0xffff)
  *  mask_imm:   d = s1 & imm
+ *  add_imm:    d = s1 - imm	(addition with overflow exception)
  *  addu_imm:   d = s1 + imm
  *  subu_imm:   d = s1 - imm
  *  inc_reg:    d ++;		(addu special case; d = d + 1)
@@ -527,6 +528,20 @@ X(and_imm)	{ reg(ic->arg[0]) = (reg(ic->arg[1]) & ic->arg[2])
 X(and_u_imm)	{ reg(ic->arg[0]) = (reg(ic->arg[1]) & ic->arg[2])
 		    | (reg(ic->arg[1]) & 0xffff); }
 X(mask_imm)	{ reg(ic->arg[0]) = reg(ic->arg[1]) & ic->arg[2]; }
+X(add_imm)
+{
+	int32_t a = reg(ic->arg[1]);
+	int32_t b = ic->arg[2];
+	int32_t res = a + b;
+
+	if (a >= 0 && res < 0) {
+		SYNCH_PC;
+		m88k_exception(cpu, M88K_EXCEPTION_INTEGER_OVERFLOW, 0);
+		return;
+	}
+
+	reg(ic->arg[0]) = res;
+}
 X(addu_imm)	{ reg(ic->arg[0]) = reg(ic->arg[1]) + ic->arg[2]; }
 X(subu_imm)	{ reg(ic->arg[0]) = reg(ic->arg[1]) - ic->arg[2]; }
 X(inc_reg)	{ reg(ic->arg[0]) ++; }
@@ -1201,6 +1216,7 @@ X(to_be_translated)
 	case 0x19:	/*  subu   imm  */
 	case 0x1a:	/*  divu   imm  */
 	case 0x1b:	/*  mulu   imm  */
+	case 0x1c:	/*  add    imm  */
 	case 0x1d:	/*  sub    imm  */
 	case 0x1e:	/*  div    imm  */
 	case 0x1f:	/*  cmp    imm  */
@@ -1218,6 +1234,7 @@ X(to_be_translated)
 		case 0x19: ic->f = instr(subu_imm); break;
 		case 0x1a: ic->f = instr(divu_imm); break;
 		case 0x1b: ic->f = instr(mulu_imm); break;
+		case 0x1c: ic->f = instr(add_imm); break;
 		case 0x1d: ic->f = instr(sub_imm); break;
 		case 0x1e: ic->f = instr(div_imm); break;
 		case 0x1f: ic->f = instr(cmp_imm); break;

@@ -3732,3 +3732,5 @@ Changelog for GXemul:
 
 ==============  RELEASE 0.4.6.6  ==============
 
+20081114	Adding the M88K 'add' instruction for immediate values
+		(add_imm in cpu_m88k_instr.c).
