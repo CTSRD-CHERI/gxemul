@@ -805,7 +805,19 @@ X(rte)
 		cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->pc + 4;
 	}
 
-	if ((cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR)
+	/*  If the NIP is not valid, then try the FIP:  */
+	if (!(cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_V)) {
+		/*  Neither the NIP nor the FIP valid?  */
+		if (!(cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_V)) {
+			fatal("[ TODO: Neither FIP nor NIP has the Valid bit set?! ]\n");
+
+			/*  goto abort_dump;  */
+
+			/*  For now, let's continue anyway.  */
+		} else {
+			cpu->pc = cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR;
+		}
+	} else if ((cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR)
 	    != (cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR) + 4) {
 		/*
 		 *  The NIP instruction should first be executed (this
@@ -1671,7 +1683,12 @@ X(to_be_translated)
 		case 0xfc:
 			switch (iword & 0xff) {
 			case 0x00:
-				ic->f = instr(rte);
+				if (iword == 0xf400fc00)
+					ic->f = instr(rte);
+				else {
+					fatal("unimplemented rte variant: 0x%08"PRIx32"\n", iword);
+					goto bad;
+				}
 				break;
 			case (M88K_PROM_INSTR & 0xff):
 				ic->f = instr(prom_call);
