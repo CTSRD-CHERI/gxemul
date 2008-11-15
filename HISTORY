@@ -3737,3 +3737,4 @@ Changelog for GXemul:
 		Continuing on dev_pcc2 (used by mvme187).
 		Working on M88K interrupts. Very unstable so far; OpenBSD/
 		mvme88k bugs out randomly after the first few interrupts.
+20081115	More work on dev_pcc2.
