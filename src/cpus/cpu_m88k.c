@@ -1058,6 +1058,53 @@ int m88k_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 		}
 		break;
 
+	case 0x21:
+		switch (op11) {
+		case 0x00:	/*  fmul  */
+		case 0x05:	/*  fadd  */
+		case 0x06:	/*  fsub  */
+		case 0x07:	/*  fcmp  */
+		case 0x0e:	/*  fdiv  */
+			switch (op11) {
+			case 0x00: mnem = "fmul"; break;
+			case 0x05: mnem = "fadd"; break;
+			case 0x06: mnem = "fsub"; break;
+			case 0x07: mnem = "fcmp"; break;
+			case 0x0e: mnem = "fdiv"; break;
+			}
+			debug("%s.%c%c%c r%i,r%i,r%i\n",
+			    mnem,
+			    ((iw >> 5) & 1)? 'd' : 's',
+			    ((iw >> 9) & 1)? 'd' : 's',
+			    ((iw >> 7) & 1)? 'd' : 's',
+			    d, s1, s2);
+			break;
+		case 0x04:	/*  flt  */
+			switch (op11) {
+			case 0x04: mnem = "flt"; break;
+			}
+			debug("%s.%cs r%i,r%i\n",
+			    mnem,
+			    ((iw >> 5) & 1)? 'd' : 's',
+			    d, s2);
+			break;
+		case 0x09:	/*  int  */
+		case 0x0a:	/*  nint  */
+		case 0x0b:	/*  trnc  */
+			switch (op11) {
+			case 0x09: mnem = "int"; break;
+			case 0x0a: mnem = "nint"; break;
+			case 0x0b: mnem = "trnc"; break;
+			}
+			debug("%s.s%c r%i,r%i\n",
+			    mnem,
+			    ((iw >> 7) & 1)? 'd' : 's',
+			    d, s2);
+			break;
+		default:debug("UNIMPLEMENTED 0x21, op11=0x%02x\n", op11);
+		}
+		break;
+
 	case 0x30:
 	case 0x31:
 	case 0x32:
