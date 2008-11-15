@@ -3738,3 +3738,6 @@ Changelog for GXemul:
 		Working on M88K interrupts. Very unstable so far; OpenBSD/
 		mvme88k bugs out randomly after the first few interrupts.
 20081115	More work on dev_pcc2.
+		Found the "random" failure bug: the M88K interrupt handling
+		code didn't execute the interrupted instruction, but skipped
+		it instead.

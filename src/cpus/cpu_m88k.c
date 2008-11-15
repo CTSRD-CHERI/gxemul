@@ -707,9 +707,9 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 	if (update_shadow_regs) {
 		cpu->cd.m88k.cr[M88K_CR_SSBR] = 0;
 
-		/*  SNIP is the address to return to, when executing rte:  */
 		cpu->cd.m88k.cr[M88K_CR_SXIP] = cpu->pc | M88K_XIP_V;
 
+		/*  SNIP is the address to return to, when executing rte:  */
 		if (cpu->delay_slot) {
 			cpu->cd.m88k.cr[M88K_CR_SXIP] += 4;
 			cpu->cd.m88k.cr[M88K_CR_SNIP] =
@@ -752,6 +752,10 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 			exit(1);
 
 		case M88K_EXCEPTION_INTERRUPT:
+			/*  When returning with rte, we want to re-  */
+			/*  execute the interrupted instruction:  */
+			cpu->cd.m88k.cr[M88K_CR_SNIP] -= 4;
+			cpu->cd.m88k.cr[M88K_CR_SFIP] -= 4;
 			break;
 
 		case M88K_EXCEPTION_INSTRUCTION_ACCESS:
