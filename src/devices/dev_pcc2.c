@@ -56,6 +56,9 @@
 
 #define	INTERRUPT_LEVEL_MASK	0x07
 
+#define	PCC_TIMER_TICK_HZ	100.0
+#define DEV_PCC2_TICK_SHIFT	14
+
 
 #define	debug fatal
 
@@ -65,7 +68,111 @@ struct pcc2_data {
 	uint8_t			pcctwo_reg[PCC2_SIZE];
 
 	uint8_t			cur_int_vec;
+
+	/*  Timers:  */
+	struct timer		*timer;
+	int			pending_timer1_interrupts;
+	int			pending_timer2_interrupts;
 };
+
+
+static uint32_t read32(unsigned char *p)
+{
+	uint32_t x = 0;
+	int i;
+
+	for (i=0; i<sizeof(x); i++) {
+		x <<= 8;
+		x |= p[i];
+	}
+
+	return x;
+}
+
+
+static void write32(unsigned char *p, uint32_t x)
+{
+	int i;
+
+	for (i=0; i<sizeof(x); i++) {
+		p[sizeof(x) - 1 - i] = x;
+		x >>= 8;
+	}
+}
+
+
+static void pcc_timer_tick(struct timer *t, void *extra)
+{
+	struct pcc2_data *d = (struct pcc2_data *) extra;
+
+	/*  The PCC2 timers run at 1 MHz.  */
+	int steps = (int) (1000000.0 / PCC_TIMER_TICK_HZ);
+
+	uint32_t count1, count2, compare1, compare2;
+	int interrupt1 = 0, interrupt2 = 0;
+
+	/*  Read values:  */
+	count1 = read32(&d->pcctwo_reg[PCCTWO_T1COUNT]);
+	count2 = read32(&d->pcctwo_reg[PCCTWO_T2COUNT]);
+	compare1 = read32(&d->pcctwo_reg[PCCTWO_T1CMP]);
+	compare2 = read32(&d->pcctwo_reg[PCCTWO_T2CMP]);
+
+	/*  Timer enabled? Then count...  */
+	if (d->pcctwo_reg[PCCTWO_T1CTL] & PCC2_TCTL_CEN) {
+		uint32_t old_count1 = count1;
+		count1 += steps;
+
+		/*  Did we pass the compare value?  */
+		if ((old_count1 < compare1 && count1 >= compare1) ||
+		    (old_count1 < compare1 && count1 < old_count1)) {
+			interrupt1 = 1;
+
+			if (d->pcctwo_reg[PCCTWO_T1CTL] & PCC2_TCTL_COC) {
+				/*  Clear it. Well, not really. We need
+				    to include the additional delta.  */
+				count1 -= compare1;
+			}
+		}
+
+		/*  Overflow?  */
+		if (count1 < old_count1) {
+			int oc = 1 + (d->pcctwo_reg[PCCTWO_T1CTL] >> 4);
+			d->pcctwo_reg[PCCTWO_T1CTL] &= ~PCC2_TCTL_OVF;
+			d->pcctwo_reg[PCCTWO_T1CTL] |= (oc << 4);
+		}
+	}
+
+	/*  ... and the same for timer 2:  */
+	if (d->pcctwo_reg[PCCTWO_T2CTL] & PCC2_TCTL_CEN) {
+		uint32_t old_count2 = count2;
+		count2 += steps;
+
+		if ((old_count2 < compare2 && count2 >= compare2) ||
+		    (old_count2 < compare2 && count2 < old_count2)) {
+			interrupt2 = 1;
+			if (d->pcctwo_reg[PCCTWO_T2CTL] & PCC2_TCTL_COC)
+				count2 -= compare2;
+		}
+
+		if (count2 < old_count2) {
+			int oc = 1 + (d->pcctwo_reg[PCCTWO_T2CTL] >> 4);
+			d->pcctwo_reg[PCCTWO_T2CTL] &= ~PCC2_TCTL_OVF;
+			d->pcctwo_reg[PCCTWO_T2CTL] |= (oc << 4);
+		}
+	}
+
+	/*  Should we cause interrupts?  */
+	if (interrupt1 && d->pcctwo_reg[PCCTWO_T1ICR] & PCC2_TTIRQ_IEN)
+		d->pending_timer1_interrupts ++;
+	if (interrupt2 && d->pcctwo_reg[PCCTWO_T2ICR] & PCC2_TTIRQ_IEN)
+		d->pending_timer2_interrupts ++;
+
+	/*  Write back values:  */
+	write32(&d->pcctwo_reg[PCCTWO_T1COUNT], count1);
+	write32(&d->pcctwo_reg[PCCTWO_T2COUNT], count2);
+	write32(&d->pcctwo_reg[PCCTWO_T1CMP], compare1);
+	write32(&d->pcctwo_reg[PCCTWO_T2CMP], compare2);
+}
 
 
 static void reassert_interrupts(struct pcc2_data *d)
@@ -80,6 +187,33 @@ static void reassert_interrupts(struct pcc2_data *d)
 		exit(1);
 	}
 
+	/*
+	 *  Recalculate current interrupt level:
+	 */
+	d->pcctwo_reg[PCCTWO_IPL] = 0;
+	d->cur_int_vec = 0;
+
+	/*  Timer interrupts?  */
+	if (d->pending_timer1_interrupts > 0 &&
+	    d->pcctwo_reg[PCCTWO_T1ICR] & PCC2_TTIRQ_IEN) {
+		int intlevel = d->pcctwo_reg[PCCTWO_T1ICR] & PCC2_TTIRQ_IL;
+		d->pcctwo_reg[PCCTWO_T1ICR] |= PCC2_TTIRQ_INT;
+		if (d->pcctwo_reg[PCCTWO_IPL] < intlevel)
+			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
+			d->cur_int_vec = PCC2V_TIMER1;
+	}
+	if (d->pending_timer2_interrupts > 0 &&
+	    d->pcctwo_reg[PCCTWO_T2ICR] & PCC2_TTIRQ_IEN) {
+		int intlevel = d->pcctwo_reg[PCCTWO_T2ICR] & PCC2_TTIRQ_IL;
+		d->pcctwo_reg[PCCTWO_T2ICR] |= PCC2_TTIRQ_INT;
+		if (d->pcctwo_reg[PCCTWO_IPL] < intlevel)
+			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
+			d->cur_int_vec = PCC2V_TIMER2;
+	}
+
+	/*  TODO: Other interrupt sources.  */
+
+
 	/*  Block interrupts at the mask level or lower:  */
 	if ((d->pcctwo_reg[PCCTWO_IPL] & INTERRUPT_LEVEL_MASK) >
 	    (d->pcctwo_reg[PCCTWO_MASK] & INTERRUPT_LEVEL_MASK))
@@ -93,6 +227,13 @@ static void reassert_interrupts(struct pcc2_data *d)
 		INTERRUPT_ASSERT(d->cpu_irq);
 	else
 		INTERRUPT_DEASSERT(d->cpu_irq);
+}
+
+
+DEVICE_TICK(pcc2)
+{
+	struct pcc2_data *d = extra;
+	reassert_interrupts(d);
 }
 
 
@@ -167,7 +308,8 @@ DEVICE_ACCESS(pcc2)
 			d->pcctwo_reg[relative_addr] |= (idata & 3);
 
 			if (idata & PCC2_TCTL_COVF)
-				d->pcctwo_reg[relative_addr] &= ~PCC2_TCTL_COVF;
+				d->pcctwo_reg[relative_addr] &=
+				    ~(PCC2_TCTL_OVF | PCC2_TCTL_COVF);
 
 			if (idata & ~7)
 				fatal("[ pcc2: HUH? write to PCCTWO_TxCTL"
@@ -185,6 +327,13 @@ DEVICE_ACCESS(pcc2)
 		if (writeflag == MEM_WRITE) {
 			d->pcctwo_reg[relative_addr] &= ~0x17;
 			d->pcctwo_reg[relative_addr] |= (idata & 0x17);
+
+			if (relative_addr == PCCTWO_T1ICR &&
+			    !(idata & PCC2_TTIRQ_IEN))
+				d->pending_timer1_interrupts = 0;
+			if (relative_addr == PCCTWO_T2ICR &&
+			    !(idata & PCC2_TTIRQ_IEN))
+				d->pending_timer2_interrupts = 0;
 
 			if (idata & PCC2_TTIRQ_ICLR)
 				d->pcctwo_reg[relative_addr] &= ~PCC2_TTIRQ_INT;
@@ -313,7 +462,17 @@ DEVICE_ACCESS(mvme187_iack)
 	if (writeflag == MEM_WRITE) {
 		fatal("[ pcc2: write to mvme187_iack? ]\n");
 	} else {
-		odata = d->cur_int_vec;
+		int vec = d->cur_int_vec;
+
+		INTERRUPT_DEASSERT(d->cpu_irq);
+
+		odata = vec + d->pcctwo_reg[PCCTWO_VECBASE];
+
+		if (vec == PCC2V_TIMER1 && d->pending_timer1_interrupts > 0)
+			d->pending_timer1_interrupts --;
+		if (vec == PCC2V_TIMER2 && d->pending_timer2_interrupts > 0)
+			d->pending_timer2_interrupts --;
+
 		memory_writemax64(cpu, data, len, odata);
 	}
 
@@ -349,6 +508,11 @@ DEVINIT(pcc2)
 	memory_device_register(devinit->machine->memory, "mvme187_iack",
 	    M187_IACK, 32, dev_mvme187_iack_access, (void *)d,
 	    DM_DEFAULT, NULL);
+
+	d->timer = timer_add(PCC_TIMER_TICK_HZ, pcc_timer_tick, d);
+
+	machine_add_tickfunction(devinit->machine,
+	    dev_pcc2_tick, d, DEV_PCC2_TICK_SHIFT);
 
 	return 1;
 }
