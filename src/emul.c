@@ -856,6 +856,16 @@ void emul_run(struct emul *emul)
 
 	atexit(fix_console);
 
+	if (emul == NULL) {
+		printf("No emulation defined. Aborting.\n");
+		return;
+	}
+
+	if (emul->n_machines == 0) {
+		printf("No machine(s) defined. Aborting.\n");
+		return;
+	}
+
 	/*  Initialize the interactive debugger:  */
 	debugger_init(emul);
 

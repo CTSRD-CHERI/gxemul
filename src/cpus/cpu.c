@@ -476,6 +476,12 @@ do_return:
 void cpu_run_init(struct machine *machine)
 {
 	int i;
+
+	if (machine->ncpus == 0) {
+		printf("Machine with no CPUs? TODO.\n");
+		exit(1);
+	}
+
 	for (i=0; i<machine->ncpus; i++) {
 		struct cpu *cpu = machine->cpus[i];
 
