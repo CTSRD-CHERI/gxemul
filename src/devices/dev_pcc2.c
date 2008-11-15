@@ -223,8 +223,7 @@ static void reassert_interrupts(struct pcc2_data *d)
 
 	/*  TODO: Other interrupt sources.  */
 
-
-	/*  Block interrupts at the mask level or lower:  */
+	/*  Assert interrupt on the CPU if the IPL is higher than the mask:  */
 	if ((d->pcctwo_reg[PCCTWO_IPL] & INTERRUPT_LEVEL_MASK) >
 	    (d->pcctwo_reg[PCCTWO_MASK] & INTERRUPT_LEVEL_MASK))
 		assert = 1;
@@ -489,6 +488,7 @@ DEVICE_ACCESS(mvme187_iack)
 	} else {
 		odata = d->pcctwo_reg[PCCTWO_VECBASE] + d->cur_int_vec[
 		    (relative_addr >> 2) & INTERRUPT_LEVEL_MASK];
+
 		memory_writemax64(cpu, data, len, odata);
 	}
 
