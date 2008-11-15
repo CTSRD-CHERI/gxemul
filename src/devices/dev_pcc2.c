@@ -67,7 +67,7 @@ struct pcc2_data {
 
 	uint8_t			pcctwo_reg[PCC2_SIZE];
 
-	uint8_t			cur_int_vec;
+	uint8_t			cur_int_vec[8];
 
 	/*  Timers:  */
 	struct timer		*timer;
@@ -191,7 +191,6 @@ static void reassert_interrupts(struct pcc2_data *d)
 	 *  Recalculate current interrupt level:
 	 */
 	d->pcctwo_reg[PCCTWO_IPL] = 0;
-	d->cur_int_vec = 0;
 
 	/*  Timer interrupts?  */
 	if (d->pending_timer1_interrupts > 0 &&
@@ -200,7 +199,7 @@ static void reassert_interrupts(struct pcc2_data *d)
 		d->pcctwo_reg[PCCTWO_T1ICR] |= PCC2_TTIRQ_INT;
 		if (d->pcctwo_reg[PCCTWO_IPL] < intlevel)
 			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
-			d->cur_int_vec = PCC2V_TIMER1;
+			d->cur_int_vec[intlevel] = PCC2V_TIMER1;
 	}
 	if (d->pending_timer2_interrupts > 0 &&
 	    d->pcctwo_reg[PCCTWO_T2ICR] & PCC2_TTIRQ_IEN) {
@@ -208,7 +207,7 @@ static void reassert_interrupts(struct pcc2_data *d)
 		d->pcctwo_reg[PCCTWO_T2ICR] |= PCC2_TTIRQ_INT;
 		if (d->pcctwo_reg[PCCTWO_IPL] < intlevel)
 			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
-			d->cur_int_vec = PCC2V_TIMER2;
+			d->cur_int_vec[intlevel] = PCC2V_TIMER2;
 	}
 
 	/*  TODO: Other interrupt sources.  */
@@ -462,11 +461,12 @@ DEVICE_ACCESS(mvme187_iack)
 	if (writeflag == MEM_WRITE) {
 		fatal("[ pcc2: write to mvme187_iack? ]\n");
 	} else {
-		int vec = d->cur_int_vec;
-
-		INTERRUPT_DEASSERT(d->cpu_irq);
+		int vec = d->cur_int_vec[
+		    (relative_addr >> 2) & INTERRUPT_LEVEL_MASK];
 
 		odata = vec + d->pcctwo_reg[PCCTWO_VECBASE];
+
+		INTERRUPT_DEASSERT(d->cpu_irq);
 
 		if (vec == PCC2V_TIMER1 && d->pending_timer1_interrupts > 0)
 			d->pending_timer1_interrupts --;
