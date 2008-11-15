@@ -438,7 +438,8 @@ static void m88k_extu(struct cpu *cpu, struct m88k_instr_call *ic, int w, int o)
 }
 static void m88k_ext(struct cpu *cpu, struct m88k_instr_call *ic, int w, int o)
 {
-	int32_t x = reg(ic->arg[1]) >> o;
+	int32_t x = reg(ic->arg[1]);
+	x >>= o;	/*  signed (arithmetic) shift
 	if (w != 0) {
 		x <<= (32-w);
 		x >>= (32-w);

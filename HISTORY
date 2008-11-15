@@ -3741,3 +3741,5 @@ Changelog for GXemul:
 		Found the "random" failure bug: the M88K interrupt handling
 		code didn't execute the interrupted instruction, but skipped
 		it instead.
+		Fixing a bug in the implementation of the m88k 'ext'
+		instruction (it worked like extu!).
