@@ -30,6 +30,8 @@ Release:
 -------------------------------------------------------------------------------
 
 M88K:
+	o)  Interrupts don't really work yet. Random bugs when trying to
+	    boot OpenBSD/mvme88k.
 	o)  Correct handling of FIP != NIP + 4, in rte, to
 	    simulate delayed branch stuff.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!

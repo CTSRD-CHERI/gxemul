@@ -170,8 +170,6 @@ static void pcc_timer_tick(struct timer *t, void *extra)
 	/*  Write back values:  */
 	write32(&d->pcctwo_reg[PCCTWO_T1COUNT], count1);
 	write32(&d->pcctwo_reg[PCCTWO_T2COUNT], count2);
-	write32(&d->pcctwo_reg[PCCTWO_T1CMP], compare1);
-	write32(&d->pcctwo_reg[PCCTWO_T2CMP], compare2);
 }
 
 
@@ -424,6 +422,11 @@ DEVICE_ACCESS(pcc2)
 		if (writeflag == MEM_WRITE) {
 			fatal("[ pcc2: HUH? Write attempt to PCCTWO_IPL. ]\n");
 			exit(1);
+		} else {
+			if (d->pcctwo_reg[PCCTWO_IPL] == 0) {
+				fatal("pcc2: IPL == 0 on read!\n");
+				exit(1);
+			}
 		}
 		break;
 

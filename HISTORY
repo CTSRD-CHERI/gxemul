@@ -3735,3 +3735,5 @@ Changelog for GXemul:
 20081114	Adding the M88K 'add' instruction for immediate values
 		(add_imm in cpu_m88k_instr.c).
 		Continuing on dev_pcc2 (used by mvme187).
+		Working on M88K interrupts. Very unstable so far; OpenBSD/
+		mvme88k bugs out randomly after the first few interrupts.

@@ -697,7 +697,6 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 		cpu->cd.m88k.cr[M88K_CR_EPSR] = cpu->cd.m88k.cr[M88K_CR_PSR];
 	}
 
-
 	m88k_stcr(cpu, cpu->cd.m88k.cr[M88K_CR_PSR]
 	    | M88K_PSR_SFRZ	/*  Freeze shadow registers,          */
 	    | M88K_PSR_IND	/*  disable interrupts,               */
