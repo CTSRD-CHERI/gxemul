@@ -733,6 +733,17 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 	else
 		cpu->delay_slot = NOT_DELAYED;
 
+	/*  Default to no memory transactions:  */
+	cpu->cd.m88k.cr[M88K_CR_DMT0] = 0;
+	cpu->cd.m88k.cr[M88K_CR_DMD0] = 0;
+	cpu->cd.m88k.cr[M88K_CR_DMA0] = 0;
+	cpu->cd.m88k.cr[M88K_CR_DMT1] = 0;
+	cpu->cd.m88k.cr[M88K_CR_DMD1] = 0;
+	cpu->cd.m88k.cr[M88K_CR_DMA1] = 0;
+	cpu->cd.m88k.cr[M88K_CR_DMT2] = 0;
+	cpu->cd.m88k.cr[M88K_CR_DMD2] = 0;
+	cpu->cd.m88k.cr[M88K_CR_DMA2] = 0;
+
 	/*  Vector-specific handling:  */
 	if (vector < M88K_EXCEPTION_USER_TRAPS_START) {
 		switch (vector) {
@@ -740,6 +751,9 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 		case M88K_EXCEPTION_RESET:
 			fatal("[ m88k_exception: reset ]\n");
 			exit(1);
+
+		case M88K_EXCEPTION_INTERRUPT:
+			break;
 
 		case M88K_EXCEPTION_INSTRUCTION_ACCESS:
 			break;
