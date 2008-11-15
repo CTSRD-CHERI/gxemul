@@ -872,14 +872,14 @@ if (x&1)
 		if (writeflag==MEM_READ) {
 			debug("[ pckbc: read from unimplemented reg %i ]\n",
 			    (int)relative_addr);
-			odata = d->reg[relative_addr];
+			odata = d->reg[relative_addr % DEV_PCKBC_LENGTH];
 		} else {
 			debug("[ pckbc: write to unimplemented reg %i:",
 			    (int)relative_addr);
 			for (i=0; i<len; i++)
 				debug(" %02x", data[i]);
 			debug(" ]\n");
-			d->reg[relative_addr] = idata;
+			d->reg[relative_addr % DEV_PCKBC_LENGTH] = idata;
 		}
 	}
 

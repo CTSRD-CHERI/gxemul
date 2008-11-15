@@ -724,7 +724,7 @@ int mips_cpu_disassemble_instr(struct cpu *cpu, unsigned char *originstr,
 	else
 		debug("%016"PRIx64, (uint64_t)dumpaddr);
 
-	*((uint32_t *)&instr[0]) = *((uint32_t *)&originstr[0]);
+	memcpy(instr, originstr, sizeof(uint32_t));
 
 	/*
 	 *  The rest of the code is written for little endian,

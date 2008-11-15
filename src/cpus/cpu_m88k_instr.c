@@ -887,7 +887,11 @@ X(xmem_slow)
 			x = LE32_TO_HOST(x);
 		else
 			x = BE32_TO_HOST(x);
-		*((uint32_t *)&tmp[0]) = x;
+
+		{
+			uint32_t *p = (uint32_t *) tmp;
+			*p = x;
+		}
 
 		if (addr & 3) {
 			m88k_exception(cpu,
@@ -918,7 +922,10 @@ X(xmem_slow)
 	}
 
 	if (size) {
-		uint32_t x = *((uint32_t *)&data[0]);
+		uint32_t x;
+		uint32_t *p = (uint32_t *) data;
+		x = *p;
+
 		if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
 			x = LE32_TO_HOST(x);
 		else
@@ -1125,7 +1132,11 @@ X(to_be_translated)
 		}
 	}
 
-	iword = *((uint32_t *)&ib[0]);
+	{
+		uint32_t *p = (uint32_t *) ib;
+		iword = *p;
+	}
+
 	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
 		iword = LE32_TO_HOST(iword);
 	else

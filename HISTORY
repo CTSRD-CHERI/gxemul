@@ -3744,3 +3744,4 @@ Changelog for GXemul:
 		Fixing a bug in the implementation of the m88k 'ext'
 		instruction (it worked like extu!).
 		Adding disassembly of all 88100 floating point instructions.
+		Minor updates to make the code build with GCC "4.4.0 20081017".

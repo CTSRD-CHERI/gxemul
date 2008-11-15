@@ -1217,8 +1217,11 @@ X(to_be_translated)
 
 	/*  SPARC instruction words are always big-endian. Convert
 	    to host order:  */
-	iword = BE32_TO_HOST( *((uint32_t *)&ib[0]) );
-
+	{
+		uint32_t *p = (uint32_t *) ib;
+		iword = *p;
+		iword = BE32_TO_HOST(iword);
+	}
 
 #define DYNTRANS_TO_BE_TRANSLATED_HEAD
 #include "cpu_dyntrans.c"

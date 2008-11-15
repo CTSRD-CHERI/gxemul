@@ -391,6 +391,8 @@ exception:
 	switch (pfsr_status) {
 
 	case CMMU_PFSR_SUCCESS:
+		fatal("HUH? CMMU_PFSR_SUCCESS:, but exception? TODO\n");
+		exit(1);
 		break;
 
 	case CMMU_PFSR_WRITE:

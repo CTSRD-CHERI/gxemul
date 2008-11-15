@@ -3495,7 +3495,10 @@ X(to_be_translated)
 		}
 	}
 
-	iword = *((uint32_t *)&ib[0]);
+	{
+		uint32_t *p = (uint32_t *) ib;
+		iword = *p;
+	}
 
 	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
 		iword = LE32_TO_HOST(iword);

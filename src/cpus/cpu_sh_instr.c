@@ -2921,11 +2921,16 @@ X(to_be_translated)
 		}
 	}
 
-	iword = *((uint16_t *)&ib[0]);
+	{
+		uint16_t *p = (uint16_t *) ib;
+		iword = *p;
+	}
+
 	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
 		iword = LE16_TO_HOST(iword);
 	else
 		iword = BE16_TO_HOST(iword);
+
 	main_opcode = iword >> 12;
 	r8 = (iword >> 8) & 0xf;
 	r4 = (iword >> 4) & 0xf;
