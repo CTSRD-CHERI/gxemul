@@ -754,12 +754,47 @@ X(fstcr)
 
 
 /*
+ *  fadd.xxx:  Floating point addition
+ *
+ *  arg[0] = pointer to destination register
+ *  arg[1] = pointer to source register s1
+ *  arg[2] = pointer to source register s2
+ *
+ *  Note: For 'd' variants, arg[x] points to a _pair_ of registers!
+ */
+X(fadd_dds)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint32_t s2 = reg(ic->arg[2]);
+	uint64_t s1 = reg(ic->arg[1]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+
+	d = ieee_store_float_value(f1.f + f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+
+
+/*
  *  flt.ss and flt.ds:  Convert integer to floating point.
  *
  *  arg[0] = pointer to destination register (32-bit integer)
  *  arg[1] = pointer to source register s2 (32-bit integer)
  *
- *  Note: For flt.ds, arg[0] points to a _pair_ of register!
+ *  Note: For flt.ds, arg[0] points to a _pair_ of registers!
  */
 X(flt_ss)
 {
@@ -1387,6 +1422,22 @@ X(to_be_translated)
 				}
 			} else {
 				ic->f = instr(flt_ss);
+			}
+			break;
+
+		case 0x05:	/*  fadd  */
+			if (d == 0) {
+				/*  d = 0 isn't allowed. for now, let's abort execution.  */
+				fatal("TODO: exception for d = 0 in fadd.xxx instruction\n");
+				goto bad;
+			}
+			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
+			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
+			switch ((iword >> 5) & 0x3f) {
+			case 0x11:	ic->f = instr(fadd_dds); break;
+			default:fatal("Unimplemented fadd combination.\n");
+				goto bad;
 			}
 			break;
 
