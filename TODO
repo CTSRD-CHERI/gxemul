@@ -51,7 +51,8 @@ M88K:
 	o)  Instruction disassembly, and implementation:
 		o)  See http://www.panggih.staff.ugm.ac.id/download/GCC/info/gcc.i5
 		    for some strange cases of when "div" can fail (?)
-		o)  Floating point stuff
+		o)  Floating point stuff:
+			Exceptions for overflow etc!
 		o)  "Graphics" instructions (M88110-specific)
 
 MIPS:

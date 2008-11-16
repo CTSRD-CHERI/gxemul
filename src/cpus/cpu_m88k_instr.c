@@ -791,8 +791,8 @@ X(fadd_dds)
 /*
  *  flt.ss and flt.ds:  Convert integer to floating point.
  *
- *  arg[0] = pointer to destination register (32-bit integer)
- *  arg[1] = pointer to source register s2 (32-bit integer)
+ *  arg[0] = pointer to destination register
+ *  arg[1] = pointer to source register s2
  *
  *  Note: For flt.ds, arg[0] points to a _pair_ of registers!
  */
@@ -825,6 +825,46 @@ X(flt_ds)
 
 	reg(ic->arg[0]) = result >> 32;	/*  High 32-bit word,  */
 	reg(ic->arg[0] + 4) = result;	/*  and low word.  */
+}
+
+
+/*
+ *  trnc.ss and trnc.sd:  Truncate floating point to interger.
+ *
+ *  arg[0] = pointer to destination register
+ *  arg[1] = pointer to source register s2
+ *
+ *  Note: For trnc.sd, arg[1] points to a _pair_ of registers!
+ */
+X(trnc_ss)
+{
+	struct ieee_float_value f1;
+	ieee_interpret_float_value(reg(ic->arg[1]), &f1, IEEE_FMT_S);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	reg(ic->arg[0]) = (int32_t) f1.f;
+}
+X(trnc_sd)
+{
+	struct ieee_float_value f1;
+	uint64_t x = reg(ic->arg[1]);
+	x = (x << 32) + reg(ic->arg[1] + 4);
+	ieee_interpret_float_value(x, &f1, IEEE_FMT_D);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	reg(ic->arg[0]) = (int32_t) f1.f;
 }
 
 
@@ -1438,6 +1478,25 @@ X(to_be_translated)
 			case 0x11:	ic->f = instr(fadd_dds); break;
 			default:fatal("Unimplemented fadd combination.\n");
 				goto bad;
+			}
+			break;
+
+		case 0x0b:	/*  trnc  */
+			if (d == 0) {
+				/*  d = 0 isn't allowed. for now, let's abort execution.  */
+				fatal("TODO: exception for d = 0 in trnc.xx instruction\n");
+				goto bad;
+			}
+			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s2];
+			if ((iword >> 7) & 1) {
+				ic->f = instr(trnc_sd);
+				if (s2 & 1) {
+					fatal("TODO: double precision truncation into uneven register r%i?\n", d);
+					goto bad;
+				}
+			} else {
+				ic->f = instr(trnc_ss);
 			}
 			break;
 
