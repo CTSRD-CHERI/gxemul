@@ -3745,3 +3745,4 @@ Changelog for GXemul:
 		instruction (it worked like extu!).
 		Adding disassembly of all 88100 floating point instructions.
 		Minor updates to make the code build with GCC "4.4.0 20081017".
+20081116	Implementing the m88k flt.ss and flt.ds instructions.

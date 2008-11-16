@@ -36,6 +36,7 @@
 #include <ctype.h>
 
 #include "cpu.h"
+#include "float_emul.h"
 #include "interrupt.h"
 #include "machine.h"
 #include "memory.h"

@@ -142,7 +142,12 @@ struct m88k_cpu_type_def {
 #define M88K_CR_DLAR    50
 #define M88K_CR_DPAR    51
 
+
 #define	N_M88K_FPU_CONTROL_REGS		64
+
+#define M88K_FPCR_FPECR		0
+#define	M88K_FPECR_FUNIMP		(1 << 6)
+/*  ... TODO: more  */
 
 
 #define	M88K_N_IC_ARGS			3
@@ -233,7 +238,7 @@ struct m88k_cpu {
 	/*  Control Registers:  */
 	uint32_t		cr[N_M88K_CONTROL_REGS];
 
-	/*  Floating Point registers:  */
+	/*  Floating Point Control registers:  */
 	uint32_t		fcr[N_M88K_FPU_CONTROL_REGS];
 
 	/*  Current interrupt assertion:  */

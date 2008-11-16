@@ -754,6 +754,46 @@ X(fstcr)
 
 
 /*
+ *  flt.ss and flt.ds:  Convert integer to floating point.
+ *
+ *  arg[0] = pointer to destination register (32-bit integer)
+ *  arg[1] = pointer to source register s2 (32-bit integer)
+ *
+ *  Note: For flt.ds, arg[0] points to a _pair_ of register!
+ */
+X(flt_ss)
+{
+	int32_t x = reg(ic->arg[1]);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	reg(ic->arg[0]) = ieee_store_float_value((double)x, IEEE_FMT_S, 0);
+}
+X(flt_ds)
+{
+	int32_t x = reg(ic->arg[1]);
+	uint64_t result;
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	result = ieee_store_float_value((double)x, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = result >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = result;	/*  and low word.  */
+}
+
+
+/*
  *  xcr:   Exchange (load + store) control register.
  *
  *  arg[0] = pointer to register d
@@ -1094,7 +1134,7 @@ X(to_be_translated)
 	uint32_t addr, low_pc, iword;
 	unsigned char *page;
 	unsigned char ib[4];
-	uint32_t op26, op10, d, s1, s2, cr6, imm16;
+	uint32_t op26, op10, op11, d, s1, s2, cr6, imm16;
 	int32_t d16, d26, simm16;
 	int offset, shift;
 	int in_crosspage_delayslot = 0;
@@ -1162,6 +1202,7 @@ X(to_be_translated)
 	}
 
 	op26   = (iword >> 26) & 0x3f;
+	op11   = (iword >> 11) & 0x1f;
 	op10   = (iword >> 10) & 0x3f;
 	d      = (iword >> 21) & 0x1f;
 	s1     = (iword >> 16) & 0x1f;
@@ -1325,6 +1366,32 @@ X(to_be_translated)
 				goto bad;
 		} else
 			goto bad;
+		break;
+
+	case 0x21:
+		switch (op11) {
+
+		case 0x04:	/*  flt  */
+			if (d == 0) {
+				/*  d = 0 isn't allowed. for now, let's abort execution.  */
+				fatal("TODO: exception for d = 0 in flt.xx instruction\n");
+				goto bad;
+			}
+			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s2];
+			if ((iword >> 5) & 1) {
+				ic->f = instr(flt_ds);
+				if (d & 1) {
+					fatal("TODO: double precision load into uneven register r%i?\n", d);
+					goto bad;
+				}
+			} else {
+				ic->f = instr(flt_ss);
+			}
+			break;
+
+		default:goto bad;
+		}
 		break;
 
 	case 0x30:	/*  br     */
