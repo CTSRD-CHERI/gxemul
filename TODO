@@ -41,19 +41,21 @@ M88K:
 		o)  Move initialization from dev_mvme187 to somewhere
 		    more reasonable?
 	o)  Instruction trace by using bits of ??IP control regs.
-	o)  Interrupts (these are machine dependent, though).
+	o)  Breakpoints seem to be broken? How to indicate user space vs
+	    supervisor? (Also the "dump" instruction needs this support.)
 	o)  Implement devices etc. for one or more machine modes,
 	    to get some guest OS running. OpenBSD/mvme88k on MVME187
 	    seems to be the smartest path to follow for now.
 		o)  VME bus device
 		o)  PCC2
 		o)  Cirrus Logic serial port controller
+		o)  SMP for mvme197? 88110.
 	o)  Instruction disassembly, and implementation:
 		o)  See http://www.panggih.staff.ugm.ac.id/download/GCC/info/gcc.i5
 		    for some strange cases of when "div" can fail (?)
 		o)  Floating point stuff:
 			Exceptions for overflow etc!
-		o)  "Graphics" instructions (M88110-specific)
+		o)  88110-specific instructions, e.g. "graphics" instructions
 
 MIPS:
 	o)  Nicer MIPS status bits in register dumps.
