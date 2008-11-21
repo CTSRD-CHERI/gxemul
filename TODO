@@ -10,6 +10,8 @@ Goals for 0.4.7:
   [ ]	M88K: Make it possible to run OpenBSD/mvme88k! This would
 	be really cool.
 
+  [X]   Update the HelenOS version to 0.3.0 (if it works) in the documentation.
+
   [ ]	Go through ALL emulation modes, to find out which ones have
 	good timer code, and which ones have broken timers. Try to fix
 	those that are broken.
@@ -35,6 +37,9 @@ M88K:
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.
+	    Also, the entire translation cache is thrown away on user/supervisor
+	    mode switches, which (I guess) makes e.g. syscalls quite
+	    expensive.
 	o)  xmem: Set transaction registers!
 	o)  CMMUs:
 		o)  Translation invalidations, could be optimized.

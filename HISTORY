@@ -3745,3 +3745,4 @@ Changelog for GXemul:
 		Minor updates to make the code build with GCC "4.4.0 20081017".
 20081116	Implementing the m88k flt.ss, flt.ds, trnc.ss, trnc.sd, and
 		fadd.dds floating point instructions.
+20081121	Updating the HelenOS version in the documentation to 0.3.0.
