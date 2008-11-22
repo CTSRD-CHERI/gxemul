@@ -254,7 +254,7 @@ void cpu_functioncall_trace(struct cpu *cpu, uint64_t f)
 	fatal("(");
 
 	if (cpu->machine->cpu_family->functioncall_trace != NULL)
-		cpu->machine->cpu_family->functioncall_trace(cpu, f, n_args);
+		cpu->machine->cpu_family->functioncall_trace(cpu, n_args);
 
 	fatal(")>\n");
 

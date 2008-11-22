@@ -54,6 +54,7 @@
 
 
 void m88k_pc_to_pointers(struct cpu *);
+void m88k_cpu_functioncall_trace(struct cpu *cpu, int n_args);
 
 static char *memop[4] = { ".d", "", ".h", ".b" };
 
@@ -671,6 +672,11 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 	case M88K_EXCEPTION_SFU1_IMPRECISE:
 		debug("SFU1_IMPRECISE"); break;
 	case 0x80:
+#if 0
+		fatal("[ syscall %i(", cpu->cd.m88k.r[13]);
+		m88k_cpu_functioncall_trace(cpu, 8);
+		fatal(") ]\n");
+#endif
 		debug("syscall, r13=%i", cpu->cd.m88k.r[13]); break;
 	case MVMEPROM_VECTOR:
 		debug("MVMEPROM_VECTOR"); break;

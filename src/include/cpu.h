@@ -294,7 +294,7 @@ struct cpu_family {
 	/*  Print architecture-specific function call arguments.
 	    (This is called for each function call, if running with -t.)  */
 	void			(*functioncall_trace)(struct cpu *,
-				    uint64_t f, int n_args);
+				    int n_args);
 };
 
 

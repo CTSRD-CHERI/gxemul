@@ -445,7 +445,7 @@ int DYNTRANS_RUN_INSTR_DEF(struct cpu *cpu)
  *  like    <f()>  or  <0x1234()>   on a function call. It is up to this
  *  function to print the arguments passed.
  */
-void DYNTRANS_FUNCTION_TRACE_DEF(struct cpu *cpu, uint64_t f, int n_args)
+void DYNTRANS_FUNCTION_TRACE_DEF(struct cpu *cpu, int n_args)
 {
 	int show_symbolic_function_name = 1;
         char strbuf[50];
