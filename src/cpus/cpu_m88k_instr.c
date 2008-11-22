@@ -44,6 +44,10 @@
                 cpu->pc += (low_pc << M88K_INSTR_ALIGNMENT_SHIFT);      \
         }
 
+#define	ABORT_EXECUTION	  {	cpu->cd.m88k.next_ic = &nothing_call;	\
+				cpu->running = 0;			\
+				debugger_n_steps_left_before_interaction = 0; }
+
 
 /*
  *  nop:  Do nothing.
@@ -904,8 +908,6 @@ X(rte)
 
 	m88k_stcr(cpu, cpu->cd.m88k.cr[M88K_CR_EPSR], M88K_CR_PSR, 1);
 
-	/*  First try the NIP, if it is Valid:  */
-	cpu->pc = cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR;
 	if (cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_E) {
 		fatal("rte: NIP: TODO: single-step support\n");
 		goto abort_dump;
@@ -916,10 +918,8 @@ X(rte)
 		goto abort_dump;
 	}
 
-	if ((cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR)
-	    == (cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR)) {
-		cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->pc + 4;
-	}
+	/*  First try the NIP, if it is Valid:  */
+	cpu->pc = cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR;
 
 	/*  If the NIP is not valid, then try the FIP:  */
 	if (!(cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_V)) {
@@ -927,13 +927,17 @@ X(rte)
 		if (!(cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_V)) {
 			fatal("[ TODO: Neither FIP nor NIP has the Valid bit set?! ]\n");
 
-			/*  goto abort_dump;  */
+			if ((cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR)
+			    != (cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR) + 4)
+				goto abort_dump;
 
-			/*  For now, let's continue anyway.  */
+			/*  For now, continue anyway, using NIP.  */
 		} else {
 			cpu->pc = cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR;
 		}
-	} else if ((cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR)
+	} else if (cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_V &&
+	    cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_V &&
+	    (cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR)
 	    != (cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR) + 4) {
 		/*
 		 *  The NIP instruction should first be executed (this
@@ -942,17 +946,21 @@ X(rte)
 		 *  of a delayed branch).
 		 */
 
-		fatal("FIP != NIP + 4: TODO\n");
+		fatal("FIP != NIP + 4: TODO: Delay slot stuff!\n");
 		goto abort_dump;
 	}
+
+	/*  fatal("RTE: NIP=0x%08"PRIx32", FIP=0x%08"PRIx32"\n",
+	    cpu->cd.m88k.cr[M88K_CR_SNIP], cpu->cd.m88k.cr[M88K_CR_SFIP]);  */
 
 	quick_pc_to_pointers(cpu);
 	return;
 
 abort_dump:
-	fatal("NIP=0x%08"PRIx32", FIP=0x%08"PRIx32"\n",
+	fatal("RTE failed. NIP=0x%08"PRIx32", FIP=0x%08"PRIx32"\n",
 	    cpu->cd.m88k.cr[M88K_CR_SNIP], cpu->cd.m88k.cr[M88K_CR_SFIP]);
-	exit(1);
+
+	ABORT_EXECUTION;
 }
 
 
@@ -1068,7 +1076,7 @@ X(prom_call)
 		mvmeprom_emul(cpu);
 		break;
 	default:fatal("m88k prom_call: unimplemented machine type\n");
-		exit(1);
+		ABORT_EXECUTION;
 	}
 
 	if (!cpu->running) {

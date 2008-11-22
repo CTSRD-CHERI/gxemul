@@ -692,9 +692,6 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 		update_shadow_regs = 0;
 	} else {
 		/*  Freeze shadow registers, and save the PSR:  */
-
-		/*  TODO: Shadow registers!  */
-
 		cpu->cd.m88k.cr[M88K_CR_EPSR] = cpu->cd.m88k.cr[M88K_CR_PSR];
 	}
 
@@ -712,15 +709,21 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 
 		/*  SNIP is the address to return to, when executing rte:  */
 		if (cpu->delay_slot) {
-			cpu->cd.m88k.cr[M88K_CR_SXIP] += 4;
-			cpu->cd.m88k.cr[M88K_CR_SNIP] =
-			    cpu->cd.m88k.delay_target | M88K_NIP_V;
-		} else {
-			cpu->cd.m88k.cr[M88K_CR_SNIP] =
-			    (cpu->pc + 4) | M88K_NIP_V;
-		}
+			if (vector == M88K_EXCEPTION_DATA_ACCESS) {
+				cpu->cd.m88k.cr[M88K_CR_SNIP] = cpu->cd.m88k.delay_target | M88K_NIP_V;
+				cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->cd.m88k.cr[M88K_CR_SNIP]+4;
+			} else {
+				fatal("m88k delay slot with non data access: TODO\n");
+				exit(1);
 
-		cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->cd.m88k.cr[M88K_CR_SNIP]+4;
+				/*  Perhaps something like this could work:  */
+				cpu->cd.m88k.cr[M88K_CR_SNIP] = (cpu->pc + 4) | M88K_NIP_V;
+				cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->cd.m88k.delay_target | M88K_NIP_V;
+			}
+		} else {
+			cpu->cd.m88k.cr[M88K_CR_SNIP] = (cpu->pc + 4) | M88K_NIP_V;
+			cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->cd.m88k.cr[M88K_CR_SNIP]+4;
+		}
 
 		if (vector == M88K_EXCEPTION_INSTRUCTION_ACCESS)
 			cpu->cd.m88k.cr[M88K_CR_SXIP] |= M88K_XIP_E;
@@ -760,6 +763,10 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 			break;
 
 		case M88K_EXCEPTION_INSTRUCTION_ACCESS:
+			/*  When returning with rte, we want to re-  */
+			/*  execute the instruction in SXIP, not SNIP/SFIP:  */
+			cpu->cd.m88k.cr[M88K_CR_SNIP] = 0;
+			cpu->cd.m88k.cr[M88K_CR_SFIP] = 0;
 			break;
 
 		case M88K_EXCEPTION_DATA_ACCESS:
@@ -778,6 +785,7 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 			break;
 
 		default:fatal("m88k_exception(): 0x%x: TODO\n", vector);
+			fflush(stdout);
 			exit(1);
 		}
 	}

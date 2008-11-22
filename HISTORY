@@ -3746,3 +3746,4 @@ Changelog for GXemul:
 20081116	Implementing the m88k flt.ss, flt.ds, trnc.ss, trnc.sd, and
 		fadd.dds floating point instructions.
 20081121	Updating the HelenOS version in the documentation to 0.3.0.
+		Continuing on 88100 interrupt/exception handling.
