@@ -579,7 +579,7 @@ X(div_imm)
 		SYNCH_PC;
 		m88k_exception(cpu, M88K_EXCEPTION_ILLEGAL_INTEGER_DIVIDE, 0);
 	} else
-		reg(ic->arg[0]) = (int32_t) reg(ic->arg[1]) / ic->arg[2];
+		reg(ic->arg[0]) = (int32_t) reg(ic->arg[1]) / (int32_t) ic->arg[2];
 }
 X(sub_imm)
 {
@@ -661,7 +661,7 @@ X(div)
 		SYNCH_PC;
 		m88k_exception(cpu, M88K_EXCEPTION_ILLEGAL_INTEGER_DIVIDE, 0);
 	} else
-		reg(ic->arg[0]) = (int32_t) reg(ic->arg[1]) / reg(ic->arg[2]);
+		reg(ic->arg[0]) = (int32_t) reg(ic->arg[1]) / (int32_t) reg(ic->arg[2]);
 }
 X(addu_co)
 {
