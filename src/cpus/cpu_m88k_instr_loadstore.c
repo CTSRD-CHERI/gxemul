@@ -130,7 +130,7 @@ void LS_GENERIC_N(struct cpu *cpu, struct m88k_instr_call *ic)
 	cpu->cd.m88k.dmt[1] = cpu->cd.m88k.dmt[0];
 	cpu->cd.m88k.dmt[0] |= DMT_DOUB1;
 	cpu->cd.m88k.dma[1] = cpu->cd.m88k.dma[0] + sizeof(uint32_t);
-	cpu->cd.m88k.dmd[0] = 0;
+	cpu->cd.m88k.dmd[1] = 0;
 #ifdef LS_LOAD
 	{
 		int dreg = (((uint32_t *)ic->arg[0]) - &cpu->cd.m88k.r[0]);
