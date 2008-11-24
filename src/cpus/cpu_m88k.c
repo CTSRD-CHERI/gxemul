@@ -1098,7 +1098,7 @@ int m88k_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 			switch (op11) {
 			case 0x04: mnem = "flt"; break;
 			}
-			debug("%s.%cs r%i,r%i\n",
+			debug("%s.%cs\tr%i,r%i\n",
 			    mnem,
 			    ((iw >> 5) & 1)? 'd' : 's',
 			    d, s2);
