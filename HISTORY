@@ -3747,3 +3747,5 @@ Changelog for GXemul:
 		fadd.dds floating point instructions.
 20081121	Updating the HelenOS version in the documentation to 0.3.0.
 		Continuing on 88100 interrupt/exception handling.
+20081125	Bringing back the dummy machine_iyonix.c, which was removed
+		in SVN rev. 4866.
