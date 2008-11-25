@@ -2924,18 +2924,13 @@ X(to_be_translated)
 		else
 			ic->arg[1] = (size_t)(void *)arm_r[iword & 0xfff];
 		if ((iword & 0x0e000010) == 0x06000010) {
-#if 0
-			if (!cpu->translation_readahead)
-				fatal("Not a Load/store TODO\n");
-			goto bad;
-#else
 			/*  GDB uses this for breakpoints.  */
 			ic->f = cond_instr(und);
 			ic->arg[0] = addr & 0xfff;
-#endif
 		}
 		/*  Special case: pc-relative load within the same page:  */
 		if (rn == ARM_PC && rd != ARM_PC && main_opcode < 6 && l_bit) {
+			unsigned char *p = page;
 			int ofs = (addr & 0xfff) + 8, max = 0xffc;
 			int b_bit = iword & 0x00400000;
 			if (b_bit)
@@ -2946,25 +2941,16 @@ X(to_be_translated)
 				ofs -= (iword & 0xfff);
 			/*  NOTE/TODO: This assumes 4KB pages,
 			    it will not work with 1KB pages.  */
-			if (ofs >= 0 && ofs <= max) {
-				unsigned char *p;
+			if (ofs >= 0 && ofs <= max && p != NULL) {
 				unsigned char c[4];
 				int len = b_bit? 1 : 4;
 				uint32_t x, a = (addr & 0xfffff000) | ofs;
 				/*  ic->f = cond_instr(mov);  */
 				ic->f = arm_dpi_instr[condition_code + 16*0xd];
 				ic->arg[2] = (size_t)(&cpu->cd.arm.r[rd]);
-				p = page;
-				if (p != NULL) {
-					memcpy(c, p + (a & 0xfff), len);
-				} else {
-					if (!cpu->memory_rw(cpu, cpu->mem, a, &c[0],
-					    sizeof(c), MEM_READ, CACHE_DATA)) {
-						fatal("Hm? Internal error in "
-						    "cpu_arm_instr.c!\n");
-						goto bad;
-					}
-				}
+
+				memcpy(c, p + (a & 0xfff), len);
+
 				if (b_bit) {
 					x = c[0];
 				} else {

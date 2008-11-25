@@ -3749,3 +3749,5 @@ Changelog for GXemul:
 		Continuing on 88100 interrupt/exception handling.
 20081125	Bringing back the dummy machine_iyonix.c, which was removed
 		in SVN rev. 4866.
+		Fixing a bug in ARM pc-relative loads, when loading within
+		the same page as the pc.
