@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: interrupt.c,v 1.13.2.1 2008-01-18 19:12:24 debug Exp $
- *
  *  The interrupt subsystem.
  *
  *  Interrupts have a "path", e.g. "machine[0].cpu.5". A device which
