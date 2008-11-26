@@ -50,6 +50,7 @@
 #include "misc.h"
 
 #include "netbsd_iyonix_bootconfig.h"
+#include "i80321reg.h"
 
 
 MACHINE_SETUP(iyonix)
@@ -62,8 +63,13 @@ MACHINE_SETUP(iyonix)
 
 	cpu->cd.arm.coproc[6] = arm_coproc_i80321_6;
 
+	/*  TODO: Is it flash, or just RAM?  */
+	dev_ram_init(machine, 0xa0000000,
+	    machine->physical_ram_in_mb * 1048576, DEV_RAM_MIRROR, 0x0);
+
 	snprintf(tmpstr, sizeof(tmpstr), "i80321 irq=%s.cpu[%i].irq "
-	    "addr=0xffffe000", machine->path, machine->bootstrap_cpu);
+	    "addr=0x%08x", machine->path, machine->bootstrap_cpu,
+	    (int) VERDE_PMMR_BASE);
 	device_add(machine, tmpstr);
 
 	/*  TODO: actual irq on the i80321!  */
@@ -78,12 +84,15 @@ MACHINE_SETUP(iyonix)
 	/*
 	 *  Set up suitable virtual memory mappings and bootconfig struct
 	 *  in order to boot a plain NetBSD/iyonix ELF kernel:
+	 *
+	 *  r0 is expected to point to the bootconfig struct.
 	 */
 
 	arm_setup_initial_translation_table(cpu,
 	    machine->physical_ram_in_mb * 1048576 - 65536);
 	arm_translation_table_set_l1(cpu, 0x90000000, 0x90000000);
-	arm_translation_table_set_l1(cpu, 0xf0000000, 0x00000000);
+	arm_translation_table_set_l1_b(cpu, 0xf0000000, 0x00000000);
+	arm_translation_table_set_l1_b(cpu, 0xff000000, 0xff000000);
 
 	bootblock_addr = machine->physical_ram_in_mb * 1048576 - 65536 - 8192;
 	cpu->cd.arm.r[0] = bootblock_addr;
@@ -93,6 +102,8 @@ MACHINE_SETUP(iyonix)
 	    &bootconfig.magic, BOOTCONFIG_MAGIC);
 	store_32bit_word_in_host(cpu, (unsigned char *)
 	    &bootconfig.version, BOOTCONFIG_VERSION);
+
+	/*  TODO: More fields.  */
 
 	store_buf(cpu, bootblock_addr, (char *)&bootconfig, sizeof(bootconfig));
 }
