@@ -91,10 +91,10 @@ MACHINE_SETUP(iyonix)
 	arm_setup_initial_translation_table(cpu,
 	    machine->physical_ram_in_mb * 1048576 - 65536);
 	arm_translation_table_set_l1(cpu, 0x90000000, 0x90000000);
-	arm_translation_table_set_l1_b(cpu, 0xf0000000, 0x00000000);
+	arm_translation_table_set_l1(cpu, 0xf0000000, 0x00000000);
 	arm_translation_table_set_l1_b(cpu, 0xff000000, 0xff000000);
 
-	bootblock_addr = machine->physical_ram_in_mb * 1048576 - 65536 - 8192;
+	bootblock_addr = machine->physical_ram_in_mb * 1048576 - 65536 - 16384;
 	cpu->cd.arm.r[0] = bootblock_addr;
 	memset(&bootconfig, 0, sizeof(bootconfig));
 

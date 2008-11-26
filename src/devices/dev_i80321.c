@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: dev_i80321.c,v 1.23.2.1 2008-01-18 19:12:28 debug Exp $
- *
  *  COMMENT: Intel i80321 (ARM) core functionality
  *
  *	o)  Interrupt controller
@@ -325,6 +323,7 @@ DEVINIT(i80321)
 	d->status = &cpu->cd.arm.i80321_isrc;
 	d->enable = &cpu->cd.arm.i80321_inten;
 
+	/*  TODO: base = 0 on Iyonix?  */
 	d->mcu_reg[MCU_SDBR / sizeof(uint32_t)] = base = 0xa0000000;
 	d->mcu_reg[MCU_SBR0 / sizeof(uint32_t)] = (base + memsize) >> 25;
 	d->mcu_reg[MCU_SBR1 / sizeof(uint32_t)] = (base + memsize) >> 25;
