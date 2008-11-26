@@ -3751,3 +3751,5 @@ Changelog for GXemul:
 		in SVN rev. 4866.
 		Fixing a bug in ARM pc-relative loads, when loading within
 		the same page as the pc.
+20081126	Continuing on the Iyonix mode: connecting initial i80321
+		interrupts, and importing NetBSD/iyonix' bootconfig.h.

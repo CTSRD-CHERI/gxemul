@@ -25,7 +25,17 @@
  *  SUCH DAMAGE.
  *   
  *
- *  A Iyonix machine mode. Not yet working.
+ *  COMMENT: A Iyonix machine
+ *
+ *  According to NetBSD/iyonix, for Tungsten motherboards:
+ *
+ *	0x90000000 (1 MB)	obio
+ *	    0x900002f8 = uart1
+ *	0xa0000000 (8 MB)	Flash memory
+ *	0xfe400000		iopxs vbase
+ *
+ *  A dmesg can be found at the end of the following URL:
+ *  http://www.sarasarado.org/~hatano/diary/d200411.html
  */
 
 #include <stdio.h>
@@ -39,32 +49,52 @@
 #include "memory.h"
 #include "misc.h"
 
+#include "netbsd_iyonix_bootconfig.h"
+
 
 MACHINE_SETUP(iyonix)
 {
+	char tmpstr[1000];
+	uint32_t bootblock_addr;
+	struct bootconfig bootconfig;
+
 	machine->machine_name = "Iyonix";
 
 	cpu->cd.arm.coproc[6] = arm_coproc_i80321_6;
 
-	/*  0xa0000000 = physical ram, 0xc0000000 = uncached  */
-	dev_ram_init(machine, 0xa0000000, 0x20000000, DEV_RAM_MIRROR, 0x0);
-	dev_ram_init(machine, 0xc0000000, 0x20000000, DEV_RAM_MIRROR, 0x0);
-	dev_ram_init(machine, 0xf0000000, 0x08000000, DEV_RAM_MIRROR, 0x0);
+	snprintf(tmpstr, sizeof(tmpstr), "i80321 irq=%s.cpu[%i].irq "
+	    "addr=0xffffe000", machine->path, machine->bootstrap_cpu);
+	device_add(machine, tmpstr);
 
-	device_add(machine, "ns16550 irq=0 addr=0xfe800000 in_use=0");
-
-	bus_isa_init(machine, machine->path, 0, 0x90000000ULL, 0x98000000ULL);
-
-	device_add(machine, "i80321 addr=0xffffe000");
+	/*  TODO: actual irq on the i80321!  */
+	snprintf(tmpstr, sizeof(tmpstr), "%s.cpu[%i].irq.i80321.1",
+	    machine->path, machine->bootstrap_cpu);
+	bus_isa_init(machine, tmpstr, 0, 0x90000000ULL, 0x98000000ULL);
 
 	if (!machine->prom_emulation)
 		return;
 
+
+	/*
+	 *  Set up suitable virtual memory mappings and bootconfig struct
+	 *  in order to boot a plain NetBSD/iyonix ELF kernel:
+	 */
+
 	arm_setup_initial_translation_table(cpu,
 	    machine->physical_ram_in_mb * 1048576 - 65536);
-	arm_translation_table_set_l1(cpu, 0xa0000000, 0xa0000000);
-	arm_translation_table_set_l1(cpu, 0xc0000000, 0xa0000000);
-	arm_translation_table_set_l1_b(cpu, 0xff000000, 0xff000000);
+	arm_translation_table_set_l1(cpu, 0x90000000, 0x90000000);
+	arm_translation_table_set_l1(cpu, 0xf0000000, 0x00000000);
+
+	bootblock_addr = machine->physical_ram_in_mb * 1048576 - 65536 - 8192;
+	cpu->cd.arm.r[0] = bootblock_addr;
+	memset(&bootconfig, 0, sizeof(bootconfig));
+
+	store_32bit_word_in_host(cpu, (unsigned char *)
+	    &bootconfig.magic, BOOTCONFIG_MAGIC);
+	store_32bit_word_in_host(cpu, (unsigned char *)
+	    &bootconfig.version, BOOTCONFIG_VERSION);
+
+	store_buf(cpu, bootblock_addr, (char *)&bootconfig, sizeof(bootconfig));
 }
 
 
@@ -76,7 +106,7 @@ MACHINE_DEFAULT_CPU(iyonix)
 
 MACHINE_DEFAULT_RAM(iyonix)
 {
-	machine->physical_ram_in_mb = 32;
+	machine->physical_ram_in_mb = 64;
 }
 
 

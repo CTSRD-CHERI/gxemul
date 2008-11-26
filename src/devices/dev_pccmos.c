@@ -143,6 +143,7 @@ DEVINIT(pccmos)
 	case MACHINE_PREP:
 	case MACHINE_MVMEPPC:
 	case MACHINE_ALPHA:
+	case MACHINE_IYONIX:	// TODO: not sure about exact type.
 		break;
 	default:fatal("devinit_pccmos(): unimplemented machine type"
 		    " %i\n", devinit->machine->machine_type);
