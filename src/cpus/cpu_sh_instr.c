@@ -2391,6 +2391,7 @@ X(ftrv_xmtrx_fvn)
  *  fneg:  Negate a floating point register
  *  fabs:  Get the absolute value of a floating point register
  *  fsqrt: Calculate square root
+ *  fsrra: Calculate 1 / (square root)
  *
  *  arg[0] = ptr to fp register
  *  arg[1] = (uint32_t) immediate value (for fldi)
@@ -2432,6 +2433,28 @@ X(fsqrt_frn)
 		int32_t ieee, r1 = reg(ic->arg[0]);
 		ieee_interpret_float_value(r1, &op1, IEEE_FMT_S);
 		ieee = ieee_store_float_value(sqrt(op1.f), IEEE_FMT_S, 0);
+		reg(ic->arg[0]) = ieee;
+	}
+}
+X(fsrra_frn)
+{
+	// I'm guessing that this is 1/sqrt. That's how it is described at
+	// http://yam.20to4.net/dreamcast/hints/index.html at least.
+
+	struct ieee_float_value op1;
+
+	FLOATING_POINT_AVAILABLE_CHECK;
+
+	if (cpu->cd.sh.fpscr & SH_FPSCR_PR) {
+		/*  Double-precision:  */
+		fatal("Double-precision fsrra? TODO\n");
+		exit(1);
+	} else {
+		/*  Single-precision:  */
+		int32_t ieee, r1 = reg(ic->arg[0]);
+		ieee_interpret_float_value(r1, &op1, IEEE_FMT_S);
+		ieee = ieee_store_float_value(1.0f / sqrt(op1.f),
+		    IEEE_FMT_S, 0);
 		reg(ic->arg[0]) = ieee;
 	}
 }
@@ -3846,6 +3869,10 @@ X(to_be_translated)
 		} else if (lo8 == 0x6d) {
 			/*  FSQRT FRn  */
 			ic->f = instr(fsqrt_frn);
+			ic->arg[0] = (size_t)&cpu->cd.sh.fr[r8];
+		} else if (lo8 == 0x7d) {
+			/*  FSRRA FRn  */
+			ic->f = instr(fsrra_frn);
 			ic->arg[0] = (size_t)&cpu->cd.sh.fr[r8];
 		} else if (lo8 == 0x8d) {
 			/*  FLDI0 FRn  */

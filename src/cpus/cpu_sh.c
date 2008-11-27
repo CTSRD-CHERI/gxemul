@@ -1363,6 +1363,8 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 		else if (lo8 == 0x6d)
 			debug("fsqrt\t%sr%i\n",
 			    cpu->cd.sh.fpscr & SH_FPSCR_PR? "d" : "f", r8);
+		else if (lo8 == 0x7d)
+			debug("fsrra\tfr%i\n", r8);
 		else if (lo8 == 0x8d)
 			debug("fldi0\tfr%i\n", r8);
 		else if (lo8 == 0x9d)
