@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: cpu_sh.c,v 1.76.2.1 2008-01-18 19:12:26 debug Exp $
- *
  *  Hitachi SuperH ("SH") CPU emulation.
  *
  *  TODO: It would be nice if this could encompass both 64-bit SH5, and
@@ -1373,6 +1371,8 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 			debug("fcnvsd\tfpul,dr%i\n", r8);
 		else if (lo8 == 0xbd)
 			debug("fcnvds\tdr%i,fpul\n", r8);
+		else if (lo8 == 0xed)
+			debug("fipr\tfv%i,fv%i\n", (r8 & 3) << 2, r8 & 0xc);
 		else if ((iword & 0x01ff) == 0x00fd)
 			debug("fsca\tfpul,dr%i\n", r8);
 		else if (iword == 0xf3fd)
