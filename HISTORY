@@ -3753,3 +3753,4 @@ Changelog for GXemul:
 		the same page as the pc.
 20081126	Continuing on the Iyonix mode: connecting initial i80321
 		interrupts, and importing NetBSD/iyonix' bootconfig.h.
+20081127	Importing iopi2creg.h from NetBSD (ARM Xscale I2C registers).

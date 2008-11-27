@@ -67,6 +67,10 @@ MACHINE_SETUP(iyonix)
 	dev_ram_init(machine, 0xa0000000,
 	    machine->physical_ram_in_mb * 1048576, DEV_RAM_MIRROR, 0x0);
 
+	/*  Uncached RAM?  */
+	dev_ram_init(machine, 0xc0000000,
+	    machine->physical_ram_in_mb * 1048576, DEV_RAM_MIRROR, 0x0);
+
 	snprintf(tmpstr, sizeof(tmpstr), "i80321 irq=%s.cpu[%i].irq "
 	    "addr=0x%08x", machine->path, machine->bootstrap_cpu,
 	    (int) VERDE_PMMR_BASE);

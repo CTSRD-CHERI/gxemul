@@ -31,9 +31,10 @@
  *	o)  Timer
  *	o)  PCI controller
  *	o)  Memory controller
+ *	o)  I2C
  *
  *  TODO:
- *	o)  LOTS of things left to implement.
+ *	o)  More or less everything.
  *	o)  This is hardcoded for little endian emulation.
  */
 
@@ -49,8 +50,9 @@
 #include "misc.h"
 #include "timer.h"
 
-
 #include "i80321reg.h"
+#include "iopi2creg.h"
+
 
 #define	TICK_SHIFT		15
 #define	DEV_I80321_LENGTH	VERDE_PMMR_SIZE
@@ -254,6 +256,61 @@ DEVICE_ACCESS(i80321)
 		n = "MCU_SBR1";
 		break;
 
+	/*  Peripheral Bus Interface Unit  */
+	case VERDE_PBIU_BASE + PBIU_PBCR:
+		n = "PBIU_PBCR (PBIU Control Register)";
+		break;
+	case VERDE_PBIU_BASE + PBIU_PBBAR0:
+		n = "PBIU_PBBAR0 (PBIU Base Address Register 0)";
+		break;
+	case VERDE_PBIU_BASE + PBIU_PBLR0:
+		n = "PBIU_PBLR0 (PBIU Limit Register 0)";
+		break;
+	case VERDE_PBIU_BASE + PBIU_PBBAR1:
+		n = "PBIU_PBBAR1 (PBIU Base Address Register 1)";
+		break;
+	case VERDE_PBIU_BASE + PBIU_PBLR1:
+		n = "PBIU_PBLR1 (PBIU Limit Register 1)";
+		break;
+	case VERDE_PBIU_BASE + PBIU_PBBAR2:
+		n = "PBIU_PBBAR2 (PBIU Base Address Register 2)";
+		break;
+	case VERDE_PBIU_BASE + PBIU_PBLR2:
+		n = "PBIU_PBLR2 (PBIU Limit Register 2)";
+		break;
+
+	/*  TODO:  */
+	case 0x7cc:
+		n = "0x7cc_TODO";
+		break;
+
+	case VERDE_I2C_BASE0 + IIC_ICR:
+		n = "I2C 0, IIC_ICR (control register)";
+		break;
+	case VERDE_I2C_BASE0 + IIC_ISR:
+		n = "I2C 0, IIC_ISR (status register)";
+		break;
+	case VERDE_I2C_BASE0 + IIC_ISAR:
+		n = "I2C 0, IIC_ISAR (slave address register)";
+		break;
+	case VERDE_I2C_BASE0 + IIC_IDBR:
+		n = "I2C 0, IIC_IDBR (data buffer register)";
+		break;
+
+	case VERDE_I2C_BASE1 + IIC_ICR:
+		n = "I2C 1, IIC_ICR (control register)";
+		break;
+	case VERDE_I2C_BASE1 + IIC_ISR:
+		n = "I2C 1, IIC_ISR (status register)";
+		odata = IIC_ISR_ITE;	/*  IDBR Tx empty  */
+		break;
+	case VERDE_I2C_BASE1 + IIC_ISAR:
+		n = "I2C 1, IIC_ISAR (slave address register)";
+		break;
+	case VERDE_I2C_BASE1 + IIC_IDBR:
+		n = "I2C 1, IIC_IDBR (data buffer register)";
+		break;
+
 	default:if (writeflag == MEM_READ) {
 			fatal("[ i80321: read from 0x%x ]\n",
 			    (int)relative_addr);
@@ -261,6 +318,7 @@ DEVICE_ACCESS(i80321)
 			fatal("[ i80321: write to 0x%x: 0x%llx ]\n",
 			    (int)relative_addr, (long long)idata);
 		}
+		exit(1);
 	}
 
 	if (n != NULL) {

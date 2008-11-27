@@ -234,7 +234,9 @@ ARM:
 	    occured" message after reboot/halt is too ugly.
 	o)  Generic ARM "wait"-like instruction?
 	o)  try to get netbsd/evbarm 3.x or 4.x running (iq80321)
-	o)  netbsd/iyonix?
+	o)  netbsd/iyonix? the i80321 device currently tells netbsd that
+	    RAM starts at 0xa0000000, but that is perhaps not correct for the
+	    iyonix.
 	o)  make the xscale counter registers (ccnt) work
 	o)  make the ata controller usable for FreeBSD!
 	o)  Debian/cats crashes because of unimplemented coproc stuff.
