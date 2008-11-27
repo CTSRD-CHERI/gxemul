@@ -74,6 +74,9 @@ struct i80321_data {
 
 	/*  Memory Controller:  */
 	uint32_t	mcu_reg[0x100 / sizeof(uint32_t)];
+
+	/*  I2C Controller:  */
+	uint32_t	i2c_reg[VERDE_I2C_SIZE / sizeof(uint32_t)];
 };
 
 
@@ -158,6 +161,16 @@ DEVICE_ACCESS(i80321)
 			d->mcu_reg[regnr] = idata;
 		else
 			odata = d->mcu_reg[regnr];
+	}
+
+	/*  I2C registers:  */
+	if (relative_addr >= VERDE_I2C_BASE &&
+	    relative_addr <  VERDE_I2C_BASE + VERDE_I2C_SIZE) {
+		int regnr = (relative_addr - VERDE_I2C_BASE) / sizeof(uint32_t);
+		if (writeflag == MEM_WRITE)
+			d->i2c_reg[regnr] = idata;
+		else
+			odata = d->i2c_reg[regnr];
 	}
 
 
@@ -246,14 +259,63 @@ DEVICE_ACCESS(i80321)
 		break;
 
 	/*  Memory Controller Unit:  */
+	case VERDE_MCU_BASE + MCU_SDIR:
+		n = "MCU_SDIR (DDR SDRAM Init Register)";
+		break;
+	case VERDE_MCU_BASE + MCU_SDCR:
+		n = "MCU_SDCR (DDR SDRAM Control Register)";
+		break;
 	case VERDE_MCU_BASE + MCU_SDBR:
-		n = "MCU_SDBR";
+		n = "MCU_SDBR (SDRAM Base Register)";
 		break;
 	case VERDE_MCU_BASE + MCU_SBR0:
-		n = "MCU_SBR0";
+		n = "MCU_SBR0 (SDRAM Boundary 0)";
 		break;
 	case VERDE_MCU_BASE + MCU_SBR1:
-		n = "MCU_SBR1";
+		n = "MCU_SBR1 (SDRAM Boundary 1)";
+		break;
+	case VERDE_MCU_BASE + MCU_ECCR:
+		n = "MCU_ECCR (ECC Control Register)";
+		break;
+	case VERDE_MCU_BASE + MCU_RFR:
+		n = "MCU_RFR (Refresh Frequency Register)";
+		break;
+	case VERDE_MCU_BASE + MCU_DBUDSR:
+		n = "MCU_DBUDSR (Data Bus Pull-up Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_DBDDSR:
+		n = "MCU_DBDDSR (Data Bus Pull-down Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_CUDSR:
+		n = "MCU_CUDSR (Clock Pull-up Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_CDDSR:
+		n = "MCU_CDDSR (Clock Pull-down Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_CEUDSR:
+		n = "MCU_CEUDSR (Clock En Pull-up Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_CEDDSR:
+		n = "MCU_CEDDSR (Clock En Pull-down Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_CSUDSR:
+		n = "MCU_CSUDSR (Chip Sel Pull-up Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_CSDDSR:
+		n = "MCU_CSDDSR (Chip Sel Pull-down Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_REUDSR:
+		n = "MCU_REUDSR (Rx En Pull-up Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_REDDSR:
+		n = "MCU_REDDSR (Rx En Pull-down Drive Strength)";
+		break;
+
+	case VERDE_MCU_BASE + MCU_ABUDSR:
+		n = "MCU_ABUDSR (Addr Bus Pull-up Drive Strength)";
+		break;
+	case VERDE_MCU_BASE + MCU_ABDDSR:
+		n = "MCU_ABDDSR (Addr Bus Pull-down Drive Strength)";
 		break;
 
 	/*  Peripheral Bus Interface Unit  */
@@ -303,12 +365,14 @@ DEVICE_ACCESS(i80321)
 	case VERDE_I2C_BASE1 + IIC_ISR:
 		n = "I2C 1, IIC_ISR (status register)";
 		odata = IIC_ISR_ITE;	/*  IDBR Tx empty  */
+		odata |= IIC_ISR_IRF;	/*  IDBR Rx full  */
 		break;
 	case VERDE_I2C_BASE1 + IIC_ISAR:
 		n = "I2C 1, IIC_ISAR (slave address register)";
 		break;
 	case VERDE_I2C_BASE1 + IIC_IDBR:
 		n = "I2C 1, IIC_IDBR (data buffer register)";
+		odata = 7;	/*  TODO  */
 		break;
 
 	default:if (writeflag == MEM_READ) {
@@ -323,7 +387,8 @@ DEVICE_ACCESS(i80321)
 
 	if (n != NULL) {
 		if (writeflag == MEM_READ) {
-			debug("[ i80321: read from %s ]\n", n);
+			debug("[ i80321: read from %s: 0x%llx ]\n",
+			    n, (long long)idata);
 		} else {
 			debug("[ i80321: write to %s: 0x%llx ]\n",
 			    n, (long long)idata);
