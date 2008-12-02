@@ -776,6 +776,8 @@ int piix_ide_cfg_reg_write(struct pci_device *pd, int reg, uint32_t value)
 	void *wdc1 = ((struct piix_ide_extra *)pd->extra)->wdc1;
 	int enabled = 0;
 
+	PCI_SET_DATA(reg, value);
+
 	switch (reg) {
 	case PCI_COMMAND_STATUS_REG:
 		if (value & PCI_COMMAND_IO_ENABLE)
