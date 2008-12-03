@@ -1782,8 +1782,10 @@ cpu->cd.DYNTRANS_ARCH.vph_tlb_entry[r].valid);
 		return;
 	}
 
+
 	/*  Translation read-ahead:  */
-	if (!single_step && !cpu->machine->instruction_trace) {
+	if (!single_step && !cpu->machine->instruction_trace &&
+	    cpu->machine->breakpoints.n == 0) {
 		uint64_t baseaddr = cpu->pc;
 		uint64_t pagenr = DYNTRANS_ADDR_TO_PAGENR(baseaddr);
 		int i = 1;
