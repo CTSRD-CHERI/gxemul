@@ -3756,3 +3756,5 @@ Changelog for GXemul:
 20081127	Importing iopi2creg.h from NetBSD (ARM Xscale I2C registers).
 		Implementing the SH4 fsrra instruction, 1/sqrt(x), and the
 		fipr instruction (vector dot-product).
+20081203	Using register names in dev_clmpcc, but no actual progress on
+		getting OpenBSD/mvme88k to boot further.
