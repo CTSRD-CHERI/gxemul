@@ -3758,3 +3758,6 @@ Changelog for GXemul:
 		fipr instruction (vector dot-product).
 20081203	Using register names in dev_clmpcc, but no actual progress on
 		getting OpenBSD/mvme88k to boot further.
+		FINALLY found the M88K bug I've been hunting: conditional
+		branches with delay slots did not set the delay target address
+		correctly in the case the branch was _not_ taken.

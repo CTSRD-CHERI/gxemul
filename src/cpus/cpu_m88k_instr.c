@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: cpu_m88k_instr.c,v 1.42.2.1 2008-01-18 19:12:25 debug Exp $
- *
  *  M88K instructions.
  *
  *  Individual functions should keep track of cpu->n_translated_instrs.
@@ -184,8 +182,16 @@ X(bb0_samepage)
 X(bb0_n)
 {
 	int cond = !(reg(ic->arg[0]) & (uint32_t)ic->arg[1]);
-	cpu->cd.m88k.delay_target = (cpu->pc & ~((M88K_IC_ENTRIES_PER_PAGE-1) <<
-	    M88K_INSTR_ALIGNMENT_SHIFT)) + (int32_t)ic->arg[2];
+
+	SYNCH_PC;
+
+	if (cond)
+		cpu->cd.m88k.delay_target =
+		    (cpu->pc & ~((M88K_IC_ENTRIES_PER_PAGE-1) <<
+		    M88K_INSTR_ALIGNMENT_SHIFT)) + (int32_t)ic->arg[2];
+	else
+		cpu->cd.m88k.delay_target = cpu->pc + 8;
+
 	cpu->delay_slot = TO_BE_DELAYED;
 	ic[1].f(cpu, ic+1);
 	cpu->n_translated_instrs ++;
@@ -215,8 +221,16 @@ X(bb1_samepage)
 X(bb1_n)
 {
 	int cond = reg(ic->arg[0]) & ic->arg[1];
-	cpu->cd.m88k.delay_target = (cpu->pc & ~((M88K_IC_ENTRIES_PER_PAGE-1) <<
-	    M88K_INSTR_ALIGNMENT_SHIFT)) + (int32_t)ic->arg[2];
+
+	SYNCH_PC;
+
+	if (cond)
+		cpu->cd.m88k.delay_target =
+		    (cpu->pc & ~((M88K_IC_ENTRIES_PER_PAGE-1) <<
+		    M88K_INSTR_ALIGNMENT_SHIFT)) + (int32_t)ic->arg[2];
+	else
+		cpu->cd.m88k.delay_target = cpu->pc + 8;
+
 	cpu->delay_slot = TO_BE_DELAYED;
 	ic[1].f(cpu, ic+1);
 	cpu->n_translated_instrs ++;

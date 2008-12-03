@@ -23,9 +23,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: generate_m88k_bcnd.c,v 1.3.2.1 2008-01-18 19:12:27 debug Exp $
  */
 
 #include <stdio.h>
@@ -96,10 +93,15 @@ void bcnd(int samepage, int n_bit, int m5)
 		print_operator(m5);
 		printf(" 0;\n");
 
-		printf("\tcpu->cd.m88k.delay_target = (cpu->pc\n");
-		printf("\t\t& ~((M88K_IC_ENTRIES_PER_PAGE-1)"
+		printf("\tSYNCH_PC;\n");
+
+		printf("\tif (cond)\n");
+		printf("\t\tcpu->cd.m88k.delay_target = (cpu->pc\n");
+		printf("\t\t\t& ~((M88K_IC_ENTRIES_PER_PAGE-1)"
 		    " << M88K_INSTR_ALIGNMENT_SHIFT))\n");
-		printf("\t\t+ ic->arg[2];\n");
+		printf("\t\t\t+ ic->arg[2];\n");
+		printf("\telse\n");
+		printf("\t\tcpu->cd.m88k.delay_target = cpu->pc + 8;\n");
 
 		printf("\tcpu->delay_slot = TO_BE_DELAYED;\n");
 		printf("\tic[1].f(cpu, ic+1);\n");
