@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: cpu_dyntrans.c,v 1.187.2.2 2008-06-10 00:18:05 debug Exp $
- *
  *  Common dyntrans routines. Included from cpu_*.c.
  *
  *  Note: This might be a bit hard to follow, if you are reading this source
@@ -200,17 +198,20 @@ int DYNTRANS_RUN_INSTR_DEF(struct cpu *cpu)
 	 *
 	 *  TODO: Turn this into a family-specific function somewhere...
  	 */
+
+	/*  Note: Do not cause interrupts while single-stepping. It is
+	    so horribly annoying.  */
+	if (!single_step) {
 #ifdef DYNTRANS_ARM
-	if (cpu->cd.arm.irq_asserted && !(cpu->cd.arm.cpsr & ARM_FLAG_I))
-		arm_exception(cpu, ARM_EXCEPTION_IRQ);
+		if (cpu->cd.arm.irq_asserted && !(cpu->cd.arm.cpsr & ARM_FLAG_I))
+			arm_exception(cpu, ARM_EXCEPTION_IRQ);
 #endif
 #ifdef DYNTRANS_M88K
-	if (cpu->cd.m88k.irq_asserted &&
-	    !(cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_IND))
-		m88k_exception(cpu, M88K_EXCEPTION_INTERRUPT, 0);
+		if (cpu->cd.m88k.irq_asserted &&
+		    !(cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_IND))
+			m88k_exception(cpu, M88K_EXCEPTION_INTERRUPT, 0);
 #endif
 #ifdef DYNTRANS_MIPS
-	{
 		int enabled, mask;
 		int status = cpu->cd.mips.coproc[0]->reg[COP0_STATUS];
 		if (cpu->cd.mips.cpu_type.exc_model == EXC3K) {
@@ -230,23 +231,23 @@ int DYNTRANS_RUN_INSTR_DEF(struct cpu *cpu)
 
 		if (enabled && mask)
 			mips_cpu_exception(cpu, EXCEPTION_INT, 0, 0, 0, 0, 0,0);
-	}
 #endif
 #ifdef DYNTRANS_PPC
-	if (cpu->cd.ppc.dec_intr_pending && cpu->cd.ppc.msr & PPC_MSR_EE) {
-		if (!(cpu->cd.ppc.cpu_type.flags & PPC_NO_DEC))
-			ppc_exception(cpu, PPC_EXCEPTION_DEC);
-		cpu->cd.ppc.dec_intr_pending = 0;
-	}
-	if (cpu->cd.ppc.irq_asserted && cpu->cd.ppc.msr & PPC_MSR_EE)
-		ppc_exception(cpu, PPC_EXCEPTION_EI);
+		if (cpu->cd.ppc.dec_intr_pending && cpu->cd.ppc.msr & PPC_MSR_EE) {
+			if (!(cpu->cd.ppc.cpu_type.flags & PPC_NO_DEC))
+				ppc_exception(cpu, PPC_EXCEPTION_DEC);
+			cpu->cd.ppc.dec_intr_pending = 0;
+		}
+		if (cpu->cd.ppc.irq_asserted && cpu->cd.ppc.msr & PPC_MSR_EE)
+			ppc_exception(cpu, PPC_EXCEPTION_EI);
 #endif
 #ifdef DYNTRANS_SH
-	if (cpu->cd.sh.int_to_assert > 0 && !(cpu->cd.sh.sr & SH_SR_BL)
-	    && ((cpu->cd.sh.sr & SH_SR_IMASK) >> SH_SR_IMASK_SHIFT)
-	    < cpu->cd.sh.int_level)
-		sh_exception(cpu, 0, cpu->cd.sh.int_to_assert, 0);
+		if (cpu->cd.sh.int_to_assert > 0 && !(cpu->cd.sh.sr & SH_SR_BL)
+		    && ((cpu->cd.sh.sr & SH_SR_IMASK) >> SH_SR_IMASK_SHIFT)
+		    < cpu->cd.sh.int_level)
+			sh_exception(cpu, 0, cpu->cd.sh.int_to_assert, 0);
 #endif
+	}
 
 	cached_pc = cpu->pc;
 

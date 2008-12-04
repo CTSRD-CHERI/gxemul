@@ -3761,3 +3761,5 @@ Changelog for GXemul:
 		FINALLY found the M88K bug I've been hunting: conditional
 		branches with delay slots did not set the delay target address
 		correctly in the case the branch was _not_ taken.
+20081204	Interrupt exceptions (in cpu_dyntrans.c) are no longer
+		generated while single-stepping. (It was too annoying.)
