@@ -986,8 +986,24 @@ X(rte)
 		 *  of a delayed branch).
 		 */
 
-		fatal("FIP != NIP + 4: TODO: Delay slot stuff!\n");
-		goto abort_dump;
+		uint32_t nip = cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR;
+		uint32_t fip = cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR;
+
+		cpu->pc = nip;
+		cpu->delay_slot = NOT_DELAYED;
+		quick_pc_to_pointers(cpu);
+
+		if (cpu->pc != nip) {
+			fatal("NIP execution caused exception?! TODO\n");
+			goto abort_dump;
+		}
+
+		instr(to_be_translated)(cpu, cpu->cd.m88k.next_ic);
+
+		cpu->pc = fip;
+		cpu->delay_slot = NOT_DELAYED;
+		quick_pc_to_pointers(cpu);
+		return;
 	}
 
 	/*  fatal("RTE: NIP=0x%08"PRIx32", FIP=0x%08"PRIx32"\n",

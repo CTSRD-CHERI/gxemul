@@ -3768,3 +3768,6 @@ Changelog for GXemul:
 		Implementing the "max negative number" condition of the
 		M88K bcnd instruction.
 		Implementing the M88K triadic register 'rot' instruction.
+		The FIP != NIP+4 situation in the M88K rte instruction is now
+		supported (i.e. executing one instruction from the pipeline,
+		and then continuing somewhere else).

@@ -36,12 +36,6 @@ To be translated prefetch:
 	    pages, NOT when running via a slow device!
 
 M88K:
-	o)  Correct handling of FIP != NIP + 4, in rte, to
-	    simulate delayed branch stuff.
-	o)  Instruction across page boundary? I.e. when the delay slot
-	    is on a new page, and it gets a page fault. Currently, the
-	    XIP is set to the first instruction, not the delay slot!
-	    This is probably not correct. TODO: investigate.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.

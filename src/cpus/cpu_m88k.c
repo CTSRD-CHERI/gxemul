@@ -723,6 +723,11 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 			if (vector == M88K_EXCEPTION_DATA_ACCESS) {
 				cpu->cd.m88k.cr[M88K_CR_SNIP] = cpu->cd.m88k.delay_target | M88K_NIP_V;
 				cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->cd.m88k.cr[M88K_CR_SNIP]+4;
+			} else if (vector == M88K_EXCEPTION_INSTRUCTION_ACCESS) {
+				/*  If we are in a delay slot, then pc is
+				    something like 0xc6000 here (not 0xc5ffc).  */
+				cpu->cd.m88k.cr[M88K_CR_SNIP] = cpu->cd.m88k.delay_target | M88K_NIP_V;
+				cpu->cd.m88k.cr[M88K_CR_SFIP] = 0;
 			} else {
 				/*  Perhaps something like this could work:  */
 				cpu->cd.m88k.cr[M88K_CR_SNIP] = (cpu->pc + 4) | M88K_NIP_V;
@@ -772,9 +777,12 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 
 		case M88K_EXCEPTION_INSTRUCTION_ACCESS:
 			/*  When returning with rte, we want to re-  */
-			/*  execute the instruction in SXIP, not SNIP/SFIP:  */
-			cpu->cd.m88k.cr[M88K_CR_SNIP] = 0;
-			cpu->cd.m88k.cr[M88K_CR_SFIP] = 0;
+			/*  execute the instruction in SXIP, not SNIP/SFIP,  */
+			/*  (unless the exception was in a delay-slot):  */
+			if (!(cpu->delay_slot & EXCEPTION_IN_DELAY_SLOT)) {
+				cpu->cd.m88k.cr[M88K_CR_SNIP] = 0;
+				cpu->cd.m88k.cr[M88K_CR_SFIP] = 0;
+			}
 			break;
 
 		case M88K_EXCEPTION_DATA_ACCESS:
