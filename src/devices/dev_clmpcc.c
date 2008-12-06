@@ -29,10 +29,11 @@
  *
  *  Used by OpenBSD/mvme88k.
  *
+ *  Works so far:
+ *	TX/RX interrupts (happy case).
+ *
  *  TODO:
  *	Multiple channels
- *	Interrupts
- *	RX
  *	DMA?
  */
 
@@ -50,18 +51,52 @@
 #include "misc.h"
 
 
+#include "mvme_pcctworeg.h"
 #include "clmpccreg.h"
 
 #define debug fatal
 
 #define	CLMPCC_LEN		0x200
+#define	DEV_CLMPCC_TICK_SHIFT	16
 
 struct clmpcc_data {
 	unsigned char	reg[CLMPCC_LEN];
 
 	int		console_handle;
-	struct interrupt irq;
+
+	/*  Interrupt pins on the PCC2 controller:  */
+	struct interrupt irq_scc_rxe;
+	struct interrupt irq_scc_m;
+	struct interrupt irq_scc_tx;
+	struct interrupt irq_scc_rx;
 };
+
+
+static void reassert_interrupts(struct clmpcc_data *d)
+{
+	int rxintr = 0;
+
+	if (console_charavail(d->console_handle))
+		rxintr = 1;
+
+	if (rxintr)
+		INTERRUPT_ASSERT(d->irq_scc_rx);
+	else
+		INTERRUPT_DEASSERT(d->irq_scc_rx);
+
+	/*  TODO: Hack/experiment for now...  */
+	if ((d->reg[CLMPCC_REG_IER] & 3) != 0)
+		INTERRUPT_ASSERT(d->irq_scc_tx);
+	else
+		INTERRUPT_DEASSERT(d->irq_scc_tx);
+}
+
+
+DEVICE_TICK(clmpcc)
+{
+	struct clmpcc_data *d = extra;
+	reassert_interrupts(d);
+}
 
 
 DEVICE_ACCESS(clmpcc)
@@ -150,6 +185,49 @@ DEVICE_ACCESS(clmpcc)
 	case CLMPCC_REG_RPILR:	/*  Rx Priority Interrupt Level Register  */
 	case CLMPCC_REG_TPILR:	/*  Tx Priority Interrupt Level Register  */
 	case CLMPCC_REG_MPILR:	/*  Modem Priority Interrupt Level Register  */
+		reassert_interrupts(d);
+		break;
+
+	case CLMPCC_REG_RISRl:	/*  Receive Interrupt Status Reg (low)  */
+		odata = 0x00;
+		break;
+
+	case CLMPCC_REG_TIR:	/*  Transmit Interrupt Register  */
+		odata = 0x40;	/*  see openbsd's cl_txintr  */
+		break;
+
+	case CLMPCC_REG_RIR:	/*  Rx Interrupt Register  */
+		odata = 0x00;
+		if (console_charavail(d->console_handle))
+			odata = 0x40;
+		break;
+
+	case CLMPCC_REG_RFOC:	/*  Rx FIFO Output Count  */
+		odata = 0;
+		if (console_charavail(d->console_handle))
+			odata = 1;
+		break;
+
+	case CLMPCC_REG_TFTC:	/*  Tx FIFO Transfer Count  */
+		odata = 0xff;	/*  bogus value  */
+		break;
+
+	case CLMPCC_REG_TEOIR:	/*  Tx End of Interrupt Register  */
+	case CLMPCC_REG_REOIR:	/*  Rx End of Interrupt Register  */
+		/*  TODO: Do something more realistic?  */
+		INTERRUPT_DEASSERT(d->irq_scc_tx);
+		break;
+
+	case CLMPCC_REG_TDR:
+		if (writeflag == MEM_WRITE) {
+			if (d->reg[CLMPCC_REG_CAR] == 0)
+				console_putchar(d->console_handle, idata);
+			else
+				fatal("[ clmpcc: TODO: transmit "
+				    "to channel, CAR!=0 ]\n");
+		} else {
+			odata = console_readchar(d->console_handle);
+		}
 		break;
 
 	default:if (writeflag == MEM_READ)
@@ -171,6 +249,7 @@ DEVICE_ACCESS(clmpcc)
 DEVINIT(clmpcc)
 {
 	struct clmpcc_data *d;
+	char tmpstr[100];
 
 	CHECK_ALLOCATION(d = malloc(sizeof(struct clmpcc_data)));
 	memset(d, 0, sizeof(struct clmpcc_data));
@@ -179,11 +258,34 @@ DEVINIT(clmpcc)
 	    console_start_slave(devinit->machine, devinit->name2 != NULL?
 	    devinit->name2 : devinit->name, devinit->in_use);
 
-	INTERRUPT_CONNECT(devinit->interrupt_path, d->irq);
+	/*
+	 *  Connect to the PCC2's interrupt pins:
+	 *
+	 *  The supplied interrupt_path is something like
+	 *  "machine[0].cpu[0].pcc2".
+	 *
+	 *  We want to use "machine[0].cpu[0].pcc2.x", where x is
+	 *  0xc, 0xd, 0xe, and 0xf (PCC2V_SCC_xxx).
+	 */
+	snprintf(tmpstr, sizeof(tmpstr), "%s.%i",
+	    devinit->interrupt_path, PCC2V_SCC_RXE);
+	INTERRUPT_CONNECT(tmpstr, d->irq_scc_rxe);
+	snprintf(tmpstr, sizeof(tmpstr), "%s.%i",
+	    devinit->interrupt_path, PCC2V_SCC_M);
+	INTERRUPT_CONNECT(tmpstr, d->irq_scc_m);
+	snprintf(tmpstr, sizeof(tmpstr), "%s.%i",
+	    devinit->interrupt_path, PCC2V_SCC_TX);
+	INTERRUPT_CONNECT(tmpstr, d->irq_scc_tx);
+	snprintf(tmpstr, sizeof(tmpstr), "%s.%i",
+	    devinit->interrupt_path, PCC2V_SCC_RX);
+	INTERRUPT_CONNECT(tmpstr, d->irq_scc_rx);
 
 	memory_device_register(devinit->machine->memory, devinit->name,
 	    devinit->addr, CLMPCC_LEN, dev_clmpcc_access, (void *)d,
 	    DM_DEFAULT, NULL);
+
+	machine_add_tickfunction(devinit->machine,
+	    dev_clmpcc_tick, d, DEV_CLMPCC_TICK_SHIFT);
 
 	/*
 	 *  NOTE:  Ugly cast into a pointer, because this is a convenient way

@@ -25,9 +25,14 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: cpu_m88k.c,v 1.39.2.1 2008-01-18 19:12:25 debug Exp $
- *
  *  Motorola M881x0 CPU emulation.
+ *
+ *  M88100: Disassembly of (almost?) everything, and execution of most
+ *          instructions. Exception handling and virtual memory has also
+ *          been implemented. Exceptions while in delay slots may not work
+ *          fully yet, though.
+ *
+ *  M88110: Not yet. 
  */
 
 #include <stdio.h>
@@ -719,9 +724,6 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 				cpu->cd.m88k.cr[M88K_CR_SNIP] = cpu->cd.m88k.delay_target | M88K_NIP_V;
 				cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->cd.m88k.cr[M88K_CR_SNIP]+4;
 			} else {
-				fatal("m88k delay slot with non data access: TODO\n");
-				exit(1);
-
 				/*  Perhaps something like this could work:  */
 				cpu->cd.m88k.cr[M88K_CR_SNIP] = (cpu->pc + 4) | M88K_NIP_V;
 				cpu->cd.m88k.cr[M88K_CR_SFIP] = cpu->cd.m88k.delay_target | M88K_NIP_V;

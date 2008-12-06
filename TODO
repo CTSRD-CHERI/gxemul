@@ -31,9 +31,17 @@ Release:
 
 -------------------------------------------------------------------------------
 
+To be translated prefetch:
+	o)  ONLY do this when able to read directly from memory
+	    pages, NOT when running via a slow device!
+
 M88K:
 	o)  Correct handling of FIP != NIP + 4, in rte, to
 	    simulate delayed branch stuff.
+	o)  Instruction across page boundary? I.e. when the delay slot
+	    is on a new page, and it gets a page fault. Currently, the
+	    XIP is set to the first instruction, not the delay slot!
+	    This is probably not correct. TODO: investigate.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.
@@ -52,8 +60,6 @@ M88K:
 	    to get some guest OS running. OpenBSD/mvme88k on MVME187
 	    seems to be the smartest path to follow for now.
 		o)  VME bus device
-		o)  PCC2
-		o)  Cirrus Logic serial port controller
 		o)  SMP for mvme197? 88110.
 	o)  Instruction disassembly, and implementation:
 		o)  See http://www.panggih.staff.ugm.ac.id/download/GCC/info/gcc.i5

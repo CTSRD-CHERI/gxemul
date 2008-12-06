@@ -37,7 +37,6 @@
  *	The interrupt controller mechanism (partially!)
  *
  *  TODO:
- *	Interrupts are not working well yet.
  *	All devices appart from the timers.
  */
 
@@ -221,6 +220,22 @@ static void reassert_interrupts(struct pcc2_data *d)
 			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
 	}
 
+	if (d->pcctwo_reg[PCCTWO_SCCTX] & PCC2_IRQ_IEN &&
+	    d->pcctwo_reg[PCCTWO_SCCTX] & PCC2_IRQ_INT) {
+		int intlevel = d->pcctwo_reg[PCCTWO_SCCTX] & PCC2_IRQ_IPL;
+		d->cur_int_vec[intlevel] = PCC2V_SCC_TX;
+		if (d->pcctwo_reg[PCCTWO_IPL] < intlevel)
+			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
+	}
+
+	if (d->pcctwo_reg[PCCTWO_SCCRX] & PCC2_IRQ_IEN &&
+	    d->pcctwo_reg[PCCTWO_SCCRX] & PCC2_IRQ_INT) {
+		int intlevel = d->pcctwo_reg[PCCTWO_SCCRX] & PCC2_IRQ_IPL;
+		d->cur_int_vec[intlevel] = PCC2V_SCC_RX;
+		if (d->pcctwo_reg[PCCTWO_IPL] < intlevel)
+			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
+	}
+
 	/*  TODO: Other interrupt sources.  */
 
 	/*  Assert interrupt on the CPU if the IPL is higher than the mask:  */
@@ -236,6 +251,45 @@ static void reassert_interrupts(struct pcc2_data *d)
 		INTERRUPT_ASSERT(d->cpu_irq);
 	else
 		INTERRUPT_DEASSERT(d->cpu_irq);
+}
+
+
+void pcctwo_interrupt_common(struct interrupt *interrupt, int assert)
+{
+	struct pcc2_data *d = interrupt->extra;
+
+	switch (interrupt->line) {
+
+	case PCC2V_SCC_TX:
+		if (assert)
+			d->pcctwo_reg[PCCTWO_SCCTX] |= PCC2_IRQ_INT;
+		else
+			d->pcctwo_reg[PCCTWO_SCCTX] &= ~PCC2_IRQ_INT;
+		break;
+
+	case PCC2V_SCC_RX:
+		if (assert)
+			d->pcctwo_reg[PCCTWO_SCCRX] |= PCC2_IRQ_INT;
+		else
+			d->pcctwo_reg[PCCTWO_SCCRX] &= ~PCC2_IRQ_INT;
+		break;
+
+	default:fatal("[ pcctwo_interrupt_common: TODO: line = %i ]\n",
+		    interrupt->line);
+		exit(1);
+	}
+
+	reassert_interrupts(d);
+}
+
+
+static void pcctwo_interrupt_assert(struct interrupt *interrupt)
+{
+	pcctwo_interrupt_common(interrupt, 1);
+}
+static void pcctwo_interrupt_deassert(struct interrupt *interrupt)
+{
+	pcctwo_interrupt_common(interrupt, 0);
 }
 
 
@@ -499,6 +553,7 @@ DEVICE_ACCESS(mvme187_iack)
 DEVINIT(pcc2)
 {
 	struct pcc2_data *d;
+	int i;
 
 	CHECK_ALLOCATION(d = malloc(sizeof(struct pcc2_data)));
 	memset(d, 0, sizeof(struct pcc2_data));
@@ -516,6 +571,25 @@ DEVINIT(pcc2)
 
 	/*  Connect to the CPU's interrupt pin:  */
 	INTERRUPT_CONNECT(devinit->interrupt_path, d->cpu_irq);
+
+	/*
+	 *  Register the 16 PCC2 interrupt vectors:
+	 */
+	for (i=0; i<16; i++) {
+		struct interrupt template;
+		char n[300];
+		snprintf(n, sizeof(n), "%s.pcc2.%i",
+		    devinit->interrupt_path, i);
+
+		memset(&template, 0, sizeof(template));
+		template.line = i;
+		template.name = n;
+		template.extra = d;
+		template.interrupt_assert = pcctwo_interrupt_assert;
+		template.interrupt_deassert = pcctwo_interrupt_deassert;
+
+		interrupt_handler_register(&template);
+	}
 
 	memory_device_register(devinit->machine->memory, "pcc2",
 	    devinit->addr, 4096, dev_pcc2_access, (void *)d,
