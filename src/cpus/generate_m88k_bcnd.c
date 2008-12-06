@@ -43,6 +43,7 @@ void print_function_name(int samepage, int n_bit, int m5)
 	case 0x1: printf("gt0"); break;
 	case 0x2: printf("eq0"); break;
 	case 0x3: printf("ge0"); break;
+	case 0x8: printf("maxneg"); break;
 	case 0xc: printf("lt0"); break;
 	case 0xd: printf("ne0"); break;
 	case 0xe: printf("le0"); break;
@@ -53,12 +54,13 @@ void print_function_name(int samepage, int n_bit, int m5)
 void print_operator(int m5)
 {
 	switch (m5) {
-	case 0x1: printf(">"); break;
-	case 0x2: printf("=="); break;
-	case 0x3: printf(">="); break;
-	case 0xc: printf("<"); break;
-	case 0xd: printf("!="); break;
-	case 0xe: printf("<="); break;
+	case 0x1: printf("> 0"); break;
+	case 0x2: printf("== 0"); break;
+	case 0x3: printf(">= 0"); break;
+	case 0x8: printf("== 0x80000000"); break;
+	case 0xc: printf("< 0"); break;
+	case 0xd: printf("!= 0"); break;
+	case 0xe: printf("<= 0"); break;
 	}
 }
 
@@ -76,7 +78,7 @@ void bcnd(int samepage, int n_bit, int m5)
 	if (!n_bit) {
 		printf("\tif ((int32_t)reg(ic->arg[0]) ");
 		print_operator(m5);
-		printf(" 0) {\n");
+		printf(") {\n");
 
 		if (samepage)
 			printf("\t\tcpu->cd.m88k.next_ic = (struct m88k_"
@@ -91,7 +93,7 @@ void bcnd(int samepage, int n_bit, int m5)
 		/*  n_bit, i.e. delay slot:  */
 		printf("\tint cond = (int32_t)reg(ic->arg[0]) ");
 		print_operator(m5);
-		printf(" 0;\n");
+		printf(";\n");
 
 		printf("\tSYNCH_PC;\n");
 
@@ -135,7 +137,7 @@ int main(int argc, char *argv[])
 	for (samepage=0; samepage<=1; samepage++)
 		for (n_bit=0; n_bit<=1; n_bit++)
 			for (m5=0; m5<=31; m5++) {
-				if (m5 == 1 || m5 == 2 || m5 == 3 ||
+				if (m5 == 1 || m5 == 2 || m5 == 3 || m5 == 8 ||
 				    m5 == 0xc || m5 == 0xd || m5 == 0xe)
 					bcnd(samepage, n_bit, m5);
 			}
@@ -149,7 +151,7 @@ int main(int argc, char *argv[])
 				if (m5 || n_bit || samepage)
 					printf(",\n");
 
-				if (m5 == 1 || m5 == 2 || m5 == 3 ||
+				if (m5 == 1 || m5 == 2 || m5 == 3 || m5 == 8 ||
 				    m5 == 0xc || m5 == 0xd || m5 == 0xe) {
 					if (samepage && n_bit)
 						printf("NULL");

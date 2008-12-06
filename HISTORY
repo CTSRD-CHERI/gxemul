@@ -3765,3 +3765,5 @@ Changelog for GXemul:
 		generated while single-stepping. (It was too annoying.)
 20081206	Implementing rudimentary tx/rx interrupts for clmpcc;
 		OpenBSD/mvme88k can input/output stuff in userland now :)
+		Implementing the "max negative number" condition of the
+		M88K bcnd instruction.

@@ -1158,10 +1158,11 @@ int m88k_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 			case 0x1: debug("gt0"); break;
 			case 0x2: debug("eq0"); break;
 			case 0x3: debug("ge0"); break;
+			case 0x8: debug("maxneg"); break;
 			case 0xc: debug("lt0"); break;
 			case 0xd: debug("ne0"); break;
 			case 0xe: debug("le0"); break;
-			default:  debug("%i", d);
+			default:  debug("unimplemented_%i", d);
 			}
 		} else {
 			debug("%i", d);
