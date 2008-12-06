@@ -209,7 +209,7 @@ DEVICE_ACCESS(clmpcc)
 		break;
 
 	case CLMPCC_REG_TFTC:	/*  Tx FIFO Transfer Count  */
-		odata = 0xff;	/*  bogus value  */
+		odata = 0x1f;	/*  bogus value  */
 		break;
 
 	case CLMPCC_REG_TEOIR:	/*  Tx End of Interrupt Register  */
