@@ -3767,3 +3767,4 @@ Changelog for GXemul:
 		OpenBSD/mvme88k can input/output stuff in userland now :)
 		Implementing the "max negative number" condition of the
 		M88K bcnd instruction.
+		Implementing the M88K triadic register 'rot' instruction.

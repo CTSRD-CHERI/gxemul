@@ -438,6 +438,7 @@ X(cmp)     { m88k_cmp(cpu, ic, reg(ic->arg[2])); }
  *  ext:       Extract bits, signed, W<O> taken from register s2.
  *  mak_imm:   Make bit field, immediate W<O>.
  *  mak:       Make bit field, W<O> taken from register s2.
+ *  rot:       Rotate s1 right, nr of steps taken from s2.
  *  clr:       Clear bits, W<O> taken from register s2.
  *  set:       Set bits, W<O> taken from register s2.
  *
@@ -499,6 +500,31 @@ X(mak)
 {
 	m88k_mak(cpu, ic, (reg(ic->arg[2]) >> 5) & 0x1f,
 	    reg(ic->arg[2]) & 0x1f);
+}
+static void m88k_rot(struct cpu *cpu, struct m88k_instr_call *ic, int n)
+{
+	uint32_t x = reg(ic->arg[1]);
+#if 1
+	if (n != 0) {
+		uint32_t mask = (1 << n) - 1;
+		uint32_t bits = x & mask;
+		x >>= n;
+		x |= (bits << (32-n));
+	}
+#else
+	/*  Naive implementation:  */
+	while (n > 0) {
+		int bit = x & 1;
+		x >>= 1;
+		x |= (bit << 31);
+		n --;
+	}
+#endif
+	reg(ic->arg[0]) = x;
+}
+X(rot)
+{
+	m88k_rot(cpu, ic, reg(ic->arg[2]) & 0x1f);
 }
 X(clr)
 {
@@ -1805,6 +1831,7 @@ X(to_be_translated)
 		case 0x90:	/*  ext    */
 		case 0x98:	/*  extu   */
 		case 0xa0:	/*  mak    */
+		case 0xa8:	/*  rot    */
 			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
 			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
 			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
@@ -1831,6 +1858,7 @@ X(to_be_translated)
 			case 0x90: ic->f = instr(ext);   break;
 			case 0x98: ic->f = instr(extu);  break;
 			case 0xa0: ic->f = instr(mak);   break;
+			case 0xa8: ic->f = instr(rot);   break;
 			}
 
 			/*  Optimization for  or rX,r0,rY  etc:  */
