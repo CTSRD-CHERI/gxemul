@@ -199,7 +199,7 @@ DEVICE_ACCESS(clmpcc)
 	case CLMPCC_REG_RIR:	/*  Rx Interrupt Register  */
 		odata = 0x00;
 		if (console_charavail(d->console_handle))
-			odata = 0x40;
+			odata = 0xc0;
 		break;
 
 	case CLMPCC_REG_RFOC:	/*  Rx FIFO Output Count  */
@@ -216,6 +216,7 @@ DEVICE_ACCESS(clmpcc)
 	case CLMPCC_REG_REOIR:	/*  Rx End of Interrupt Register  */
 		/*  TODO: Do something more realistic?  */
 		INTERRUPT_DEASSERT(d->irq_scc_tx);
+		INTERRUPT_DEASSERT(d->irq_scc_rx);
 		break;
 
 	case CLMPCC_REG_TDR:
