@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *   
  *
- *  $Id: dev_pvr.c,v 1.24.2.1 2008-01-18 19:12:29 debug Exp $
- *  
  *  COMMENT: PowerVR CLX2 (graphics controller used in the Dreamcast)
  *
  *  Implemented by reading http://www.ludd.luth.se/~jlo/dc/powervr-reg.txt and
@@ -134,7 +132,7 @@ struct pvr_data_alt {
 /*
  *  pvr_fb_invalidate():
  */
-static void pvr_fb_invalidate(struct pvr_data *d, int start, int stop)
+void pvr_fb_invalidate(struct pvr_data *d, int start, int stop)
 {
 	d->fb_update_x1 = d->fb_update_y1 = 0;
 	d->fb_update_x2 = d->xsize - 1;
@@ -161,7 +159,7 @@ static void pvr_vblank_timer_tick(struct timer *t, void *extra)
  *  This function should be called every time a register is written to which
  *  affects the framebuffer geometry (size, bit-depth, starting position, etc).
  */
-static void pvr_geometry_updated(struct pvr_data *d)
+void pvr_geometry_updated(struct pvr_data *d)
 {
 	/*  Make sure to redraw border on geometry changes.  */
 	d->border_updated = 1;
@@ -231,7 +229,7 @@ static void line(struct pvr_data *d, int x1, int y1, int x2, int y2)
  *  TODO: This function is totally bogus so far, the format of the Object
  *        Buffer is just a quick made-up hack to see if it works at all.
  */
-static void pvr_render(struct cpu *cpu, struct pvr_data *d)
+void pvr_render(struct cpu *cpu, struct pvr_data *d)
 {
 	int ob_ofs = REG(PVRREG_OB_ADDR);
 	int fb_base = REG(PVRREG_FB_RENDER_ADDR1);
@@ -323,7 +321,7 @@ static void pvr_reset(struct pvr_data *d)
  *  Initialize the Tile Accelerator. This makes the TA ready to receive
  *  commands (via address 0x10000000).
  */
-static void pvr_ta_init(struct cpu *cpu, struct pvr_data *d)
+void pvr_ta_init(struct cpu *cpu, struct pvr_data *d)
 {
 	REG(PVRREG_TA_OPB_POS) = REG(PVRREG_TA_OPB_START);
 	REG(PVRREG_TA_OB_POS) = REG(PVRREG_TA_OB_START);
@@ -342,7 +340,7 @@ static void pvr_ta_command(struct cpu *cpu, struct pvr_data *d, int list_ofs)
 	int16_t x, y;
 	uint32_t *ta = &d->ta[list_ofs];
 
-#if 0
+#if 1
 	/*  Dump the Tile Accelerator command for debugging:  */
 	{
 		int i;
@@ -356,7 +354,7 @@ static void pvr_ta_command(struct cpu *cpu, struct pvr_data *d, int list_ofs)
 	/*
 	 *  TODO: REWRITE!!!
 	 *
-	 *  THis is just a quick hack to see if I can get out at least
+	 *  This is just a quick hack to see if I can get out at least
 	 *  the pixel coordinates.
 	 */
 
@@ -422,6 +420,15 @@ DEVICE_ACCESS(pvr_ta)
 {
 	struct pvr_data *d = extra;
 	uint64_t idata = 0, odata = 0;
+
+#if 1
+	if (writeflag == MEM_WRITE)
+		debug("[ pvr_ta: WRITE addr=%08x value=%08x\n ]\n",
+		    (int)relative_addr, (int)idata);
+	else
+		debug("[ pvr_ta: READ addr=%08x ]\n",
+		    (int)relative_addr);
+#endif
 
 	if (writeflag == MEM_WRITE) {
 		idata = memory_readmax64(cpu, data, len);
@@ -620,6 +627,91 @@ DEVICE_ACCESS(pvr)
 		}
 		break;
 
+	case PVRREG_FB_CLIP_X:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: FB_CLIP_X set to min=%i, "
+			    "max=%i ]\n", (int) (idata & FB_CLIP_XY_MIN_MASK),
+			    (int) ((idata & FB_CLIP_XY_MAX_MASK)
+			    >> FB_CLIP_XY_MAX_SHIFT));
+			DEFAULT_WRITE;
+			pvr_geometry_updated(d);
+			pvr_fb_invalidate(d, -1, -1);
+		}
+		break;
+
+	case PVRREG_FB_CLIP_Y:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: FB_CLIP_Y set to min=%i, "
+			    "max=%i ]\n", (int) (idata & FB_CLIP_XY_MIN_MASK),
+			    (int) ((idata & FB_CLIP_XY_MAX_MASK)
+			    >> FB_CLIP_XY_MAX_SHIFT));
+			DEFAULT_WRITE;
+			pvr_geometry_updated(d);
+			pvr_fb_invalidate(d, -1, -1);
+		}
+		break;
+
+	case PVRREG_SHADOW:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: SHADOW set to enable=%i, "
+			    "intensity=%i ]\n",
+			    (int) (idata & SHADOW_ENABLE? 1 : 0),
+			    (int) (idata & SHADOW_INTENSITY_MASK));
+			DEFAULT_WRITE;
+			pvr_geometry_updated(d);
+			pvr_fb_invalidate(d, -1, -1);
+		}
+		break;
+
+	case PVRREG_OBJECT_CLIP:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: OBJECT_CLIP 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_OB_CFG:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: OB_CFG 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_UNKNOWN_80:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: UNKNOWN_80 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_UNKNOWN_84:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: UNKNOWN_84 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_BGPLANE_Z:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: BGPLANE_Z 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_BGPLANE_CFG:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: BGPLANE_CFG 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_ISP_CFG:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: ISP_CFG 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
 	case PVRREG_VRAM_CFG1:
 		if (writeflag == MEM_WRITE) {
 			debug("[ pvr: VRAM_CFG1 set to 0x%08"PRIx32,
@@ -658,7 +750,7 @@ DEVICE_ACCESS(pvr)
 
 	case PVRREG_FOG_TABLE_COL:
 		if (writeflag == MEM_WRITE) {
-			debug("[ pvr: FOG_TABLE_COL set to 0x%08"PRIx32" ]\n",
+			debug("[ pvr: FOG_TABLE_COL set to 0x%06"PRIx32" ]\n",
 			    (int) idata);
 			DEFAULT_WRITE;
 		}
@@ -666,8 +758,41 @@ DEVICE_ACCESS(pvr)
 
 	case PVRREG_FOG_VERTEX_COL:
 		if (writeflag == MEM_WRITE) {
-			debug("[ pvr: FOG_VERTEX_COL set to 0x%08"PRIx32" ]\n",
+			debug("[ pvr: FOG_VERTEX_COL set to 0x%06"PRIx32" ]\n",
 			    (int) idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_FOG_DENSITY:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: FOG_DENSITY set to 0x%08"PRIx32" ]\n",
+			    (int) idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_CLAMP_MAX:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: CLAMP_MAX set to 0x%06"PRIx32" ]\n",
+			    (int) idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_CLAMP_MIN:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: CLAMP_MIN set to 0x%06"PRIx32" ]\n",
+			    (int) idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_FB_RENDER_CFG:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: PVRREG_FB_RENDER_CFG set to 0x%08x ]\n",
+			    (int) idata);
+			/*  TODO  */
 			DEFAULT_WRITE;
 		}
 		break;
@@ -697,6 +822,10 @@ DEVICE_ACCESS(pvr)
 			pvr_fb_invalidate(d, -1, -1);
 			DEFAULT_WRITE;
 		}
+		break;
+
+	case PVRREG_HPOS_IRQ:
+		DEFAULT_WRITE;
 		break;
 
 	case PVRREG_RASEVTPOS:
@@ -766,6 +895,20 @@ DEVICE_ACCESS(pvr)
 		}
 		break;
 
+	case PVRREG_SYNCH_WIDTH:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: SYNCH_WIDTH 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_TSP_CFG:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: TSP_CFG 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
 	case PVRREG_DIWCONF:
 		if (writeflag == MEM_WRITE) {
 			if ((idata & DIWCONF_MAGIC_MASK) !=
@@ -785,8 +928,11 @@ DEVICE_ACCESS(pvr)
 
 	case PVRREG_DIWHSTRT:
 		if (writeflag == MEM_WRITE) {
-			debug("[ pvr: DIWHSTRT hpos=%i ]\n",
-			    (int)(idata & DIWVSTRT_HPOS_MASK));
+			int v = idata & DIWVSTRT_HPOS_MASK;
+			debug("[ pvr: DIWHSTRT hpos=%i (%s) ]\n",
+			    v, v == 174? "PAL" :
+			    (v == 164? "NTSC" :
+			    (v == 144? "VGA" : "unknown!")));
 			DEFAULT_WRITE;
 		}
 		break;
@@ -801,9 +947,36 @@ DEVICE_ACCESS(pvr)
 		}
 		break;
 
+	case PVRREG_SCALER_CFG:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: SCALER_CFG 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
 	case PVRREG_SYNC_STAT:
 		/*  TODO. Ugly hack, but it works:  */
 		odata = random();
+		break;
+
+	case PVRREG_MAGIC_110:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: MAGIC_110 set to 0x%08"PRIx32,
+			    (int) idata);
+			if (idata != MAGIC_110_VALUE)
+				fatal("{ MAGIC_110 = 0x%08"PRIx32" is not "
+				    "yet implemented! }", (int) idata);
+			debug(" ]\n");
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_TA_LUMINANCE:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: TA_LUMINANCE set to 0x%08"PRIx32" ]\n",
+			    (int) idata);
+			DEFAULT_WRITE;
+		}
 		break;
 
 	case PVRREG_TA_OPB_START:
@@ -870,6 +1043,15 @@ DEVICE_ACCESS(pvr)
 		}
 		break;
 
+	case PVRREG_TA_OPL_INIT:
+		if (writeflag == MEM_WRITE) {
+			idata &= PVR_TA_OPL_INIT_MASK;
+			debug("[ pvr: TA_OPL_INIT set to 0x%x ]\n",
+			    (int) idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
 	case PVRREG_TILEBUF_SIZE:
 		if (writeflag == MEM_WRITE) {
 			d->tilebuf_ysize = (idata & TILEBUF_SIZE_HEIGHT_MASK)
@@ -878,6 +1060,14 @@ DEVICE_ACCESS(pvr)
 			d->tilebuf_xsize ++; d->tilebuf_ysize ++;
 			debug("[ pvr: TILEBUF_SIZE set to %i x %i ]\n",
 			    d->tilebuf_xsize, d->tilebuf_ysize);
+			DEFAULT_WRITE;
+		}
+		break;
+
+	case PVRREG_TA_OPB_CFG:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: TA_OPB_CFG set to 0x%x ]\n",
+			    (int) idata);
 			DEFAULT_WRITE;
 		}
 		break;
@@ -907,6 +1097,8 @@ DEVICE_ACCESS(pvr)
 			    " ]\n", (int)relative_addr, (int)idata);
 			DEFAULT_WRITE;
 		}
+
+		exit(1);
 	}
 
 return_ok:

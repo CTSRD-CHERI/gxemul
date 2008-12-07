@@ -1,4 +1,5 @@
--------------------------------------------------------------------------------
+TODO list for GXemul
+====================
 
 Some things, in no specific order, that I'd like to fix:
 (Some items in this list are perhaps already fixed.)
@@ -7,7 +8,7 @@ Some things, in no specific order, that I'd like to fix:
 
 Goals for 0.4.7:
 
-  [ ]	M88K: Make it possible to run OpenBSD/mvme88k! This would
+  [/]	M88K: Make it possible to run OpenBSD/mvme88k! This would
 	be really cool.
 
   [X]   Update the HelenOS version to 0.3.0 (if it works) in the documentation.
@@ -16,7 +17,7 @@ Goals for 0.4.7:
 	good timer code, and which ones have broken timers. Try to fix
 	those that are broken.
 
-Release:
+Release checklist:
 	README
 	RELEASE NOTES
 	Send SVN dump to Sourceforge
@@ -36,6 +37,13 @@ To be translated prefetch:
 	    pages, NOT when running via a slow device!
 
 M88K:
+	o)  Implement devices etc. for one or more machine modes,
+	    to get some guest OS running. OpenBSD/mvme88k on MVME187
+	    seems to be the smartest path to follow for now.
+		o)  VME bus device
+			o)  SCSI
+			o)  Ethernet
+		o)  SMP for mvme197? 88110.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.
@@ -48,13 +56,8 @@ M88K:
 		o)  Move initialization from dev_mvme187 to somewhere
 		    more reasonable?
 	o)  Instruction trace by using bits of ??IP control regs.
-	o)  Breakpoints seem to be broken? How to indicate user space vs
-	    supervisor? (Also the "dump" instruction needs this support.)
-	o)  Implement devices etc. for one or more machine modes,
-	    to get some guest OS running. OpenBSD/mvme88k on MVME187
-	    seems to be the smartest path to follow for now.
-		o)  VME bus device
-		o)  SMP for mvme197? 88110.
+	o)  Breakpoints: How to indicate user space vs supervisor? (Also the
+	    "dump" instruction and other things need this support.)
 	o)  Instruction disassembly, and implementation:
 		o)  See http://www.panggih.staff.ugm.ac.id/download/GCC/info/gcc.i5
 		    for some strange cases of when "div" can fail (?)
@@ -120,6 +123,7 @@ SuperH:
 	    this mechanism for its reboot code (machine_reset).
 
 Dreamcast:
+	x)  Try to make the ROM from my real Dreamcast boot.
 	x)  G2 DMA
 	x)  LAN adapter (dev_mb8696x.c).  NetBSD root-on-nfs.
 	x)  PVR:  Lots of stuff. See dev_pvr.c.

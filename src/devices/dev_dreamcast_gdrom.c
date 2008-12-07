@@ -25,11 +25,10 @@
  *  SUCH DAMAGE.
  *   
  *
- *  $Id: dev_dreamcast_gdrom.c,v 1.5.2.1 2008-01-18 19:12:28 debug Exp $
- *  
  *  COMMENT: Dreamcast GD-ROM
  *
- *  TODO: This is just a dummy so far.
+ *  TODO: This is just a dummy so far. It is enough for NetBSD/dreamcast to
+ *  read the GD-ROM, but it shouldn't be assumed to work for anything else.
  */
 
 #include <stdio.h>
@@ -190,8 +189,8 @@ DEVICE_ACCESS(dreamcast_gdrom)
 		if (writeflag == MEM_READ) {
 			odata = d->busy;
 		} else {
-			fatal("Write to GDROM_BUSY?\n");
-			exit(1);
+			fatal("[ Write to GDROM_BUSY? ]\n");
+/*			exit(1);  */
 		}
 		break;
 
@@ -254,8 +253,8 @@ DEVICE_ACCESS(dreamcast_gdrom)
 		} else {
 			/*  NetBSD/dreamcast writes 0 here.  */
 			if (idata != 0) {
-				fatal("Write to GDROM_REGX?\n");
-				exit(1);
+				fatal("[ Write to GDROM_REGX? ]\n");
+				/*  exit(1);  */
 			}
 		}
 		break;
@@ -264,8 +263,8 @@ DEVICE_ACCESS(dreamcast_gdrom)
 		if (writeflag == MEM_READ) {
 			odata = d->stat;
 		} else {
-			fatal("Write to GDROM_STAT?\n");
-			exit(1);
+			fatal("[ Write to GDROM_STAT? ]\n");
+/*			exit(1);  */
 		}
 		break;
 
@@ -302,6 +301,8 @@ DEVICE_ACCESS(dreamcast_gdrom)
 				d->stat = 0;	/*  TODO  */
 				d->busy |= 0x08;
 				d->cmd_count = 0;
+			} else if (idata == 0xef) {
+				fatal("dreamcast_gdrom: ROM: TODO\n");
 			} else {
 				fatal("dreamcast_gdrom: unimplemented "
 				    "GDROM_COND = 0x%02x\n", (int)idata);
@@ -317,7 +318,7 @@ DEVICE_ACCESS(dreamcast_gdrom)
 			fatal("[ dreamcast_gdrom: write to addr 0x%x: 0x%x ]\n",
 			    (int)relative_addr, (int)idata);
 		}
-		exit(1);
+/*		exit(1);  */
 	}
 
 	if (writeflag == MEM_READ)

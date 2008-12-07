@@ -134,7 +134,21 @@
 #define	DIWMODE_C_MASK		0x00800000	/*  Clock double  */
 
 #define	PVRREG_FB_RENDER_CFG	0x48
-/*  TODO  */
+#define	  FB_RENDER_CFG_RENDER_MODE_MASK	0x07
+/*	render mode:
+		0: RGB0555  (2 bytes/pixel, alpha is inserted into bit15)
+		1: RGB565   (2 bytes/pixel)
+		2: ARGB4444 (2 bytes/pixel)
+		3: ARGB1555 (2 bytes/pixel, alpha is determined by threshold)
+		4: RGB888   (3 bytes/pixel)
+		5: RGB0888  (4 bytes/pixel, alpha is inserted into bit24-31)
+		6: ARGB8888 (4 bytes/pixel)
+		7: ARGB4444 (2 bytes/pixel, same as 2?)  */
+#define	  FB_RENDER_CFG_DITHER	(1 << 3)
+#define	  FB_RENDER_CFG_ALPHA_MASK	0x0000ff00
+#define	  FB_RENDER_CFG_ALPHA_SHFIT	8
+#define	  FB_RENDER_CFG_THRESHOLD_MASK	0x00ff0000
+#define	  FB_RENDER_CFG_THRESHOLD_SHFIT	8
 
 #define	PVRREG_FB_RENDER_MODULO	0x4c
 #define	FB_RENDER_MODULO_MASK	0x000001ff
@@ -157,6 +171,29 @@
 
 #define	PVRREG_FB_RENDER_ADDR2	0x64		/*  Even interlace lines  */
 
+#define	PVRREG_FB_CLIP_X	0x68		/*  horizontal pixel clipping area - 1  */
+#define	PVRREG_FB_CLIP_Y	0x6c		/*  vertical pixel clipping area - 1  */
+#define	  FB_CLIP_XY_MIN_MASK	  0x000007ff
+#define	  FB_CLIP_XY_MAX_MASK	  0x07ff0000	/*  e.g. 640 for x  */
+#define	  FB_CLIP_XY_MAX_SHIFT	  16
+
+#define	PVRREG_SHADOW		0x74
+#define	  SHADOW_INTENSITY_MASK	  0x000000ff
+#define	  SHADOW_ENABLE		  (1 << 8)
+
+#define	PVRREG_OBJECT_CLIP	0x78	/*  float, position of polygon culling  */
+
+#define	PVRREG_OB_CFG		0x7c	/*  TODO  */
+
+#define	PVRREG_UNKNOWN_80	0x80
+#define	PVRREG_UNKNOWN_84	0x84
+
+#define	PVRREG_BGPLANE_Z	0x88	/*  float  */
+
+#define	PVRREG_BGPLANE_CFG	0x8c	/*  TODO  */
+
+#define	PVRREG_ISP_CFG		0x98	/*  TODO  */
+
 #define	PVRREG_VRAM_CFG1	0xa0
 #define	VRAM_CFG1_GOOD_REFRESH_VALUE	0x20
 
@@ -167,10 +204,15 @@
 #define	VRAM_CFG3_UNKNOWN_MAGIC	  0x15d1c951
 
 #define	PVRREG_FOG_TABLE_COL	0xb0
-
 #define	PVRREG_FOG_VERTEX_COL	0xb4
+#define	PVRREG_FOG_DENSITY	0xb8	/*  TODO  */
 
-#define	PVRREG_RASEVTPOS	0xcc
+#define	PVRREG_CLAMP_MAX	0xbc		/*  maximum color  */
+#define	PVRREG_CLAMP_MIN	0xc0		/*  minimum color  */
+
+#define	PVRREG_HPOS_IRQ		0xc8		/*  http://www.ludd.luth.se/~jlo/dc/powervr-reg.txt  */
+
+#define	PVRREG_RASEVTPOS	0xcc		/*  vpos_irq according to powervr-reg.txt  */
 #define	RASEVTPOS_POS2_MASK	0x000003ff
 #define	RASEVTPOS_POS1_MASK	0x03ff0000
 #define	RASEVTPOS_POS1_SHIFT	16
@@ -214,6 +256,13 @@
 #define	BRDVERT_STOP(x)		((x) << 0)
 #define	BRDVERT_START(x)	((x) << 16)
 
+#define	PVRREG_SYNCH_WIDTH	0xe0		/*  http://www.ludd.luth.se/~jlo/dc/powervr-reg.txt  */
+
+#define	PVRREG_TSP_CFG		0xe4		/*  http://www.ludd.luth.se/~jlo/dc/powervr-reg.txt  */
+#define	    TSP_CFG_CBE		    (1 << 17)	/*  codebook enable  */
+#define	    TSP_CFG_IE		    (1 << 16)	/*  index enable  */
+#define	    TSP_CFG_MODULO_MASK	    0x1f	/*  modulo  */
+
 #define	PVRREG_DIWCONF		0xe8
 #define	DIWCONF_BLANK		(1U << 3)	/*  blank screen  */
 #define	DIWCONF_LR		(1U << 8)	/*  low-res (320 horizontal)  */
@@ -230,6 +279,8 @@
 #define	DIWVSTRT_V1(x)		((x) << 0)
 #define	DIWVSTRT_V2(x)		((x) << 16)
 
+#define	PVRREG_SCALER_CFG	0xf4
+
 #define	PVRREG_PALETTE_CFG	0x108
 #define	PVR_PALETTE_CFG_MODE_MASK	0x3
 #define	PVR_PALETTE_CFG_MODE_ARGB1555	 0x0
@@ -242,6 +293,11 @@
 #define	PVR_SYNC_STAT_INTERLACE_FIELD_EVEN	0x00000400
 #define	PVR_SYNC_STAT_HBLANK			0x00001000
 #define	PVR_SYNC_STAT_VBLANK			0x00002000
+
+#define	PVRREG_MAGIC_110	0x110
+#define	  MAGIC_110_VALUE	  0x93f39
+
+#define	PVRREG_TA_LUMINANCE	0x118	/*  todo  */
 
 #define	PVRREG_TA_OPB_START	0x124
 #define	TA_OPB_START_MASK	0x00ffff80

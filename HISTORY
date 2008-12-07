@@ -3771,3 +3771,4 @@ Changelog for GXemul:
 		The FIP != NIP+4 situation in the M88K rte instruction is now
 		supported (i.e. executing one instruction from the pipeline,
 		and then continuing somewhere else).
+		Continuing on Dreamcast PowerVR register names, etc.

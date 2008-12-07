@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *   
  *
- *  $Id: dev_dreamcast_g2.c,v 1.5.2.1 2008-01-18 19:12:28 debug Exp $
- *  
  *  COMMENT: Dreamcast G2 bus
  *
  *  Register offsets are from KOS, NetBSD sources, etc.
@@ -139,7 +137,7 @@ DEVICE_ACCESS(dreamcast_g2)
 			fatal("[ dreamcast_g2: write to addr 0x%x: 0x%x ]\n",
 			    (int)relative_addr, (int)idata);
 		}
-		exit(1);
+/*		exit(1); */
 	}
 
 	/*  Default write:  */
@@ -198,7 +196,7 @@ DEVICE_ACCESS(dreamcast_g2_extdma)
 			fatal("[ dreamcast_g2_extdma: write to addr 0x%x: "
 			    "0x%x ]\n", (int)relative_addr, (int)idata);
 		}
-		exit(1);
+/*		exit(1); */
 	}
 
 	/*  Default write:  */
@@ -226,13 +224,20 @@ DEVICE_ACCESS(dreamcast_g2_unknown)
 
 	switch (relative_addr) {
 
-	case 0x90:
-	case 0x94:
-		if (writeflag != MEM_WRITE || idata != 0x222) {
-			fatal("[ dreamcast_g2_unknown: unimplemented 0x90 ]\n");
+	case 0x80:
+		if (writeflag != MEM_WRITE || idata != 0x400) {
+			fatal("[ dreamcast_g2_unknown: unimplemented 0x80 ]\n");
 			exit(1);
 		}
 		break;
+
+	case 0x90:
+	case 0x94:
+/*		if (writeflag != MEM_WRITE || idata != 0x222) {
+			fatal("[ dreamcast_g2_unknown: unimplemented 0x90 ]\n");
+			exit(1);
+		}
+*/		break;
 
 	case 0xa0:
 	case 0xa4:
@@ -257,7 +262,7 @@ DEVICE_ACCESS(dreamcast_g2_unknown)
 			fatal("[ dreamcast_g2_unknown: write to addr 0x%x: "
 			    "0x%x ]\n", (int)relative_addr, (int)idata);
 		}
-		exit(1);
+/*		exit(1); */
 	}
 
 	/*  Default write:  */
@@ -282,11 +287,11 @@ DEVINIT(dreamcast_g2)
 	memory_device_register(machine->memory, devinit->name,
 	    0x005f6800, 0x100, dev_dreamcast_g2_access, d, DM_DEFAULT, NULL);
 
-	memory_device_register(machine->memory, devinit->name, 0x005f7800,
-	    0x100, dev_dreamcast_g2_extdma_access, d, DM_DEFAULT, NULL);
-
 	memory_device_register(machine->memory, devinit->name, 0x005f7400,
 	    0x100, dev_dreamcast_g2_unknown_access, d, DM_DEFAULT, NULL);
+
+	memory_device_register(machine->memory, devinit->name, 0x005f7800,
+	    0x100, dev_dreamcast_g2_extdma_access, d, DM_DEFAULT, NULL);
 
 	return 1;
 }

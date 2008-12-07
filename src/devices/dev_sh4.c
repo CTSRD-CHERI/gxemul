@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *   
  *
- *  $Id: dev_sh4.c,v 1.51.2.1 2008-01-18 19:12:30 debug Exp $
- *  
  *  COMMENT: SH4-specific memory mapped registers (0xf0000000 - 0xffffffff)
  *
  *  TODO: Among other things:
@@ -1181,9 +1179,14 @@ DEVICE_ACCESS(sh4)
 		if (writeflag == MEM_READ)
 			odata = cpu->cd.sh.dmac_chcr[dma_channel];
 		else {
-			/*  IP.BIN sets this to 0x12c0, and I want to know if
-			    some other guest OS uses other values.  */
-			if (idata != 0x12c0) {
+			/*
+			 *  IP.BIN sets this to 0x12c0, and the Dreamcast
+			 *  ROM sets it to 0x5440, 0x12c1, and 0x52c0. I want
+			 *  to know if some other guest OS uses other values.
+			 */
+			if (idata != 0x12c0 &&
+			    idata != 0x5440 && idata != 0x52c0 &&
+			    idata != 0x12c1) {
 				fatal("[ SH4 DMA: Attempt to set chcr "
 				    "to 0x%08"PRIx32" ]\n", (uint32_t) idata);
 				exit(1);
@@ -1289,6 +1292,7 @@ DEVICE_ACCESS(sh4)
 		} else {
 			debug("[ sh4: pdtra: read: TODO ]\n");
 			odata = d->pdtra;
+odata = random();
 		}
 		break;
 
