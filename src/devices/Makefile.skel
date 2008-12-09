@@ -1,6 +1,4 @@
 #
-#  $Id: Makefile.skel,v 1.147.2.1 2008-02-24 05:43:17 debug Exp $
-#
 #  Makefile for GXemul devices
 #
 
@@ -18,10 +16,10 @@ OBJS=device.o bus_isa.o bus_pci.o lk201.o \
 	dev_kn02.o dev_kn220.o dev_kn230.o dev_lca.o dev_le.o \
 	dev_lpt.o dev_m8820x.o dev_malta_lcd.o dev_mb8696x.o dev_mc146818.o \
 	dev_mk48txx.o dev_mp.o dev_mvme187.o dev_ns16550.o dev_ohci.o \
-	dev_pcc2.o dev_pccmos.o dev_pcic.o dev_pckbc.o dev_pmagja.o \
-	dev_pmppc.o dev_prep.o dev_ps2_ether.o dev_ps2_gif.o dev_ps2_gs.o \
-	dev_ps2_spd.o dev_ps2_stuff.o dev_pvr.o dev_px.o dev_ram.o \
-	dev_random.o dev_rs5c313.o dev_rtc.o dev_rtl8139c.o \
+	dev_osiop.o dev_pcc2.o dev_pccmos.o dev_pcic.o dev_pckbc.o \
+	dev_pmagja.o dev_pmppc.o dev_prep.o dev_ps2_ether.o dev_ps2_gif.o \
+	dev_ps2_gs.o dev_ps2_spd.o dev_ps2_stuff.o dev_pvr.o dev_px.o \
+	dev_ram.o dev_random.o dev_rs5c313.o dev_rtc.o dev_rtl8139c.o \
 	dev_scc.o dev_sfb.o dev_sgi_gbe.o dev_sgi_ip19.o dev_sgi_ip20.o \
 	dev_sgi_ip22.o dev_sgi_ip30.o dev_sgi_ip32.o dev_sgi_mardigras.o \
 	dev_sh4.o dev_sii.o dev_sn.o dev_ssc.o dev_turbochannel.o \

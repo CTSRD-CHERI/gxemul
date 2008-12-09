@@ -3772,3 +3772,4 @@ Changelog for GXemul:
 		supported (i.e. executing one instruction from the pipeline,
 		and then continuing somewhere else).
 		Continuing on Dreamcast PowerVR register names, etc.
+20081208	Beginning on a osiop (NCR 53C710 SCSI) device skeleton.
