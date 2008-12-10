@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: memory_rw.c,v 1.1.2.1 2008-01-18 19:12:27 debug Exp $
- *
  *  Generic memory_rw(), with special hacks for specific CPU families.
  *
  *  Example for inclusion from memory_mips.c:
@@ -231,11 +229,12 @@ not just the device in question.
 
 				/*
 				 *  If accessing the memory mapped device
-				 *  failed, then return with a DBE exception.
+				 *  failed, then return with an exception.
+				 *  (Architecture specific.)
 				 */
 				if (res <= 0 && !no_exceptions) {
-					debug("%s device '%s' addr %08lx "
-					    "failed\n", writeflag?
+					debug("[ %s device '%s' addr %08lx "
+					    "failed ]\n", writeflag?
 					    "writing to" : "reading from",
 					    mem->devices[i].name, (long)paddr);
 #ifdef MEM_MIPS
@@ -243,6 +242,16 @@ not just the device in question.
 					    cache == CACHE_INSTRUCTION?
 					    EXCEPTION_IBE : EXCEPTION_DBE,
 					    0, vaddr, 0, 0, 0, 0);
+#endif
+#ifdef MEM_M88K
+					/*  TODO: This is enough for
+					    OpenBSD/mvme88k's badaddr()
+					    implementation... but the
+					    faulting address should probably
+					    be included somewhere too!  */
+					m88k_exception(cpu, cache == CACHE_INSTRUCTION
+					    ? M88K_EXCEPTION_INSTRUCTION_ACCESS
+					    : M88K_EXCEPTION_DATA_ACCESS, 0);
 #endif
 					return MEMORY_ACCESS_FAILED;
 				}

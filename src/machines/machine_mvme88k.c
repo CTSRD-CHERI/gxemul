@@ -110,6 +110,9 @@ MACHINE_SETUP(mvme88k)
 		    "mk48txx addr=0x%x", 0xfffc0000);
 		device_add(machine, tmpstr);
 
+		/*  VME devices: TODO  */
+		device_add(machine, "unreadable addr=0xffff0000 len=0x10000");
+
 		break;
 
 	case MACHINE_MVME88K_188:
