@@ -99,6 +99,9 @@ MACHINE_SETUP(mvme88k)
 		machine->main_console_handle =
 		    (size_t) device_add(machine, tmpstr);
 
+		/*  ie0 ethernet: TODO  */
+		device_add(machine, "unreadable addr=0xfff46000 len=0x1000");
+
 		/*  53C710 SCSI at 0xfff47000:  */
 		snprintf(tmpstr, sizeof(tmpstr), "osiop irq=%s.cpu[%i].pcc2.%i "
 		    "addr=0x%08x", machine->path,
