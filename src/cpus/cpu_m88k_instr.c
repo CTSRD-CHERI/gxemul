@@ -965,11 +965,12 @@ X(rte)
 	if (!(cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_V)) {
 		/*  Neither the NIP nor the FIP valid?  */
 		if (!(cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_V)) {
-			fatal("[ TODO: Neither FIP nor NIP has the Valid bit set?! ]\n");
-
 			if ((cpu->cd.m88k.cr[M88K_CR_SFIP] & M88K_FIP_ADDR)
-			    != (cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR) + 4)
+			    != (cpu->cd.m88k.cr[M88K_CR_SNIP] & M88K_NIP_ADDR) + 4) {
+				fatal("[ TODO: Neither FIP nor NIP has the "
+				    "Valid bit set?! ]\n");
 				goto abort_dump;
+			}
 
 			/*  For now, continue anyway, using NIP.  */
 		} else {
