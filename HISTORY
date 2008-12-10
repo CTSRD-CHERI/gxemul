@@ -3773,3 +3773,4 @@ Changelog for GXemul:
 		and then continuing somewhere else).
 		Continuing on Dreamcast PowerVR register names, etc.
 20081208	Beginning on a osiop (NCR 53C710 SCSI) device skeleton.
+20081210	The SH4 Store Queue memory area is 0x04000000 long, not 0x40.

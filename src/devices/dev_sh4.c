@@ -92,6 +92,9 @@
 #endif
 
 struct sh4_data {
+	/*  Store Queues:  */
+	uint8_t		sq[32 * 2];
+
 	/*  SCIF (Serial controller):  */
 	uint16_t	scif_smr;
 	uint8_t		scif_brr;
@@ -828,6 +831,23 @@ DEVICE_ACCESS(sh4_pcic)
 
 	if (writeflag == MEM_READ)
 		memory_writemax64(cpu, data, len, odata);
+
+	return 1;
+}
+
+
+DEVICE_ACCESS(sh4_sq)
+{
+	struct sh4_data *d = extra;
+	int i;
+
+	if (writeflag == MEM_WRITE) {
+		for (i=0; i<len; i++)
+			d->sq[(relative_addr + i) % sizeof(d->sq)] = data[i];
+	} else {
+		for (i=0; i<len; i++)
+			data[i] = d->sq[(relative_addr + i) % sizeof(d->sq)];
+	}
 
 	return 1;
 }
@@ -1614,7 +1634,8 @@ DEVINIT(sh4)
 	dev_ram_init(machine, 0x1e000000, 0x8000, DEV_RAM_RAM, 0x0);
 
 	/*  0xe0000000: Store queues:  */
-	dev_ram_init(machine, 0xe0000000, 32 * 2, DEV_RAM_RAM, 0x0);
+	memory_device_register(machine->memory, "sh4_sq",
+	    0xe0000000, 0x04000000, dev_sh4_sq_access, d, DM_DEFAULT, NULL);
 
 
 	/*
