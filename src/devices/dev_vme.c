@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: dev_vme.c,v 1.5.2.1 2008-01-18 19:12:30 debug Exp $
- *
  *  COMMENT: VME bus
  *
  *  TODO: Probably almost everything.
@@ -47,7 +45,7 @@
 #include "mvme88k_vme.h"
 
 
-#define debug fatal
+/*  #define debug fatal  */
 
 
 #define	VME_LEN			0x1000
