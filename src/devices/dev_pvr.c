@@ -71,6 +71,18 @@
 #define	INTERNAL_FB_ADDR	0x300000000ULL
 #define	PVR_FB_TICK_SHIFT	19
 
+
+/*  DMA:  */
+#define	PVR_DMA_MEMLENGTH	0x100
+#define	N_PVR_DMA_REGS		(PVR_DMA_MEMLENGTH / sizeof(uint32_t))
+
+#define	PVR_ADDR		0x00
+#define	PVR_COUNT		0x04
+#define	PVR_MODE		0x08
+#define	PVR_LMMODE0		0x84  
+#define	PVR_LMMODE1		0x88
+
+
 #define	PVR_VBLANK_HZ		60.0
 #define	PVR_MARGIN		16
 
@@ -118,6 +130,9 @@ struct pvr_data {
 
 	uint8_t			*vram;
 	uint8_t			*vram_alt;
+
+	/*  DMA registers:  */
+	uint32_t		dma_reg[N_PVR_DMA_REGS];
 };
 
 struct pvr_data_alt {
@@ -127,6 +142,136 @@ struct pvr_data_alt {
 
 #define	REG(x)		(d->reg[(x)/sizeof(uint32_t)])
 #define	DEFAULT_WRITE	REG(relative_addr) = idata;
+
+
+DEVICE_ACCESS(pvr_dma)
+{
+	struct pvr_data *d = extra;
+	uint64_t idata = 0, odata = 0;
+
+	if (writeflag == MEM_WRITE)
+		idata = memory_readmax64(cpu, data, len);
+
+	/*  Default read:  */
+	if (writeflag == MEM_READ)
+		odata = d->dma_reg[relative_addr / sizeof(uint32_t)];
+
+	switch (relative_addr) {
+
+	case PVR_ADDR:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr_dma: ADDR set to 0x%08x ]\n",
+			    (int) idata);
+		}
+		break;
+
+	case PVR_COUNT:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr_dma: LEN set to 0x%08x ]\n",
+			    (int) idata);
+		}
+		break;
+
+	case PVR_MODE:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr_dma: MODE set to 0x%08x ]\n",
+			    (int) idata);
+		}
+		break;
+
+	/*  These are written to by the Dreamcast ROM, but I have not
+	    found them documented anywhere.  */
+	case 0x10:
+	case 0x14:
+		if (writeflag == MEM_WRITE && idata != 0x0cff0000) {
+			fatal("[ pvr_dma: TODO: unknown_0x%02x set to "
+			    "0x%08x ]\n", (int) relative_addr, (int) idata);
+			exit(1);
+		}
+		break;
+
+	case 0x18:
+	case 0x1c:
+	case 0x20:
+	case 0x40:
+	case 0x44:
+	case 0x48:
+	case 0x4c:
+		if (writeflag == MEM_WRITE && idata != 0) {
+			fatal("[ pvr_dma: TODO: unknown_0x%02x set to "
+			    "0x%08x ]\n", (int) relative_addr, (int) idata);
+			exit(1);
+		}
+		break;
+
+	case PVR_LMMODE0:	/*  0x84  */
+		if (writeflag == MEM_WRITE && idata != 0) {
+			fatal("[ pvr_dma: TODO: LMMODE0 set to "
+			    "0x%08x ]\n", (int) idata);
+			exit(1);
+		}
+		break;
+
+	case PVR_LMMODE1:	/*  0x84  */
+		if (writeflag == MEM_WRITE && idata != 0) {
+			fatal("[ pvr_dma: TODO: LMMODE1 set to "
+			    "0x%08x ]\n", (int) idata);
+			exit(1);
+		}
+		break;
+
+	case 0x8c:
+		if (writeflag == MEM_WRITE) {
+			fatal("[ pvr_dma: write to 0x8c: TODO ]\n");
+			exit(1);
+		} else {
+			/*  0x20 means G2 DMA in progress?  */
+			/*  0x11 = mask which has to do with AICA  */
+			odata = 0x11 * (random() & 1);
+		}
+		break;
+
+	case 0x9c:
+		/*  TODO  */
+		break;
+
+	case 0xa0:
+		if (writeflag == MEM_WRITE && idata != 0x80000000) {
+			fatal("[ pvr_dma: TODO: unknown_0x%02x set to "
+			    "0x%08x ]\n", (int) relative_addr, (int) idata);
+			exit(1);
+		}
+		break;
+
+	case 0xa4:
+	case 0xac:
+		if (writeflag == MEM_WRITE && idata != 0) {
+			fatal("[ pvr_dma: TODO: unknown_0x%02x set to "
+			    "0x%08x ]\n", (int) relative_addr, (int) idata);
+			exit(1);
+		}
+		break;
+
+	default:if (writeflag == MEM_READ) {
+			fatal("[ pvr_dma: read from addr 0x%x ]\n",
+			    (int)relative_addr);
+		} else {
+			fatal("[ pvr_dma: write to addr 0x%x: 0x%x ]\n",
+			    (int)relative_addr, (int)idata);
+		}
+
+		exit(1);
+	}
+
+	/*  Default write:  */
+	if (writeflag == MEM_WRITE)
+		d->dma_reg[relative_addr / sizeof(uint32_t)] = idata;
+
+	if (writeflag == MEM_READ)
+		memory_writemax64(cpu, data, len, odata);
+
+	return 1;
+}
 
 
 /*
@@ -1109,7 +1254,7 @@ return_ok:
 }
 
 
-static void extend_update_region(struct pvr_data *d, uint64_t low, 
+void pvr_extend_update_region(struct pvr_data *d, uint64_t low, 
 	uint64_t high)
 {
 	int vram_ofs = REG(PVRREG_DIWADDRL);
@@ -1208,7 +1353,7 @@ DEVICE_TICK(pvr_fb)
 
 	memory_device_dyntrans_access(cpu, cpu->mem, extra, &low, &high);
 	if ((int64_t)low != -1)
-		extend_update_region(d, low, high);
+		pvr_extend_update_region(d, low, high);
 
 	if (d->fb_update_x1 == -1)
 		return;
@@ -1358,7 +1503,7 @@ DEVICE_ACCESS(pvr_vram)
 	 */
 
 	memcpy(d->vram + relative_addr, data, len);
-	extend_update_region(d, relative_addr, relative_addr + len - 1);
+	pvr_extend_update_region(d, relative_addr, relative_addr + len - 1);
 
 	return 1;
 }
@@ -1395,8 +1540,13 @@ DEVINIT(pvr)
 	    8 * 1048576, dev_pvr_vram_alt_access, (void *)d_alt,
 	    DM_DEFAULT, NULL);
 
+	/*  Tile Accelerator command area at 0x10000000:  */
 	memory_device_register(machine->memory, "pvr_ta",
 	    0x10000000, sizeof(d->ta), dev_pvr_ta_access, d, DM_DEFAULT, NULL);
+
+	/*  PVR2 DMA registers at 0x5f6800:  */
+	memory_device_register(machine->memory, "pvr_dma", 0x005f6800,
+	    PVR_DMA_MEMLENGTH, dev_pvr_dma_access, d, DM_DEFAULT, NULL);
 
 	d->xsize = 640;
 	d->ysize = 480;

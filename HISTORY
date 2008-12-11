@@ -3777,3 +3777,5 @@ Changelog for GXemul:
 20081211	OpenBSD/m88k's badaddr() should now be able to detect
 		invalid addresses; memory_rw.c causes exceptions on reads
 		that fail (but no actual address is supplied yet).
+20081212	Moving the Dreamcast PowerVR2 DMA handling from
+		dev_dreamcast_g2 to dev_pvr, where it belongs.
