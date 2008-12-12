@@ -13,6 +13,9 @@ Goals for 0.4.7:
 
   [X]   Update the HelenOS version to 0.3.0 (if it works) in the documentation.
 
+  [ ]	If possible, make some more Dreamcast demos run (and/or get as
+	far as possible with the Dreamcast ROM).
+
   [ ]	Go through ALL emulation modes, to find out which ones have
 	good timer code, and which ones have broken timers. Try to fix
 	those that are broken.
@@ -125,16 +128,18 @@ MIPS:
 		    (http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi/hdwr/bks/SGI_Developer/books/R10K_UM/sgi_html/t5.Ver.2.0.book_284.html)
 
 SuperH:
+	x)  SH4 DMA (0xffa00000)
 	x)  Auto-generation of loads/stores! This should get rid of at least
 	    the endianness check in each load/store.
 	x)  Experiment with whether or not correct ITLB emulation is
 	    actually needed. (20070522: I'm turning it off today.)
 	x)  SH4 interrupt controller:
 		x)  MASKING should be possible!
-	x)  SH4 DMA (0xffa00000)
 	x)  SH4 UBC (0xff200000)
 	x)  Store queues can copy 32 bytes at a time, there's no need to
 	    copy individual 32-bit words. (Performance improvement.)
+	    (Except that e.g. the Dreamcast TA currently receives using
+	    32-bit words... hm)
 	x)  SH4 BSC (Bus State Controller)
 	x)  Instruction tracing should include symbols for branch targets,
 	    and so on, to make the output more human readable.
@@ -142,14 +147,22 @@ SuperH:
 	x)  NetBSD/evbsh3, hpcsh! Linux?
 	x)  Floating point speed!
 	x)  Floating point exception correctness.
+		E.g. fipr and the other "geometric" instructions should
+		throw an exception if the "precision" bit is wrong
+		(since the geometric instructions loose precision).
+		See the manual about this!
 	x)  Exceptions for unaligned load/stores. OpenBSD/landisk uses
 	    this mechanism for its reboot code (machine_reset).
 
 Dreamcast:
 	x)  Try to make the ROM from my real Dreamcast boot.
-	x)  G2 DMA
-	x)  LAN adapter (dev_mb8696x.c).  NetBSD root-on-nfs.
 	x)  PVR:  Lots of stuff. See dev_pvr.c.
+		x)  DMA
+		x)  Textures...
+		x)  Make it fast!
+	x)  G2 DMA
+	x)  SPU: Sound emulation (ARM cpu).
+	x)  LAN adapter (dev_mb8696x.c).  NetBSD root-on-nfs.
 	x)  Better GDROM support
 	x)  Modem
 	x)  PCI bridge/bus?
@@ -162,7 +175,6 @@ Dreamcast:
 		    nothing.)
 	x)  Make as many as possible of the KOS examples run!
 	x)  More homebrew demos/games.
-	x)  SPU: Sound emulation (ARM cpu).
 	x)  VME processor emulation? "(Sanyo LC8670 "Potato")" according to
 	    Wikipedia, LC86K87 according to Comstedt's page. See
 	    http://www.maushammer.com/vmu.html for a good description of
