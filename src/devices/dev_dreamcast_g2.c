@@ -199,7 +199,7 @@ exit(1);
 			if (idata != EXTDMA_MAGIC_VALUE	&&
 			    idata != EXTDMA_MAGIC_VALUE_ROM) {
 				fatal("Unimplemented g2 extdma magic "
-				    "vaule 0x%x\n", (int) idata);q
+				    "vaule 0x%x\n", (int) idata);
 				exit(1);
 			}
 		}
