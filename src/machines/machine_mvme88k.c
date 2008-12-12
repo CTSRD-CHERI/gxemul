@@ -53,6 +53,9 @@
  *	  0xfff46000             = 82596 Ethernet (ie0)
  *	  0xfff47000             = 53C710 SCSI (osiop0)
  *	  0xfffc0000             = MK48T08 (nvram0)
+ *
+ *  Note: It may turn out to be easier to support Lance ethernet (via VME)
+ *  than to support the 82596 ethernet controller.
  */
 
 #include <stdio.h>
