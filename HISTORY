@@ -3780,3 +3780,5 @@ Changelog for GXemul:
 20081212	Moving the Dreamcast PowerVR2 DMA handling from
 		dev_dreamcast_g2 to dev_pvr, where it belongs.
 20081213	Continuing on SH4 and PowerVR2 DMA.
+		Moving the unsupported guest OSes from guestoses.html to a
+		new page, unsupported.html, for clarity.
