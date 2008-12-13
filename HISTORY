@@ -3782,3 +3782,4 @@ Changelog for GXemul:
 20081213	Continuing on SH4 and PowerVR2 DMA.
 		Moving the unsupported guest OSes from guestoses.html to a
 		new page, unsupported.html, for clarity.
+		Continuing on the NCR 53C710 SCSI controller (dev_osiop.c).

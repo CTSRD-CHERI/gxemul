@@ -27,7 +27,10 @@
  *
  *  COMMENT: NCR 53C710 SCSI I/O Processor (SIOP)
  *
- *  TODO
+ *  Based on reverse-engineering OpenBSD's osiop.c, and a PDF manual:
+ *  "Symbios SYM53C710 SCSI I/O Processor Technical Manual, version 3.1".
+ *
+ *  TODO: Many things. Especially the SCRIPTS instruction set and DMA.
  */
 
 #include <stdio.h>
@@ -48,11 +51,69 @@
 #define	DEV_OSIOP_LENGTH	OSIOP_NREGS
 #define	OSIOP_CHIP_REVISION	2
 
+#define	OSIOP_TICK_SHIFT	16
+
 struct osiop_data {
 	struct interrupt	irq;
+	int			asserted;
 
 	uint8_t			reg[OSIOP_NREGS];
 };
+
+
+/*
+ *  osiop_update_sip_and_dip():
+ *
+ *  The SIP bit in ISTAT is basically a "summary" of whether there is
+ *  a non-masked SCSI interrupt. Similarly for DIP, for DMA.
+ */
+void osiop_update_sip_and_dip(struct osiop_data *d)
+{
+	d->reg[OSIOP_ISTAT] &= ~(OSIOP_ISTAT_SIP | OSIOP_ISTAT_DIP);
+
+	/*  Any enabled SCSI interrupts?  */
+	if (d->reg[OSIOP_SSTAT0] & d->reg[OSIOP_SIEN])
+		d->reg[OSIOP_ISTAT] |= OSIOP_ISTAT_SIP;
+
+	/*  Or enabled DMA interrupts?  */
+	if (d->reg[OSIOP_DSTAT] & d->reg[OSIOP_DIEN] & ~OSIOP_DIEN_RES)
+		d->reg[OSIOP_ISTAT] |= OSIOP_ISTAT_DIP;
+}
+
+
+/*
+ *  osiop_reassert_interrupts():
+ *
+ *  Recalculate interrupt assertions; if either of the SIP or DIP bits
+ *  in the ISTAT register is set, then we should cause an interrupt.
+ *
+ *  (The d->asserted stuff is to make sure we don't call
+ *  INTERRUPT_DEASSERT etc. too often when not necessary.)
+ */
+void osiop_reassert_interrupts(struct osiop_data *d)
+{
+	int assert = 0;
+
+	osiop_update_sip_and_dip(d);
+
+	if (d->reg[OSIOP_ISTAT] & (OSIOP_ISTAT_SIP | OSIOP_ISTAT_DIP))
+		assert = 1;
+
+	if (assert && !d->asserted)
+		INTERRUPT_ASSERT(d->irq);
+	if (!assert && d->asserted)
+		INTERRUPT_DEASSERT(d->irq);
+
+	d->asserted = assert;
+}
+
+
+DEVICE_TICK(osiop)
+{
+	struct osiop_data *d = extra;
+
+	osiop_reassert_interrupts(d);
+}
 
 
 DEVICE_ACCESS(osiop)
@@ -71,6 +132,9 @@ DEVICE_ACCESS(osiop)
 	}
 
 	if (len == sizeof(uint32_t)) {
+		/*
+		 *  NOTE: These are stored in HOST byte order!
+		 */
 		switch (origofs) {
 		case OSIOP_DSA:
 		case OSIOP_TEMP:
@@ -110,6 +174,8 @@ DEVICE_ACCESS(osiop)
 		/*  Used by OpenBSD/mvme88k during probing:  */
 		if (len == 4)
 			non1lenOk = 1;
+		if (writeflag == MEM_WRITE)
+			osiop_reassert_interrupts(d);
 		break;
 
 	case OSIOP_SCID:
@@ -120,6 +186,20 @@ DEVICE_ACCESS(osiop)
 		break;
 
 	case OSIOP_SBCL:
+		break;
+
+	case OSIOP_DSTAT:
+		/*  Cleared when read. Most likely not writable.  */
+		odata = d->reg[OSIOP_DSTAT];
+		d->reg[OSIOP_DSTAT] = OSIOP_DSTAT_DFE;
+		osiop_reassert_interrupts(d);
+		break;
+
+	case OSIOP_SSTAT0:
+		/*  Cleared when read. Most likely not writable.  */
+		odata = d->reg[OSIOP_SSTAT0];
+		d->reg[OSIOP_SSTAT0] = 0;
+		osiop_reassert_interrupts(d);
 		break;
 
 	case OSIOP_DSA:
@@ -139,13 +219,16 @@ DEVICE_ACCESS(osiop)
 		break;
 
 	case OSIOP_ISTAT:
-		if (writeflag == MEM_WRITE && (idata & 0x3f) != 0x00) {
-			fatal("osiop TODO: istat 0x%x\n", (int) idata);
-			exit(1);
-		}
+		if (writeflag == MEM_WRITE) {
+			if ((idata & 0x3f) != 0x00) {
+				fatal("osiop TODO: istat 0x%x\n", (int) idata);
+				exit(1);
+			}
 
-		d->reg[relative_addr] = idata &
-		    ~(OSIOP_ISTAT_ABRT | OSIOP_ISTAT_RST);
+			d->reg[relative_addr] = idata &
+			    ~(OSIOP_ISTAT_ABRT | OSIOP_ISTAT_RST);
+			osiop_reassert_interrupts(d);
+		}
 		break;
 
 	case OSIOP_CTEST8:
@@ -156,7 +239,13 @@ DEVICE_ACCESS(osiop)
 		break;
 
 	case OSIOP_DMODE:
+		break;
+
 	case OSIOP_DIEN:
+		if (writeflag == MEM_WRITE)
+			osiop_reassert_interrupts(d);
+		break;
+
 	case OSIOP_DWT:
 		break;
 
@@ -216,6 +305,9 @@ DEVINIT(osiop)
 	memory_device_register(devinit->machine->memory, "osiop",
 	    devinit->addr, DEV_OSIOP_LENGTH,
 	    dev_osiop_access, d, DM_DEFAULT, NULL);
+
+	machine_add_tickfunction(devinit->machine,
+	    dev_osiop_tick, d, OSIOP_TICK_SHIFT);
 
 	return 1;
 }

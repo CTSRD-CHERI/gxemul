@@ -236,6 +236,14 @@ static void reassert_interrupts(struct pcc2_data *d)
 			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
 	}
 
+	if (d->pcctwo_reg[PCCTWO_SCSIICR] & PCC2_IRQ_IEN &&
+	    d->pcctwo_reg[PCCTWO_SCSIICR] & PCC2_IRQ_INT) {
+		int intlevel = d->pcctwo_reg[PCCTWO_SCSIICR] & PCC2_IRQ_IPL;
+		d->cur_int_vec[intlevel] = PCC2V_SCSI;
+		if (d->pcctwo_reg[PCCTWO_IPL] < intlevel)
+			d->pcctwo_reg[PCCTWO_IPL] = intlevel;
+	}
+
 	/*  TODO: Other interrupt sources.  */
 
 	/*  Assert interrupt on the CPU if the IPL is higher than the mask:  */
@@ -259,6 +267,13 @@ void pcctwo_interrupt_common(struct interrupt *interrupt, int assert)
 	struct pcc2_data *d = interrupt->extra;
 
 	switch (interrupt->line) {
+
+	case PCC2V_SCSI:
+		if (assert)
+			d->pcctwo_reg[PCCTWO_SCSIICR] |= PCC2_IRQ_INT;
+		else
+			d->pcctwo_reg[PCCTWO_SCSIICR] &= ~PCC2_IRQ_INT;
+		break;
 
 	case PCC2V_SCC_TX:
 		if (assert)
