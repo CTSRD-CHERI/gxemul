@@ -377,12 +377,6 @@ void sh4_dmac_transfer(struct cpu *cpu, struct sh4_data *d, int channel)
 		 *  Single Address Mode
 		 *  External Address Space => external device
 		 */
-		if (dar != 0) {
-			fatal("DAR != 0? (0x%08x) maybe ok, but I want"
-			    " to catch this anyway to see if it happens...\n",
-			    (int) dar);
-			exit(1);
-		}
 
 		/*  Note: No transfer is done here! It is up to the
 		    external device to do the transfer itself!  */

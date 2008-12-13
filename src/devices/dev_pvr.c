@@ -131,7 +131,6 @@ struct pvr_data {
 	uint32_t		ta[64 / sizeof(uint32_t)];
 
 	uint8_t			*vram;
-	uint8_t			*vram_alt;
 
 	/*  DMA registers:  */
 	uint32_t		dma_reg[N_PVR_DMA_REGS];
@@ -212,8 +211,9 @@ void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 		dar = d->dma_reg[PVR_ADDR / sizeof(uint32_t)];
 
 		if (dar != 0x10000000) {
-			fatal("TODO: DMA to non-TA? dar=%08x\n", (int)dar);
-			exit(1);
+			fatal("[TODO: DMA to non-TA? dar=%08x\n", (int)dar);
+			cpu->cd.sh.dmac_chcr[channel] |= CHCR_TE;
+			break;
 		}
 
 		while (count > 0) {
@@ -472,10 +472,10 @@ static void line(struct pvr_data *d, int x1, int y1, int x2, int y2)
 		int px = (i * x2 + (256-i) * x1) >> 8;
 		int py = (i * y2 + (256-i) * y1) >> 8;
 		if (px > 0 && py > 0 && px < d->xsize && py < d->ysize) {
-			d->vram[(fb_base + (px + py * d->xsize)*
-			    d->bytes_per_pixel) % VRAM_SIZE] = 255;
-			d->vram[(fb_base + (px + py * d->xsize)*
-			    d->bytes_per_pixel + 1) % VRAM_SIZE] = 255;
+			int ofs = fb_base + (px + py * d->xsize) *
+                            d->bytes_per_pixel;
+			d->vram[(ofs+0) % VRAM_SIZE] = 255;
+			d->vram[(ofs+1) % VRAM_SIZE] = 255;
 		}
 	}
 }
@@ -506,6 +506,9 @@ void pvr_render(struct cpu *cpu, struct pvr_data *d)
 
 	for (;;) {
 		uint8_t cmd = d->vram[ob_ofs % VRAM_SIZE];
+
+		if (ob_ofs >= VRAM_SIZE)
+			fatal("[ pvr_render: WARNING: ob_ofs > VRAM_SIZE! ]\n");
 
 		if (cmd == 0)
 			break;
@@ -629,6 +632,9 @@ static void pvr_ta_command(struct cpu *cpu, struct pvr_data *d, int list_ofs)
 	}
 
 	ob_ofs = REG(PVRREG_TA_OB_POS);
+
+	if (ob_ofs >= VRAM_SIZE - 8)
+		fatal("[ WARNING: ob_ofs >= VRAM_SIZE - 8 ]\n");
 
 	switch (ta[0] >> 28) {
 	case 0x8:
@@ -1404,6 +1410,8 @@ void pvr_extend_update_region(struct pvr_data *d, uint64_t low,
 		if (d->fb_update_y2 < 0 || new_y2 > d->fb_update_y2)
 			d->fb_update_y2 = new_y2;
 
+		if (d->fb_update_y1 < 0)
+			d->fb_update_y1 = 0;
 		if (d->fb_update_y2 >= d->ysize)
 			d->fb_update_y2 = d->ysize - 1;
 	}
@@ -1501,10 +1509,10 @@ DEVICE_TICK(pvr_fb)
 			int fo = fb_ofs, vo = vram_ofs;
 			for (p=0; p<pixels_to_copy; p++) {
 				/*  0rrrrrgg(high) gggbbbbb(low)  */
-				fb[fo%VRAM_SIZE] = (vram[(vo+1)%VRAM_SIZE] << 1) & 0xf8;
-				fb[(fo+1)%VRAM_SIZE] = ((vram[vo%VRAM_SIZE] >> 2) & 0x38) +
+				fb[fo] = (vram[(vo+1)%VRAM_SIZE] << 1) & 0xf8;
+				fb[fo+1] = ((vram[vo%VRAM_SIZE] >> 2) & 0x38) +
 				    (vram[(vo+1)%VRAM_SIZE] << 6);
-				fb[(fo+2)%VRAM_SIZE] = (vram[vo%VRAM_SIZE] & 0x1f) << 3;
+				fb[fo+2] = (vram[vo%VRAM_SIZE] & 0x1f) << 3;
 				fo += 3; vo += 2;
 			}
 			vram_ofs += bytes_per_line;
@@ -1517,10 +1525,10 @@ DEVICE_TICK(pvr_fb)
 			int fo = fb_ofs, vo = vram_ofs;
 			for (p=0; p<pixels_to_copy; p++) {
 				/*  rrrrrggg(high) gggbbbbb(low)  */
-				fb[fo] = vram[vo+1] & 0xf8;
-				fb[fo+1] = ((vram[vo] >> 3) & 0x1c) +
-				    (vram[vo+1] << 5);
-				fb[fo+2] = (vram[vo] & 0x1f) << 3;
+				fb[fo] = vram[(vo+1)%VRAM_SIZE] & 0xf8;
+				fb[fo+1] = ((vram[vo%VRAM_SIZE] >> 3) & 0x1c) +
+				    (vram[(vo+1)%VRAM_SIZE] << 5);
+				fb[fo+2] = (vram[vo%VRAM_SIZE] & 0x1f) << 3;
 				fo += 3; vo += 2;
 			}
 			vram_ofs += bytes_per_line;
@@ -1531,7 +1539,7 @@ DEVICE_TICK(pvr_fb)
 	case 2: /*  RGB888 (24-bit)  */
 		for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
 			/*  TODO: Reverse colors, like in the 32-bit case?  */
-			memcpy(fb+fb_ofs, vram+vram_ofs, 3*pixels_to_copy);
+			memcpy(fb+fb_ofs, vram+(vram_ofs%VRAM_SIZE), 3*pixels_to_copy);
 			vram_ofs += bytes_per_line;
 			fb_ofs += d->fb->bytes_per_line;
 		}
@@ -1541,9 +1549,9 @@ DEVICE_TICK(pvr_fb)
 		for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
 			int fo = fb_ofs, vo = vram_ofs;
 			for (p=0; p<pixels_to_copy; p++) {
-				fb[fo] = vram[vo+2];
-				fb[fo+1] = vram[vo+1];
-				fb[fo+2] = vram[vo+0];
+				fb[fo] = vram[(vo+2)%VRAM_SIZE];
+				fb[fo+1] = vram[(vo+1)%VRAM_SIZE];
+				fb[fo+2] = vram[(vo+0)%VRAM_SIZE];
 				fo += 3; vo += 4;
 			}
 			vram_ofs += bytes_per_line;
@@ -1588,7 +1596,7 @@ DEVICE_ACCESS(pvr_vram_alt)
 			int addr = relative_addr + i;
 			addr = ((addr & 4) << 20) | (addr & 3)
 			    | ((addr & 0x7ffff8) >> 1);
-			data[i] = d->vram[addr];
+			data[i] = d->vram[addr % VRAM_SIZE];
 		}
 		return 1;
 	}
@@ -1601,7 +1609,7 @@ DEVICE_ACCESS(pvr_vram_alt)
 		int addr = relative_addr + i;
 		addr = ((addr & 4) << 20) | (addr & 3)
 		    | ((addr & 0x7ffff8) >> 1);
-		d->vram[addr] = data[i];
+		d->vram[addr % VRAM_SIZE] = data[i];
 	}
 
 	return 1;
@@ -1651,14 +1659,13 @@ DEVINIT(pvr)
 	    DM_DEFAULT, NULL);
 
 	/*  8 MB video RAM:  */
-	d->vram = zeroed_alloc(8 * 1048576);
+	d->vram = zeroed_alloc(VRAM_SIZE);
 	memory_device_register(machine->memory, "pvr_vram", 0x05000000,
-	    8 * 1048576, dev_pvr_vram_access, (void *)d,
+	    VRAM_SIZE, dev_pvr_vram_access, (void *)d,
 	    DM_DYNTRANS_OK | DM_DYNTRANS_WRITE_OK
 	    | DM_READS_HAVE_NO_SIDE_EFFECTS, d->vram);
 
 	/*  8 MB video RAM, when accessed at 0xa4000000:  */
-	d->vram_alt = zeroed_alloc(VRAM_SIZE);
 	memory_device_register(machine->memory, "pvr_alt_vram", 0x04000000,
 	    VRAM_SIZE, dev_pvr_vram_alt_access, (void *)d_alt,
 	    DM_DEFAULT, NULL);
