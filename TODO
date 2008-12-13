@@ -9,16 +9,9 @@ Some things, in no specific order, that I'd like to fix:
 Goals for 0.4.7:
 
   [/]	M88K: Make it possible to run OpenBSD/mvme88k! This would
-	be really cool.
-
-  [X]   Update the HelenOS version to 0.3.0 (if it works) in the documentation.
-
-  [ ]	If possible, make some more Dreamcast demos run (and/or get as
-	far as possible with the Dreamcast ROM).
-
-  [ ]	Go through ALL emulation modes, to find out which ones have
-	good timer code, and which ones have broken timers. Try to fix
-	those that are broken.
+	be really cool. Either via network (le0 via VME bus?) or disk
+	(NCR 73C710 SCSI "osiop"). It would be the first stable M88K mode,
+	being the fifth officially emulated architecture in GXemul.
 
 Release checklist:
 	README
@@ -32,6 +25,18 @@ Release checklist:
 	gxemul-users mail
 	Freshmeat
 	Wikipedia page (version number and date)
+	Graph: Release timeline (date on x axis, including release numbers,
+		and comments for major new features).
+
+Goals for 0.5.0:
+
+  [ ]	Start to SLOWLY convert to C++, instead of restarting from scratch
+	(which was my last experiment with GXemul/C++).
+
+  [ ]	Go through ALL emulation modes, to find out which ones have
+	good timer code, and which ones have broken timers. Try to fix
+	those that are broken.
+
 
 -------------------------------------------------------------------------------
 
@@ -43,30 +48,17 @@ M88K:
 	o)  Implement devices etc. for one or more machine modes,
 	    to get some guest OS running. OpenBSD/mvme88k on MVME187
 	    seems to be the smartest path to follow for now.
+		osiop0 at pcctwo0 offset 0x47000 ipl 2: NCR53C710 rev 2, 50MHz, SCSI ID 7
+		scsibus0 at osiop0: 8 targets 
+		vme0 at pcctwo0 offset 0x40000: system controller
+		vme0: using BUG parameters
+		vme0: 1phys 0x18000000-0xefff0000 to VME 0x18000000-0xefff0000
+		vme0: vme to cpu irq level 1:1
+		vmes0 at vme0
+		le0 at vmes0 addr 0xffff1200 ipl 3 vec 0x80: address 00:00:77:83:ac:56
+		le0: 128 receive buffers, 32 transmit buffers
+		ie0 at pcctwo0 offset 0x46000 ipl 3: address 08:00:3e:23:ed:e8
 		o)  SCSI
-
-pcctwo0 at bussw0 offset 0x0: rev 0
-nvram0 at pcctwo0 offset 0xc0000: MK48T08
-cl0 at pcctwo0 offset 0x45000 ipl 3: console
-osiop0 at pcctwo0 offset 0x47000 ipl 2: NCR53C710 rev 2, 50MHz, SCSI ID 7
-scsibus0 at osiop0: 8 targets 
-vme0 at pcctwo0 offset 0x40000: system controller
-vme0: using BUG parameters
-vme0: 1phys 0x18000000-0xefff0000 to VME 0x18000000-0xefff0000
-vme0: vme to cpu irq level 1:1
-vmes0 at vme0
-le0 at vmes0 addr 0xffff1200 ipl 3 vec 0x80: address 00:00:77:83:ac:56
-le0: 128 receive buffers, 32 transmit buffers
-vs0 at vmes0 addr 0xffff9000 ipl 2 vec 0x81 vec 0x82: SCSI ID 7/7
-scsibus1 at vs0: 8 targets
-sd0 at scsibus1 targ 0 lun 0: <COMPAQPC, DCAS-32160, S6CA> SCSI2 0/direct 
-fixed
-sd0: 2006MB, 8188 cyl, 3 head, 167 sec, 512 bytes/sec, 4110000 sec total
-scsibus2 at vs0: 8 targets
-vmel0 at vme0
-ie0 at pcctwo0 offset 0x46000 ipl 3: address 08:00:3e:23:ed:e8
-softraid0 at root
-
 		o)  Ethernet
 		o)  VME bus
 		o)  SMP for mvme197? 88110.
@@ -126,9 +118,10 @@ MIPS:
 		x)  memory space, exceptions, ...
 		x)  use cop0 framemask for tlb lookups
 		    (http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi/hdwr/bks/SGI_Developer/books/R10K_UM/sgi_html/t5.Ver.2.0.book_284.html)
+	o)  Playstation 2 with NetBSD? Perhaps USB keyboard is a big step
+	    on the way to running the whole OS. (?)
 
 SuperH:
-	x)  SH4 DMA (0xffa00000)
 	x)  Auto-generation of loads/stores! This should get rid of at least
 	    the endianness check in each load/store.
 	x)  Experiment with whether or not correct ITLB emulation is
@@ -136,6 +129,7 @@ SuperH:
 	x)  SH4 interrupt controller:
 		x)  MASKING should be possible!
 	x)  SH4 UBC (0xff200000)
+	x)  SH4 DMA (0xffa00000): non-dreamcast-PVR modes
 	x)  Store queues can copy 32 bytes at a time, there's no need to
 	    copy individual 32-bit words. (Performance improvement.)
 	    (Except that e.g. the Dreamcast TA currently receives using
@@ -157,9 +151,9 @@ SuperH:
 Dreamcast:
 	x)  Try to make the ROM from my real Dreamcast boot.
 	x)  PVR:  Lots of stuff. See dev_pvr.c.
-		x)  DMA
+		x)  DMA to non-0x10000000
 		x)  Textures...
-		x)  Make it fast!
+		x)  Make it fast! if possible
 	x)  G2 DMA
 	x)  SPU: Sound emulation (ARM cpu).
 	x)  LAN adapter (dev_mb8696x.c).  NetBSD root-on-nfs.
@@ -597,6 +591,43 @@ Better framebuffer and X-windows functionality:
 		    emulator)
 	o)  Generalize the framebuffer stuff by moving _ALL_ X11
 		specific code to a separate module.
+
+C++:
+	o)  SLOWLY try to convert the code from C to C++. What will this
+	    achieve? Well, one of the absolutely biggest problems in
+	    GXemul so far (in C) is that it has not been written in a
+	    way which would allow the following things:
+
+		x)  Adding and removing devices during runtime.
+		    This is hindered by the fact that the C code is
+		    written in a "construct only" kind of way, with no
+		    "destructors". It will be much easier to achieve this
+		    in C++ than having to rewrite EVERYTHING in C to
+		    use destructors.
+
+		x)  Serializing/deserializing a snapshot of the entire
+		    emulation to a file (which in the long run would
+		    allow things like "live migration").
+		    This will be much easier in C++ than in C.
+
+		x)  Allowing multiple _DIFFERENT_ CPU architectures per
+		    machine, and different cache configurations and
+		    busses.
+		    Also possible with C, but will be easier with C++.
+		    (Already tried some of it in the experimental C++
+		    branch.)
+		    Example: Dreamcast has both an SH4 and an ARM cpu.
+
+		x)  Controlled abort, when something fails. The C code
+		    right now is unable to use somthing similar to
+		    "exceptions", which would be good to abort emulation
+		    e.g. when something unimplemented is attempted.
+
+	    But for the future, it would also allow the code to be
+	    more easily maintained. Hopefully some of the template magic
+	    (which currently consists of programs creating temporary
+	    C files which are compiled into the program) can be replaced
+	    by native C++ templates instead.
 
 -------------------------------------------------------------------------------
 
