@@ -301,7 +301,107 @@ DEVICE_TICK(sh4)
 
 
 /*
- *  sh_sci_cmd():
+ *  sh4_dmac_transfer():
+ *
+ *  Called whenever a DMA transfer is to be executed.
+ *  Clears the lowest bit of the corresponding channel's CHCR when done.
+ */
+void sh4_dmac_transfer(struct cpu *cpu, struct sh4_data *d, int channel)
+{
+	/*  According to the SH7760 manual, bits 31..29 are ignored in  */
+	/*  both the SAR and DAR.  */
+	uint32_t sar = cpu->cd.sh.dmac_sar[channel] & 0x1fffffff;
+	uint32_t dar = cpu->cd.sh.dmac_dar[channel] & 0x1fffffff;
+	uint32_t count = cpu->cd.sh.dmac_tcr[channel] & 0x1fffffff;
+	uint32_t chcr = cpu->cd.sh.dmac_chcr[channel];
+	int transmit_size = 1;
+	int src_delta = 0, dst_delta = 0;
+	int cause_interrupt = chcr & CHCR_IE;
+
+	/*  DMAC not enabled? Then just return.  */
+	if (!(chcr & CHCR_TD))
+		return;
+
+	/*  Transfer End already set? Then don't transfer again.  */
+	if (chcr & CHCR_TE)
+		return;
+
+	/*  Special case: 0 means 16777216:  */
+	if (count == 0)
+		count = 16777216;
+
+	switch (chcr & CHCR_TS) {
+	case CHCR_TS_8BYTE: transmit_size = 8; break;
+	case CHCR_TS_1BYTE: transmit_size = 1; break;
+	case CHCR_TS_2BYTE: transmit_size = 2; break;
+	case CHCR_TS_4BYTE: transmit_size = 4; break;
+	case CHCR_TS_32BYTE: transmit_size = 32; break;
+	default: fatal("Unimplemented transmit size?! CHCR[%i] = 0x%08x\n",
+	    channel, chcr);
+	exit(1);
+	}
+
+	switch (chcr & CHCR_DM) {
+	case CHCR_DM_FIXED:       dst_delta = 0; break;
+	case CHCR_DM_INCREMENTED: dst_delta = 1; break;
+	case CHCR_DM_DECREMENTED: dst_delta = -1; break;
+	default: fatal("Unimplemented destination delta?! CHCR[%i] = 0x%08x\n",
+	    channel, chcr);
+	exit(1);
+	}
+
+	switch (chcr & CHCR_SM) {
+	case CHCR_SM_FIXED:       src_delta = 0; break;
+	case CHCR_SM_INCREMENTED: src_delta = 1; break;
+	case CHCR_SM_DECREMENTED: src_delta = -1; break;
+	default: fatal("Unimplemented source delta?! CHCR[%i] = 0x%08x\n",
+	    channel, chcr);
+	exit(1);
+	}
+
+	src_delta *= transmit_size;
+	dst_delta *= transmit_size;
+
+#ifdef SH4_DEGUG
+	fatal("|SH4 DMA transfer, channel %i\n", channel);
+	fatal("|Source addr:      0x%08x (delta %i)\n", (int) sar, src_delta);
+	fatal("|Destination addr: 0x%08x (delta %i)\n", (int) dar, dst_delta);
+	fatal("|Count:            0x%08x\n", (int) count);
+	fatal("|Transmit size:    0x%08x\n", (int) transmit_size);
+	fatal("|Interrupt:        %s\n", cause_interrupt? "yes" : "no");
+#endif
+
+	switch (chcr & CHCR_RS) {
+	case 0x200:
+		/*
+		 *  Single Address Mode
+		 *  External Address Space => external device
+		 */
+		if (dar != 0) {
+			fatal("DAR != 0? (0x%08x) maybe ok, but I want"
+			    " to catch this anyway to see if it happens...\n",
+			    (int) dar);
+			exit(1);
+		}
+
+		/*  Note: No transfer is done here! It is up to the
+		    external device to do the transfer itself!  */
+		break;
+
+	default:fatal("Unimplemented SH4 RS DMAC: 0x%08x\n",
+		    (int) (chcr & CHCR_RS));
+		exit(1);
+	}
+
+	if (cause_interrupt) {
+		fatal("TODO: sh4 dmac interrupt!\n");
+		exit(1);
+	}
+}
+
+
+/*
+ *  sh4_sci_cmd():
  *
  *  Handle a SCI command byte.
  *
@@ -312,7 +412,7 @@ DEVICE_TICK(sh4)
  *   4      DT: Data transfer
  *   3..0   Data or address bits
  */
-static void sh_sci_cmd(struct sh4_data *d, struct cpu *cpu)
+static void sh4_sci_cmd(struct sh4_data *d, struct cpu *cpu)
 {
 	uint8_t cmd = d->sci_curbyte;
 	int writeflag = cmd & 0x40? 0 : 1;
@@ -369,13 +469,13 @@ static void sh_sci_cmd(struct sh4_data *d, struct cpu *cpu)
 
 
 /*
- *  sh_sci_access():
+ *  sh4_sci_access():
  *
  *  Reads or writes a bit via the SH4's serial interface. If writeflag is
  *  non-zero, input is used. If writeflag is zero, a bit is outputed as
  *  the return value from this function.
  */
-static uint8_t sh_sci_access(struct sh4_data *d, struct cpu *cpu,
+static uint8_t sh4_sci_access(struct sh4_data *d, struct cpu *cpu,
 	int writeflag, uint8_t input)
 {
 	if (writeflag) {
@@ -405,7 +505,7 @@ static uint8_t sh_sci_access(struct sh4_data *d, struct cpu *cpu,
 			if (d->sci_bits_outputed == 8) {
 				/*  4 control bits and 4 address/data bits have
 				    been written.  */
-				sh_sci_cmd(d, cpu);
+				sh4_sci_cmd(d, cpu);
 				d->sci_bits_outputed = 0;
 			}
 		} else {
@@ -1133,43 +1233,45 @@ DEVICE_ACCESS(sh4)
 
 	/*************************************************/
 	/*  DMAC: DMA Controller                         */
+	/*  4 channels on SH7750                         */
+	/*  8 channels on SH7760                         */
 
-	case SH4_SAR3:
-		dma_channel ++;
-	case SH4_SAR2:
-		dma_channel ++;
-	case SH4_SAR1:
-		dma_channel ++;
-	case SH4_SAR0:
-		dma_channel ++;
+	case SH4_SAR7:	dma_channel ++;
+	case SH4_SAR6:	dma_channel ++;
+	case SH4_SAR5:	dma_channel ++;
+	case SH4_SAR4:	dma_channel ++;
+	case SH4_SAR3:	dma_channel ++;
+	case SH4_SAR2:	dma_channel ++;
+	case SH4_SAR1:	dma_channel ++;
+	case SH4_SAR0:	dma_channel ++;
 		if (writeflag == MEM_READ)
 			odata = cpu->cd.sh.dmac_sar[dma_channel];
 		else
 			cpu->cd.sh.dmac_sar[dma_channel] = idata;
 		break;
 
-	case SH4_DAR3:
-		dma_channel ++;
-	case SH4_DAR2:
-		dma_channel ++;
-	case SH4_DAR1:
-		dma_channel ++;
-	case SH4_DAR0:
-		dma_channel ++;
+	case SH4_DAR7:	dma_channel ++;
+	case SH4_DAR6:	dma_channel ++;
+	case SH4_DAR5:	dma_channel ++;
+	case SH4_DAR4:	dma_channel ++;
+	case SH4_DAR3:	dma_channel ++;
+	case SH4_DAR2:	dma_channel ++;
+	case SH4_DAR1:	dma_channel ++;
+	case SH4_DAR0:	dma_channel ++;
 		if (writeflag == MEM_READ)
 			odata = cpu->cd.sh.dmac_dar[dma_channel];
 		else
 			cpu->cd.sh.dmac_dar[dma_channel] = idata;
 		break;
 
-	case SH4_DMATCR3:
-		dma_channel ++;
-	case SH4_DMATCR2:
-		dma_channel ++;
-	case SH4_DMATCR1:
-		dma_channel ++;
-	case SH4_DMATCR0:
-		dma_channel ++;
+	case SH4_DMATCR7: dma_channel ++;
+	case SH4_DMATCR6: dma_channel ++;
+	case SH4_DMATCR5: dma_channel ++;
+	case SH4_DMATCR4: dma_channel ++;
+	case SH4_DMATCR3: dma_channel ++;
+	case SH4_DMATCR2: dma_channel ++;
+	case SH4_DMATCR1: dma_channel ++;
+	case SH4_DMATCR0: dma_channel ++;
 		if (writeflag == MEM_READ)
 			odata = cpu->cd.sh.dmac_tcr[dma_channel] & 0x00ffffff;
 		else {
@@ -1180,39 +1282,29 @@ DEVICE_ACCESS(sh4)
 				exit(1);
 			}
 
-			/*  Special case: writing 0 to the count register
-			    means 16777216:  */
-			if (idata == 0)
-				idata = 0x01000000;
 			cpu->cd.sh.dmac_tcr[dma_channel] = idata;
 		}
 		break;
 
-	case SH4_CHCR3:
-		dma_channel ++;
-	case SH4_CHCR2:
-		dma_channel ++;
-	case SH4_CHCR1:
-		dma_channel ++;
-	case SH4_CHCR0:
-		dma_channel ++;
-		if (writeflag == MEM_READ)
+	case SH4_CHCR7:	dma_channel ++;
+	case SH4_CHCR6:	dma_channel ++;
+	case SH4_CHCR5:	dma_channel ++;
+	case SH4_CHCR4:	dma_channel ++;
+	case SH4_CHCR3:	dma_channel ++;
+	case SH4_CHCR2:	dma_channel ++;
+	case SH4_CHCR1:	dma_channel ++;
+	case SH4_CHCR0:	dma_channel ++;
+		if (writeflag == MEM_READ) {
 			odata = cpu->cd.sh.dmac_chcr[dma_channel];
-		else {
-			/*
-			 *  IP.BIN sets this to 0x12c0, and the Dreamcast
-			 *  ROM sets it to 0x5440, 0x12c1, and 0x52c0. I want
-			 *  to know if some other guest OS uses other values.
-			 */
-			if (idata != 0x12c0 &&
-			    idata != 0x5440 && idata != 0x52c0 &&
-			    idata != 0x12c1) {
-				fatal("[ SH4 DMA: Attempt to set chcr "
-				    "to 0x%08"PRIx32" ]\n", (uint32_t) idata);
-				exit(1);
-			}
+		} else {
+			/*  CHCR_CHSET always reads back as 0:  */
+			idata &= ~CHCR_CHSET;
 
 			cpu->cd.sh.dmac_chcr[dma_channel] = idata;
+
+			/*  Perform a transfer?  */
+			if (idata & CHCR_TD)
+				sh4_dmac_transfer(cpu, d, dma_channel);
 		}
 		break;
 
@@ -1338,7 +1430,7 @@ odata = random();
 	/*  SCI:  Serial Interface  */
 
 	case SHREG_SCSPTR:
-		odata = sh_sci_access(d, cpu,
+		odata = sh4_sci_access(d, cpu,
 		    writeflag == MEM_WRITE? 1 : 0, idata);
 
 		/*
