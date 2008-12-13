@@ -25,7 +25,7 @@
  *  SUCH DAMAGE.
  *   
  *
- *  COMMENT: NCR53C710 SCSI controller
+ *  COMMENT: NCR 53C710 SCSI I/O Processor (SIOP)
  *
  *  TODO
  */

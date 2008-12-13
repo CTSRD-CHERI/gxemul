@@ -55,7 +55,7 @@ dev_mp.c  Generic Multi-processor controller for the test machines
 dev_mvme187.c  MVME187-specific devices and control registers
 dev_ns16550.c  NS16550 serial controller
 dev_ohci.c  USB Open Host Controller Interface
-dev_osiop.c  NCR53C710 SCSI controller
+dev_osiop.c  NCR 53C710 SCSI I/O Processor (SIOP)
 dev_pcc2.c  Peripheral Channel Controller (PCC2) bus (used in MVME machines)
 dev_pccmos.c  PC CMOS/RTC device (ISA ports 0x70 and 0x71)
 dev_pcic.c  Intel 82365SL PC Card Interface Controller
