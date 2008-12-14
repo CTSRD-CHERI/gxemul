@@ -202,6 +202,10 @@ DEVICE_ACCESS(clmpcc)
 			odata = 0xc0;
 		break;
 
+	case CLMPCC_REG_LICR:	/*  Local Interrupt Status Register  */
+		odata = 0;	/*  channel nr << 2  */
+		break;
+
 	case CLMPCC_REG_RFOC:	/*  Rx FIFO Output Count  */
 		odata = 0;
 		if (console_charavail(d->console_handle))

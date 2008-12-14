@@ -116,6 +116,9 @@ MACHINE_SETUP(mvme88k)
 		    "mk48txx addr=0x%x", 0xfffc0000);
 		device_add(machine, tmpstr);
 
+		/*  VMES (?): TODO  */
+		device_add(machine, "unreadable addr=0xff780000 len=0x80000");
+
 		/*  VME devices: TODO  */
 		device_add(machine, "unreadable addr=0xffff0000 len=0x10000");
 

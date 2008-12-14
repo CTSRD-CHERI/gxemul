@@ -489,6 +489,12 @@ DEVICE_ACCESS(pcc2)
 		}
 		break;
 
+	case PCCTWO_SCCRXIACK:
+		/*  TODO. Hm. Is this enough?  */
+		d->pcctwo_reg[PCCTWO_SCCRX] &= ~PCC2_IRQ_INT;
+		reassert_interrupts(d);
+		break;
+
 	case PCCTWO_SCSIICR:
 		if (len != 1) {
 			fatal("TODO: pcc2: non-byte reads and writes of "
