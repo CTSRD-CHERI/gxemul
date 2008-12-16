@@ -6,7 +6,7 @@ Some things, in no specific order, that I'd like to fix:
 
 -------------------------------------------------------------------------------
 
-Goals for 0.4.7:
+Goals for 0.4.7:  (Perhaps make a release during early 2009? If possible.)
 
   [/]	M88K: Make it possible to run OpenBSD/mvme88k! This would
 	be really cool. Either via network (le0 via VME bus?) or disk
@@ -25,17 +25,26 @@ Release checklist:
 	gxemul-users mail
 	Freshmeat
 	Wikipedia page (version number and date)
+	Send mail to package maintainers (if they are not subscribed
+		to the mailing list(s))
+	If new arch:
+		Linux-MIPS wiki page
+		Ohloh description page
 	Graph: Release timeline (date on x axis, including release numbers,
 		and comments for major new features).
 
-Goals for 0.5.0:
+Goals for 0.5.x:
 
-  [ ]	Start to SLOWLY convert to C++, instead of restarting from scratch
-	(which was my last experiment with GXemul/C++).
+  [ ]	Start to SLOWLY convert to C++. Instead of restarting from scratch
+	(which was my last experiment with GXemul/C++), only translate
+	things that make sense.
 
   [ ]	Go through ALL emulation modes, to find out which ones have
 	good timer code, and which ones have broken timers. Try to fix
 	those that are broken.
+
+  [ ]	Perhaps continue on one or more unfinished architectures, such as
+	Alpha or SPARC?
 
 
 -------------------------------------------------------------------------------
@@ -62,6 +71,8 @@ M88K:
 		o)  Ethernet
 		o)  VME bus
 		o)  SMP for mvme197? 88110.
+	o)  Instruction combination for the sched_idle loop on OpenBSD/mvme88k,
+	    so that the host idles.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.
