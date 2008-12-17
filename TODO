@@ -44,7 +44,7 @@ Goals for 0.5.x:
 	those that are broken.
 
   [ ]	Perhaps continue on one or more unfinished architectures, such as
-	Alpha or SPARC?
+	Alpha or SPARC? Or something new like M32R?
 
 
 -------------------------------------------------------------------------------
@@ -286,6 +286,10 @@ ARM:
 	o)  Debian/cats crashes because of unimplemented coproc stuff.
 	    fix this?
 
+M32R:
+	o)  Everything.
+	o)  /home/debug/emul/m32r/linux-2.6.14.6-20060127-revE.root/boot/vmlinux-2.6.14.6-20060127-revE
+
 Test machines:
 	o)  dev_fb 2D acceleration functions, to make dev_fb useful for
 	    simple graphical OSes:
@@ -304,6 +308,9 @@ Debugger:
 	o)  How does SMP debugging work? Does it simply use "threads"?
 	    What if the guest OS (running on an emulated SMP machine)
 	    has a usertask running, with userland threads?
+	o)  Count reads/writes to memory areas, for statistics and breakpoints!
+	    (Don't insert those pages into the fast load/store lookup tables,
+	    or course.)
 	o)  Try to make the debugger more modular and, if possible, reentrant!
 	o)  Memory dumps should be able to dump both physical and
 	    virtual emulated memory.
