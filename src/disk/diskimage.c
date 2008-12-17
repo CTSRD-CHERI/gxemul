@@ -744,7 +744,8 @@ int diskimage_add(struct machine *machine, char *fname)
 
 	/*  ... but some machines use SCSI by default:  */
 	if (machine->machine_type == MACHINE_PMAX ||
-	    machine->machine_type == MACHINE_ARC)
+	    machine->machine_type == MACHINE_ARC ||
+	    machine->machine_type == MACHINE_MVME88K)
 		d->type = DISKIMAGE_SCSI;
 
 	if (prefix_i + prefix_f + prefix_s > 1) {

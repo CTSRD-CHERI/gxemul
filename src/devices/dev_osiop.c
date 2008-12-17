@@ -29,8 +29,6 @@
  *
  *  Based on reverse-engineering OpenBSD's osiop.c, and a PDF manual:
  *  "Symbios SYM53C710 SCSI I/O Processor Technical Manual, version 3.1".
- *
- *  TODO: Many things. Especially the SCRIPTS instruction set and DMA.
  */
 
 #include <stdio.h>
@@ -48,10 +46,12 @@
 
 #include "osiopreg.h"
 
+#define debug fatal
+
 #define	DEV_OSIOP_LENGTH	OSIOP_NREGS
 #define	OSIOP_CHIP_REVISION	2
 
-#define	OSIOP_TICK_SHIFT	16
+#define	OSIOP_TICK_SHIFT	18
 
 struct osiop_data {
 	struct interrupt	irq;
@@ -108,6 +108,151 @@ void osiop_reassert_interrupts(struct osiop_data *d)
 }
 
 
+/*
+ *  osiop_get_next_scripts_word():
+ *
+ *  Reads a 32-bit word at physical memory location DSP, and returns it
+ *  in host order.
+ *
+ *  (NOTE/TODO: This could be optimized to read from a host page directly,
+ *  but then care must be taken when the instruction pointer (DSP) goes
+ *  over a page boundary to the next page. At least the page lookup
+ *  could be "cached"...)
+ */
+uint32_t osiop_get_next_scripts_word(struct cpu *cpu, struct osiop_data *d)
+{
+	uint32_t dsp = *(uint32_t*) &d->reg[OSIOP_DSP];
+	uint32_t instr;
+
+	cpu->memory_rw(cpu, cpu->mem, dsp, (unsigned char *) &instr,
+	    sizeof(instr), MEM_READ, NO_EXCEPTIONS | PHYSICAL);
+
+	dsp += sizeof(instr);
+	*(uint32_t*) &d->reg[OSIOP_DSP] = dsp;
+
+	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
+		instr = LE32_TO_HOST(instr);
+	else
+		instr = BE32_TO_HOST(instr);
+
+	return instr;
+}
+
+
+/*
+ *  osiop_execute_scripts():
+ *
+ *  Interprets SCRIPTS machine code by reading one instruction word at a time,
+ *  and executing it.
+ */
+void osiop_execute_scripts(struct cpu *cpu, struct osiop_data *d)
+{
+	for (;;) {
+		uint32_t dsp = *(uint32_t*) &d->reg[OSIOP_DSP];
+		uint32_t instr1 = osiop_get_next_scripts_word(cpu, d);
+		uint32_t instr2 = osiop_get_next_scripts_word(cpu, d);
+		uint8_t dcmd;
+		int opcode, relative_addressing, table_indirect_addressing;
+		int select_with_atn;
+
+		/*
+		 *  According to the 53C710 manual: the first 32-bit word is
+		 *  always loaded into DCMD and DBC, the second into DSPS,
+		 *  the third (only used by memory move instructions) is loaded
+		 *  into the TEMP register.
+		 */
+
+		dcmd = d->reg[OSIOP_DCMD] = instr1 >> 24;
+		*(uint32_t*) &d->reg[OSIOP_DBC] = instr1 & 0x00ffffff;
+		*(uint32_t*) &d->reg[OSIOP_DSPS] = instr2;
+
+		opcode = (dcmd >> 3) & 7;
+
+		debug("{ SCRIPTS instr at 0x%08x: 0x%08x 0x%08x",
+		    (int) dsp, (int) instr1, (int) instr2);
+
+		switch (dcmd & 0xc0) {
+
+		case 0x00:
+			debug(": BLOCK MOVE");
+			{
+				fatal(": TODO\n");
+				exit(1);
+			}
+			break;
+
+		case 0x40:
+			/*  I/O or Read/Write  */
+			relative_addressing = dcmd & 4;
+			table_indirect_addressing = dcmd & 2;
+			select_with_atn = dcmd & 1;
+
+			switch (opcode) {
+			case 0:	debug(": SELECT");
+				break;
+/*			case 1:	debug(": WAIT DISCONNECT");
+				break;
+			case 2:	debug(": WAIT RESELECT");
+				break;
+			case 3:	debug(": SET");
+				break;
+			case 4:	debug(": CLEAR");
+				break;
+*/
+			default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
+				    dcmd, opcode);
+				exit(1);
+			}
+
+			if (select_with_atn)
+				debug(" ATN");
+			if (table_indirect_addressing)
+				debug(" FROM");
+			if (relative_addressing)
+				debug(", REL");
+
+/*        SELECT ATN FROM ds_Device, REL(reselect)*/
+/*  TODO: Continue here.  */
+exit(1);
+			break;
+
+		case 0x80:
+			/*  Transfer Control  */
+			switch (opcode) {
+/*			case 0:	debug(": JUMP");
+				break;
+			case 1:	debug(": CALL");
+				break;
+			case 2:	debug(": RETURN");
+				break;
+			case 3:	debug(": INTERRUPT");
+				break;
+*/			default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
+				    dcmd, opcode);
+				exit(1);
+			}
+
+			break;
+
+		case 0xc0:
+			debug(": MEMORY MOVE");
+			/*  TODO: third instruction word!  */
+			{
+				fatal(": TODO\n");
+				exit(1);
+			}
+			break;
+
+		default:fatal(": UNIMPLEMENTED dcmd 0x%02x\n", dcmd);
+			exit(1);
+		}
+
+		debug(" }\n");
+
+	}
+}
+
+
 DEVICE_TICK(osiop)
 {
 	struct osiop_data *d = extra;
@@ -123,6 +268,8 @@ DEVICE_ACCESS(osiop)
 	struct osiop_data *d = extra;
 	int origofs = relative_addr;
 	int non1lenOk = 0;
+
+	idata = memory_readmax64(cpu, data, len);
 
 	/*  Make relative_addr suit addresses in osiopreg.h:  */
 	if (cpu->byte_order == EMUL_BIG_ENDIAN) {
@@ -146,22 +293,22 @@ DEVICE_ACCESS(osiop)
 		case OSIOP_ADDER:
 			relative_addr = origofs;
 			non1lenOk = 1;
-			if (writeflag == MEM_WRITE) {
+
+			if (writeflag == MEM_WRITE)
 				*(uint32_t*) &d->reg[origofs] = idata;
-			} else {
+			else
 				odata = *(uint32_t*) &d->reg[origofs];
-			}
+
 			break;
 		}
 	} else {
 		/*  Byte access:  */
 		oldreg = d->reg[relative_addr];
-		if (writeflag == MEM_WRITE) {
-			idata = memory_readmax64(cpu, data, len);
+
+		if (writeflag == MEM_WRITE)
 			d->reg[relative_addr] = idata;
-		} else {
+		else
 			odata = oldreg;
-		}
 	}
 
 	switch (relative_addr) {
@@ -186,6 +333,8 @@ DEVICE_ACCESS(osiop)
 		break;
 
 	case OSIOP_SBCL:
+		if (writeflag == MEM_WRITE)
+			debug("[ osiop: SBCL set to 0x%x ]\n", (int) idata);
 		break;
 
 	case OSIOP_DSTAT:
@@ -203,6 +352,8 @@ DEVICE_ACCESS(osiop)
 		break;
 
 	case OSIOP_DSA:
+		if (writeflag == MEM_WRITE)
+			debug("[ osiop: DSA set to 0x%x ]\n", (int) idata);
 		break;
 
 	case OSIOP_CTEST0:
@@ -216,6 +367,8 @@ DEVICE_ACCESS(osiop)
 		break;
 
 	case OSIOP_TEMP:
+		if (writeflag == MEM_WRITE)
+			debug("[ osiop: TEMP set to 0x%x ]\n", (int) idata);
 		break;
 
 	case OSIOP_ISTAT:
@@ -236,6 +389,10 @@ DEVICE_ACCESS(osiop)
 		break;
 
 	case OSIOP_DSP:
+		if (writeflag == MEM_WRITE) {
+			debug("[ osiop: DSP set to 0x%x ]\n", (int) idata);
+			osiop_execute_scripts(cpu, d);
+		}
 		break;
 
 	case OSIOP_DMODE:

@@ -3783,3 +3783,5 @@ Changelog for GXemul:
 		Moving the unsupported guest OSes from guestoses.html to a
 		new page, unsupported.html, for clarity.
 		Continuing on the NCR 53C710 SCSI controller (dev_osiop.c).
+20081217	Beginning on implementing the SCRIPTS instruction set for
+		dev_osiop.
