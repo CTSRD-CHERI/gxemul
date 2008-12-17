@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: bootblock_iso9660.c,v 1.4.2.1 2008-01-18 19:12:31 debug Exp $
- *
  *  ISO9660 CD-ROM "bootblock" handling.
  *
  *  There is really no bootblock; instead, the file which is to be booted
@@ -35,6 +33,10 @@
  *
  *  TODO: This is really ugly. It's a quick hack. All the magic constants
  *        need to be replaced with real code!
+ *
+ *        Instead of the current "could not find" message, it should really
+ *        be more helpful, and print out the files found in the current
+ *        directory, so that one can more easily choose the correct file.
  */
 
 #include <stdio.h>
