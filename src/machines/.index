@@ -12,6 +12,7 @@ machine_hpcsh.c  Handheld SuperH-based machines
 machine_iq80321.c  Intel IQ80321 (ARM)
 machine_iyonix.c  A Iyonix machine
 machine_landisk.c  I-O DATA LanDisk USL-5P
+machine_luna88k.c  LUNA88K machine
 machine_macppc.c  Generic PowerPC-based Macintosh machines
 machine_mvme88k.c  MVME88K machines (MVME187)
 machine_mvmeppc.c  MVMEPPC machines
