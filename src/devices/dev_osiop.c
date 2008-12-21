@@ -29,6 +29,9 @@
  *
  *  Based on reverse-engineering OpenBSD's osiop.c, and a PDF manual:
  *  "Symbios SYM53C710 SCSI I/O Processor Technical Manual, version 3.1".
+ *
+ *  See e.g. openbsd/sys/dev/microcode/siop/osiop.ss for an example of what
+ *  the SCRIPTS assembly language looks like (or osiop.out for the raw result).
  */
 
 #include <stdio.h>
@@ -108,6 +111,22 @@ void osiop_reassert_interrupts(struct osiop_data *d)
 }
 
 
+static uint32_t read_word(struct cpu *cpu, uint32_t addr)
+{
+	uint32_t word;
+
+	cpu->memory_rw(cpu, cpu->mem, addr, (unsigned char *) &word,
+	    sizeof(word), MEM_READ, NO_EXCEPTIONS | PHYSICAL);
+
+	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
+		word = LE32_TO_HOST(word);
+	else
+		word = BE32_TO_HOST(word);
+
+	return word;
+}
+
+
 /*
  *  osiop_get_next_scripts_word():
  *
@@ -124,18 +143,150 @@ uint32_t osiop_get_next_scripts_word(struct cpu *cpu, struct osiop_data *d)
 	uint32_t dsp = *(uint32_t*) &d->reg[OSIOP_DSP];
 	uint32_t instr;
 
-	cpu->memory_rw(cpu, cpu->mem, dsp, (unsigned char *) &instr,
-	    sizeof(instr), MEM_READ, NO_EXCEPTIONS | PHYSICAL);
+	if (dsp & 3) {
+		fatal("osiop_get_next_scripts_word: unaligned DSP 0x%08x\n",
+		    dsp);
+		exit(1);
+	}
+
+	instr = read_word(cpu, dsp);
 
 	dsp += sizeof(instr);
 	*(uint32_t*) &d->reg[OSIOP_DSP] = dsp;
 
-	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
-		instr = LE32_TO_HOST(instr);
-	else
-		instr = BE32_TO_HOST(instr);
-
 	return instr;
+}
+
+
+/*
+ *  osiop_execute_scripts_instr():
+ *
+ *  Interprets a single SCRIPTS machine code instruction. Returns 1 if
+ *  execution should continue, or 0 if there was an interrupt.
+ *
+ *  See "Symbios SYM53C710 SCSI I/O Processor Technical Manual, version 3.1"
+ *  chapter 5 for details about the instruction set.
+ */
+int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
+{
+	uint32_t dsp = *(uint32_t*) &d->reg[OSIOP_DSP];
+	uint32_t instr1 = osiop_get_next_scripts_word(cpu, d);
+	uint32_t instr2 = osiop_get_next_scripts_word(cpu, d);
+	uint32_t dbc;
+	uint8_t dcmd;
+	int opcode, relative_addressing, table_indirect_addressing;
+	int select_with_atn, scsi_ids_to_select = -1;
+
+	/*
+	 *  According to the 53C710 manual: the first 32-bit word is
+	 *  always loaded into DCMD and DBC, the second into DSPS,
+	 *  the third (only used by memory move instructions) is loaded
+	 *  into the TEMP register.
+	 */
+
+	dcmd = d->reg[OSIOP_DCMD] = instr1 >> 24;
+	dbc = *(uint32_t*) &d->reg[OSIOP_DBC] = instr1 & 0x00ffffff;
+	*(uint32_t*) &d->reg[OSIOP_DSPS] = instr2;
+
+	opcode = (dcmd >> 3) & 7;
+
+	debug("{ SCRIPTS @ 0x%08x:  0x%08x 0x%08x",
+	    (int) dsp, (int) instr1, (int) instr2);
+
+	switch (dcmd & 0xc0) {
+
+	case 0x00:
+		debug(": BLOCK MOVE");
+		{
+			fatal(": TODO\n");
+			exit(1);
+		}
+		break;
+
+	case 0x40:
+		/*  I/O or Read/Write  */
+		relative_addressing = dcmd & 4;
+		table_indirect_addressing = dcmd & 2;
+		select_with_atn = dcmd & 1;
+		scsi_ids_to_select = (dbc >> 16) & 0xff;
+
+		switch (opcode) {
+		case 0:	debug(": SELECT");
+			break;
+/*		case 1:	debug(": WAIT DISCONNECT");
+			break;
+		case 2:	debug(": WAIT RESELECT");
+			break;
+		case 3:	debug(": SET");
+			break;
+		case 4:	debug(": CLEAR");
+			break;
+*/
+		default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
+			    dcmd, opcode);
+			exit(1);
+		}
+
+		if (select_with_atn)
+			debug(" ATN");
+		if (table_indirect_addressing) {
+			uint32_t dsa = *(uint32_t*) &d->reg[OSIOP_DSA];
+			uint32_t addr, word;
+			int32_t tmp = dbc << 8;
+			tmp >>= 8;
+			addr = dsa + tmp;
+
+			debug(" FROM %i", dbc);
+
+			word = read_word(cpu, addr);
+			scsi_ids_to_select = (word >> 16) & 0xff;
+		}
+
+		debug(" [SCSI IDs 0x%02x]", scsi_ids_to_select);
+
+		if (relative_addressing)
+			debug(", REL");
+
+
+/*        SELECT ATN FROM ds_Device, REL(reselect)*/
+/*  TODO: Continue here.  */
+exit(1);
+		break;
+
+	case 0x80:
+		/*  Transfer Control  */
+		switch (opcode) {
+/*		case 0:	debug(": JUMP");
+			break;
+		case 1:	debug(": CALL");
+			break;
+		case 2:	debug(": RETURN");
+			break;
+		case 3:	debug(": INTERRUPT");
+			break;
+*/		default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
+			    dcmd, opcode);
+			exit(1);
+		}
+
+		break;
+
+	case 0xc0:
+		debug(": MEMORY MOVE");
+		/*  TODO: third instruction word!  */
+		{
+			fatal(": TODO\n");
+			exit(1);
+		}
+		break;
+
+	default:fatal(": UNIMPLEMENTED dcmd 0x%02x\n", dcmd);
+		exit(1);
+	}
+
+	debug(" }\n");
+
+	return 1;
 }
 
 
@@ -147,109 +298,8 @@ uint32_t osiop_get_next_scripts_word(struct cpu *cpu, struct osiop_data *d)
  */
 void osiop_execute_scripts(struct cpu *cpu, struct osiop_data *d)
 {
-	for (;;) {
-		uint32_t dsp = *(uint32_t*) &d->reg[OSIOP_DSP];
-		uint32_t instr1 = osiop_get_next_scripts_word(cpu, d);
-		uint32_t instr2 = osiop_get_next_scripts_word(cpu, d);
-		uint8_t dcmd;
-		int opcode, relative_addressing, table_indirect_addressing;
-		int select_with_atn;
-
-		/*
-		 *  According to the 53C710 manual: the first 32-bit word is
-		 *  always loaded into DCMD and DBC, the second into DSPS,
-		 *  the third (only used by memory move instructions) is loaded
-		 *  into the TEMP register.
-		 */
-
-		dcmd = d->reg[OSIOP_DCMD] = instr1 >> 24;
-		*(uint32_t*) &d->reg[OSIOP_DBC] = instr1 & 0x00ffffff;
-		*(uint32_t*) &d->reg[OSIOP_DSPS] = instr2;
-
-		opcode = (dcmd >> 3) & 7;
-
-		debug("{ SCRIPTS instr at 0x%08x: 0x%08x 0x%08x",
-		    (int) dsp, (int) instr1, (int) instr2);
-
-		switch (dcmd & 0xc0) {
-
-		case 0x00:
-			debug(": BLOCK MOVE");
-			{
-				fatal(": TODO\n");
-				exit(1);
-			}
-			break;
-
-		case 0x40:
-			/*  I/O or Read/Write  */
-			relative_addressing = dcmd & 4;
-			table_indirect_addressing = dcmd & 2;
-			select_with_atn = dcmd & 1;
-
-			switch (opcode) {
-			case 0:	debug(": SELECT");
-				break;
-/*			case 1:	debug(": WAIT DISCONNECT");
-				break;
-			case 2:	debug(": WAIT RESELECT");
-				break;
-			case 3:	debug(": SET");
-				break;
-			case 4:	debug(": CLEAR");
-				break;
-*/
-			default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
-				    dcmd, opcode);
-				exit(1);
-			}
-
-			if (select_with_atn)
-				debug(" ATN");
-			if (table_indirect_addressing)
-				debug(" FROM");
-			if (relative_addressing)
-				debug(", REL");
-
-/*        SELECT ATN FROM ds_Device, REL(reselect)*/
-/*  TODO: Continue here.  */
-exit(1);
-			break;
-
-		case 0x80:
-			/*  Transfer Control  */
-			switch (opcode) {
-/*			case 0:	debug(": JUMP");
-				break;
-			case 1:	debug(": CALL");
-				break;
-			case 2:	debug(": RETURN");
-				break;
-			case 3:	debug(": INTERRUPT");
-				break;
-*/			default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
-				    dcmd, opcode);
-				exit(1);
-			}
-
-			break;
-
-		case 0xc0:
-			debug(": MEMORY MOVE");
-			/*  TODO: third instruction word!  */
-			{
-				fatal(": TODO\n");
-				exit(1);
-			}
-			break;
-
-		default:fatal(": UNIMPLEMENTED dcmd 0x%02x\n", dcmd);
-			exit(1);
-		}
-
-		debug(" }\n");
-
-	}
+	while (osiop_execute_scripts_instr(cpu, d))
+		;
 }
 
 
@@ -391,7 +441,7 @@ DEVICE_ACCESS(osiop)
 	case OSIOP_DSP:
 		if (writeflag == MEM_WRITE) {
 			debug("[ osiop: DSP set to 0x%x ]\n", (int) idata);
-			osiop_execute_scripts(cpu, d);
+/*			osiop_execute_scripts(cpu, d);  */
 		}
 		break;
 

@@ -3785,3 +3785,4 @@ Changelog for GXemul:
 		Continuing on the NCR 53C710 SCSI controller (dev_osiop.c).
 20081217	Beginning on implementing the SCRIPTS instruction set for
 		dev_osiop.
+20081219	Continuing a little bit on the osiop SCRIPTS ISA.
