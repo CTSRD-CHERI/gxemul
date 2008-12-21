@@ -1178,6 +1178,47 @@ X(tb1)
 }
 
 
+/*
+ *  idle:
+ *
+ *  s:	ld    rX,rY,ofs
+ *      bcnd  eq0,rX,s
+ */
+X(idle)
+{
+	uint32_t rY = reg(ic[0].arg[1]) + ic[0].arg[2];
+	uint32_t index = rY >> 12;
+	unsigned char *p = cpu->cd.m88k.host_load[index];
+	uint32_t *p32 = (uint32_t *) p;
+	uint32_t v;
+
+	/*  Fallback:  */
+	if (p == NULL || (rY & 3)) {
+		instr(ld_u_4_be)(cpu, ic);
+		return;
+	}
+
+	v = p32[(rY & 0xfff) >> 2];
+	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
+		v = LE32_TO_HOST(v);
+	else
+		v = BE32_TO_HOST(v);
+
+	reg(ic[0].arg[0]) = v;
+
+	if (v == 0) {
+		SYNCH_PC;
+		usleep(75);
+		cpu->has_been_idling = 1;
+		cpu->n_translated_instrs += N_SAFE_DYNTRANS_LIMIT / 4;
+		cpu->cd.m88k.next_ic = &nothing_call;
+	} else {
+		cpu->n_translated_instrs ++;
+		cpu->cd.m88k.next_ic = &ic[2];
+	}
+}
+
+
 /*****************************************************************************/
 
 
@@ -1255,6 +1296,32 @@ X(end_of_page2)
 
 	fatal("end_of_page2: fatal error, we're in a delay slot\n");
 	exit(1);
+}
+
+
+/*****************************************************************************/
+
+
+/*
+ *  Idle loop detection, e.g.:
+ *
+ *  s00028d44: 15b7d650	ld	r13,r23,0xd650	    ; [<_sched_whichqs>]
+ *  s00028d48: e84dffff	bcnd	eq0,r13,0x00028d44  ; <_sched_idle+0xc4>
+ */
+void COMBINE(idle)(struct cpu *cpu, struct m88k_instr_call *ic, int low_addr)
+{
+	int n_back = (low_addr >> M88K_INSTR_ALIGNMENT_SHIFT)
+	    & (M88K_IC_ENTRIES_PER_PAGE-1);
+	if (n_back < 1)
+		return;
+
+	if (ic[0].f == instr(bcnd_samepage_eq0) &&
+	    ic[-1].f == instr(ld_u_4_be) &&
+	    ic[0].arg[0] == ic[-1].arg[0] &&
+	    ic[0].arg[0] != (size_t) &cpu->cd.m88k.r[M88K_ZERO_REG]) {
+		ic[-1].f = instr(idle);
+		return;
+	}
 }
 
 
@@ -1671,6 +1738,10 @@ X(to_be_translated)
 			ic->arg[2] = (size_t) ( cpu->cd.m88k.cur_ic_page +
 			    (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
 		}
+
+		if ((iword & 0xffe0ffff) == 0xe840ffff)
+			cpu->cd.m88k.combination_check = COMBINE(idle);
+
 		break;
 
 	case 0x3c:
