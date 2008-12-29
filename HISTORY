@@ -3789,3 +3789,4 @@ Changelog for GXemul:
 20081221	Implementing an instruction combination for M88K idle loop
 		detection (works with OpenBSD/mvme88k).
 		Adding a dummy LUNA 88K machine mode (machine_luna88k.c).
+20081229	Continuing on the osiop SCRIPTS ISA.

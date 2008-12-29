@@ -41,6 +41,7 @@
 #include "console.h"
 #include "cpu.h"
 #include "device.h"
+#include "diskimage.h"
 #include "interrupt.h"
 #include "machine.h"
 #include "memory.h"
@@ -49,19 +50,65 @@
 
 #include "osiopreg.h"
 
-#define debug fatal
+/*  #define debug fatal  */
+
+static const char *phases[8] =
+	{ "DATA_OUT", "DATA_IN", "COMMAND", "STATUS",
+	  "RESERVED_OUT", "RESERVED_IN", "MSG_OUT", "MSG_IN" };
 
 #define	DEV_OSIOP_LENGTH	OSIOP_NREGS
 #define	OSIOP_CHIP_REVISION	2
+
+#define	MAX_SCRIPTS_PER_CHUNK	256	/*  256 may be a reasoable value?  */
 
 #define	OSIOP_TICK_SHIFT	18
 
 struct osiop_data {
 	struct interrupt	irq;
 	int			asserted;
-
+	
+	int			scripts_running;
+	int			selected_id;
+	
+	/*
+	 *  Most of these are byte-addressed, but some are not. (Note: For
+	 *  convenience, 32-bit words are stored in host byte order!)
+	 */
 	uint8_t			reg[OSIOP_NREGS];
 };
+
+
+static int osiop_get_scsi_phase(struct osiop_data *d)
+{
+	return OSIOP_PHASE(d->reg[OSIOP_SOCL]);
+}
+
+
+static void osiop_set_scsi_phase(struct osiop_data *d, int phase)
+{
+	int mask = OSIOP_MSG | OSIOP_CD | OSIOP_IO;
+	d->reg[OSIOP_SOCL] &= ~mask;
+	d->reg[OSIOP_SOCL] |= (phase & mask);
+}
+
+
+static void osiop_go_to_next_phase(struct osiop_data *d)
+{
+	int phase = osiop_get_scsi_phase(d);
+
+	/*  TODO: This is perhaps bogus.  */
+
+	switch (phase) {
+	case DATA_OUT_PHASE: phase = DATA_IN_PHASE; break;
+	case DATA_IN_PHASE:  phase = COMMAND_PHASE; break;
+	case COMMAND_PHASE:  phase = STATUS_PHASE; break;
+	case STATUS_PHASE:   phase = MSG_OUT_PHASE; break;
+	case MSG_OUT_PHASE:  phase = MSG_IN_PHASE; break;
+	default:             phase = DATA_OUT_PHASE;
+	}
+	
+	osiop_set_scsi_phase(d, phase);
+}
 
 
 /*
@@ -72,6 +119,7 @@ struct osiop_data {
  */
 void osiop_update_sip_and_dip(struct osiop_data *d)
 {
+	/*  First, let's assume no interrupt assertions.  */
 	d->reg[OSIOP_ISTAT] &= ~(OSIOP_ISTAT_SIP | OSIOP_ISTAT_DIP);
 
 	/*  Any enabled SCSI interrupts?  */
@@ -90,8 +138,8 @@ void osiop_update_sip_and_dip(struct osiop_data *d)
  *  Recalculate interrupt assertions; if either of the SIP or DIP bits
  *  in the ISTAT register is set, then we should cause an interrupt.
  *
- *  (The d->asserted stuff is to make sure we don't call
- *  INTERRUPT_DEASSERT etc. too often when not necessary.)
+ *  (The d->asserted stuff is to make sure we don't call INTERRUPT_DEASSERT
+ *  etc. too often when not necessary. Just an optimization.)
  */
 void osiop_reassert_interrupts(struct osiop_data *d)
 {
@@ -111,6 +159,7 @@ void osiop_reassert_interrupts(struct osiop_data *d)
 }
 
 
+/*  Helper: returns a word in host order, from emulated physical RAM.  */
 static uint32_t read_word(struct cpu *cpu, uint32_t addr)
 {
 	uint32_t word;
@@ -131,7 +180,7 @@ static uint32_t read_word(struct cpu *cpu, uint32_t addr)
  *  osiop_get_next_scripts_word():
  *
  *  Reads a 32-bit word at physical memory location DSP, and returns it
- *  in host order.
+ *  in host order. DSP is then advanced to point to the next instruction word.
  *
  *  (NOTE/TODO: This could be optimized to read from a host page directly,
  *  but then care must be taken when the instruction pointer (DSP) goes
@@ -169,18 +218,22 @@ uint32_t osiop_get_next_scripts_word(struct cpu *cpu, struct osiop_data *d)
  */
 int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 {
-	uint32_t dsp = *(uint32_t*) &d->reg[OSIOP_DSP];
+	uint32_t dspOrig = *(uint32_t*) &d->reg[OSIOP_DSP];
 	uint32_t instr1 = osiop_get_next_scripts_word(cpu, d);
 	uint32_t instr2 = osiop_get_next_scripts_word(cpu, d);
-	uint32_t dbc;
+	uint32_t dbc, target_addr;
 	uint8_t dcmd;
-	int opcode, relative_addressing, table_indirect_addressing;
-	int select_with_atn, scsi_ids_to_select = -1;
-
+	int32_t reladdr;
+	int opcode, phase, relative_addressing, table_indirect_addressing;
+	int select_with_atn, scsi_ids_to_select = -1, scsi_id_to_select;
+	int test_carry, compare_data, compare_phase;
+	int jump_if_true, wait_for_valid_phase;
+	int comparison = 0, interrupt_instead_of_branch = 0;
+	
 	/*
-	 *  According to the 53C710 manual: the first 32-bit word is
-	 *  always loaded into DCMD and DBC, the second into DSPS,
-	 *  the third (only used by memory move instructions) is loaded
+	 *  According to the 53C710 manual, chapter 5 (introduction): the first
+	 *  32-bit word is always loaded into DCMD and DBC, the second into
+	 *  DSPS, the third (only used by memory move instructions) is loaded
 	 *  into the TEMP register.
 	 */
 
@@ -188,10 +241,14 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 	dbc = *(uint32_t*) &d->reg[OSIOP_DBC] = instr1 & 0x00ffffff;
 	*(uint32_t*) &d->reg[OSIOP_DSPS] = instr2;
 
+	reladdr = (instr2 << 8);
+	reladdr >>= 8;
+
 	opcode = (dcmd >> 3) & 7;
+	phase = dcmd & 7;
 
 	debug("{ SCRIPTS @ 0x%08x:  0x%08x 0x%08x",
-	    (int) dsp, (int) instr1, (int) instr2);
+	    (int) dspOrig, (int) instr1, (int) instr2);
 
 	switch (dcmd & 0xc0) {
 
@@ -212,51 +269,104 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 
 		switch (opcode) {
 		case 0:	debug(": SELECT");
+			if (select_with_atn)
+				debug(" ATN");
+			if (table_indirect_addressing) {
+				uint32_t dsa = *(uint32_t*) &d->reg[OSIOP_DSA];
+				uint32_t addr, word;
+				int32_t tmp = dbc << 8;
+				tmp >>= 8;
+				addr = dsa + tmp;
+
+				debug(" FROM %i", dbc);
+
+				word = read_word(cpu, addr);
+				scsi_ids_to_select = (word >> 16) & 0xff;
+			}
+
+			if (scsi_ids_to_select == 0) {
+				fatal("osiop: TODO: scsi_ids_to_select = 0!\n");
+				exit(1);
+			}
+
+			scsi_id_to_select = 0;
+			while (!(scsi_ids_to_select & 1)) {
+				scsi_ids_to_select >>= 1;
+				scsi_id_to_select ++;
+			}
+
+			scsi_ids_to_select &= ~1;
+			if (scsi_ids_to_select != 0) {
+				fatal("osiop: TODO: multiselect?\n");
+				exit(1);
+			}		
+
+			debug(" [SCSI ID %i]", scsi_id_to_select);
+
+			if (relative_addressing) {
+				/*  Note: Relative to _current_ DSP value, not
+				    what the DSP was when the current
+				    instruction was read!  */
+				target_addr = reladdr +
+				    *(uint32_t*) &d->reg[OSIOP_DSP];
+				debug(" REL(%i)", reladdr);
+			} else {
+				target_addr = instr2;
+				debug(" 0x%08x", instr2);
+			}
+
+			d->selected_id = scsi_id_to_select;
+
+			if (diskimage_exist(cpu->machine,
+			    d->selected_id, DISKIMAGE_SCSI)) {
+				/*  TODO: Just a guess, so far:  */
+				osiop_set_scsi_phase(d, COMMAND_PHASE);
+			} else {
+				d->selected_id = -1;
+
+#if 1
+				/*  TODO: The scsi ID does not exist.
+				    Should we simply timeout:  */
+				d->scripts_running = 0;
+#else
+				/*  or branch to the reselect address?  */
+				*(uint32_t*) &d->reg[OSIOP_DSP] = target_addr;
+#endif
+			}
+
 			break;
-/*		case 1:	debug(": WAIT DISCONNECT");
+			
+		case 1:	debug(": WAIT DISCONNECT");
+			exit(1);
 			break;
 		case 2:	debug(": WAIT RESELECT");
+			exit(1);
 			break;
 		case 3:	debug(": SET");
+			exit(1);
 			break;
 		case 4:	debug(": CLEAR");
+			exit(1);
 			break;
-*/
+
 		default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
 			    dcmd, opcode);
 			exit(1);
 		}
 
-		if (select_with_atn)
-			debug(" ATN");
-		if (table_indirect_addressing) {
-			uint32_t dsa = *(uint32_t*) &d->reg[OSIOP_DSA];
-			uint32_t addr, word;
-			int32_t tmp = dbc << 8;
-			tmp >>= 8;
-			addr = dsa + tmp;
-
-			debug(" FROM %i", dbc);
-
-			word = read_word(cpu, addr);
-			scsi_ids_to_select = (word >> 16) & 0xff;
-		}
-
-		debug(" [SCSI IDs 0x%02x]", scsi_ids_to_select);
-
-		if (relative_addressing)
-			debug(", REL");
-
-
-/*        SELECT ATN FROM ds_Device, REL(reselect)*/
-/*  TODO: Continue here.  */
-exit(1);
 		break;
 
 	case 0x80:
 		/*  Transfer Control  */
+		relative_addressing = (dbc >> 23) & 1;
+		test_carry = (dbc >> 21) & 1;
+		jump_if_true = (dbc >> 19) & 1;
+		compare_data = (dbc >> 18) & 1;
+		compare_phase = (dbc >> 17) & 1;
+		wait_for_valid_phase = (dbc >> 16) & 1;
+		
 		switch (opcode) {
-/*		case 0:	debug(": JUMP");
+		case 0:	debug(": JUMP");
 			break;
 		case 1:	debug(": CALL");
 			break;
@@ -264,9 +374,81 @@ exit(1);
 			break;
 		case 3:	debug(": INTERRUPT");
 			break;
-*/		default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
+		default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
 			    dcmd, opcode);
 			exit(1);
+		}
+
+		if (opcode == 0 || opcode == 1) {
+			if (relative_addressing) {
+				/*  Note: Relative to _current_ DSP value,
+				    not what it was when the current instruction
+				    was read!  */
+				target_addr = reladdr +
+				    *(uint32_t*) &d->reg[OSIOP_DSP];
+				debug(" REL(%i)", reladdr);
+			} else {
+				target_addr = instr2;
+				debug(" 0x%08x", instr2);
+			}
+		} else {
+			if (opcode == 2) {
+				/*  Return:  */
+				target_addr = *(uint32_t*) &d->reg[OSIOP_TEMP];
+			} else {
+				/*  Interrupt:  */
+				target_addr = 0;
+				interrupt_instead_of_branch = 1;
+			}
+		}
+
+		if (test_carry) {
+			if (compare_data || compare_phase) {
+				fatal("osiop: TODO: test_carry cannot be"
+				    " combined with other tests!\n");
+				exit(1);
+			}
+			
+			fatal("osiop: TODO: test_carry\n");
+			exit(1);
+		}
+
+		if (compare_data) {
+			fatal("osiop: TODO: compare_data\n");
+			exit(1);
+		}
+
+		if (compare_phase) {
+			int cur_phase;
+			
+			debug(" %s %s%s",
+			    wait_for_valid_phase ? "WHEN" : "IF",
+			    jump_if_true? "" : "NOT ",
+			    phases[phase]);
+
+			/*
+			 *  The SOCL register contains the current phase.
+			 *
+			 *  Fake "waiting" for correct phase by simply changing
+			 *  phase.
+			 */
+			if (wait_for_valid_phase)
+				osiop_go_to_next_phase(d);
+			
+			cur_phase = osiop_get_scsi_phase(d);
+			
+			comparison = (phase == cur_phase);
+		}
+
+		if ((jump_if_true && comparison) ||
+		    (!jump_if_true && !comparison)) {
+			/*  Perform the branch or interrupt.  */
+			if (interrupt_instead_of_branch) {
+				d->scripts_running = 0;
+				d->reg[OSIOP_DSTAT] |= OSIOP_DSTAT_SIR;
+			} else {
+				*(uint32_t*) &d->reg[OSIOP_DSP] = target_addr;
+			}
 		}
 
 		break;
@@ -298,14 +480,24 @@ exit(1);
  */
 void osiop_execute_scripts(struct cpu *cpu, struct osiop_data *d)
 {
-	while (osiop_execute_scripts_instr(cpu, d))
-		;
+	int n = 0;
+
+	debug("{ SCRIPTS start }\n");
+
+	while (d->scripts_running && n < MAX_SCRIPTS_PER_CHUNK &&
+	    osiop_execute_scripts_instr(cpu, d))
+		n++;
+
+	debug("{ SCRIPTS end }\n");
 }
 
 
 DEVICE_TICK(osiop)
 {
 	struct osiop_data *d = extra;
+
+	if (d->scripts_running)
+		osiop_execute_scripts(cpu, d);
 
 	osiop_reassert_interrupts(d);
 }
@@ -441,7 +633,9 @@ DEVICE_ACCESS(osiop)
 	case OSIOP_DSP:
 		if (writeflag == MEM_WRITE) {
 			debug("[ osiop: DSP set to 0x%x ]\n", (int) idata);
-/*			osiop_execute_scripts(cpu, d);  */
+
+			d->scripts_running = 1;
+			osiop_execute_scripts(cpu, d);
 		}
 		break;
 
@@ -505,6 +699,7 @@ DEVINIT(osiop)
 	CHECK_ALLOCATION(d = malloc(sizeof(struct osiop_data)));
 	memset(d, 0, sizeof(struct osiop_data));
 
+	/*  Set up initial device register values:  */
 	d->reg[OSIOP_SCID] = OSIOP_SCID_VALUE(7);
 
 	INTERRUPT_CONNECT(devinit->interrupt_path, d->irq);
