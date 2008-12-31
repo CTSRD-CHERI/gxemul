@@ -3790,3 +3790,4 @@ Changelog for GXemul:
 		detection (works with OpenBSD/mvme88k).
 		Adding a dummy LUNA 88K machine mode (machine_luna88k.c).
 20081229	Continuing on the osiop SCRIPTS ISA.
+20081231	More progress on dev_osiop.c.

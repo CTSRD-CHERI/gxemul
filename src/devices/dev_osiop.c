@@ -59,7 +59,7 @@ static const char *phases[8] =
 #define	DEV_OSIOP_LENGTH	OSIOP_NREGS
 #define	OSIOP_CHIP_REVISION	2
 
-#define	MAX_SCRIPTS_PER_CHUNK	256	/*  256 may be a reasoable value?  */
+#define	MAX_SCRIPTS_PER_CHUNK	256	/*  256 may be a reasonable value?  */
 
 #define	OSIOP_TICK_SHIFT	18
 
@@ -68,7 +68,13 @@ struct osiop_data {
 	int			asserted;
 	
 	int			scripts_running;
+
+	/*  Current transfer:  */
 	int			selected_id;
+	struct scsi_transfer	*xferp;
+
+	/*  ALU:  */
+	int			carry;
 	
 	/*
 	 *  Most of these are byte-addressed, but some are not. (Note: For
@@ -76,6 +82,21 @@ struct osiop_data {
 	 */
 	uint8_t			reg[OSIOP_NREGS];
 };
+
+
+/*  Allocate memory for a new transfer.  */
+static void osiop_new_xfer(struct osiop_data *d, int target_scsi_id)
+{
+	if (d->xferp != NULL) {
+		fatal("WARNING! osiop_new_xfer(): freeing previous"
+		    " transfer\n");
+		scsi_transfer_free(d->xferp);
+		d->xferp = NULL;
+	}
+
+	d->selected_id = target_scsi_id;
+	d->xferp = scsi_transfer_alloc();
+}
 
 
 static int osiop_get_scsi_phase(struct osiop_data *d)
@@ -92,43 +113,36 @@ static void osiop_set_scsi_phase(struct osiop_data *d, int phase)
 }
 
 
-static void osiop_go_to_next_phase(struct osiop_data *d)
-{
-	int phase = osiop_get_scsi_phase(d);
-
-	/*  TODO: This is perhaps bogus.  */
-
-	switch (phase) {
-	case DATA_OUT_PHASE: phase = DATA_IN_PHASE; break;
-	case DATA_IN_PHASE:  phase = COMMAND_PHASE; break;
-	case COMMAND_PHASE:  phase = STATUS_PHASE; break;
-	case STATUS_PHASE:   phase = MSG_OUT_PHASE; break;
-	case MSG_OUT_PHASE:  phase = MSG_IN_PHASE; break;
-	default:             phase = DATA_OUT_PHASE;
-	}
-	
-	osiop_set_scsi_phase(d, phase);
-}
-
-
 /*
  *  osiop_update_sip_and_dip():
  *
  *  The SIP bit in ISTAT is basically a "summary" of whether there is
  *  a non-masked SCSI interrupt. Similarly for DIP, for DMA.
+ *
+ *  However, the SIP and DIP bits are set even if interrupts are
+ *  masked away using DIEN and SIEN. (At least that is how I understood
+ *  things from reading OpenBSD's osiop.c osiop_poll().) 
  */
-void osiop_update_sip_and_dip(struct osiop_data *d)
+static int osiop_update_sip_and_dip(struct osiop_data *d)
 {
+	int assert = 0;
+
 	/*  First, let's assume no interrupt assertions.  */
 	d->reg[OSIOP_ISTAT] &= ~(OSIOP_ISTAT_SIP | OSIOP_ISTAT_DIP);
 
 	/*  Any enabled SCSI interrupts?  */
-	if (d->reg[OSIOP_SSTAT0] & d->reg[OSIOP_SIEN])
+	if (d->reg[OSIOP_SSTAT0])
 		d->reg[OSIOP_ISTAT] |= OSIOP_ISTAT_SIP;
+	if (d->reg[OSIOP_SSTAT0] & d->reg[OSIOP_SIEN])
+		assert = 1;
 
 	/*  Or enabled DMA interrupts?  */
-	if (d->reg[OSIOP_DSTAT] & d->reg[OSIOP_DIEN] & ~OSIOP_DIEN_RES)
+	if (d->reg[OSIOP_DSTAT] & ~OSIOP_DIEN_RES)
 		d->reg[OSIOP_ISTAT] |= OSIOP_ISTAT_DIP;
+	if (d->reg[OSIOP_DSTAT] & d->reg[OSIOP_DIEN] & ~OSIOP_DIEN_RES)
+		assert = 1;
+
+	return assert;
 }
 
 
@@ -141,13 +155,11 @@ void osiop_update_sip_and_dip(struct osiop_data *d)
  *  (The d->asserted stuff is to make sure we don't call INTERRUPT_DEASSERT
  *  etc. too often when not necessary. Just an optimization.)
  */
-void osiop_reassert_interrupts(struct osiop_data *d)
+static void osiop_reassert_interrupts(struct osiop_data *d)
 {
 	int assert = 0;
 
-	osiop_update_sip_and_dip(d);
-
-	if (d->reg[OSIOP_ISTAT] & (OSIOP_ISTAT_SIP | OSIOP_ISTAT_DIP))
+	if (osiop_update_sip_and_dip(d))
 		assert = 1;
 
 	if (assert && !d->asserted)
@@ -173,6 +185,23 @@ static uint32_t read_word(struct cpu *cpu, uint32_t addr)
 		word = BE32_TO_HOST(word);
 
 	return word;
+}
+
+
+/*  Helper: reads/writes single bytes from emulated physical RAM.  */
+static uint8_t read_byte(struct cpu *cpu, uint32_t addr)
+{
+	uint8_t byte;
+
+	cpu->memory_rw(cpu, cpu->mem, addr, (unsigned char *) &byte,
+	    sizeof(byte), MEM_READ, NO_EXCEPTIONS | PHYSICAL);
+
+	return byte;
+}
+static void write_byte(struct cpu *cpu, uint32_t addr, uint8_t byte)
+{
+	cpu->memory_rw(cpu, cpu->mem, addr, (unsigned char *) &byte,
+	    sizeof(byte), MEM_READ, NO_EXCEPTIONS | PHYSICAL);
 }
 
 
@@ -221,7 +250,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 	uint32_t dspOrig = *(uint32_t*) &d->reg[OSIOP_DSP];
 	uint32_t instr1 = osiop_get_next_scripts_word(cpu, d);
 	uint32_t instr2 = osiop_get_next_scripts_word(cpu, d);
-	uint32_t dbc, target_addr;
+	uint32_t dbc, target_addr = 0;
 	uint8_t dcmd;
 	int32_t reladdr;
 	int opcode, phase, relative_addressing, table_indirect_addressing;
@@ -253,10 +282,124 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 	switch (dcmd & 0xc0) {
 
 	case 0x00:
-		debug(": BLOCK MOVE");
 		{
-			fatal(": TODO\n");
-			exit(1);
+			int ofs1 = instr1 & 0x00ffffff;
+			int ofs2 = instr2 & 0x00ffffff;
+			int indirect_addressing = dcmd & 0x20;
+			int table_indirect_addressing = dcmd & 0x10;
+			uint32_t dsa = *(uint32_t*) &d->reg[OSIOP_DSA];
+			uint32_t addr, xfer_byte_count, xfer_addr;
+			int32_t tmp = ofs2 << 8;
+			int res;
+			int i;
+			tmp >>= 8;
+			
+			opcode = (dcmd >> 3) & 1;
+
+			switch (opcode) {
+			case 0: debug(": CHMOV");
+				break;
+			case 1: debug(": MOVE");
+				break;
+			}
+
+			if (indirect_addressing) {
+				fatal("osiop: TODO: indirect_addressing move\n");
+				exit(1);
+			}
+
+			if (!table_indirect_addressing) {
+				fatal("osiop: TODO: !table_indirect_addressing move\n");
+				exit(1);
+			}
+			
+			debug(" FROM %i", tmp);
+			
+			if (ofs1 != ofs2) {
+				fatal("osiop: TODO: move ofs1!=ofs2\n");
+				exit(1);
+			}
+			
+			if (phase != osiop_get_scsi_phase(d)) {
+				fatal("osiop: TODO: move: wait for phase. "
+				    "phase = %i, osiop_get_scsi_phase = %i\n",
+				    phase, osiop_get_scsi_phase(d));
+				exit(1);
+			}
+			
+			debug(" WHEN %s", phases[phase]);
+
+			addr = dsa + tmp;
+			xfer_byte_count = read_word(cpu, addr) & 0x00ffffff;
+			xfer_addr = read_word(cpu, addr+4);
+
+			switch (phase) {
+
+			case COMMAND_PHASE:
+				scsi_transfer_allocbuf(&d->xferp->cmd_len,
+				    &d->xferp->cmd, xfer_byte_count, 0);
+
+				i = 0;
+				while (xfer_byte_count > 0) {
+					uint8_t byte = read_byte(cpu, xfer_addr);
+					printf("  byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);
+					d->xferp->cmd[i++] = byte;
+					xfer_addr ++;
+					xfer_byte_count --;
+				}
+
+				res = diskimage_scsicommand(cpu,
+				    d->selected_id, DISKIMAGE_SCSI, d->xferp);
+				if (res == 0) {
+					fatal("osiop TODO: error\n");
+					exit(1);
+				}
+				if (res == 2) {
+					fatal("osiop TODO: data out\n");
+					exit(1);
+				}
+
+				osiop_set_scsi_phase(d, STATUS_PHASE);
+				break;
+
+			case MSG_OUT_PHASE:
+				scsi_transfer_allocbuf(&d->xferp->msg_out_len,
+				    &d->xferp->msg_out, xfer_byte_count, 0);
+
+				i = 0;
+				while (xfer_byte_count > 0) {
+					uint8_t byte = read_byte(cpu, xfer_addr);
+					printf("  byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);
+					d->xferp->msg_out[i++] = byte;
+					xfer_addr ++;
+					xfer_byte_count --;
+				}
+				
+				osiop_set_scsi_phase(d, COMMAND_PHASE);
+				break;
+
+			case STATUS_PHASE:
+				i = 0;
+				while (xfer_byte_count > 0 && i < d->xferp->status_len) {
+					uint8_t byte = d->xferp->status[i++];
+					printf("  writing byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);
+					write_byte(cpu, xfer_addr, byte);
+					xfer_addr ++;
+					xfer_byte_count --;
+				}
+				break;
+
+			default:fatal("osiop: TODO: unimplemented move, "
+				    "phase=%i\n", phase);
+				exit(1);
+			}
+
+			/*  Transfer complete.  */
+			*(uint32_t*) &d->reg[OSIOP_DNAD] = xfer_addr;
+			*(uint32_t*) &d->reg[OSIOP_DBC] = 0;
 		}
 		break;
 
@@ -269,8 +412,11 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 
 		switch (opcode) {
 		case 0:	debug(": SELECT");
-			if (select_with_atn)
+			if (select_with_atn) {
 				debug(" ATN");
+				d->reg[OSIOP_SOCL] |= OSIOP_ATN;
+			}
+
 			if (table_indirect_addressing) {
 				uint32_t dsa = *(uint32_t*) &d->reg[OSIOP_DSA];
 				uint32_t addr, word;
@@ -315,12 +461,12 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				debug(" 0x%08x", instr2);
 			}
 
-			d->selected_id = scsi_id_to_select;
-
 			if (diskimage_exist(cpu->machine,
 			    d->selected_id, DISKIMAGE_SCSI)) {
+				osiop_new_xfer(d, scsi_id_to_select);
+
 				/*  TODO: Just a guess, so far:  */
-				osiop_set_scsi_phase(d, COMMAND_PHASE);
+				osiop_set_scsi_phase(d, MSG_OUT_PHASE);
 			} else {
 				d->selected_id = -1;
 
@@ -342,16 +488,48 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 		case 2:	debug(": WAIT RESELECT");
 			exit(1);
 			break;
+	
 		case 3:	debug(": SET");
-			exit(1);
 			break;
 		case 4:	debug(": CLEAR");
-			exit(1);
 			break;
 
 		default:fatal(": UNIMPLEMENTED dcmd=0x%02x opcode=%i\n",
 			    dcmd, opcode);
 			exit(1);
+		}
+
+		/*  SET or CLEAR:  */
+		if (opcode == 3 || opcode == 4) {
+			int bit_atn = (dbc >> 3) & 1;
+			int bit_ack = (dbc >> 6) & 1;
+			int bit_target = (dbc >> 9) & 1;
+			int bit_carry = (dbc >> 10) & 1;
+
+			if (bit_atn)
+				debug(" ATN");
+			if (bit_ack)
+				debug(" ACK");
+			if (bit_target)
+				debug(" TARGET");
+			if (bit_carry)
+				debug(" CARRY");
+			
+			if (opcode == 3) {
+				d->reg[OSIOP_SOCL] |= (bit_ack * OSIOP_ACK);
+				d->reg[OSIOP_SOCL] |= (bit_atn * OSIOP_ATN);
+				if (bit_carry)
+					d->carry = 1;
+				d->reg[OSIOP_SCNTL0] |=
+				    (bit_target * OSIOP_SCNTL0_TRG);
+			} else {
+				d->reg[OSIOP_SOCL] &= ~(bit_ack * OSIOP_ACK);
+				d->reg[OSIOP_SOCL] &= ~(bit_atn * OSIOP_ATN);
+				if (bit_carry)
+					d->carry = 0;
+				d->reg[OSIOP_SCNTL0] &=
+				    ~(bit_target * OSIOP_SCNTL0_TRG);
+			}
 		}
 
 		break;
@@ -397,7 +575,6 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				target_addr = *(uint32_t*) &d->reg[OSIOP_TEMP];
 			} else {
 				/*  Interrupt:  */
-				target_addr = 0;
 				interrupt_instead_of_branch = 1;
 			}
 		}
@@ -420,25 +597,21 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 
 		if (compare_phase) {
 			int cur_phase;
-			
+
 			debug(" %s %s%s",
 			    wait_for_valid_phase ? "WHEN" : "IF",
 			    jump_if_true? "" : "NOT ",
 			    phases[phase]);
 
-			/*
-			 *  The SOCL register contains the current phase.
-			 *
-			 *  Fake "waiting" for correct phase by simply changing
-			 *  phase.
-			 */
-			if (wait_for_valid_phase)
-				osiop_go_to_next_phase(d);
-			
+			/*  TODO: wait for valid phase!  */
+
 			cur_phase = osiop_get_scsi_phase(d);
 			
 			comparison = (phase == cur_phase);
 		}
+
+		if (!test_carry && !compare_data && !compare_phase)
+			jump_if_true = comparison = 1;
 
 		if ((jump_if_true && comparison) ||
 		    (!jump_if_true && !comparison)) {
