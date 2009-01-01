@@ -509,7 +509,7 @@ instructions:
 <ol>
   <li>Create an empty harddisk image, which will be the root disk
 	that OpenBSD installs itself onto:<pre>
-	<b>dd if=/dev/zero of=obsd_mvme88k.img bs=1024 count=1 seek=2500000</b>
+	<b>dd if=/dev/zero of=obsd_mvme88k.img bs=1024 count=1 seek=2100000</b>
 
 </pre>
   <li>Download the entire mvme88k directory from the ftp server:<pre>
@@ -521,9 +521,15 @@ instructions:
 	(I recommend using <tt>mkisofs</tt> for that purpose. If you don't
 	already have <tt>mkisofs</tt> installed on your system, you need
 	to install it in order to do this.)<pre>
-	<b>mkisofs -o openbsd_mvme88k_4.4.iso ftp.se.openbsd.org/pub/OpenBSD/</b>
+	<b>mkisofs -o openbsd_mvme88k_4.4.iso -U ftp.se.openbsd.org/pub/OpenBSD/</b>
 
 </pre>
+  <li>Copy away the kernel, we'll need it later. But remove the rest of the
+	downloaded tree.<pre>
+	<b>cp ftp.se.openbsd.org/pub/OpenBSD/4.4/mvme88k/bsd .
+	rm -rf ftp.se.openbsd.org</b>
+</pre>
+
   <li>Start the emulator using this command line:<pre>
 	<b>gxemul -e mvme187 -d obsd_mvme88k.img -d b:openbsd_mvme88k_4.4.iso -j 4.4/mvme88k/bsd.rd</b>
 
@@ -536,11 +542,8 @@ instructions:
 <p>
 Once the install has finished, the following command should let you 
 boot from the harddisk image:
-
-<p>
 <pre>
-	<b>gxemul -e mvme187 -d obsd_mvme88k.img ftp.se.openbsd.org/pub/OpenBSD/4.4/mvme88k/bsd</b>
-
+	<b>gxemul -e mvme187 -d obsd_mvme88k.img bsd</b>
 </pre>
 
 <p>No NIC has been implemented yet for mvme187, so there is no network connectivity

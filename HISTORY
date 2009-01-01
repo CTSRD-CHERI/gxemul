@@ -3793,3 +3793,5 @@ Changelog for GXemul:
 20081231	More progress on dev_osiop.c.
 20090101	FINALLY the osiop works well enough to let OpenBSD detect
 		SCSI devices! :-)
+		After some more hacking, everything is finally stable enough
+		to allow OpenBSD/mvme88k to be installed onto a disk image!

@@ -799,6 +799,9 @@ X(fstcr)
 
 /*
  *  fadd.xxx:  Floating point addition
+ *  fsub.xxx:  Floating point subtraction
+ *  fmul.xxx:  Floating point multiplication
+ *  fdiv.xxx:  Floating point multiplication
  *
  *  arg[0] = pointer to destination register
  *  arg[1] = pointer to source register s1
@@ -806,6 +809,28 @@ X(fstcr)
  *
  *  Note: For 'd' variants, arg[x] points to a _pair_ of registers!
  */
+X(fadd_sss)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint32_t d;
+	uint32_t s2 = reg(ic->arg[2]);
+	uint32_t s1 = reg(ic->arg[1]);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_S);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+
+	d = ieee_store_float_value(f1.f + f2.f, IEEE_FMT_S, 0);
+
+	reg(ic->arg[0]) = d;
+}
 X(fadd_dds)
 {
 	struct ieee_float_value f1;
@@ -829,6 +854,351 @@ X(fadd_dds)
 
 	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
 	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fadd_ddd)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint64_t s1 = reg(ic->arg[1]);
+	uint64_t s2 = reg(ic->arg[2]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+	s2 = (s2 << 32) + reg(ic->arg[2] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_D);
+
+	d = ieee_store_float_value(f1.f + f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fsub_sds)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint32_t d;
+	uint32_t s2 = reg(ic->arg[2]);
+	uint64_t s1 = reg(ic->arg[1]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+
+	d = ieee_store_float_value(f1.f - f2.f, IEEE_FMT_S, 0);
+	reg(ic->arg[0]) = d;
+}
+X(fsub_dsd)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint64_t s2 = reg(ic->arg[2]);
+	uint32_t s1 = reg(ic->arg[1]);
+	s2 = (s2 << 32) + reg(ic->arg[2] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_S);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_D);
+
+	d = ieee_store_float_value(f1.f - f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fsub_dds)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint32_t s2 = reg(ic->arg[2]);
+	uint64_t s1 = reg(ic->arg[1]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+
+	d = ieee_store_float_value(f1.f - f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fsub_ddd)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint64_t s1 = reg(ic->arg[1]);
+	uint64_t s2 = reg(ic->arg[2]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+	s2 = (s2 << 32) + reg(ic->arg[2] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_D);
+
+	d = ieee_store_float_value(f1.f - f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fmul_sss)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint32_t d;
+	uint32_t s2 = reg(ic->arg[2]);
+	uint32_t s1 = reg(ic->arg[1]);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_S);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+
+	d = ieee_store_float_value(f1.f * f2.f, IEEE_FMT_S, 0);
+	reg(ic->arg[0]) = d;
+}
+X(fmul_dss)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint32_t s2 = reg(ic->arg[2]);
+	uint32_t s1 = reg(ic->arg[1]);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_S);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+
+	d = ieee_store_float_value(f1.f * f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fmul_dsd)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint64_t s2 = reg(ic->arg[2]);
+	uint32_t s1 = reg(ic->arg[1]);
+	s2 = (s2 << 32) + reg(ic->arg[2] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_S);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_D);
+
+	d = ieee_store_float_value(f1.f * f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fmul_dds)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint32_t s2 = reg(ic->arg[2]);
+	uint64_t s1 = reg(ic->arg[1]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+
+	d = ieee_store_float_value(f1.f * f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fmul_ddd)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint64_t s1 = reg(ic->arg[1]);
+	uint64_t s2 = reg(ic->arg[2]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+	s2 = (s2 << 32) + reg(ic->arg[2] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_D);
+
+	d = ieee_store_float_value(f1.f * f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fdiv_ddd)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint64_t s1 = reg(ic->arg[1]);
+	uint64_t s2 = reg(ic->arg[2]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+	s2 = (s2 << 32) + reg(ic->arg[2] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_D);
+
+	if (f2.f == 0) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FDVZ;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	d = ieee_store_float_value(f1.f / f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+
+
+/*
+ *  fcmp.sXX:  Floating point comparison
+ *
+ *  arg[0] = pointer to destination register
+ *  arg[1] = pointer to source register s1
+ *  arg[2] = pointer to source register s2
+ *
+ *  Note: For 'd' variants, arg[x] points to a _pair_ of registers!
+ */
+static uint32_t m88k_fcmp_common(struct ieee_float_value *f1,
+	struct ieee_float_value *f2)
+{
+	uint32_t d;
+
+	/*  TODO: Implement all bits correctly, e.g. "in range" bits.  */
+	d = 0;
+	if (isnan(f1->f) || isnan(f2->f))
+		d |= (1 << 0);
+	else
+		d |= (1 << 1);
+	if (f1->f == f2->f)
+		d |= (1 << 2);
+	else
+		d |= (1 << 3);
+	if (f1->f > f2->f)
+		d |= (1 << 4);
+	else
+		d |= (1 << 5);
+	if (f1->f < f2->f)
+		d |= (1 << 6);
+	else
+		d |= (1 << 7);
+
+	return d;
+}
+X(fcmp_sds)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint32_t s2 = reg(ic->arg[2]);
+	uint64_t s1 = reg(ic->arg[1]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+	reg(ic->arg[0]) = m88k_fcmp_common(&f1, &f2);
+}
+X(fcmp_sdd)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t s1 = reg(ic->arg[1]);
+	uint64_t s2 = reg(ic->arg[2]);
+	s1 = (s1 << 32) + reg(ic->arg[1] + 4);
+	s2 = (s2 << 32) + reg(ic->arg[2] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_D);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_D);
+	reg(ic->arg[0]) = m88k_fcmp_common(&f1, &f2);
 }
 
 
@@ -1578,6 +1948,28 @@ X(to_be_translated)
 	case 0x21:
 		switch (op11) {
 
+		case 0x00:	/*  fmul  */
+			if (d == 0) {
+				/*  d = 0 isn't allowed. for now, let's abort execution.  */
+				fatal("TODO: exception for d = 0 in fmul.xxx instruction\n");
+				goto bad;
+			}
+			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
+			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
+			switch ((iword >> 5) & 0x3f) {
+			case 0x00:	ic->f = instr(fmul_sss); break;
+			case 0x01:	ic->f = instr(fmul_dss); break;
+			case 0x05:	ic->f = instr(fmul_dsd); break;
+			case 0x11:	ic->f = instr(fmul_dds); break;
+			case 0x15:	ic->f = instr(fmul_ddd); break;
+			default:if (!cpu->translation_readahead)
+					fatal("Unimplemented fmul combination 0x%x.\n",
+					    (iword >> 5) & 0x3f);
+				goto bad;
+			}
+			break;
+
 		case 0x04:	/*  flt  */
 			if (d == 0) {
 				/*  d = 0 isn't allowed. for now, let's abort execution.  */
@@ -1607,8 +1999,52 @@ X(to_be_translated)
 			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
 			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
 			switch ((iword >> 5) & 0x3f) {
+			case 0x00:	ic->f = instr(fadd_sss); break;
 			case 0x11:	ic->f = instr(fadd_dds); break;
-			default:fatal("Unimplemented fadd combination.\n");
+			case 0x15:	ic->f = instr(fadd_ddd); break;
+			default:if (!cpu->translation_readahead)
+					fatal("Unimplemented fadd combination 0x%x.\n",
+					    (iword >> 5) & 0x3f);
+				goto bad;
+			}
+			break;
+
+		case 0x06:	/*  fsub  */
+			if (d == 0) {
+				/*  d = 0 isn't allowed. for now, let's abort execution.  */
+				fatal("TODO: exception for d = 0 in fsub.xxx instruction\n");
+				goto bad;
+			}
+			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
+			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
+			switch ((iword >> 5) & 0x3f) {
+			case 0x05:	ic->f = instr(fsub_dsd); break;
+			case 0x10:	ic->f = instr(fsub_sds); break;
+			case 0x11:	ic->f = instr(fsub_dds); break;
+			case 0x15:	ic->f = instr(fsub_ddd); break;
+			default:if (!cpu->translation_readahead)
+					fatal("Unimplemented fsub combination 0x%x.\n",
+					    (iword >> 5) & 0x3f);
+				goto bad;
+			}
+			break;
+
+		case 0x07:	/*  fcmp  */
+			if (d == 0) {
+				/*  d = 0 isn't allowed. for now, let's abort execution.  */
+				fatal("TODO: exception for d = 0 in fcmp.xxx instruction\n");
+				goto bad;
+			}
+			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
+			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
+			switch ((iword >> 5) & 0x3f) {
+			case 0x10:	ic->f = instr(fcmp_sds); break;
+			case 0x14:	ic->f = instr(fcmp_sdd); break;
+			default:if (!cpu->translation_readahead)
+					fatal("Unimplemented fcmp combination 0x%x.\n",
+					    (iword >> 5) & 0x3f);
 				goto bad;
 			}
 			break;
@@ -1629,6 +2065,24 @@ X(to_be_translated)
 				}
 			} else {
 				ic->f = instr(trnc_ss);
+			}
+			break;
+
+		case 0x0e:	/*  fdiv  */
+			if (d == 0) {
+				/*  d = 0 isn't allowed. for now, let's abort execution.  */
+				fatal("TODO: exception for d = 0 in fdiv.xxx instruction\n");
+				goto bad;
+			}
+			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
+			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
+			switch ((iword >> 5) & 0x3f) {
+			case 0x15:	ic->f = instr(fdiv_ddd); break;
+			default:if (!cpu->translation_readahead)
+					fatal("Unimplemented fdiv combination 0x%x.\n",
+					    (iword >> 5) & 0x3f);
+				goto bad;
 			}
 			break;
 

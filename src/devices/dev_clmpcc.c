@@ -213,7 +213,12 @@ DEVICE_ACCESS(clmpcc)
 		break;
 
 	case CLMPCC_REG_TFTC:	/*  Tx FIFO Transfer Count  */
-		odata = 0x1f;	/*  bogus value  */
+		/*
+		 *  0x1f is low enough to allow OpenBSD/mvme88k's ramdisk
+		 *  kernel to run (bsd.rd), but not the default kernel (bsd).
+		 *  Lowering it to 0x0f seems to work.
+		 */
+		odata = 0x0f;
 		break;
 
 	case CLMPCC_REG_TEOIR:	/*  Tx End of Interrupt Register  */

@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: dev_m8820x.c,v 1.9.2.1 2008-01-18 19:12:29 debug Exp $
- *
  *  COMMENT: M88200/M88204 CMMU (Cache/Memory Management Unit)
  */
 
@@ -66,7 +64,9 @@ static void m8820x_command(struct cpu *cpu, struct m8820x_data *d)
 	switch (cmd) {
 
 	case CMMU_FLUSH_CACHE_CB_LINE:
+	case CMMU_FLUSH_CACHE_CB_PAGE:
 	case CMMU_FLUSH_CACHE_INV_LINE:
+	case CMMU_FLUSH_CACHE_INV_PAGE:
 	case CMMU_FLUSH_CACHE_INV_ALL:
 	case CMMU_FLUSH_CACHE_CBI_LINE:
 	case CMMU_FLUSH_CACHE_CBI_PAGE:

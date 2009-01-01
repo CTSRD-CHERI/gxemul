@@ -32,6 +32,16 @@
  *
  *  See e.g. openbsd/sys/dev/microcode/siop/osiop.ss for an example of what
  *  the SCRIPTS assembly language looks like (or osiop.out for the raw result).
+ *
+ *
+ *  TODOs:
+ *
+ *  o)	Target mode. Right now, only Initiator mode is implemented.
+ *  o)	Errors. Right now, the emulator aborts if there is a SCSI error.
+ *  o)	Allow all phases to do partial transfers. Right now, only data in
+ *	and data out support this (hackish).
+ *  o)	Read bytes directly from/to host pages, if emulated RAM is mapped
+ *	into host pages (for performance).
  */
 
 #include <stdio.h>
@@ -343,8 +353,8 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				i = 0;
 				while (xfer_byte_count > 0) {
 					uint8_t byte = read_byte(cpu, xfer_addr);
-					debug("  reading msg_out byte @ 0x%08x = 0x%02x\n",
-					    xfer_addr, byte);
+					/*  debug("  reading msg_out byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);  */
 					d->xferp->msg_out[i++] = byte;
 					xfer_addr ++;
 					xfer_byte_count --;
@@ -360,8 +370,8 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				i = 0;
 				while (xfer_byte_count > 0) {
 					uint8_t byte = read_byte(cpu, xfer_addr);
-					debug("  reading cmd byte @ 0x%08x = 0x%02x\n",
-					    xfer_addr, byte);
+					/*  debug("  reading cmd byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);  */
 					d->xferp->cmd[i++] = byte;
 					xfer_addr ++;
 					xfer_byte_count --;
@@ -373,14 +383,39 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 					fatal("osiop TODO: error\n");
 					exit(1);
 				}
-				if (res == 2) {
-					fatal("osiop TODO: data out\n");
-					exit(1);
+
+				d->data_offset = 0;
+				
+				if (res == 2)
+					osiop_set_scsi_phase(d, DATA_OUT_PHASE);
+				else if (d->xferp->data_in_len > 0)
+					osiop_set_scsi_phase(d, DATA_IN_PHASE);
+				else
+					osiop_set_scsi_phase(d, STATUS_PHASE);
+				break;
+
+			case DATA_OUT_PHASE:
+				if (d->xferp->data_out == NULL)
+					scsi_transfer_allocbuf(&d->xferp->data_out_len,
+					    &d->xferp->data_out, d->xferp->data_out_len, 0);
+
+				while (xfer_byte_count > 0) {
+					uint8_t byte = read_byte(cpu, xfer_addr);
+					/*  debug("  reading data_out byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);  */
+					d->xferp->data_out[d->xferp->data_out_offset++] = byte;
+					xfer_addr ++;
+					xfer_byte_count --;
 				}
 
-				if (d->xferp->data_in_len > 0) {
-					osiop_set_scsi_phase(d, DATA_IN_PHASE);
-					d->data_offset = 0;
+				/*  Rerun the command to actually write out the data:  */
+				res = diskimage_scsicommand(cpu,
+				    d->selected_id, DISKIMAGE_SCSI, d->xferp);
+				if (res == 0) {
+					fatal("osiop TODO: error on rerun\n");
+					exit(1);
+				} else if (res == 2) {
+					/*  Stay at data out phase.  */
 				} else {
 					osiop_set_scsi_phase(d, STATUS_PHASE);
 				}
@@ -391,8 +426,8 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				while (xfer_byte_count > 0 && i + d->data_offset < d->xferp->data_in_len) {
 					uint8_t byte = d->xferp->data_in[i + d->data_offset];
 					i ++;
-					debug("  writing data_in byte @ 0x%08x = 0x%02x\n",
-					    xfer_addr, byte);
+					/*  debug("  writing data_in byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);  */
 					write_byte(cpu, xfer_addr, byte);
 					xfer_addr ++;
 					xfer_byte_count --;
@@ -407,8 +442,8 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				i = 0;
 				while (xfer_byte_count > 0 && i < d->xferp->status_len) {
 					uint8_t byte = d->xferp->status[i++];
-					debug("  writing status byte @ 0x%08x = 0x%02x\n",
-					    xfer_addr, byte);
+					/*  debug("  writing status byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);  */
 					write_byte(cpu, xfer_addr, byte);
 					xfer_addr ++;
 					xfer_byte_count --;
@@ -421,8 +456,8 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				i = 0;
 				while (xfer_byte_count > 0 && i < d->xferp->msg_in_len) {
 					uint8_t byte = d->xferp->msg_in[i++];
-					debug("  writing msg_in byte @ 0x%08x = 0x%02x\n",
-					    xfer_addr, byte);
+					/*  debug("  writing msg_in byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);  */
 					write_byte(cpu, xfer_addr, byte);
 					xfer_addr ++;
 					xfer_byte_count --;

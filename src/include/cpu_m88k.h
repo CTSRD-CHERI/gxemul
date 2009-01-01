@@ -26,9 +26,6 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *
- *
- *  $Id: cpu_m88k.h,v 1.22.2.1 2008-01-18 19:12:31 debug Exp $
  */
 
 #include "misc.h"
@@ -146,6 +143,7 @@ struct m88k_cpu_type_def {
 #define	N_M88K_FPU_CONTROL_REGS		64
 
 #define M88K_FPCR_FPECR		0
+#define	M88K_FPECR_FDVZ			(1 << 3)
 #define	M88K_FPECR_FUNIMP		(1 << 6)
 /*  ... TODO: more  */
 
