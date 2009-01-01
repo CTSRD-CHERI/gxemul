@@ -10,9 +10,9 @@ Goals for 0.4.7:  (Perhaps make a release during early 2009? If possible.)
 
   [/]	The first stable M88K emulation mode: MVME187, running OpenBSD/mvme88k
 
-		[/]  Stable install instructions!
-		[ ]  Stable running after install
-		[ ]  Self compilation?
+		[X]  Stable install instructions!
+		[X]  Stable running after install
+		[/]  Self compilation?
 		[ ]  Performance
 		[ ]  Ethernet
 
@@ -57,8 +57,16 @@ To be translated prefetch:
 	    pages, NOT when running via a slow device!
 
 M88K:
+	o)  Find the cause of the "tail -10" failure, and fix it!
+	o)  Self-compilation of gxemul 0.4.6.6:
+		cc -Wall -fstrict-aliasing -fomit-frame-pointer -fpeephole -O3 -DNDEBUG -I../include/  -c cpu_mips_coproc.c
+		cpu_mips_coproc.c: In function `coproc_tlbwri':
+		cpu_mips_coproc.c:1786: warning: `psize' might be used uninitialized in this function
+	    feels strange. In fact there are lots of similar "might be used uninitialized"
+	    warnings, which are incorrect.
 	o)  Instruction combination for the MULTIPROCESSOR _sched_idle
 	    for OpenBSD/m88k.
+	o)  MVME187 disk bootblock boot.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.
@@ -77,7 +85,9 @@ M88K:
 		o)  See http://www.panggih.staff.ugm.ac.id/download/GCC/info/gcc.i5
 		    for some strange cases of when "div" can fail (?)
 		o)  Floating point stuff:
-			Exceptions for overflow etc!
+			+) Refactor all the fsub, fadd, fmul etc. They
+			   are currently quite horribly redundant.
+			+) Exceptions for overflow etc!
 		o)  88110-specific instructions, e.g. "graphics" instructions
 
 MIPS:

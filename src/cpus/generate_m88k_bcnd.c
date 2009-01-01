@@ -78,7 +78,8 @@ void bcnd(int samepage, int n_bit, int m5)
 
 	/*  Easiest case is without the n_bit:  */
 	if (!n_bit) {
-		printf("\tif ((int32_t)reg(ic->arg[0]) ");
+		printf("\tif ((%sint32_t)reg(ic->arg[0]) ",
+		    (m5 == 7 || m5 == 8)? "u" : "");
 		print_operator(m5);
 		printf(") {\n");
 
@@ -93,7 +94,8 @@ void bcnd(int samepage, int n_bit, int m5)
 		printf("\t}\n");
 	} else {
 		/*  n_bit, i.e. delay slot:  */
-		printf("\tint cond = (int32_t)reg(ic->arg[0]) ");
+		printf("\tint cond = (%sint32_t)reg(ic->arg[0]) ",
+		    (m5 == 7 || m5 == 8)? "u" : "");
 		print_operator(m5);
 		printf(";\n");
 

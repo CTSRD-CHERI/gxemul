@@ -17,8 +17,8 @@ Several processor architectures and machine types have been implemented.
 It is working well enough to allow unmodified "guest" operating systems to 
 run inside the emulator, as if they were running on real hardware.
 
-The emulator emulates (networks of) real machines. The machines may 
-consist of ARM, MIPS, PowerPC, and SuperH processors, and various 
+The emulator emulates (networks of) real machines. The machines may consist
+of ARM, Motorola 88K, MIPS, PowerPC, and SuperH processors, and various 
 surrounding hardware components such as framebuffers, busses, interrupt 
 controllers, ethernet controllers, disk controllers, and serial port 
 controllers.
