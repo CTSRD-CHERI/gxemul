@@ -72,6 +72,7 @@ struct osiop_data {
 	/*  Current transfer:  */
 	int			selected_id;
 	struct scsi_transfer	*xferp;
+	int			data_offset;
 
 	/*  ALU:  */
 	int			carry;
@@ -201,7 +202,7 @@ static uint8_t read_byte(struct cpu *cpu, uint32_t addr)
 static void write_byte(struct cpu *cpu, uint32_t addr, uint8_t byte)
 {
 	cpu->memory_rw(cpu, cpu->mem, addr, (unsigned char *) &byte,
-	    sizeof(byte), MEM_READ, NO_EXCEPTIONS | PHYSICAL);
+	    sizeof(byte), MEM_WRITE, NO_EXCEPTIONS | PHYSICAL);
 }
 
 
@@ -335,6 +336,23 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 
 			switch (phase) {
 
+			case MSG_OUT_PHASE:
+				scsi_transfer_allocbuf(&d->xferp->msg_out_len,
+				    &d->xferp->msg_out, xfer_byte_count, 0);
+
+				i = 0;
+				while (xfer_byte_count > 0) {
+					uint8_t byte = read_byte(cpu, xfer_addr);
+					debug("  reading msg_out byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);
+					d->xferp->msg_out[i++] = byte;
+					xfer_addr ++;
+					xfer_byte_count --;
+				}
+				
+				osiop_set_scsi_phase(d, COMMAND_PHASE);
+				break;
+
 			case COMMAND_PHASE:
 				scsi_transfer_allocbuf(&d->xferp->cmd_len,
 				    &d->xferp->cmd, xfer_byte_count, 0);
@@ -342,7 +360,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				i = 0;
 				while (xfer_byte_count > 0) {
 					uint8_t byte = read_byte(cpu, xfer_addr);
-					printf("  byte @ 0x%08x = 0x%02x\n",
+					debug("  reading cmd byte @ 0x%08x = 0x%02x\n",
 					    xfer_addr, byte);
 					d->xferp->cmd[i++] = byte;
 					xfer_addr ++;
@@ -360,36 +378,59 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 					exit(1);
 				}
 
-				osiop_set_scsi_phase(d, STATUS_PHASE);
+				if (d->xferp->data_in_len > 0) {
+					osiop_set_scsi_phase(d, DATA_IN_PHASE);
+					d->data_offset = 0;
+				} else {
+					osiop_set_scsi_phase(d, STATUS_PHASE);
+				}
 				break;
 
-			case MSG_OUT_PHASE:
-				scsi_transfer_allocbuf(&d->xferp->msg_out_len,
-				    &d->xferp->msg_out, xfer_byte_count, 0);
-
+			case DATA_IN_PHASE:
 				i = 0;
-				while (xfer_byte_count > 0) {
-					uint8_t byte = read_byte(cpu, xfer_addr);
-					printf("  byte @ 0x%08x = 0x%02x\n",
+				while (xfer_byte_count > 0 && i + d->data_offset < d->xferp->data_in_len) {
+					uint8_t byte = d->xferp->data_in[i + d->data_offset];
+					i ++;
+					debug("  writing data_in byte @ 0x%08x = 0x%02x\n",
 					    xfer_addr, byte);
-					d->xferp->msg_out[i++] = byte;
+					write_byte(cpu, xfer_addr, byte);
 					xfer_addr ++;
 					xfer_byte_count --;
 				}
-				
-				osiop_set_scsi_phase(d, COMMAND_PHASE);
+
+				d->data_offset += i;
+				if (d->data_offset >= d->xferp->data_in_len)
+					osiop_set_scsi_phase(d, STATUS_PHASE);
 				break;
 
 			case STATUS_PHASE:
 				i = 0;
 				while (xfer_byte_count > 0 && i < d->xferp->status_len) {
 					uint8_t byte = d->xferp->status[i++];
-					printf("  writing byte @ 0x%08x = 0x%02x\n",
+					debug("  writing status byte @ 0x%08x = 0x%02x\n",
 					    xfer_addr, byte);
 					write_byte(cpu, xfer_addr, byte);
 					xfer_addr ++;
 					xfer_byte_count --;
 				}
+
+				osiop_set_scsi_phase(d, MSG_IN_PHASE);
+				break;
+
+			case MSG_IN_PHASE:
+				i = 0;
+				while (xfer_byte_count > 0 && i < d->xferp->msg_in_len) {
+					uint8_t byte = d->xferp->msg_in[i++];
+					debug("  writing msg_in byte @ 0x%08x = 0x%02x\n",
+					    xfer_addr, byte);
+					write_byte(cpu, xfer_addr, byte);
+					xfer_addr ++;
+					xfer_byte_count --;
+				}
+
+				/*  Done.  */
+				scsi_transfer_free(d->xferp);
+				d->xferp = NULL;
 				break;
 
 			default:fatal("osiop: TODO: unimplemented move, "
@@ -399,7 +440,9 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 
 			/*  Transfer complete.  */
 			*(uint32_t*) &d->reg[OSIOP_DNAD] = xfer_addr;
-			*(uint32_t*) &d->reg[OSIOP_DBC] = 0;
+			*(uint32_t*) &d->reg[OSIOP_DBC] = xfer_byte_count;
+			
+			d->reg[OSIOP_DFIFO] = 0;	/*  TODO  */
 		}
 		break;
 
@@ -462,7 +505,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 			}
 
 			if (diskimage_exist(cpu->machine,
-			    d->selected_id, DISKIMAGE_SCSI)) {
+			    scsi_id_to_select, DISKIMAGE_SCSI)) {
 				osiop_new_xfer(d, scsi_id_to_select);
 
 				/*  TODO: Just a guess, so far:  */
@@ -483,7 +526,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 			break;
 			
 		case 1:	debug(": WAIT DISCONNECT");
-			exit(1);
+			/*  TODO  */
 			break;
 		case 2:	debug(": WAIT RESELECT");
 			exit(1);
@@ -747,6 +790,12 @@ DEVICE_ACCESS(osiop)
 		}
 		break;
 
+	case OSIOP_SBDL:
+		if (writeflag == MEM_WRITE)
+			fatal("[ osiop: SBDL set to 0x%x, but should be "
+			    "read-only! ]\n", (int) idata);
+		break;
+
 	case OSIOP_SBCL:
 		if (writeflag == MEM_WRITE)
 			debug("[ osiop: SBCL set to 0x%x ]\n", (int) idata);
@@ -766,6 +815,10 @@ DEVICE_ACCESS(osiop)
 		osiop_reassert_interrupts(d);
 		break;
 
+	case OSIOP_SSTAT1:
+	case OSIOP_SSTAT2:
+		break;
+		
 	case OSIOP_DSA:
 		if (writeflag == MEM_WRITE)
 			debug("[ osiop: DSA set to 0x%x ]\n", (int) idata);
@@ -786,6 +839,9 @@ DEVICE_ACCESS(osiop)
 			debug("[ osiop: TEMP set to 0x%x ]\n", (int) idata);
 		break;
 
+	case OSIOP_DFIFO:
+		break;
+
 	case OSIOP_ISTAT:
 		if (writeflag == MEM_WRITE) {
 			if ((idata & 0x3f) != 0x00) {
@@ -803,6 +859,9 @@ DEVICE_ACCESS(osiop)
 		odata = (odata & 0xf) | (OSIOP_CHIP_REVISION << 4);
 		break;
 
+	case OSIOP_DBC:
+		break;
+
 	case OSIOP_DSP:
 		if (writeflag == MEM_WRITE) {
 			debug("[ osiop: DSP set to 0x%x ]\n", (int) idata);
@@ -810,6 +869,10 @@ DEVICE_ACCESS(osiop)
 			d->scripts_running = 1;
 			osiop_execute_scripts(cpu, d);
 		}
+		break;
+
+	case OSIOP_DSPS:
+	case OSIOP_SCRATCH:
 		break;
 
 	case OSIOP_DMODE:
@@ -874,6 +937,9 @@ DEVINIT(osiop)
 
 	/*  Set up initial device register values:  */
 	d->reg[OSIOP_SCID] = OSIOP_SCID_VALUE(7);
+
+	/*  OpenBSD's osiop_checkintr needs this:  */
+	d->reg[OSIOP_CTEST1] = OSIOP_CTEST1_FMT;
 
 	INTERRUPT_CONNECT(devinit->interrupt_path, d->irq);
 

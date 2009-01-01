@@ -3791,3 +3791,5 @@ Changelog for GXemul:
 		Adding a dummy LUNA 88K machine mode (machine_luna88k.c).
 20081229	Continuing on the osiop SCRIPTS ISA.
 20081231	More progress on dev_osiop.c.
+20090101	FINALLY the osiop works well enough to let OpenBSD detect
+		SCSI devices! :-)
