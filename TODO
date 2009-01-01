@@ -57,6 +57,8 @@ To be translated prefetch:
 	    pages, NOT when running via a slow device!
 
 M88K:
+	o)  Instruction combination for the MULTIPROCESSOR _sched_idle
+	    for OpenBSD/m88k.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.
