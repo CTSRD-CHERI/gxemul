@@ -8,10 +8,13 @@ Some things, in no specific order, that I'd like to fix:
 
 Goals for 0.4.7:  (Perhaps make a release during early 2009? If possible.)
 
-  [/]	M88K: Make it possible to run OpenBSD/mvme88k! This would
-	be really cool. Either via network (le0 via VME bus?) or disk
-	(NCR 73C710 SCSI "osiop"). It would be the first stable M88K mode,
-	being the fifth officially emulated architecture in GXemul.
+  [/]	The first stable M88K emulation mode: MVME187, running OpenBSD/mvme88k
+
+		[/]  Stable install instructions!
+		[ ]  Stable running after install
+		[ ]  Self compilation?
+		[ ]  Performance
+		[ ]  Ethernet
 
 Release checklist:
 	README
@@ -54,25 +57,6 @@ To be translated prefetch:
 	    pages, NOT when running via a slow device!
 
 M88K:
-	o)  Implement devices etc. for one or more machine modes,
-	    to get some guest OS running. OpenBSD/mvme88k on MVME187
-	    seems to be the smartest path to follow for now.
-		osiop0 at pcctwo0 offset 0x47000 ipl 2: NCR53C710 rev 2, 50MHz, SCSI ID 7
-		scsibus0 at osiop0: 8 targets 
-		vme0 at pcctwo0 offset 0x40000: system controller
-		vme0: using BUG parameters
-		vme0: 1phys 0x18000000-0xefff0000 to VME 0x18000000-0xefff0000
-		vme0: vme to cpu irq level 1:1
-		vmes0 at vme0
-		le0 at vmes0 addr 0xffff1200 ipl 3 vec 0x80: address 00:00:77:83:ac:56
-		le0: 128 receive buffers, 32 transmit buffers
-		ie0 at pcctwo0 offset 0x46000 ipl 3: address 08:00:3e:23:ed:e8
-		o)  SCSI
-		o)  Ethernet
-		o)  VME bus
-		o)  SMP for mvme197? 88110.
-	o)  Instruction combination for the sched_idle loop on OpenBSD/mvme88k,
-	    so that the host idles.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.
