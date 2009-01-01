@@ -1,6 +1,4 @@
 #
-#  $Id: Makefile.skel,v 1.40 2007-07-20 09:03:33 debug Exp $
-#
 #  Makefile for GXemul src/cpus
 #
 

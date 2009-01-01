@@ -1,4 +1,3 @@
-/*  gxemul: $Id: pxreg.h,v 1.2 2005-03-05 12:34:03 debug Exp $  */
 /* 	$NetBSD: pxreg.h,v 1.8 2000/06/13 13:39:12 ad Exp $	*/
 
 #ifndef _PMAX_DEV_PXREG_H_

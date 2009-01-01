@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sh4_bscreg.h,v 1.3 2006-11-11 01:02:17 debug Exp $  */
 /*	$NetBSD: bscreg.h,v 1.6 2005/12/11 12:18:58 christos Exp $	*/
 
 /*  This file has been extended with useful bitfield definitions from

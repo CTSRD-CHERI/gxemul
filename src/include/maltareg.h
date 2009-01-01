@@ -1,4 +1,3 @@
-/*  gxemul: $Id: maltareg.h,v 1.1 2005-07-30 18:11:21 debug Exp $  */
 /*	$NetBSD: maltareg.h,v 1.1 2002/03/07 14:44:04 simonb Exp $	*/
 
 #ifndef MALTAREG_H

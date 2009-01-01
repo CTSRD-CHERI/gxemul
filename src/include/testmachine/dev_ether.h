@@ -4,7 +4,6 @@
 /*
  *  Definitions used by the "ether" device in GXemul.
  *
- *  $Id: dev_ether.h,v 1.2 2006-07-05 05:38:36 debug Exp $
  *  This file is in the public domain.
  */
 

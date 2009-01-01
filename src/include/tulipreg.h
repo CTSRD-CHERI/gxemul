@@ -1,4 +1,3 @@
-/*  GXemul: $Id: tulipreg.h,v 1.3 2005-10-27 14:01:15 debug Exp $  */
 /*  $NetBSD: tulipreg.h,v 1.31 2005/06/23 23:51:42 rpaulo Exp $  */
 
 #ifndef __volatile

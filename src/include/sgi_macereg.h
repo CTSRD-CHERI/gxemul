@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sgi_macereg.h,v 1.2 2007-01-20 16:11:26 debug Exp $  */
 /*  $NetBSD: macereg.h,v 1.2 2005/12/11 12:18:54 christos Exp $  */
 
 #ifndef SGI_MACEREG_H

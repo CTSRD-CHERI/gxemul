@@ -1,4 +1,3 @@
-/*  gxemul: $Id: vripreg.h,v 1.1 2005-04-06 17:13:44 debug Exp $  */
 /*	$NetBSD: vripreg.h,v 1.8 2003/04/01 02:33:52 igy Exp $	*/
 
 #ifndef VRIPREG_H

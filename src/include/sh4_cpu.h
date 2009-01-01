@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sh4_cpu.h,v 1.2 2006-10-19 10:18:02 debug Exp $  */
 /*	$NetBSD: cpu.h,v 1.41 2006/01/21 04:24:12 uwe Exp $	*/
 
 #ifndef	SH4_CPU_H

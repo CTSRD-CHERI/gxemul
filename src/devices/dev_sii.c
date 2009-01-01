@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2003-2008  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2003-2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *   
  *
- *  $Id: dev_sii.c,v 1.21.2.1 2008-01-18 19:12:30 debug Exp $
- *  
  *  COMMENT: SII SCSI controller, used in some DECstation systems
  *
  *  TODO:  This is huge and ugly. Fix this.

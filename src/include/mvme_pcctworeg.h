@@ -1,4 +1,3 @@
-/*  GXemul: $Id: mvme_pcctworeg.h,v 1.1 2007-05-15 12:35:14 debug Exp $  */
 /*	$OpenBSD: pcctworeg.h,v 1.8 2006/04/27 20:19:28 miod Exp $ */
 
 #ifndef MVME_PCCTWOREG_H

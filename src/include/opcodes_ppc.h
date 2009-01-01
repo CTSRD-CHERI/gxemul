@@ -2,7 +2,7 @@
 #define	OPCODES_PPC_H
 
 /*
- *  Copyright (C) 2005-2008  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2005-2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,11 +28,10 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: opcodes_ppc.h,v 1.50.2.1 2008-01-18 19:12:32 debug Exp $
+ *  POWER and PowerPC opcodes. These are gathered from various sources.
  *
- *
- *  PPC and POWER opcodes. These are gathered from various sources.
- *  Note: The define uses the PPC name, not the POWER name, when they differ.
+ *  Note: The define uses the PowerPC name, not the POWER name, when they
+ *  differ.
  */
 
 #define	PPC_HI6_MULLI		0x07

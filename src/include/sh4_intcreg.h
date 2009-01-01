@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sh4_intcreg.h,v 1.1 2006-10-27 13:12:21 debug Exp $  */
 /*	$NetBSD: intcreg.h,v 1.10 2005/12/11 12:18:58 christos Exp $	*/
 
 #ifndef _SH3_INTCREG_H_

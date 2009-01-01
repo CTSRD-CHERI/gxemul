@@ -1,4 +1,3 @@
-/*  GXemul: $Id: z8530reg.h,v 1.1 2005-12-02 01:46:31 debug Exp $  */
 /*	$NetBSD: z8530reg.h,v 1.11 2003/11/02 11:07:46 wiz Exp $ */
 
 #ifndef	Z8530REG_H

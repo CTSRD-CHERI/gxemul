@@ -1,4 +1,3 @@
-/*  gxemul: $Id: jazz_r4030_dma.h,v 1.4 2005-06-02 12:31:40 debug Exp $  */
 /*	$NetBSD: dma.h,v 1.2 2001/07/24 16:26:53 tsutsui Exp $	*/
 /*	$OpenBSD: dma.h,v 1.3 1997/04/19 17:19:51 pefo Exp $	*/
 

@@ -1,4 +1,3 @@
-/*  GXemul: $Id: vr_rtcreg.h,v 1.1 2006-10-02 09:26:53 debug Exp $  */
 /*	$NetBSD: rtcreg.h,v 1.8 2002/02/10 14:36:52 sato Exp $	*/
 
 #ifndef	VR_RTCREG_H

@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sh4_mmu.h,v 1.1 2006-09-23 03:51:06 debug Exp $  */
 /*	$NetBSD: mmu_sh4.h,v 1.6 2006/03/04 01:55:03 uwe Exp $	*/
 
 #ifndef _SH3_MMU_SH4_H_

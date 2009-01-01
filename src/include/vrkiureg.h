@@ -1,4 +1,3 @@
-/*  gxemul: $Id: vrkiureg.h,v 1.1 2005-03-12 10:20:07 debug Exp $  */
 /*	$NetBSD: vrkiureg.h,v 1.2 2000/09/21 14:17:36 takemura Exp $	*/
 
 #ifndef	VRKIUREG_H

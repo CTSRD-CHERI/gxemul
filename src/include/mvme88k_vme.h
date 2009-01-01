@@ -1,4 +1,3 @@
-/*  GXemul: $Id: mvme88k_vme.h,v 1.1 2007-05-15 12:35:14 debug Exp $  */
 /*	$OpenBSD: vme.h,v 1.17 2005/11/25 22:14:32 miod Exp $ */
 
 /*

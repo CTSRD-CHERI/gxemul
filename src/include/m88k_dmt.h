@@ -1,4 +1,3 @@
-/*  GXemul: $Id: m88k_dmt.h,v 1.1 2007-05-25 06:08:52 debug Exp $  */
 /*	$OpenBSD: m88100.h,v 1.3 2006/11/18 22:58:28 miod Exp $ */
 
 #ifndef M88K_DMT_H

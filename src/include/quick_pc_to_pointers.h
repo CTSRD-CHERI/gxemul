@@ -1,5 +1,3 @@
-/*  $Id: quick_pc_to_pointers.h,v 1.1 2005-11-30 16:23:10 debug Exp $  */
-
 #ifdef quick_pc_to_pointers
 #undef quick_pc_to_pointers
 #endif
@@ -20,4 +18,3 @@
 #else
 #define quick_pc_to_pointers(cpu)	DYNTRANS_PC_TO_POINTERS(cpu)
 #endif
-

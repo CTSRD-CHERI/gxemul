@@ -1,4 +1,3 @@
-/*  GXemul: $Id: lptreg.h,v 1.1 2005-11-12 11:34:31 debug Exp $  */
 /*	$NetBSD: lptreg.h,v 1.8 2005/02/27 00:27:02 perry Exp $	*/
 
 #ifndef LPTREG_H

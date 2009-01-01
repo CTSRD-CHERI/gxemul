@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2003-2008  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2003-2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,6 @@
  *  SUCH DAMAGE.
  *   
  *
- *  $Id: dev_sgi_mardigras.c,v 1.25.2.1 2008-01-18 19:12:30 debug Exp $
- *  
  *  COMMENT: MardiGras graphics controller on SGI IP30 (Octane)
  *
  *  Most of this is just guesses based on the behaviour of Linux/Octane.

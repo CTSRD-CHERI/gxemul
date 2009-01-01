@@ -1,4 +1,3 @@
-/*  gxemul: $Id: mips_cpuregs.h,v 1.3 2007-02-10 13:31:21 debug Exp $  */
 /*	$NetBSD: cpuregs.h,v 1.69 2005/12/20 21:06:43 tron Exp $	*/
 
 /*

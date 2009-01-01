@@ -1,4 +1,3 @@
-/*  gxemul: $Id: siireg.h,v 1.3 2005-03-05 12:34:03 debug Exp $  */
 /*	$NetBSD: siireg.h,v 1.4 1994/10/26 21:09:22 cgd Exp $	*/
 
 /*

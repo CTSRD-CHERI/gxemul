@@ -1,4 +1,3 @@
-/*  gxemul: $Id: ohcireg.h,v 1.1 2005-04-10 21:18:24 debug Exp $  */
 /*	$NetBSD: ohcireg.h,v 1.19 2002/07/11 21:14:27 augustss Exp $	*/
 /*	$FreeBSD: src/sys/dev/usb/ohcireg.h,v 1.8 1999/11/17 22:33:40 n_hibma Exp $	*/
 

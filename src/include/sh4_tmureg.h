@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sh4_tmureg.h,v 1.1 2006-10-19 10:15:57 debug Exp $  */
 /*	$NetBSD: tmureg.h,v 1.11 2006/03/04 01:55:03 uwe Exp $	*/
 
 #ifndef _SH3_TMUREG_H_

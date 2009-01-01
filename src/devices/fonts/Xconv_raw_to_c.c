@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2003-2008  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2003-2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -22,9 +22,6 @@
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
  *
- *
- *  gxemul: $Id: Xconv_raw_to_c.c,v 1.2 2004/08/03 00:31:59 debug Exp $
- *  $ycx2: Xconv_raw_to_c.c,v 1.2 2003/11/25 01:20:24 debug Exp $
  *
  *  Convert a raw binary file into an unsigned char array, usable from C.
  *  Example:

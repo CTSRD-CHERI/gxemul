@@ -1,5 +1,3 @@
-/*  gxemul: $Id: lk201.h,v 1.4 2005-03-05 12:34:02 debug Exp $  */
-
 /*  This file contains two files from netbsd, lk201.h and lk201.c.  */
 
 #ifndef LK201_H

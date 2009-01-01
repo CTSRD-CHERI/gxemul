@@ -1,4 +1,3 @@
-/*  GXemul: $Id: m8820x_pte.h,v 1.2 2007-05-17 02:51:18 debug Exp $  */
 /*	$OpenBSD: mmu.h,v 1.8 2006/05/21 20:55:43 miod Exp $ */
 
 #ifndef M8820X_PTE_H

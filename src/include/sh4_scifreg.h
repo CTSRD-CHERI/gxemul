@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sh4_scifreg.h,v 1.1 2006-10-19 10:15:57 debug Exp $  */
 /* $NetBSD: scifreg.h,v 1.10 2006/02/18 00:41:32 uwe Exp $ */
 
 #ifndef _SH3_SCIFREG_H_

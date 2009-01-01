@@ -1,6 +1,4 @@
 #
-#  $Id: Makefile.skel,v 1.5 2007-03-26 02:01:36 debug Exp $
-#
 #  Makefile for GXemul src/debugger
 #
 

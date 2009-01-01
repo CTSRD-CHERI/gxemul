@@ -1,6 +1,4 @@
 #
-#  $Id: Makefile.skel,v 1.1 2007-06-20 14:25:14 debug Exp $
-#
 #  Makefile for GXemul src/symbol
 #
 #  Symbol handling support.

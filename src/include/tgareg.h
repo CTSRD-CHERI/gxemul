@@ -1,4 +1,3 @@
-/*  gxemul: $Id: tgareg.h,v 1.2 2005-03-05 12:34:03 debug Exp $  */
 /* $NetBSD: tgareg.h,v 1.4 2000/03/12 05:32:30 nathanw Exp $ */
 
 #ifndef _ALPHA_INCLUDE_TGAREG_H_

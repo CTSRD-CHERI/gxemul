@@ -1,4 +1,3 @@
-/*  GXemul: $Id: m8820x.h,v 1.1 2007-05-15 12:35:14 debug Exp $  */
 /*	$OpenBSD: m8820x.h,v 1.7 2006/05/06 16:59:26 miod Exp $ */
 /*
  * Copyright (c) 2004, Miodrag Vallat.

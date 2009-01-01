@@ -1,4 +1,3 @@
-/*  GXemul: $Id: rtl81x9reg.h,v 1.1 2007-04-21 02:36:23 debug Exp $  */
 /*	$OpenBSD: rtl81x9reg.h,v 1.36 2006/12/12 10:24:38 reyk Exp $	*/
 
 #ifndef RTL81X9REG_H

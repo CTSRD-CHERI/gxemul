@@ -1,4 +1,3 @@
-/*  GXemul: $Id: yamon.h,v 1.1 2006-07-16 07:44:18 debug Exp $  */
 /*	$NetBSD: yamon.h,v 1.3 2005/06/09 21:43:13 he Exp $	*/
 
 #ifndef	_MIPS_YAMON_YAMON_H_

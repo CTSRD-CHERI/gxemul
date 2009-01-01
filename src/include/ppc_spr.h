@@ -1,6 +1,4 @@
 /*
- *  GXemul: $Id: ppc_spr.h,v 1.2 2005-11-17 22:50:34 debug Exp $
- *
  *  The NetBSD file ($NetBSD: spr.h,v 1.35 2005/01/20 21:26:49 matt Exp $)
  *  has no explicit Copyright notice, but the initial message in the NetBSD CVS
  *  log for this file says

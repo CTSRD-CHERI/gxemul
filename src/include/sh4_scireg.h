@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sh4_scireg.h,v 1.3 2007-04-16 15:11:01 debug Exp $  */
 /*	$OpenBSD: scireg.h,v 1.1.1.1 2006/10/06 21:02:55 miod Exp $	*/
 /* $NetBSD: scireg.h,v 1.8 2003/07/01 11:49:37 uwe Exp $ */
 

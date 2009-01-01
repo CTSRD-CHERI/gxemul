@@ -1,4 +1,3 @@
-/*  GXemul: $Id: mvmeprom.h,v 1.1 2007-05-11 14:46:55 debug Exp $  */
 /*	$OpenBSD: prom.h,v 1.16 2006/05/16 22:51:28 miod Exp $ */
 /*
  * Copyright (c) 1998 Steve Murphree, Jr.

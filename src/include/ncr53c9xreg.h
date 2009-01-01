@@ -1,5 +1,3 @@
-/*  gxemul: $Id: ncr53c9xreg.h,v 1.3 2005-03-05 12:34:03 debug Exp $  */
-
 #ifndef NCR53C9XREG_H
 #define NCR53C9XREG_H
 

@@ -1,5 +1,3 @@
-/*  gxemul: $Id: syscall_freebsd.h,v 1.1 2007-06-15 00:41:21 debug Exp $  */
-
 #ifndef SYSCALL_FREEBSD_H
 #define SYSCALL_FREEBSD_H
 

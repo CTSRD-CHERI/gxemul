@@ -1,4 +1,3 @@
-/*  GXemul: $Id: mii.h,v 1.1 2005-11-25 02:34:24 debug Exp $  */
 /*	$NetBSD: mii.h,v 1.12 2005/02/27 00:27:31 perry Exp $	*/
 
 #ifndef _DEV_MII_MII_H_

@@ -1,4 +1,3 @@
-/*  GXemul: $Id: mvme187.h,v 1.1 2007-05-15 12:35:14 debug Exp $  */
 /*	$OpenBSD: mvme187.h,v 1.9 2006/11/18 22:53:11 miod Exp $ */
 /*
  * Copyright (c) 1996 Nivas Madhur

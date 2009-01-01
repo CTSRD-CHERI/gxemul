@@ -1,5 +1,3 @@
-/*  gxemul: $Id: mc146818reg.h,v 1.4 2005-03-05 12:34:02 debug Exp $  */
-
 #ifndef	MC146818_REG_H
 #define	MC146818_REG_H
 

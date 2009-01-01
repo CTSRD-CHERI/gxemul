@@ -1,4 +1,3 @@
-/*  gxemul: $Id: wdcreg.h,v 1.3 2005-09-10 22:18:57 debug Exp $  */
 /*	$NetBSD: wdcreg.h,v 1.25 2002/03/31 19:47:39 bouyer Exp $	*/
 
 #ifndef	WDCREG_H

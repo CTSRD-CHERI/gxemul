@@ -1,4 +1,3 @@
-/*  GXemul: $Id: sh4_rtcreg.h,v 1.1 2006-11-11 01:02:17 debug Exp $  */
 /*  $NetBSD: rtcreg.h,v 1.9 2006/03/04 01:55:03 uwe Exp $  */
 
 #ifndef SH4_RTCREG_H

@@ -1,4 +1,3 @@
-/*  GXemul: $Id: rs5c313reg.h,v 1.1 2007-04-13 16:07:26 debug Exp $  */
 /*	$OpenBSD: rs5c313reg.h,v 1.1 2006/10/06 22:30:26 mickey Exp $	*/
 /*	$NetBSD: rs5c313reg.h,v 1.1 2006/09/07 01:12:00 uwe Exp $	*/
 

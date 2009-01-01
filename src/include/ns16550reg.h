@@ -1,5 +1,3 @@
-/*  gxemul: $Id: ns16550reg.h,v 1.3 2005-03-05 12:34:03 debug Exp $  */
-
 #ifndef	NS16550REG_H
 #define	NS16550REG_H
 

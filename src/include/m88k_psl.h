@@ -1,4 +1,3 @@
-/*  GXemul: $Id: m88k_psl.h,v 1.1 2007-05-06 04:14:57 debug Exp $  */
 /*	$OpenBSD: psl.h,v 1.4 2005/09/25 22:41:12 miod Exp $ */
 /*
  * Copyright (c) 1996 Nivas Madhur

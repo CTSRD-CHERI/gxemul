@@ -1,4 +1,3 @@
-/*  GXemul: $Id: mb86960reg.h,v 1.1 2006-11-06 05:32:38 debug Exp $  */
 /*	$NetBSD: mb86960reg.h,v 1.10 2005/12/11 12:21:27 christos Exp $	*/
 
 #ifndef	MB86960REG_H

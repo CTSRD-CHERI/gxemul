@@ -1,4 +1,3 @@
-/*  gxemul: $Id: kbdreg.h,v 1.3 2006-07-25 18:58:02 debug Exp $  */
 /*	$NetBSD: kbdreg.h,v 1.4 2000/01/23 21:01:57 soda Exp $	*/
 /*	$OpenBSD: kbdreg.h,v 1.3 1996/09/04 21:18:24 pefo Exp $	*/
 

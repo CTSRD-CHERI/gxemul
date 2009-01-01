@@ -1,6 +1,4 @@
 /*
- *  $Id: fb_include.c,v 1.3 2006-10-17 07:55:53 debug Exp $
- *
  *  Included from dev_fb.c.
  *
  *  FB_SCALEDOWN should be defined if d->vfb_scaledown > 1.

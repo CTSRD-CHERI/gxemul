@@ -1,5 +1,3 @@
-/*  gxemul: $Id: ps2_dmacreg.h,v 1.4 2005-03-05 12:34:03 debug Exp $  */
-
 #ifndef PS2_DMACREG_H
 #define	PS2_DMACREG_H
 

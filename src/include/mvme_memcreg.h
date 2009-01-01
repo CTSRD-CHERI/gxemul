@@ -1,4 +1,3 @@
-/*  GXemul: $Id: mvme_memcreg.h,v 1.1 2007-05-12 10:32:05 debug Exp $  */
 /*	$OpenBSD: memcreg.h,v 1.3 2003/06/02 07:06:56 deraadt Exp $ */
 
 /*

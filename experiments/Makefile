@@ -1,5 +1,3 @@
-# $Id: Makefile,v 1.10 2007-06-07 15:36:24 debug Exp $
-
 BINS=cp_removeblocks bintrans_eval try_runlen udp_snoop \
 	sgiprom_to_bin decprom_dump_txt_to_bin hex_to_bin \
 	new_test_1 new_test_2 new_test_x new_test_loadstore ic_statistics

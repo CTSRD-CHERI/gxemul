@@ -2,7 +2,7 @@
 #define	CPU_SPARC_H
 
 /*
- *  Copyright (C) 2005-2008  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2005-2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,7 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: cpu_sparc.h,v 1.49.2.1 2008-01-18 19:12:32 debug Exp $
+ *  SPARC CPU definitions.
  */
 
 #include "misc.h"

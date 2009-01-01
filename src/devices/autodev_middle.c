@@ -1,6 +1,4 @@
 
-/*  $Id: autodev_middle.c,v 1.1 2005-02-22 13:23:43 debug Exp $  */
-
 /*
  *  autodev_init():
  */

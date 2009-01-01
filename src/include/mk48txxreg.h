@@ -1,4 +1,3 @@
-/*  GXemul: $Id: mk48txxreg.h,v 1.1 2006-01-17 05:55:58 debug Exp $  */
 /*  $NetBSD: mk48txxreg.h,v 1.7 2003/11/01 22:41:42 tsutsui Exp $  */
 
 #ifndef MK48TXXREG_H

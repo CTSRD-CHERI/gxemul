@@ -2,7 +2,7 @@
 #define	MACHINE_PMAX_H
 
 /*
- *  Copyright (C) 2006-2008  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2006-2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,15 +28,11 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: machine_pmax.h,v 1.2.2.1 2008-01-18 19:12:32 debug Exp $
+ *  Machine-specific data for MIPS-based DECstation machines.
  */
 
 #include "misc.h"
 
-
-/*
- *  Machine-specific data for MIPS-based DECstation machines.
- */
 
 struct machine_pmax {
 	struct dec_memmap	*memmap;
