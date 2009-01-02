@@ -64,9 +64,8 @@ static void file_load_srec(struct machine *m, struct memory *mem,
 	/*  Load file contents:  */
 	while (!feof(f)) {
 		memset(buf, 0, sizeof(buf));
-		fgets((char *)buf, sizeof(buf)-1, f);
-
-		if (buf[0] == 0 || buf[0]=='\r' || buf[0]=='\n')
+		if (fgets((char *)buf, sizeof(buf)-1, f) == NULL ||
+		    buf[0] == 0 || buf[0]=='\r' || buf[0]=='\n')
 			continue;
 
 		if (buf[0] != 'S') {

@@ -303,7 +303,7 @@ static void file_load_elf(struct machine *m, struct memory *mem,
 	if (!ok) {
 		fprintf(stderr, "%s: this is a ", filename);
 		if (emachine >= 0 && emachine < N_ELF_MACHINE_TYPES)
-			fprintf(stderr, elf_machine_type[emachine]);
+			fprintf(stderr, "%s", elf_machine_type[emachine]);
 		else
 			fprintf(stderr, "machine type '%i'", emachine);
 		fprintf(stderr, " ELF binary!\n");
@@ -343,11 +343,12 @@ static void file_load_elf(struct machine *m, struct memory *mem,
 		uint64_t p_memsz;
 		int p_flags;
 		int p_align;
+		int allRead;
 
 		fseek(f, ephoff + i * ephentsize, SEEK_SET);
 
 		if (elf64) {
-			fread(&phdr64, 1, sizeof(Elf64_Phdr), f);
+			allRead = fread(&phdr64, 1, sizeof(Elf64_Phdr), f) == sizeof(Elf64_Phdr);
 			unencode(p_type,    &phdr64.p_type,    Elf64_Half);
 			unencode(p_flags,   &phdr64.p_flags,   Elf64_Half);
 			unencode(p_offset,  &phdr64.p_offset,  Elf64_Off);
@@ -357,7 +358,7 @@ static void file_load_elf(struct machine *m, struct memory *mem,
 			unencode(p_memsz,   &phdr64.p_memsz,   Elf64_Xword);
 			unencode(p_align,   &phdr64.p_align,   Elf64_Xword);
 		} else {
-			fread(&phdr32, 1, sizeof(Elf32_Phdr), f);
+			allRead = fread(&phdr32, 1, sizeof(Elf32_Phdr), f) == sizeof(Elf32_Phdr);
 			unencode(p_type,    &phdr32.p_type,    Elf32_Word);
 			unencode(p_offset,  &phdr32.p_offset,  Elf32_Off);
 			unencode(p_vaddr,   &phdr32.p_vaddr,   Elf32_Addr);
@@ -366,6 +367,11 @@ static void file_load_elf(struct machine *m, struct memory *mem,
 			unencode(p_memsz,   &phdr32.p_memsz,   Elf32_Word);
 			unencode(p_flags,   &phdr32.p_flags,   Elf32_Word);
 			unencode(p_align,   &phdr32.p_align,   Elf32_Word);
+		}
+
+		if (!allRead) {
+			fprintf(stderr, "Could not read Phdr from %s. Aborting.\n", filename);
+			exit(1);
 		}
 
 		/*
