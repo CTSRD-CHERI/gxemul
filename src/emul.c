@@ -526,9 +526,13 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 		tmp_f = fopen(name_to_load, "r");
 		if (tmp_f != NULL) {
 			unsigned char buf[2];		/*  gzip header  */
+			size_t res;
+
 			memset(buf, 0, sizeof(buf));
-			fread(buf, 1, sizeof(buf), tmp_f);
-			if (buf[0]==0x1f && buf[1]==0x8b) {
+			res = fread(buf, 1, sizeof(buf), tmp_f);
+
+			if (res == sizeof(buf) &&
+			    buf[0] == 0x1f && buf[1] == 0x8b) {
 				size_t zzlen = strlen(name_to_load)*2 + 100;
 				char *zz;
 
@@ -544,10 +548,12 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 				if (remove_after_load) {
 					snprintf(zz, zzlen, "mv %s %s.gz",
 					    name_to_load, name_to_load);
-					system(zz);
+					if (system(zz) != 0)
+						perror(zz);
 					snprintf(zz, zzlen, "gunzip %s.gz",
 					    name_to_load);
-					system(zz);
+					if (system(zz) != 0)
+						perror(zz);
 				} else {
 					/*  gunzip into new temp file:  */
 					int tmpfile_handle;
@@ -566,7 +572,8 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 					close(tmpfile_handle);
 					snprintf(zz, zzlen, "gunzip -c '%s' > "
 					    "%s", name_to_load, new_temp_name);
-					system(zz);
+					if (system(zz) != 0)
+						perror(zz);
 					name_to_load = new_temp_name;
 					remove_after_load = 1;
 				}
