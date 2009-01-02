@@ -13,7 +13,7 @@ Goals for 0.4.7:  (Perhaps make a release during early 2009? If possible.)
 		[X]  Stable install instructions!
 		[X]  Stable running after install
 		[X]  Self compilation?
-		[ ]  Performance
+		[/]  Performance
 		[ ]  Ethernet
 
 Release checklist:

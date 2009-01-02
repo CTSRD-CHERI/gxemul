@@ -58,7 +58,7 @@
 
 #define	INTERRUPT_LEVEL_MASK	0x07
 
-#define	PCC_TIMER_TICK_HZ	139.2	/*  Something nice.  */
+#define	PCC_TIMER_TICK_HZ	100.0
 #define DEV_PCC2_TICK_SHIFT	14
 
 
