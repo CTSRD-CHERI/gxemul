@@ -12,23 +12,23 @@ Copyright (C) 2003-2009  Anders Gavare
 Overview  --  What is GXemul?
 -----------------------------
 
-GXemul is a framework for full-system computer architecture emulation. 
-Several processor architectures and machine types have been implemented. 
-It is working well enough to allow unmodified "guest" operating systems to 
+GXemul is a framework for full-system computer architecture emulation.
+Several processor architectures and machine types have been implemented.
+It is working well enough to allow unmodified "guest" operating systems to
 run inside the emulator, as if they were running on real hardware.
 
 The emulator emulates (networks of) real machines. The machines may consist
-of ARM, Motorola 88K, MIPS, PowerPC, and SuperH processors, and various 
-surrounding hardware components such as framebuffers, busses, interrupt 
-controllers, ethernet controllers, disk controllers, and serial port 
+of ARM, MIPS, Motorola 88K, PowerPC, and SuperH processors, and various
+surrounding hardware components such as framebuffers, busses, interrupt
+controllers, ethernet controllers, disk controllers, and serial port
 controllers.
 
-GXemul, including the dynamic translation system, is implemented in 
-portable C, which means that the emulator will run on practically any host 
+GXemul, including the dynamic translation system, is implemented in portable
+C, which means that the emulator will run on practically any modern host
 architecture.
 
-The documentation lists the machines and guest operating systems that can 
-be regarded as "working" in GXemul. The best working guest operating 
+The documentation lists the machines and guest operating systems that can
+be regarded as "working" in GXemul. The best working guest operating
 systems are probably NetBSD/pmax and NetBSD/cats.
 
 Possible uses of GXemul include:
@@ -37,8 +37,8 @@ Possible uses of GXemul include:
 
  o)  compiling your source code inside a guest operating system which you
      otherwise would not have access to (e.g. various exotic ports of
-     NetBSD), to make sure that your source code is portable to those
-     platforms
+     NetBSD or OpenBSD), to make sure that your source code is portable to
+     those platforms
 
  o)  educational purposes, e.g. to learn how to write code for MIPS
 
@@ -79,13 +79,15 @@ To compile, type './configure' and then 'make'. This should work on most
 Unix-like systems. If it does not, then please mail me a bug report.
 
 You might want to experiment with various CC and CFLAGS environment
-variable settings, to get optimum performance.
+variable settings, to get optimum performance. The dynamic translation core
+in GXemul is written in C, not assembly language, and its performance
+therefore depends on the compiler used to compile GXemul.
 
 If you are impatient, and want to try out running a guest operating system 
 inside GXemul, read this:  doc/guestoses.html#netbsdpmaxinstall
 
-If you want to use GXemul for experimenting with code of your own, 
-then I suggest you compile a Hello World program according to the tips 
+If you want to use GXemul for experimenting with code of your own,
+then I suggest you compile a Hello World program according to the tips
 listed here:  doc/experiments.html#hello
 
 Please read the rest of the documentation in the doc/ sub-directory for
