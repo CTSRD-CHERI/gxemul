@@ -12,7 +12,7 @@ Goals for 0.4.7:  (Perhaps make a release during early 2009? If possible.)
 
 		[X]  Stable install instructions!
 		[X]  Stable running after install
-		[/]  Self compilation?
+		[X]  Self compilation?
 		[ ]  Performance
 		[ ]  Ethernet
 
@@ -64,8 +64,6 @@ M88K:
 		cpu_mips_coproc.c:1786: warning: `psize' might be used uninitialized in this function
 	    feels strange. In fact there are lots of similar "might be used uninitialized"
 	    warnings, which are incorrect.
-	o)  Instruction combination for the MULTIPROCESSOR _sched_idle
-	    for OpenBSD/m88k.
 	o)  MVME187 disk bootblock boot.
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
