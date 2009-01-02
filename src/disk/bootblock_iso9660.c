@@ -324,7 +324,13 @@ printf("\n");
 		fatal("could not create %s\n", tmpfname);
 		exit(1);
 	}
-	write(tmpfile_handle, filebuf, filelen);
+
+	if (write(tmpfile_handle, filebuf, filelen) != filelen) {
+		fatal("could not write to %s\n", tmpfname);
+		perror("write");
+		exit(1);
+	}
+
 	close(tmpfile_handle);
 
 	debug("extracted %lli bytes into %s\n", (long long)filelen, tmpfname);

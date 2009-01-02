@@ -3799,3 +3799,5 @@ Changelog for GXemul:
 		install of OpenBSD/mvme88k has dropped from 30 minutes to 10.
 		Fixing a bug which was caused by instructions like subu.co
 		with a destination register of r0 being treated as nop.
+		Various updates to make the source code build better on
+		Linux (Ubuntu 8.10), and with GNU make.

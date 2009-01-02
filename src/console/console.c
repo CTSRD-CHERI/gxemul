@@ -426,7 +426,8 @@ void console_putchar(int handle, int ch)
 		start_xterm(handle);
 
 	buf[0] = ch;
-	write(console_handles[handle].w_descriptor, buf, 1);
+	if (write(console_handles[handle].w_descriptor, buf, 1) != 1)
+		perror("error writing to console handle");
 }
 
 
@@ -503,7 +504,8 @@ static void console_slave_sigint(int x)
 
 	/*  Send a ctrl-c:  */
 	buf[0] = 3;
-	write(console_slave_outputd, buf, sizeof(buf));
+	if (write(console_slave_outputd, buf, sizeof(buf)) != sizeof(buf))
+		perror("error writing to console handle");
 
 	/*  Reset the signal handler:  */
 	signal(SIGINT, console_slave_sigint);
@@ -579,7 +581,8 @@ void console_slave(char *arg)
 			len = read(STDIN_FILENO, buf, sizeof(buf));
 			if (len < 1)
 				exit(0);
-			write(console_slave_outputd, buf, len);
+			if (write(console_slave_outputd, buf, len) != len)
+				perror("error writing to console handle");
 		}
 
 		usleep(10000);

@@ -187,14 +187,13 @@ DEVICE_ACCESS(m8820x)
 	case CMMU_BWP7:
 		if (writeflag == MEM_WRITE) {
 			uint32_t old;
+			int i = (relative_addr / sizeof(uint32_t)) - CMMU_BWP0;
 
 			regs[relative_addr / sizeof(uint32_t)] = idata;
 
 			/*  Also write to the specific batc registers:  */
-			old = batc[(relative_addr / sizeof(uint32_t))
-			    - CMMU_BWP0];
-			batc[(relative_addr / sizeof(uint32_t)) - CMMU_BWP0]
-			    = idata;
+			old = batc[i];
+			batc[i] = idata;
 			if (old != idata) {
 				/*  TODO: Don't invalidate everything?  */
 				cpu->invalidate_translation_caches(

@@ -332,7 +332,7 @@ void *device_add(struct machine *machine, char *name_and_params)
 				exit(1);
 			}
 		} else if (strncmp(s2, "irq=", 4) == 0) {
-			snprintf(devinit.interrupt_path, interrupt_path_len,s3);
+			snprintf(devinit.interrupt_path, interrupt_path_len, "%s", s3);
 			if (strchr(devinit.interrupt_path, ' ') != NULL)
 				*strchr(devinit.interrupt_path, ' ') = '\0';
 		} else if (strncmp(s2, "in_use=", 7) == 0) {
@@ -352,7 +352,7 @@ void *device_add(struct machine *machine, char *name_and_params)
 			h = s2 + 6;
 			if (*h == '\'')
 				len -= 2, h++;
-			snprintf(devinit.name2, len + 1, h);
+			snprintf(devinit.name2, len + 1, "%s", h);
 		} else {
 			fatal("unknown param: %s\n", s2);
 			if (device_exit_on_error)

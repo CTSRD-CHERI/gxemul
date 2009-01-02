@@ -3,9 +3,9 @@ all:
 	@echo the demo programs.
 
 clean:
-	cd disk; $(MAKE) clean; cd ..
-	cd hello; $(MAKE) clean; cd ..
-	cd mp; $(MAKE) clean; cd ..
-	cd rectangles; $(MAKE) clean; cd ..
+	cd disk; $(MAKE) clean
+	cd hello; $(MAKE) clean
+	cd mp; $(MAKE) clean
+	cd rectangles; $(MAKE) clean
 	rm -f *.o *core
 

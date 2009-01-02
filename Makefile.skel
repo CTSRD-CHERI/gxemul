@@ -9,7 +9,7 @@ LIBS=$(XLIB) $(OTHERLIBS)
 all: build
 
 build:
-	cd src; $(MAKE); cd ..
+	cd src; $(MAKE)
 	$(CC) $(COPTIM) src/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/net/*.o src/promemul/*.o src/symbol/*.o src/useremul/*.o $(LIBS) -o $(BIN)
 
 install: build
@@ -23,13 +23,13 @@ install: build
 
 clean:
 	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out
-	cd src; $(MAKE) clean; cd ..
+	cd src; $(MAKE) clean
 
 #  experiments and demos are not cleaned on a normal clean, only on a clean_all.
 
 clean_all: clean
-	cd experiments; $(MAKE) clean_all; cd ..
-	cd demos; $(MAKE) clean; cd ..
+	cd experiments; $(MAKE) clean_all
+	cd demos; $(MAKE) clean
 	rm -f config.h Makefile src/Makefile src/cpus/Makefile
 	rm -f src/debugger/Makefile src/devices/Makefile
 	rm -f src/devices/fonts/Makefile src/disk/Makefile

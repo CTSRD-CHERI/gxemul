@@ -12,40 +12,40 @@ all: do_include
 	    do_file do_machines do_net do_promemul do_symbol do_useremul
 
 do_include:
-	cd include; $(MAKE); cd ..
+	cd include; $(MAKE)
 
 do_console:
-	cd console; $(MAKE); cd ..
+	cd console; $(MAKE)
 
 do_cpus:
-	cd cpus; $(MAKE); cd ..
+	cd cpus; $(MAKE)
 
 do_debugger:
-	cd debugger; $(MAKE); cd ..
+	cd debugger; $(MAKE)
 
 do_devices:
-	cd devices; $(MAKE); cd ..
+	cd devices; $(MAKE)
 
 do_disk:
-	cd disk; $(MAKE); cd ..
+	cd disk; $(MAKE)
 
 do_file:
-	cd file; $(MAKE); cd ..
+	cd file; $(MAKE)
 
 do_machines:
-	cd machines; $(MAKE); cd ..
+	cd machines; $(MAKE)
 
 do_net:
-	cd net; $(MAKE); cd ..
+	cd net; $(MAKE)
 
 do_promemul:
-	cd promemul; $(MAKE); cd ..
+	cd promemul; $(MAKE)
 
 do_symbol:
-	cd symbol; $(MAKE); cd ..
+	cd symbol; $(MAKE)
 
 do_useremul:
-	cd useremul; $(MAKE); cd ..
+	cd useremul; $(MAKE)
 
 do_src: $(OBJS)
 
@@ -53,31 +53,31 @@ $(OBJS): Makefile
 
 clean:
 	rm -f $(OBJS) *core tmp_*.c
-	cd include; $(MAKE) clean; cd ..
-	cd console; $(MAKE) clean; cd ..
-	cd cpus; $(MAKE) clean; cd ..
-	cd debugger; $(MAKE) clean; cd ..
-	cd devices; $(MAKE) clean; cd ..
-	cd disk; $(MAKE) clean; cd ..
-	cd file; $(MAKE) clean; cd ..
-	cd machines; $(MAKE) clean; cd ..
-	cd net; $(MAKE) clean; cd ..
-	cd promemul; $(MAKE) clean; cd ..
-	cd symbol; $(MAKE) clean; cd ..
-	cd useremul; $(MAKE) clean; cd ..
+	cd include; $(MAKE) clean
+	cd console; $(MAKE) clean
+	cd cpus; $(MAKE) clean
+	cd debugger; $(MAKE) clean
+	cd devices; $(MAKE) clean
+	cd disk; $(MAKE) clean
+	cd file; $(MAKE) clean
+	cd machines; $(MAKE) clean
+	cd net; $(MAKE) clean
+	cd promemul; $(MAKE) clean
+	cd symbol; $(MAKE) clean
+	cd useremul; $(MAKE) clean
 
 clean_all: clean
-	cd include; $(MAKE) clean_all; cd ..
-	cd console; $(MAKE) clean_all; cd ..
-	cd cpus; $(MAKE) clean_all; cd ..
-	cd debugger; $(MAKE) clean_all; cd ..
-	cd devices; $(MAKE) clean_all; cd ..
-	cd disk; $(MAKE) clean_all; cd ..
-	cd file; $(MAKE) clean_all; cd ..
-	cd machines; $(MAKE) clean_all; cd ..
-	cd net; $(MAKE) clean_all; cd ..
-	cd promemul; $(MAKE) clean_all; cd ..
-	cd symbol; $(MAKE) clean_all; cd ..
-	cd useremul; $(MAKE) clean_all; cd ..
+	cd include; $(MAKE) clean_all
+	cd console; $(MAKE) clean_all
+	cd cpus; $(MAKE) clean_all
+	cd debugger; $(MAKE) clean_all
+	cd devices; $(MAKE) clean_all
+	cd disk; $(MAKE) clean_all
+	cd file; $(MAKE) clean_all
+	cd machines; $(MAKE) clean_all
+	cd net; $(MAKE) clean_all
+	cd promemul; $(MAKE) clean_all
+	cd symbol; $(MAKE) clean_all
+	cd useremul; $(MAKE) clean_all
 	rm -f Makefile
 

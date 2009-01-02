@@ -27,10 +27,10 @@ OBJS=device.o bus_isa.o bus_pci.o lk201.o \
 	dev_vr41xx.o dev_wdc.o dev_z8530.o dev_zero.o
 
 all:
-	cd fonts; $(MAKE); cd ..
+	cd fonts; $(MAKE)
 	$(MAKE) font8x8.c font8x10.c font8x16.c
 	$(MAKE) objs
-	make autodev.o
+	$(MAKE) autodev.o
 
 autodev.c: autodev_head.c autodev_middle.c autodev_tail.c makeautodev.sh bus_pci.c $(OBJS)
 	./makeautodev.sh
@@ -56,9 +56,9 @@ font8x16.c:
 clean:
 	rm -f $(OBJS) *core font8x16.c font8x10.c font8x8.c
 	rm -f autodev.[co]
-	cd fonts; $(MAKE) clean; cd ..
+	cd fonts; $(MAKE) clean
 
 clean_all: clean
-	cd fonts; $(MAKE) clean_all; cd ..
+	cd fonts; $(MAKE) clean_all
 	rm -f Makefile fonts/Makefile
 
