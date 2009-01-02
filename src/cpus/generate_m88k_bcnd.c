@@ -58,8 +58,8 @@ void print_operator(int m5)
 	case 0x1: printf("> 0"); break;
 	case 0x2: printf("== 0"); break;
 	case 0x3: printf(">= 0"); break;
-	case 0x7: printf("!= 0x80000000"); break;
-	case 0x8: printf("== 0x80000000"); break;
+	case 0x7: printf("!= 0x80000000UL"); break;
+	case 0x8: printf("== 0x80000000UL"); break;
 	case 0xc: printf("< 0"); break;
 	case 0xd: printf("!= 0"); break;
 	case 0xe: printf("<= 0"); break;

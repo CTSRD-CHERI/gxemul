@@ -3797,3 +3797,5 @@ Changelog for GXemul:
 		to allow OpenBSD/mvme88k to be installed onto a disk image!
 20090102	Optimizing the osiop SCSI device a bit; a default scripted
 		install of OpenBSD/mvme88k has dropped from 30 minutes to 10.
+		Fixing a bug which was caused by instructions like subu.co
+		with a destination register of r0 being treated as nop.

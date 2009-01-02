@@ -31,12 +31,18 @@ Release checklist:
 	Send mail to package maintainers (if they are not subscribed
 		to the mailing list(s))
 	If new arch:
+		Wikipedia page
 		Linux-MIPS wiki page
 		Ohloh description page
+		gavare.se main page
+		GXemul web main page
+		CV
 	Graph: Release timeline (date on x axis, including release numbers,
 		and comments for major new features).
 
 Goals for 0.5.x:
+
+  [ ]	Make -K default on?
 
   [ ]	Start to SLOWLY convert to C++. Instead of restarting from scratch
 	(which was my last experiment with GXemul/C++), only translate
@@ -57,7 +63,6 @@ To be translated prefetch:
 	    pages, NOT when running via a slow device!
 
 M88K:
-	o)  Find the cause of the "tail -10" failure, and fix it!
 	o)  Self-compilation of gxemul 0.4.6.6:
 		cc -Wall -fstrict-aliasing -fomit-frame-pointer -fpeephole -O3 -DNDEBUG -I../include/  -c cpu_mips_coproc.c
 		cpu_mips_coproc.c: In function `coproc_tlbwri':

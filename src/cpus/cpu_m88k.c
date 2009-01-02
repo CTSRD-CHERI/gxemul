@@ -801,6 +801,14 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap)
 			m88k_memory_transaction_debug_dump(cpu, 1);
 			break;
 
+#if 0
+		case M88K_EXCEPTION_ILLEGAL_INTEGER_DIVIDE:
+			/*  TODO: Is it correct to continue on the instruction
+			    _after_ the division by zero? Or should the PC
+			    be backed up one step?  */
+			break;
+#endif
+
 		default:fatal("m88k_exception(): 0x%x: TODO\n", vector);
 			fflush(stdout);
 			exit(1);

@@ -1447,6 +1447,13 @@ X(rte)
 
 		instr(to_be_translated)(cpu, cpu->cd.m88k.next_ic);
 
+		if ((cpu->pc & 0xfffff000) != (nip & 0xfffff000)) {
+			fatal("instruction in delay slot when returning via"
+			    " rte caused an exception?! nip=0x%08x, but pc "
+			    "changed to 0x%08x! TODO\n", nip, (int)cpu->pc);
+			goto abort_dump;
+		}
+
 		cpu->pc = fip;
 		cpu->delay_slot = NOT_DELAYED;
 		quick_pc_to_pointers(cpu);
@@ -2549,8 +2556,27 @@ X(to_be_translated)
 				ic->f = instr(or_r0);
 			if (s2 == M88K_ZERO_REG && ic->f == instr(addu))
 				ic->f = instr(addu_s2r0);
-			if (d == M88K_ZERO_REG)
-				ic->f = instr(nop);
+
+			/*
+			 *  Handle the case when the destination register is r0:
+			 *
+			 *  If there is NO SIDE-EFFECT! (i.e. no carry out),
+			 *  then replace the instruction with a nop. If there is
+			 *  a side-effect, we still have to run the instruction,
+			 *  so replace the destination register with a scratch
+			 *  register.
+			 */
+			if (d == M88K_ZERO_REG) {
+				int opc = (iword >> 8) & 0xff;
+				if (opc != 0x61 && opc != 0x63 &&
+				    opc != 0x65 && opc != 0x67 &&
+				    opc != 0x71 && opc != 0x73 &&
+				    opc != 0x75 && opc != 0x77)
+					ic->f = instr(nop);
+				else
+					ic->arg[0] = (size_t)
+					    &cpu->cd.m88k.zero_scratch;
+			}
 			break;
 		case 0xc0:	/*  jmp    */
 		case 0xc4:	/*  jmp.n  */
