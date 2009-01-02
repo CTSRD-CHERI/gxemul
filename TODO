@@ -6,40 +6,6 @@ Some things, in no specific order, that I'd like to fix:
 
 -------------------------------------------------------------------------------
 
-Goals for 0.4.7:  (Perhaps make a release during early 2009? If possible.)
-
-  [/]	The first stable M88K emulation mode: MVME187, running OpenBSD/mvme88k
-
-		[X]  Stable install instructions!
-		[X]  Stable running after install
-		[X]  Self compilation?
-		[/]  Performance
-		[ ]  Ethernet
-
-Release checklist:
-	README
-	RELEASE NOTES
-	Send SVN dump to Sourceforge
-	Tarball creation
-	Sourceforge file release
-	Home page update: version numbers
-	Home page News page update
-	#GXemul (version number in topic)
-	gxemul-users mail
-	Freshmeat
-	Wikipedia page (version number and date)
-	Send mail to package maintainers (if they are not subscribed
-		to the mailing list(s))
-	If new arch:
-		Wikipedia page
-		Linux-MIPS wiki page
-		Ohloh description page
-		gavare.se main page
-		GXemul web main page
-		CV
-	Graph: Release timeline (date on x axis, including release numbers,
-		and comments for major new features).
-
 Goals for 0.5.x:
 
   [ ]	Make -K default on?
@@ -63,13 +29,10 @@ To be translated prefetch:
 	    pages, NOT when running via a slow device!
 
 M88K:
-	o)  Self-compilation of gxemul 0.4.6.6:
-		cc -Wall -fstrict-aliasing -fomit-frame-pointer -fpeephole -O3 -DNDEBUG -I../include/  -c cpu_mips_coproc.c
-		cpu_mips_coproc.c: In function `coproc_tlbwri':
-		cpu_mips_coproc.c:1786: warning: `psize' might be used uninitialized in this function
-	    feels strange. In fact there are lots of similar "might be used uninitialized"
-	    warnings, which are incorrect.
-	o)  MVME187 disk bootblock boot.
+	o)  MVME187:
+		o)  disk bootblock boot
+		o)  ethernet
+	o)  PERFORMANCE!
 	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
 	    Currently, user memory accesses are not entered into the
 	    translation caches, which result in extremely poor performance.
@@ -645,6 +608,31 @@ C++:
 	    (which currently consists of programs creating temporary
 	    C files which are compiled into the program) can be replaced
 	    by native C++ templates instead.
+
+Release checklist:
+	README
+	RELEASE NOTES
+	Send SVN dump to Sourceforge
+	Tarball creation
+	Sourceforge file release
+	Home page update: version numbers
+	Home page News page update
+	#GXemul (version number in topic)
+	gxemul-users mail
+	Freshmeat
+	Wikipedia page (version number and date)
+	Send mail to package maintainers (if they are not subscribed
+		to the mailing list(s))
+	If new arch:
+		Wikipedia page
+		Linux-MIPS wiki page
+		Ohloh description page
+		gavare.se main page
+		GXemul web main page
+		CV
+	Graph: Release timeline (date on x axis, including release numbers,
+		and comments for major new features).
+
 
 -------------------------------------------------------------------------------
 
