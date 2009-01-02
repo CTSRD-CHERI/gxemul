@@ -1666,7 +1666,7 @@ landisk machine, see
 <h3>OpenBSD/mvme88k:</h3>
 
 It is possible to run <a href="http://www.openbsd.org/mvme88k.html">OpenBSD/mvme88k</a>
-on an emulated MVME187 machine in the emulator.
+on an emulated Motorola MVME187 machine in the emulator.
 
 <p>To install OpenBSD/mvme88k onto an emulated harddisk image, follow these
 instructions:
@@ -1702,7 +1702,9 @@ instructions:
 </pre>
 	and proceed like you would do if you were installing OpenBSD
 	on a real MVME187. There is a problem with finding the filesystem on
-	the CDROM, since there is no disklabel, but it's possible to mount
+	the CDROM, since there is no disklabel [and/or because the emulator
+	perhaps does not simulate CDROM TOCs well enough], but it's possible
+	to mount
 	the filesystem using manual intervention. Here is an example of what
 	an install can look like: (user input in <font color="#0000ff"><i>blue italic</i></font>)<pre>
 	CPU0 is associated to 2 MC88200 CMMUs
