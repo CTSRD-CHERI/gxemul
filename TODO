@@ -615,6 +615,7 @@ Release checklist:
 	Send SVN dump to Sourceforge
 	Tarball creation
 	Sourceforge file release
+	Branch and tag in SVN
 	Home page update: version numbers
 	Home page News page update
 	#GXemul (version number in topic)
