@@ -1,7 +1,7 @@
 
 
            ------------------------------------------------------
-             Gavare's eXperimental Emulator   --   GXemul 0.4.7
+             Gavare's eXperimental Emulator   --   GXemul 0.5.0
            ------------------------------------------------------
 
 
@@ -23,8 +23,8 @@ surrounding hardware components such as framebuffers, busses, interrupt
 controllers, ethernet controllers, disk controllers, and serial port
 controllers.
 
-GXemul, including the dynamic translation system, is implemented in portable
-C, which means that the emulator will run on practically any modern host
+GXemul, including the dynamic translation system, is implemented in C and
+C++, which means that the emulator will run on practically any modern host
 architecture.
 
 The documentation lists the machines and guest operating systems that can

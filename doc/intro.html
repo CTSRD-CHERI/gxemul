@@ -2,11 +2,12 @@
 <html><head><title>Gavare's eXperimental Emulator:&nbsp;&nbsp;&nbsp;Introduction</title>
 <meta name="robots" content="noarchive,nofollow,noindex"></head>
 <body>
-<table border=0 width=100% bgcolor="#d0d0d0"><tr>
-<td width=100% align=center valign=center><table border=0 width=100%><tr>
-<td align="left" valign=center bgcolor="#d0efff"><font color="#6060e0" size="6">
-<b>GXemul:</b></font>&nbsp;&nbsp;<font color="#000000" size="6"><b>Introduction</b>
-</font></td></tr></table></td></tr></table><p>
+<h1>GXemul: Introduction</h1><hr><p>
+
+
+
+
+
 
 <!--
 
@@ -43,7 +44,10 @@ SUCH DAMAGE.
 <h2>Introduction</h2>
 
 <p>
-<table border="0" width="99%"><tr><td valign="top" align="left">
+<table border="0" width="98%">
+<tr>
+
+<td valign="top" align="left" width="90%">
 <ul>
   <li><a href="#overview">Overview</a>
   <li><a href="#free">Is GXemul Free software?</a>
@@ -54,14 +58,16 @@ SUCH DAMAGE.
   <li><a href="#accuracy">Emulation accuracy</a>
   <li><a href="#emulmodes">Which machines does GXemul emulate?</a>
 </ul>
-</td><td valign="center" align="center">
+</td>
+
+<td valign="center" align="center">
 <a href="20050317-example.png"><img src="20050317-example_small.png"></a>
-<p>NetBSD/pmax 1.6.2 with X11<br>running in GXemul</td></tr></table>
+<p><small>NetBSD/pmax 1.6.2 with X11<br>running in GXemul</small></td>
+
+</tr>
+</table>
 
 
-
-
-<p><br>
 <a name="overview"></a>
 <h3>Overview:</h3>
 
@@ -82,9 +88,7 @@ various surrounding hardware components such as framebuffers, busses,
 interrupt controllers, ethernet controllers, disk controllers, and serial 
 port controllers.
 
-<p>GXemul, including the dynamic translation system, is implemented in
-portable
-<a href="http://en.wikipedia.org/wiki/C_(programming_language)">C</a>,
+<p>GXemul, including the dynamic translation system, is implemented in C and C++,
 which means that the emulator will run on practically any 64-bit or 32-bit
 <a href="http://en.wikipedia.org/wiki/Unix-like">Unix-like</a> systems,
 with few or no modifications.
@@ -173,29 +177,18 @@ Uncompress the .tar.gz distribution file, and run
 	$ <b>make</b>
 </pre>
 
-<p>This should work on most Unix-like systems. GXemul does not require any 
-specific libraries to build, however, if you build on a system which does 
-not have X11 libraries installed, some functionality will be lost.
+<p>This should work on most Unix-like systems. GXemul does not <i>require</i> any 
+specific libraries to build, however, having the following libraries available
+adds features that are otherwise unavailable:
+<ul>
+  <li>X11, for graphical framebuffer emulation
+  <li><tt>libintl</tt>, for I18N support
+</ul>
 
 <p>The emulator's performance is highly dependent on both runtime settings 
 and on compiler settings, so you might want to experiment with using 
-different <tt>CC</tt> and <tt>CFLAGS</tt> environment variable values when 
-running the <tt>configure</tt> script.
-
-<p>On some platforms, it is possible that building GXemul will fail 
-because of too high optimization. When using GCC (the GNU compiler), 
-<tt>-O3</tt> is the default optimization level. This works fine on e.g. 
-amd64 and i386 systems, but on some more uncommon platforms, <tt>-O3</tt> 
-might trigger internal bugs in GCC itself. If this happens, try setting 
-<tt>CFLAGS</tt> to <tt>-O2</tt> before running <tt>./configure</tt>, and 
-try again,
-
-<p>Note that there is no <tt>make install</tt> functionality; package
-maintainers for individual operating systems solve this for their 
-corresponding OSes.
-
-
-
+different <tt>CC</tt>, <tt>CXX</tt>, <tt>CFLAGS</tt>, and <tt>CXXFLAGS</tt>
+environment variable values when running the <tt>configure</tt> script.
 
 
 
