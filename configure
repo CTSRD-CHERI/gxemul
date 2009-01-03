@@ -58,7 +58,9 @@
 # Default prefix for "make install"
 DEFAULTPREFIX=/usr/local
 
-WITHI18N=YES
+# Auto-detect X11 and I18N support:
+WITHI18N=""
+WITHX11=""
 
 #  Figure out if this is a stable version. Stable versions are numeric (0.x.x),
 #  unstable are dates (e.g. 20090103) or have no ending at all.
@@ -77,10 +79,14 @@ if [ z"$*" != z ]; then
 	for a in $*; do
 		if [ z$a = z--debug ]; then
 			DEBUG=YES
+		else if [ z$a = z--with-i18n ]; then
+			WITHI18N=YES
+		else if [ z$a = z--without-i18n ]; then
+			WITHI18N=NO
 		else if [ z$a = z--with-x11 ]; then
 			WITHX11=YES
 		else if [ z$a = z--without-x11 ]; then
-			WITHOUTX11=YES
+			WITHX11=NO
 		else if [ z$a = z--with-unit-tests ]; then
 			WITHOUTUNITTESTS=NO
 		else if [ z$a = z--without-unit-tests ]; then
@@ -99,8 +105,10 @@ if [ z"$*" != z ]; then
 			echo
 			echo "  --with-x11                 build with X11 framebuffer support"
 			echo "  --without-x11              build without X11 framebuffer support"
+			echo "  --with-i18n                build with I18N support"
+			echo "  --without-i18n             build without I18N support"
 			echo
-			echo "(default is to detect X11 support automatically)"
+			echo "(default is to detect X11 and I18N support automatically)"
 			echo
 			echo "If the PREFIX environment variable is set," \
 			    "it will override the default"
@@ -112,7 +120,7 @@ if [ z"$*" != z ]; then
 			echo "Run  $0 --help  to get a list of" \
 			    "available options."
 			exit
-		fi; fi; fi; fi; fi; fi
+		fi; fi; fi; fi; fi; fi; fi; fi
 	done
 fi
 
@@ -464,7 +472,7 @@ echo " ($CXXTYPE)"
 
 
 ###############################################################################
-if [ z$NOX11 = z ]; then
+if [ ! z$WITHX11 = zNO ]; then
 	printf "checking for X11 headers and libs\n"
 
 	#  Try to compile a small X11 test program:
@@ -538,8 +546,12 @@ if [ z$NOX11 = z ]; then
 	fi
 
 	if [ z$XOK = z0 ]; then
-		echo "Failed to compile X11 test program." \
-		    "Configuring without X11."
+		echo "Failed to compile X11 test program."
+		if [ z$WITHX11 = zYES ]; then
+			echo "Aborting."
+			exit
+		fi
+		echo "Note: Configuring without X11. Framebuffer emulation will not be available."
 	else
 		printf "o  X11 headers: $XINCLUDE\n"
 		printf "o  X11 libraries: $XLIB\n"
@@ -1343,7 +1355,7 @@ printf "checking for locale install path... "
 TRANSLATIONS=""
 TRANSLATIONSUNINSTALL=""
 
-if [ z$WITHI18N = zYES ]; then
+if [ ! z$WITHI18N = zNO ]; then
 	rm -f _testintl*
 	printf '#include <stdio.h>
 #include <libintl.h>
@@ -1367,10 +1379,16 @@ int main(int argc, char *argv[])
 			TRANSLATIONS=translations
 			TRANSLATIONSUNINSTALL=translations_uninstall
 			TRANSLATIONSPREFIX=`./_testintl`
+			OTHERLIBS="-I/usr/local/include -L/usr/local/lib -lintl $OTHERLIBS"
 			echo $TRANSLATIONSPREFIX
 			printf "#define I18N\n" >> config.h
 		else
 			printf "no\n"
+			if [ z$WITHI18N = zYES ]; then
+				echo Could not compile I18N test program.
+				echo Aborting.
+				exit
+			fi
 		fi
 	fi
 	rm -f _testintl*
@@ -1415,7 +1433,7 @@ echo "" >> _Makefile.header
 
 #  Create the Makefiles:
 D=". po src src/include src/console src/cpus src/debugger src/devices"
-D="$D src/devices/fonts src/disk src/file src/machines"
+D="$D src/devices/fonts src/disk src/file src/machines src/main"
 D="$D src/net src/promemul src/symbol src/useremul"
 for a in $D; do
 	echo "creating $a/Makefile"

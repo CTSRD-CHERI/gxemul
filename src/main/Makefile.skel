@@ -1,0 +1,20 @@
+#
+#  Makefile for GXemul src/main
+#
+
+CXXFLAGS=$(CXXOPTIM) $(CPEDANTIC) $(XINCLUDE) $(DINCLUDE)
+LIBS=$(XLIB) $(OTHERLIBS)
+
+OBJS=GXemul.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+
+clean:
+	rm -f $(OBJS) *core _test
+
+clean_all: clean
+	rm -f Makefile
+

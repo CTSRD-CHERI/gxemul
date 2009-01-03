@@ -25,7 +25,7 @@
  *  SUCH DAMAGE.
  *
  *
- *  GXemul's main entry point.
+ *  GXemul's old (non-C++) main entry point.
  */
 
 #include <stdio.h>
@@ -641,7 +641,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 
 /*
- *  main():
+ *  old_main():
  *
  *  Two kinds of emulations are started from here:
  *
@@ -650,7 +650,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
  *
  *	o)  Emulations set up by parsing special config files. (0 or more.)
  */
-int main(int argc, char *argv[])
+int old_main(int argc, char *argv[])
 {
 	/*  Setting constants:  */
 	const int constant_yes = 1;
