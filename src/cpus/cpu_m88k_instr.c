@@ -852,6 +852,30 @@ X(fadd_sss)
 
 	reg(ic->arg[0]) = d;
 }
+X(fadd_dsd)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint64_t d;
+	uint64_t s2 = reg(ic->arg[2]);
+	uint32_t s1 = reg(ic->arg[1]);
+	s2 = (s2 << 32) + reg(ic->arg[2] + 4);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_S);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_D);
+
+	d = ieee_store_float_value(f1.f + f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
+	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
 X(fadd_dds)
 {
 	struct ieee_float_value f1;
@@ -1135,6 +1159,35 @@ X(fmul_ddd)
 
 	reg(ic->arg[0]) = d >> 32;	/*  High 32-bit word,  */
 	reg(ic->arg[0] + 4) = d;	/*  and low word.  */
+}
+X(fdiv_sss)
+{
+	struct ieee_float_value f1;
+	struct ieee_float_value f2;
+	uint32_t d;
+	uint32_t s1 = reg(ic->arg[1]);
+	uint32_t s2 = reg(ic->arg[2]);
+
+	if (cpu->cd.m88k.cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	ieee_interpret_float_value(s1, &f1, IEEE_FMT_S);
+	ieee_interpret_float_value(s2, &f2, IEEE_FMT_S);
+
+	if (f2.f == 0) {
+		SYNCH_PC;
+		cpu->cd.m88k.fcr[M88K_FPCR_FPECR] = M88K_FPECR_FDVZ;
+		m88k_exception(cpu, M88K_EXCEPTION_SFU1_PRECISE, 0);
+		return;
+	}
+
+	d = ieee_store_float_value(f1.f / f2.f, IEEE_FMT_D, 0);
+
+	reg(ic->arg[0]) = d;
 }
 X(fdiv_dsd)
 {
@@ -2143,6 +2196,7 @@ X(to_be_translated)
 			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
 			switch ((iword >> 5) & 0x3f) {
 			case 0x00:	ic->f = instr(fadd_sss); break;
+			case 0x05:	ic->f = instr(fadd_dsd); break;
 			case 0x11:	ic->f = instr(fadd_dds); break;
 			case 0x15:	ic->f = instr(fadd_ddd); break;
 			default:if (!cpu->translation_readahead)
@@ -2222,6 +2276,7 @@ X(to_be_translated)
 			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
 			ic->arg[2] = (size_t) &cpu->cd.m88k.r[s2];
 			switch ((iword >> 5) & 0x3f) {
+			case 0x00:	ic->f = instr(fdiv_sss); break;
 			case 0x05:	ic->f = instr(fdiv_dsd); break;
 			case 0x15:	ic->f = instr(fdiv_ddd); break;
 			default:if (!cpu->translation_readahead)
