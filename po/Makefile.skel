@@ -1,0 +1,34 @@
+#
+#  Makefile for GXemul: po/
+#
+
+MOFILES=sv.mo
+
+# This is needed to make intltool-update not complain:
+top_srcdir=..
+
+
+all: build
+
+build: $(MOFILES)
+
+install: build
+	@echo
+	@echo Installing localized translations...
+	mkdir -p $(TRANSLATIONSPREFIX)/sv/LC_MESSAGES && cp -f sv.mo $(TRANSLATIONSPREFIX)/sv/LC_MESSAGES/gxemul.mo
+
+uninstall:
+	rm -f $(TRANSLATIONSPREFIX)/sv/LC_MESSAGES/gxemul.mo
+
+sv.mo: sv.po
+	msgfmt sv.po -o sv.mo
+
+update:
+	intltool-update -g gxemul -d sv
+
+clean:
+	rm -f *.mo
+
+clean_all: clean
+	rm -f Makefile
+

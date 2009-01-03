@@ -8,11 +8,11 @@ Some things, in no specific order, that I'd like to fix:
 
 Goals for 0.5.x:
 
-  [ ]	Make -K default on?
-
   [ ]	Start to SLOWLY convert to C++. Instead of restarting from scratch
 	(which was my last experiment with GXemul/C++), only translate
 	things that make sense.
+
+  [ ]	-K behavior on errors!
 
   [ ]	Go through ALL emulation modes, to find out which ones have
 	good timer code, and which ones have broken timers. Try to fix

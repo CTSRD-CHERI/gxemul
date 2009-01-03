@@ -1,0 +1,31 @@
+To update gxemul.pot with I18N strings found in the source code
+---------------------------------------------------------------
+
+Run	make update_pot
+in the GXemul root directory (after running ./configure).
+
+
+
+To merge in new strings into individual translation files
+---------------------------------------------------------
+
+Run	cd po && make update
+and edit all relevant .po files manually.
+
+
+
+To add a new language/translation
+---------------------------------
+
+Assuming your new language code is xx:
+
+1. Edit the Makefile; copy e.g. everything mentioning sv.po
+   to your new language, xx.po.
+2. cp gxemul.pot xx.po
+3. Edit xx.po.
+   a) Change "Content-Type: text/plain; charset=CHARSET\n"
+      to "Content-Type: text/plain; charset=UTF-8\n".
+   b) Translate all strings. :-)
+
+Run make to see that xx.mo is built correctly.
+

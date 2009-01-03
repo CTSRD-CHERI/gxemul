@@ -27,26 +27,25 @@
 #  SUCH DAMAGE.
 #
 #
-#  $Id: configure,v 1.278.2.1 2008-01-18 19:12:22 debug Exp $
-#
 #  This is a minimal configure script, hardcoded for GXemul. This script
 #  figures out which compiler flags will work, and creates Makefiles in
-#  sub-directories. A config.h file is also created.
+#  sub-directories. A config.h file and some other build-specific .h files
+#  are also created.
 #
 #
 #  --->   FOR NORMAL USE, JUST RUN ./configure WITHOUT OPTIONS!
 #
 #
 #  To compile the emulator with profiling (during development), use
-#  CFLAGS="-pg", run the emulator, and then run 'gprof gxemul' and study
-#  the results.
+#  CFLAGS="-pg" and/or CXXFLAGS="-pg", run the emulator, and then run
+#  'gprof gxemul' and study the results.
 #
 #
 #  The main things that are detected by this script:
 #
 #    o)  special hacks for some OSes
-#    o)  which compiler to use  (overridden by setting CC)
-#    o)  which compiler flags to use  (overridden by setting CFLAGS)
+#    o)  which compiler to use  (overridden by setting CC and/or CXX)
+#    o)  which compiler flags to use  (overridden by setting CFLAGS and/or CXXFLAGS)
 #    o)  X11 flags and libraries  (TODO: should be possible to override
 #	 via command line options?)
 #
@@ -56,31 +55,56 @@
 #
 ###############################################################################
 
-#  Figure out if this is a stable version (0.x.x).
+# Default prefix for "make install"
+DEFAULTPREFIX=/usr/local
+
+WITHI18N=YES
+
+#  Figure out if this is a stable version. Stable versions are numeric (0.x.x),
+#  unstable are dates (e.g. 20090103) or have no ending at all.
 X=`basename \`pwd\`|cut -d \- -f 2-|cut -c1-2`
 if [ z"$X" = z0. ]; then
 	#  Stable.
-	:
+	WITHUNITTESTS=NO
 else
 	#  Development.
 	UNSTABLE=YES
+	WITHUNITTESTS=YES
 fi
 
 if [ z"$*" != z ]; then
 	#  Parse command line options:
 	for a in $*; do
-		if [ z$a = z--disable-x ]; then
-			NOX11=YES
-		else if [ z$a = z--debug ]; then
+		if [ z$a = z--debug ]; then
 			DEBUG=YES
+		else if [ z$a = z--with-x11 ]; then
+			WITHX11=YES
+		else if [ z$a = z--without-x11 ]; then
+			WITHOUTX11=YES
+		else if [ z$a = z--with-unit-tests ]; then
+			WITHOUTUNITTESTS=NO
+		else if [ z$a = z--without-unit-tests ]; then
+			WITHOUTUNITTESTS=YES
 		else if [ z$a = z--help ]; then
 			printf "usage: $0 [options]\n\n"
-			echo "  --disable-x         don't include X11 support,"\
-			    "even if the host supports it"
 			if [ z"$UNSTABLE" = zYES ]; then
-				echo "  --debug             configure" \
+				echo "  --debug                    configure" \
 					"for a debug build"
+				echo "  --without-unit-tests       build without" \
+					"unit tests"
+			else
+				echo "  --with-unit-tests          build with" \
+					"unit tests (increases binary size)"
 			fi
+			echo
+			echo "  --with-x11                 build with X11 framebuffer support"
+			echo "  --without-x11              build without X11 framebuffer support"
+			echo
+			echo "(default is to detect X11 support automatically)"
+			echo
+			echo "If the PREFIX environment variable is set," \
+			    "it will override the default"
+			echo "value, which is: $DEFAULTPREFIX"
 			echo
 			exit
 		else
@@ -88,7 +112,7 @@ if [ z"$*" != z ]; then
 			echo "Run  $0 --help  to get a list of" \
 			    "available options."
 			exit
-		fi; fi; fi
+		fi; fi; fi; fi; fi; fi
 	done
 fi
 
@@ -120,13 +144,15 @@ fi
 
 if [ z"$UNSTABLE" = zYES ]; then
 	printf "#define UNSTABLE_DEVEL\n" >> config.h
+	CXXFLAGS="-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC $CXXFLAGS"
 else
 	CFLAGS="-DNDEBUG $CFLAGS"
 fi
 
+if [ z"$WITHUNITTESTS" = zYES ]; then
+	printf "#define WITHUNITTESTS\n" >> config.h
+fi
 
-ZZ=`echo compiled on \`uname\`/\`uname -m\`, \`date\``
-printf "#define COMPILE_DATE \"$ZZ\"\n" >> config.h
 
 
 #  Include support for all CPU types:
@@ -204,9 +230,13 @@ printf "\n" >> config.h
 if [ z"`uname|cut -c 1-6`" = zCYGWIN ]; then
 	CYGWIN=YES
 
+	#  Assume gcc/g++ on Cygwin (Windows) systems.
 	if [ z"$CC" = z ]; then
 		#  Assume gcc on Cygwin (Windows) systems.
 		CC=gcc
+	fi
+	if [ z"$CXX" = z ]; then
+		CXX=g++
 	fi
 fi
 
@@ -218,10 +248,17 @@ if [ z"`uname`" = zHP-UX ]; then
 			CC=/usr/local/pa64/bin/gcc
 		fi
 	fi
+	
+	# TODO: How about HP-UX C++?
 fi
 
 if [ z"`uname`" = zOSF1 ]; then
 	OSF1=YES
+fi
+
+if [ z"`uname`" = zSunOS ]; then
+	printf "#define SOLARIS\n" >> config.h
+	OTHERLIBS="-lsocket $OTHERLIBS"
 fi
 
 
@@ -255,7 +292,19 @@ int main(int argc, char *argv[])
 }
 ' > _testprog.c
 
+echo '#include <stdio.h>
 
+int main(int argc, char *argv[])
+{
+        static int x = 0;
+        static int y = 1;
+        printf("%i,%i", x, y);
+        return 0;
+}
+' > _testprog.cc
+
+
+###############################################################################
 #  Try to detect which C compiler to use, if CC is not set:
 printf "checking which C compiler to use... "
 rm -f _testprog
@@ -323,7 +372,7 @@ if [ z"$CC" = z ]; then
 	exit
 fi
 
-printf "$CC $CFLAGS"
+printf "$CC"
 
 
 CCTYPE="generic"
@@ -350,6 +399,71 @@ fi
 echo " ($CCTYPE)"
 
 
+
+###############################################################################
+#  Try to detect which C++ compiler to use, if CXX is not set:
+printf "checking which C++ compiler to use... "
+rm -f _testprog
+if [ z"$CXX" = z ]; then
+	#  Try g++ first:
+	printf "#!/bin/sh\ng++ $CXXFLAGS _testprog.cc -o _testprog >" > _test.sh
+	printf " /dev/null 2> /dev/null\n" >> _test.sh
+	chmod 755 _test.sh
+	./_test.sh > /dev/null 2> /dev/null
+	if [ -x _testprog ]; then
+		if [ z`./_testprog` = z0,1 ]; then
+			CXX=g++
+		fi
+	fi
+	rm -f _testprog
+
+	#  If both g++ and c++ exist, then c++ might be a vendor specific
+	#  compiler which produces faster code than g++.
+	printf "#!/bin/sh\nc++ $CXXFLAGS _testprog.cc -o _testprog >" > _test.sh
+	printf " /dev/null 2> /dev/null\n" >> _test.sh
+	chmod 755 _test.sh
+	./_test.sh > /dev/null 2> /dev/null
+	if [ -x _testprog ]; then
+		if [ z`./_testprog` = z0,1 ]; then
+			CXX=c++
+		else
+			printf "broken C++ compiler detected (c++)!\n"
+		fi
+	fi
+	rm -f _testprog
+
+	rm -f _test.sh
+fi
+
+rm -f _testprog
+
+if [ z"$CXX" = z ]; then
+	printf "no working C++ compiler detected\n"
+	printf "\nPlease set the CXX environment variable to a working C++ "
+	printf "compiler before running\nthe configure script, and make"
+	printf " sure that the CXXFLAGS environment variable\nis also valid"
+	printf " for that compiler.\n"
+	exit
+fi
+
+printf "$CXX"
+
+CCTYPE="generic"
+
+if $CXX $CXXFLAGS -v 2>&1 | grep gcc 1> /dev/null 2> /dev/null; then
+	GCCXX=YES
+	CXXTYPE="GNU C++"
+fi
+
+if [ z"$CYGWIN" = zYES ]; then
+	CXXTYPE="$CXXTYPE (Cygwin)"
+fi
+
+echo " ($CXXTYPE)"
+
+
+
+###############################################################################
 if [ z$NOX11 = z ]; then
 	printf "checking for X11 headers and libs\n"
 
@@ -362,15 +476,15 @@ if [ z$NOX11 = z ]; then
 	}
 	int main(int argc, char *argv[])
 	{ return 0; }
-	" > _test_x11.c
+	" > _test_x11.cc
 
 	XOK=0
 
-	XINCLUDE=-I/usr/X11R6/include
-	$CC $CFLAGS _test_x11.c -c -o _test_x11.o $XINCLUDE 2> /dev/null
+	XINCLUDE=-I/usr/local/include
+	$CXX $CXXFLAGS _test_x11.cc -c -o _test_x11.o $XINCLUDE 2> /dev/null
 
-	XLIB="-L/usr/X11R6/lib -lX11"
-	$CC $CFLAGS _test_x11.o -o _test_x11 $XLIB 2> /dev/null
+	XLIB="-L/usr/local/lib -lX11"
+	$CXX $CXXFLAGS _test_x11.o -o _test_x11 $XLIB 2> /dev/null
 
 	if [ -x _test_x11 ]; then
 		XOK=1
@@ -379,12 +493,11 @@ if [ z$NOX11 = z ]; then
 	rm -f _test_x11 _test_x11.o
 
 	if [ z$XOK = z0 ]; then
-		XINCLUDE=-I/usr/local/include
-		$CC $CFLAGS _test_x11.c -c -o _test_x11.o \
-		    $XINCLUDE 2> /dev/null
+		XINCLUDE=-I/usr/X11R6/include
+		$CXX $CXXFLAGS _test_x11.cc -c -o _test_x11.o $XINCLUDE 2> /dev/null
 
-		XLIB="-L/usr/local/lib -lX11"
-		$CC $CFLAGS _test_x11.o -o _test_x11 $XLIB 2> /dev/null
+		XLIB="-L/usr/X11R6/lib -lX11"
+		$CXX $CXXFLAGS _test_x11.o -o _test_x11 $XLIB 2> /dev/null
 
 		if [ -x _test_x11 ]; then
 			XOK=1
@@ -394,11 +507,10 @@ if [ z$NOX11 = z ]; then
 
 	#  Special case for some 64-bit Linux/x86_64 systems:
 	if [ z$XOK = z0 ]; then
-		$CC $CFLAGS _test_x11.c -c -o _test_x11.o \
-		    $XINCLUDE 2> /dev/null
+		$CXX $CXXFLAGS _test_x11.cc -c -o _test_x11.o $XINCLUDE 2> /dev/null
 
 		XLIB="-L/usr/X11R6/lib64 -lX11"
-		$CC $CFLAGS _test_x11.o -o _test_x11 $XLIB 2> /dev/null
+		$CXX $CXXFLAGS _test_x11.o -o _test_x11 $XLIB 2> /dev/null
 
 		if [ -x _test_x11 ]; then
 			XOK=1
@@ -408,12 +520,11 @@ if [ z$NOX11 = z ]; then
 
 	if [ z$XOK = z0 ]; then
 		XINCLUDE=""
-		$CC $CFLAGS _test_x11.c -c -o _test_x11.o \
-		    $XINCLUDE 2> /dev/null
+		$CXX $CXXFLAGS _test_x11.cc -c -o _test_x11.o $XINCLUDE 2> /dev/null
 
 		#  -lsocket for Solaris
 		XLIB="-lX11 -lsocket"
-		$CC $CFLAGS _test_x11.o -o _test_x11 $XLIB 2> /dev/null
+		$CXX $CXXFLAGS _test_x11.o -o _test_x11 $XLIB 2> /dev/null
 
 		if [ -x _test_x11 ]; then
 			XOK=1
@@ -426,25 +537,18 @@ if [ z$NOX11 = z ]; then
 		XLIB="$XLIB -Wl,-rpath,/usr/X11R6/lib"
 	fi
 
-	if [ z`uname` = zOpenBSD ]; then
-		if [ z`uname -m` = zarc ]; then
-			echo "Using old OpenBSD/arc hack for X11 libs..."
-			XLIB="$XLIB -Wl,-rpath,/usr/X11R6/lib"
-		fi
-	fi
-
 	if [ z$XOK = z0 ]; then
 		echo "Failed to compile X11 test program." \
 		    "Configuring without X11."
 	else
-		printf "X11 headers: $XINCLUDE\n"
-		printf "X11 libraries: $XLIB\n"
+		printf "o  X11 headers: $XINCLUDE\n"
+		printf "o  X11 libraries: $XLIB\n"
 		echo "XINCLUDE=$XINCLUDE" >> _Makefile.header
 		echo "XLIB=$XLIB" >> _Makefile.header
 		printf "#define WITH_X11\n" >> config.h
 	fi
 
-	rm -f _test_x11.c
+	rm -f _test_x11.cc
 fi
 
 
@@ -585,8 +689,32 @@ fi
 rm -f _testm*
 
 
-#  CWARNINGS:
-printf "checking whether -Wall can be used... "
+#  CWARNINGS for C++:
+printf "checking whether -Wall can be used for C++... "
+$CXX $CXXFLAGS _testprog.cc -o _testprog -Wall 2> /dev/null
+if [ -x _testprog ]; then
+	printf "yes\n"
+	CXXWARNINGS="-Wall $CXXWARNINGS"
+
+	if [ z"$UNSTABLE" = zYES ]; then
+		printf "checking whether -Werror can be used for C++... "
+		rm -f _testprog
+		$CXX $CXXFLAGS $CXXWARNINGS _testprog.cc -o _testprog -Werror 2> /dev/null
+		if [ -x _testprog ]; then
+			printf "yes\n"
+			CXXWARNINGS="$CXXWARNINGS -Werror"
+		else
+			printf "no\n"
+		fi
+	fi
+else
+	printf "no\n"
+fi
+rm -f _testprog
+
+
+#  CWARNINGS for C:
+printf "checking whether -Wall can be used for C... "
 $CC $CFLAGS _testprog.c -o _testprog -Wall 2> /dev/null
 if [ -x _testprog ]; then
 	printf "yes\n"
@@ -600,7 +728,7 @@ if [ -x _testprog ]; then
 	fi
 
 	if [ z"$UNSTABLE" = zYES ]; then
-		printf "checking whether -Werror can be used... "
+		printf "checking whether -Werror can be used for C... "
 		rm -f _testprog
 		$CC $CFLAGS $CWARNINGS _testprog.c -o _testprog -Werror 2> /dev/null
 		if [ -x _testprog ]; then
@@ -614,6 +742,32 @@ else
 	printf "no\n"
 fi
 rm -f _testprog
+
+
+if [ z"$UNSTABLE" = zYES ]; then
+	printf "checking whether -ansi can be used... "
+	$CXX $CXXFLAGS -ansi _testprog.cc -o _testprog 2> /dev/null
+	if [ -x _testprog ]; then
+		printf "yes\n"
+		CXXFLAGS="$CXXFLAGS -ansi"
+	else
+		printf "no\n"
+	fi
+	rm -f _testprog
+fi
+
+
+if [ z"$UNSTABLE" = zYES ]; then
+	printf "checking whether -pedantic can be used... "
+	$CXX $CXXFLAGS -pedantic _testprog.cc -o _testprog 2> /dev/null
+	if [ -x _testprog ]; then
+		printf "yes\n"
+		CXXFLAGS="$CXXFLAGS -pedantic"
+	else
+		printf "no\n"
+	fi
+	rm -f _testprog
+fi
 
 
 #  -Wstrict-aliasing
@@ -636,88 +790,58 @@ if [ ! z"$DEBUG" = zYES ]; then
 fi
 
 
-if [ z"$COMPAQCC" = zYES ]; then
-	#  -O4 is possible, but sometimes -O3 is better?
-	if [ ! z"$DEBUG" = zYES ]; then
-		CFLAGS="-O4 $CFLAGS"
+if [ ! z"$DEBUG" = zYES ]; then
+	printf "checking whether -O style optimization can be used for C... "
+	OOPTIMS="no"
+	if [ z"$COMPAQCC" = zYES ]; then
+		#  -O4 is possible, but sometimes -O3 is better?
+		OOPTIMS="-O4"
 	fi
-else
 	if [ z"`uname`" = zSunOS ]; then
 		#  "cc", the system's default compiler:
-		if [ ! z"$DEBUG" = zYES ]; then
-			if [ z"$SUNCC" = zYES ]; then
-				CFLAGS="-xO5 -xdepend $CFLAGS"
-			fi
+		if [ z"$SUNCC" = zYES ]; then
+			OOPTIMS="-xO5 -xdepend"
 		fi
-		printf "#define SOLARIS\n" >> config.h
-		OTHERLIBS="-lsocket $OTHERLIBS"
-	else
-		#  gcc or something else:
-		if [ ! z"$DEBUG" = zYES ]; then
-			$CC $CFLAGS _testprog.c -o _testprog -O 2> /dev/null
-			if [ -x _testprog ]; then
-				rm -f _testprog
-				$CC $CFLAGS _testprog.c -o _testprog	\
-					-O3 2> /dev/null
-				if [ -x _testprog ]; then
-					CFLAGS="-O3 $CFLAGS"
-				else
-					CFLAGS="-O $CFLAGS"
-				fi
-			fi
+	fi
+
+	#  gcc or something else:
+	$CC $CFLAGS _testprog.c -o _testprog -O 2> /dev/null
+	if [ -x _testprog ]; then
+		rm -f _testprog
+		$CC $CFLAGS _testprog.c -o _testprog -O3 2> /dev/null
+		if [ -x _testprog ]; then
+			OOPTIMS="-O3"
+		else
+			OOPTIMS="-O"
 		fi
+	fi
+	echo $OOPTIMS
+	if [ ! z$OOPTIMS = zno ]; then
+		CFLAGS="$OOPTIMS $CFLAGS"
 	fi
 fi
 rm -f _testprog
 
 
-#  -fschedule-insns causes bugs on i386 with gcc,
-#  but works OK on my alpha with ccc (compaq's cc).
 if [ ! z"$DEBUG" = zYES ]; then
-    if [ z"$COMPAQCC" = zYES ]; then
-	printf "checking whether -fschedule-insns2 can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fschedule-insns2 2> /dev/null
+	printf "checking whether -O style optimization can be used for C++... "
+	OOPTIMS="no"
+	$CXX $CXXFLAGS _testprog.cc -o _testprog -O 2> /dev/null
 	if [ -x _testprog ]; then
-		CFLAGS="-fschedule-insns2 $CFLAGS"
-		printf "yes\n"
-	else
-		printf "no\n"
+		rm -f _testprog
+		$CXX $CXXFLAGS _testprog.cc -o _testprog -O3 2> /dev/null
+		if [ -x _testprog ]; then
+			OOPTIMS="-O3"
+		else
+			OOPTIMS="-O"
+		fi
 	fi
-	rm -f _testprog
-
-	printf "checking whether -fschedule-insns can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fschedule-insns 2> /dev/null
-	if [ -x _testprog ]; then
-		CFLAGS="-fschedule-insns $CFLAGS"
-		printf "yes\n"
-	else
-		printf "no\n"
+	echo $OOPTIMS
+	if [ ! z$OOPTIMS = zno ]; then
+		CFLAGS="$OOPTIMS $CFLAGS"
 	fi
-	rm -f _testprog
-
-	#  -intrinsics
-	printf "checking whether -intrinsics can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -intrinsics 2> /dev/null
-	if [ -x _testprog ]; then
-		CFLAGS="-intrinsics $CFLAGS"
-		printf "yes\n"
-	else
-		printf "no\n"
-	fi
-	rm -f _testprog
-
-	#  -fast
-	printf "checking whether -fast can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fast 2> /dev/null
-	if [ -x _testprog ]; then
-		CFLAGS="-fast $CFLAGS"
-		printf "yes\n"
-	else
-		printf "no\n"
-	fi
-	rm -f _testprog
-fi; fi
-
+fi
+rm -f _testprog
 
 #  -fpeephole
 if [ ! z"$DEBUG" = zYES ]; then
@@ -780,7 +904,7 @@ fi
 
 #  -g, for development builds
 if [ z"$UNSTABLE" = zYES ]; then
-	printf "checking whether -g can be used... "
+	printf "checking whether -g can be used for C... "
 	if [ z"$COMPAQCC" = zYES ]; then
 		$CC $CFLAGS -g3 _testprog.c -o _testprog > _testprog.stdout 2>&1
 		cat _testprog.stdout >> _testprog.error
@@ -799,6 +923,17 @@ if [ z"$UNSTABLE" = zYES ]; then
 		else
 			printf "no\n"
 		fi
+	fi
+	rm -f _testprog _testprog.error _testprog.stdout
+
+	printf "checking whether -g can be used for C++... "
+	$CXX $CXXFLAGS -g _testprog.cc -o _testprog > _testprog.stdout 2>&1
+	cat _testprog.stdout >> _testprog.error
+	if [ -x _testprog ]; then
+		CXXFLAGS="-g $CXXFLAGS"
+		printf "yes\n"
+	else
+		printf "no\n"
 	fi
 	rm -f _testprog _testprog.error _testprog.stdout
 fi
@@ -1183,26 +1318,103 @@ rm -f _test_end*
 
 ###############################################################################
 
+printf "checking for Doxygen... "
+
+if (doxygen --version > /dev/null); then
+	echo found
+	DOXYGEN=doxygen
+else
+	# Not found is already printed, if doxygen is not found.
+	DOXYGEN="\#"
+fi
+
+
+###############################################################################
+
+if [ "z$PREFIX" = z ]; then
+	PREFIX="$DEFAULTPREFIX"
+fi	
+echo "checking for 'make install' prefix: $PREFIX"
+
+
+###############################################################################
+
+printf "checking for locale install path... "
+TRANSLATIONS=""
+TRANSLATIONSUNINSTALL=""
+
+if [ z$WITHI18N = zYES ]; then
+	rm -f _testintl*
+	printf '#include <stdio.h>
+#include <libintl.h>
+
+int main(int argc, char *argv[])
+{
+        printf("%%s\\n", bindtextdomain("gxemul", NULL));
+        return 0;
+}
+' > _testintl.cc
+	$CXX $CXXFLAGS _testintl.cc -o _testintl 2> /dev/null
+	if [ -x _testintl ]; then
+		TRANSLATIONS=translations
+		TRANSLATIONSUNINSTALL=translations_uninstall
+		TRANSLATIONSPREFIX=`./_testintl`
+		echo $TRANSLATIONSPREFIX
+		printf "#define I18N\n" >> config.h
+	else
+		$CXX $CXXFLAGS -I/usr/local/include -L/usr/local/lib -lintl _testintl.cc -o _testintl 2> /dev/null
+		if [ -x _testintl ]; then
+			TRANSLATIONS=translations
+			TRANSLATIONSUNINSTALL=translations_uninstall
+			TRANSLATIONSPREFIX=`./_testintl`
+			echo $TRANSLATIONSPREFIX
+			printf "#define I18N\n" >> config.h
+		else
+			printf "no\n"
+		fi
+	fi
+	rm -f _testintl*
+else
+	echo skipping
+fi
+
+
+###############################################################################
+
 INCLUDE=-Iinclude/
 DINCLUDE=-I../include/
 
-rm -f _testprog.c
+rm -f _testprog*
 
+echo C++ compiler flags: $CXXFLAGS $CXXWARNINGS
 echo C compiler flags: $CFLAGS $CWARNINGS
 echo Linker flags: $OTHERLIBS
-echo "CWARNINGS=$CWARNINGS" >> _Makefile.header
-echo "COPTIM=$CFLAGS" >> _Makefile.header
+
 echo "INCLUDE=$INCLUDE" >> _Makefile.header
 echo "DINCLUDE=$DINCLUDE" >> _Makefile.header
+
 echo "CC=$CC" >> _Makefile.header
+echo "CXX=$CXX" >> _Makefile.header
+
+echo "CWARNINGS=$CWARNINGS" >> _Makefile.header
+echo "COPTIM=$CFLAGS" >> _Makefile.header
+echo "CXXOPTIM=$CXXFLAGS" >> _Makefile.header
+echo "CXXWARNINGS=$CXXWARNINGS" >> _Makefile.header
+
 echo "OTHERLIBS=$OTHERLIBS" >> _Makefile.header
 echo "CPU_ARCHS=$CPU_ARCHS" >> _Makefile.header
 echo "CPU_TOOLS=$CPU_TOOLS" >> _Makefile.header
+
+echo "TRANSLATIONS=$TRANSLATIONS" >> _Makefile.header
+echo "TRANSLATIONSUNINSTALL=$TRANSLATIONSUNINSTALL" >> _Makefile.header
+echo "TRANSLATIONSPREFIX=$TRANSLATIONSPREFIX" >> _Makefile.header
+
+echo "DOXYGEN=$DOXYGEN" >> _Makefile.header
 echo "" >> _Makefile.header
 
 
 #  Create the Makefiles:
-D=". src src/include src/console src/cpus src/debugger src/devices"
+D=". po src src/include src/console src/cpus src/debugger src/devices"
 D="$D src/devices/fonts src/disk src/file src/machines"
 D="$D src/net src/promemul src/symbol src/useremul"
 for a in $D; do

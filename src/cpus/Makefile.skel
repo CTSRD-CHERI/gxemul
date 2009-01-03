@@ -4,7 +4,7 @@
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
-OBJS=cpu.o $(CPU_ARCHS) $(CPU_BACKENDS)
+OBJS=cpu.o $(CPU_ARCHS)
 TOOLS=generate_head generate_tail $(CPU_TOOLS)
 
 

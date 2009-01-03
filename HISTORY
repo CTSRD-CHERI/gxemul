@@ -3805,3 +3805,6 @@ Changelog for GXemul:
 ==============  RELEASE 0.4.7  ==============
 
 20090103	Implementing more M88K floating point instruction variants.
+		Merging in some parts from the (old) experimental C++ branch:
+		compiler detection (C++), po directory, Doxygen configuration,
+		"make install" functionality, etc.

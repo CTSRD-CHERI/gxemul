@@ -1173,7 +1173,7 @@ static void debugger_cmd_version(struct machine *m, char *cmd_line)
 		return;
 	}
 
-	printf("%s, %s\n", VERSION, COMPILE_DATE);
+	printf("GXemul %s\n", VERSION);
 }
 
 
