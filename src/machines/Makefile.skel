@@ -2,7 +2,7 @@
 # Makefile for GXemul machines
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+CFLAGS=$(CWARNINGS) $(COPTIM) $(INCLUDE1)
 OBJS=	machine.o \
 	machine_algor.o machine_alpha.o machine_arc.o machine_bebox.o \
 	machine_cats.o machine_cobalt.o machine_dreamcast.o machine_evbmips.o \

@@ -179,6 +179,11 @@ void internal_w(char *arg)
 	case 'S':
 		console_slave(arg + 1);
 		break;
+	case 'u':
+		if (strcmp(arg, "unittest") == 0) {
+			/*  C++ Unit tests. For now: Ignore.  */
+			exit(0);
+		}
 	default:
 		fprintf(stderr, "internal_w(): UNIMPLEMENTED arg = '%s'\n",
 		    arg);

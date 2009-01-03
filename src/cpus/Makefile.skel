@@ -2,7 +2,7 @@
 #  Makefile for GXemul src/cpus
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+CFLAGS=$(CWARNINGS) $(COPTIM) $(INCLUDE1)
 
 OBJS=cpu.o $(CPU_ARCHS)
 TOOLS=generate_head generate_tail $(CPU_TOOLS)

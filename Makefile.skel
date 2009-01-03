@@ -16,7 +16,7 @@ buildsrc:
 	cd src; $(MAKE)
 
 test: build
-	./$(BIN) -W unittest > /dev/null
+	./$(BIN) -WW@unittest > /dev/null
 
 documentation: build
 	$(DOXYGEN) doc/Doxyfile

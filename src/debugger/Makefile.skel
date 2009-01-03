@@ -2,7 +2,7 @@
 #  Makefile for GXemul src/debugger
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE1)
 
 OBJS=debugger.o debugger_expr.o
 
