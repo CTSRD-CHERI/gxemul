@@ -850,7 +850,7 @@ if [ ! z"$DEBUG" = zYES ]; then
 	fi
 	echo $OOPTIMS
 	if [ ! z$OOPTIMS = zno ]; then
-		CFLAGS="$OOPTIMS $CFLAGS"
+		CXXFLAGS="$OOPTIMS $CXXFLAGS"
 	fi
 fi
 rm -f _testprog
