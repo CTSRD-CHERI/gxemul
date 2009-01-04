@@ -3808,3 +3808,6 @@ Changelog for GXemul:
 		Merging in some parts from the (old) experimental C++ branch:
 		compiler detection (C++), po directory, Doxygen configuration,
 		"make install" functionality, etc.
+20090104	Attempting to reduce the "first-person"-ness of some parts of
+		the documentation; adding a Thanks section to the intro.html
+		page, where code contributions can be credited.
