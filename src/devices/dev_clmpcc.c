@@ -63,6 +63,7 @@ struct clmpcc_data {
 	unsigned char	reg[CLMPCC_LEN];
 
 	int		console_handle;
+	int		rx_check;
 
 	int		asserted_rx;
 	int		asserted_tx;
@@ -79,7 +80,10 @@ static void reassert_interrupts(struct clmpcc_data *d)
 {
 	int rxintr = 0, txintr = 0;
 
-	if (console_charavail(d->console_handle))
+	/*  Don't check rx too often:  */
+	d->rx_check ++;
+	if ((d->rx_check & 0x3) == 0 &&
+	    console_charavail(d->console_handle))
 		rxintr = 1;
 
 	if ((d->reg[CLMPCC_REG_IER] & 3) != 0)
@@ -251,6 +255,7 @@ DEVICE_ACCESS(clmpcc)
 		} else {
 			odata = console_readchar(d->console_handle);
 		}
+		reassert_interrupts(d);
 		break;
 
 	default:if (writeflag == MEM_READ)
