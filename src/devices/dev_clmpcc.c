@@ -64,6 +64,9 @@ struct clmpcc_data {
 
 	int		console_handle;
 
+	int		asserted_rx;
+	int		asserted_tx;
+
 	/*  Interrupt pins on the PCC2 controller:  */
 	struct interrupt irq_scc_rxe;
 	struct interrupt irq_scc_m;
@@ -74,21 +77,26 @@ struct clmpcc_data {
 
 static void reassert_interrupts(struct clmpcc_data *d)
 {
-	int rxintr = 0;
+	int rxintr = 0, txintr = 0;
 
 	if (console_charavail(d->console_handle))
 		rxintr = 1;
 
-	if (rxintr)
+	if ((d->reg[CLMPCC_REG_IER] & 3) != 0)
+		txintr = 1;
+
+	if (rxintr && !d->asserted_rx)
 		INTERRUPT_ASSERT(d->irq_scc_rx);
-	else
+	else if (!rxintr && d->asserted_rx)
 		INTERRUPT_DEASSERT(d->irq_scc_rx);
 
-	/*  TODO: Hack/experiment for now...  */
-	if ((d->reg[CLMPCC_REG_IER] & 3) != 0)
+	if (txintr && !d->asserted_tx)
 		INTERRUPT_ASSERT(d->irq_scc_tx);
-	else
+	else if (!txintr && d->asserted_tx)
 		INTERRUPT_DEASSERT(d->irq_scc_tx);
+
+	d->asserted_rx = rxintr;
+	d->asserted_tx = txintr;
 }
 
 
@@ -222,10 +230,15 @@ DEVICE_ACCESS(clmpcc)
 		break;
 
 	case CLMPCC_REG_TEOIR:	/*  Tx End of Interrupt Register  */
-	case CLMPCC_REG_REOIR:	/*  Rx End of Interrupt Register  */
 		/*  TODO: Do something more realistic?  */
 		INTERRUPT_DEASSERT(d->irq_scc_tx);
+		d->asserted_tx = 0;
+		break;
+
+	case CLMPCC_REG_REOIR:	/*  Rx End of Interrupt Register  */
+		/*  TODO: Do something more realistic?  */
 		INTERRUPT_DEASSERT(d->irq_scc_rx);
+		d->asserted_rx = 0;
 		break;
 
 	case CLMPCC_REG_TDR:
