@@ -10,16 +10,25 @@ Goals for 0.5.x:
 
   [ ]	Start to SLOWLY convert to C++. Instead of restarting from scratch
 	(which was my last experiment with GXemul/C++), only translate
-	things that make sense.
+	things that make sense. Include UI abstraction but do _NOT_ include
+	a graphical UI.
 
-  [ ]	-K behavior on errors!
+  [ ]	-K behavior on errors! Hopefully this will be the natural way...
 
-  [ ]	Go through ALL emulation modes, to find out which ones have
-	good timer code, and which ones have broken timers. Try to fix
-	those that are broken.
-
-  [ ]	Perhaps continue on one or more unfinished architectures, such as
-	Alpha or SPARC? Or something new like M32R?
+  [ ]	Native code generation and faster/more generic bus access:
+	Goal would be as linear execution as possible, loads/stores are
+	obviously MOST important, and try to include things like device
+	access! I.e. host_load array(s) and host_store, which are for
+	memory accesses (and host_load_user and host_store_user for some
+	archs) just as before, but also pointers directly to handling
+	functions, e.g. nonhost_load and nonhost_store. And check the
+	result of those functions to know whether to simply continue
+	running (without branching away), or if there was an exception
+	(i.e. a bus error, or a need to abort execution for some other
+	reason).
+	Cache simulation seems to naturally fit into this scheme
+	as well (direct calls to cache-handlers). Perhaps even
+	with multiprocessor snooping etc implemented?
 
 
 -------------------------------------------------------------------------------
