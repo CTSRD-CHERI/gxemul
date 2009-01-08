@@ -2,10 +2,10 @@
 #  Makefile for GXemul src/main
 #
 
-CXXFLAGS=$(CXXOPTIM) $(CPEDANTIC) $(INCLUDE1)
-LIBS=$(XLIB) $(OTHERLIBS)
+CXXFLAGS=$(CXXWARNINGS) $(CXXOPTIM) $(CPEDANTIC) $(INCLUDE1)
+LIBS=$(OTHERLIBS)
 
-OBJS=GXemul.o UnitTest.o
+OBJS=Action.o ActionStack.o GXemul.o UnitTest.o
 
 all: $(OBJS)
 

@@ -102,8 +102,9 @@ static void Test_IRNativeAMD64_DoNothing()
 
 	native.Generate(size, buf);
 
-	void (*func)() = (void (*)()) buf;
-	func();
+// TODO
+//	void (*func)() = (void (*)()) buf;
+//	func();
 
 	munmap(buf, size);
 #endif	// NATIVE_ABI_AMD64

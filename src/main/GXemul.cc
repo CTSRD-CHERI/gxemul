@@ -324,8 +324,6 @@ int GXemul::Run()
  */
 int main(int argc, char *argv[])
 {
-	const char *progname = argv[0];
-
 #ifdef I18N
 	// Initialize gettext, for Internationalization support:
 	bindtextdomain(I18N_PACKAGE_NAME, NULL);
