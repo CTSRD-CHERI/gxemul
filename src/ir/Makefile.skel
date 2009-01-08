@@ -1,0 +1,19 @@
+#
+#  Makefile for GXemul src/ir
+#
+
+CXXFLAGS=$(CXXOPTIM) $(CPEDANTIC) $(INCLUDE1)
+LIBS=$(XLIB) $(OTHERLIBS)
+
+OBJS=	IRBlockCache.o IRNativeAMD64.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS) *core
+
+clean_all: clean
+	rm -f Makefile
+

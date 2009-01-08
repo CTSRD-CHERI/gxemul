@@ -6,7 +6,7 @@ CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 
 all: do_include
 	$(MAKE) do_console do_cpus do_debugger do_devices do_disk do_file \
-		do_machines do_main do_net do_old_core do_promemul \
+		do_ir do_machines do_main do_net do_old_core do_promemul \
 		do_symbol do_useremul
 
 do_include:
@@ -29,6 +29,9 @@ do_disk:
 
 do_file:
 	cd file; $(MAKE)
+
+do_ir:
+	cd ir; $(MAKE)
 
 do_machines:
 	cd machines; $(MAKE)
@@ -61,6 +64,7 @@ clean:
 	cd devices; $(MAKE) clean
 	cd disk; $(MAKE) clean
 	cd file; $(MAKE) clean
+	cd ir; $(MAKE) clean
 	cd machines; $(MAKE) clean
 	cd main; $(MAKE) clean
 	cd net; $(MAKE) clean
@@ -77,6 +81,7 @@ clean_all: clean
 	cd devices; $(MAKE) clean_all
 	cd disk; $(MAKE) clean_all
 	cd file; $(MAKE) clean_all
+	cd ir; $(MAKE) clean_all
 	cd machines; $(MAKE) clean_all
 	cd main; $(MAKE) clean_all
 	cd net; $(MAKE) clean_all

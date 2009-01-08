@@ -66,7 +66,7 @@ clean_all: clean
 	rm -f src/Makefile src/cpus/Makefile
 	rm -f src/debugger/Makefile src/devices/Makefile
 	rm -f src/devices/fonts/Makefile src/disk/Makefile
-	rm -f src/file/Makefile src/machines/Makefile
+	rm -f src/file/Makefile src/ir/Makefile src/machines/Makefile
 	rm -f src/main/Makefile src/net/Makefile src/old_core/Makefile
 	rm -f src/promemul/Makefile src/include/Makefile
 	rm -f src/useremul/Makefile src/include/Makefile

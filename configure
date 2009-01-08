@@ -1509,7 +1509,7 @@ rm -f _unittests.tmp
 
 #  Create the Makefiles:
 D=". po src src/include src/console src/cpus src/debugger src/devices"
-D="$D src/devices/fonts src/disk src/file src/machines src/main"
+D="$D src/devices/fonts src/disk src/file src/ir src/machines src/main"
 D="$D src/net src/old_core src/promemul src/symbol src/useremul"
 for a in $D; do
 	echo "creating $a/Makefile"
