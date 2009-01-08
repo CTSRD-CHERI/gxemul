@@ -3811,3 +3811,7 @@ Changelog for GXemul:
 20090104	Attempting to reduce the "first-person"-ness of some parts of
 		the documentation; adding a Thanks section to the intro.html
 		page, where code contributions can be credited.
+20090108	Continuing to merge in code from the C++ branch; more of the
+		main GXemul class and the unit test framework have been
+		incorporated now.
+		Moving RELEASE.html to doc/.
