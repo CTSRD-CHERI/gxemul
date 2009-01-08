@@ -473,7 +473,7 @@ echo " ($CXXTYPE)"
 
 ###############################################################################
 if [ ! z$WITHX11 = zNO ]; then
-	printf "checking for X11 headers and libs\n"
+	printf "checking for X11 headers and libs... "
 
 	#  Try to compile a small X11 test program:
 	printf "#include <X11/Xlib.h>
@@ -553,8 +553,7 @@ if [ ! z$WITHX11 = zNO ]; then
 		fi
 		echo "Note: Configuring without X11. Framebuffer emulation will not be available."
 	else
-		printf "o  X11 headers: $XINCLUDE\n"
-		printf "o  X11 libraries: $XLIB\n"
+		echo "" "$XINCLUDE $XLIB"
 		echo "XINCLUDE=$XINCLUDE" >> _Makefile.header
 		echo "XLIB=$XLIB" >> _Makefile.header
 		printf "#define WITH_X11\n" >> config.h
@@ -1438,7 +1437,7 @@ echo "" >> _Makefile.header
 #  Create the Makefiles:
 D=". po src src/include src/console src/cpus src/debugger src/devices"
 D="$D src/devices/fonts src/disk src/file src/machines src/main"
-D="$D src/net src/promemul src/symbol src/useremul"
+D="$D src/net src/old_core src/promemul src/symbol src/useremul"
 for a in $D; do
 	echo "creating $a/Makefile"
 	touch $a/Makefile

@@ -26,10 +26,7 @@ OBJS=device.o bus_isa.o bus_pci.o lk201.o \
 	dev_uninorth.o dev_unreadable.o dev_v3.o dev_vga.o dev_vme.o \
 	dev_vr41xx.o dev_wdc.o dev_z8530.o dev_zero.o
 
-all:
-	cd fonts; $(MAKE)
-	$(MAKE) font8x8.c font8x10.c font8x16.c
-	$(MAKE) objs
+all: $(OBJS)
 	$(MAKE) autodev.o
 
 autodev.c: autodev_head.c autodev_middle.c autodev_tail.c makeautodev.sh bus_pci.c $(OBJS)

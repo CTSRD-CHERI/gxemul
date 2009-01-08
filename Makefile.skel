@@ -10,7 +10,7 @@ LIBS=$(XLIB) $(OTHERLIBS)
 all: build
 
 build: buildsrc
-	$(CXX) src/*.o src/*/*.o $(LIBS) -o $(BIN)
+	$(CXX) src/*/*.o $(LIBS) -o $(BIN)
 
 buildsrc:
 	cd src; $(MAKE)
@@ -66,7 +66,7 @@ clean_all: clean
 	rm -f src/debugger/Makefile src/devices/Makefile
 	rm -f src/devices/fonts/Makefile src/disk/Makefile
 	rm -f src/file/Makefile src/machines/Makefile
-	rm -f src/main/Makefile src/net/Makefile
+	rm -f src/main/Makefile src/net/Makefile src/old_core/Makefile
 	rm -f src/promemul/Makefile src/include/Makefile
 	rm -f src/useremul/Makefile src/include/Makefile
 	rm -f src/console/Makefile src/symbol/Makefile

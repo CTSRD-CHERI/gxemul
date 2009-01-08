@@ -10,7 +10,7 @@ font8x16.c: Xconv_raw_to_c
 	./Xconv_raw_to_c vt220l.816 font8x16 > font8x16.c
 
 clean:
-	rm -f Xconv_raw_to_c font8x16.c font8x8.c font8x10.c
+	rm -f Xconv_raw_to_c
 
 clean_all: clean
 	rm -f Makefile
