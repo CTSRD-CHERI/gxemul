@@ -201,7 +201,7 @@ void internal_w(char *arg)
  */
 static void usage(int longusage)
 {
-	printf("GXemul "VERSION"    Copyright (C) 2003-2009  Anders Gavare\n");
+	printf("GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n");
 	printf("Read the source code and/or documentation for "
 	    "other Copyright messages.\n");
 
@@ -733,7 +733,7 @@ int old_main(int argc, char *argv[])
 	}
 
 	/*  Print startup message:  */
-	debug("GXemul "VERSION"    Copyright (C) 2003-2009  Anders Gavare\n"
+	debug("GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n"
 	    "Read the source code and/or documentation for other Copyright "
 	    "messages.\n\n");
 

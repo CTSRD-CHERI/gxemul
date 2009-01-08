@@ -43,6 +43,69 @@
 
 #include "../../config.h"
 
+#define	COPYRIGHT_MSG	"Copyright (C) 2003-2009  Anders Gavare"
+
+// The recommended way to add a specific message to the startup banner or
+// about box is to use the SECONDARY_MSG. This should end with a newline
+// character, unless it is completely empty.
+//
+// Example:  "Modified by XYZ to include support for machine type UVW.\n"
+//
+#define	SECONDARY_MSG	""
+
+
+#ifdef __cplusplus
+
+// Use Glib::ustring if available, otherwise std::string. Define
+// stringchar to be the type of a character.
+#ifdef WITH_GLIBMM
+#include <glibmm/ustring.h>
+typedef Glib::ustring string;
+typedef gunichar stringchar;
+#else
+#include <string>
+typedef std::string string;
+typedef char stringchar;
+#endif
+
+// Use Glib's I18N support if available
+#if defined(I18N) && defined(WITH_GLIBMM)
+#include <glibmm/i18n.h>
+#else
+#define	_(x)	(x)
+#endif
+
+#include <iostream>
+using std::ostream;
+
+#include <memory>
+using std::auto_ptr;
+
+#include <list>
+using std::list;
+
+#include <map>
+using std::map;
+
+#include <set>
+using std::set;
+
+#include <sstream>
+using std::stringstream;
+
+#include <vector>
+using std::vector;
+
+using std::min;
+using std::max;
+
+
+// Reference counting is needed in lots of places, so it is best to
+// include it from this file.
+#include "refcount_ptr.h"  
+
+#endif
+
 
 #ifdef NO_C99_PRINTF_DEFINES
 /*
@@ -237,6 +300,7 @@ void fatal(char *fmt, ...);
 
 
 /*  misc.c:  */
+#ifndef __cplusplus
 unsigned long long mystrtoull(const char *s, char **endp, int base);
 int mymkstemp(char *template);
 #ifdef USE_STRLCPY_REPLACEMENTS
@@ -244,6 +308,7 @@ size_t mystrlcpy(char *dst, const char *src, size_t size);
 size_t mystrlcat(char *dst, const char *src, size_t size);
 #endif
 void print_separator_line(void);
+#endif
 
 
 /*  mvmeprom.c:  */

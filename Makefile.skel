@@ -16,7 +16,7 @@ buildsrc:
 	cd src; $(MAKE)
 
 test: build
-	./$(BIN) -WW@unittest > /dev/null
+	./$(BIN) -W unittest > /dev/null
 
 documentation: build
 	$(DOXYGEN) doc/Doxyfile
@@ -61,6 +61,7 @@ clean:
 clean_all: clean
 	cd experiments; $(MAKE) clean_all
 	cd demos; $(MAKE) clean
+	rm -f _unittests.tmp unittest.h unittest_h.h
 	rm -f config.h Makefile po/Makefile
 	rm -f src/Makefile src/cpus/Makefile
 	rm -f src/debugger/Makefile src/devices/Makefile

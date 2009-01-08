@@ -5,7 +5,7 @@
 CXXFLAGS=$(CXXOPTIM) $(CPEDANTIC) $(INCLUDE1)
 LIBS=$(XLIB) $(OTHERLIBS)
 
-OBJS=GXemul.o
+OBJS=GXemul.o UnitTest.o
 
 all: $(OBJS)
 
