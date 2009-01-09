@@ -26,6 +26,7 @@
  */
 
 #include <assert.h>
+#include <string.h>
 #include <fstream>
 
 using std::ifstream;

@@ -26,6 +26,8 @@
  */
 
 #include <assert.h>
+#include <stdio.h>
+#include <string.h>
 #include "components/MIPS_CPUComponent.h"
 
 #include "mips_cpu_types.h"
