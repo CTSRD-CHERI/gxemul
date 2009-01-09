@@ -1,0 +1,20 @@
+#
+#  Makefile for GXemul src/main/actions
+#
+
+CXXFLAGS=$(CXXWARNINGS) $(CXXOPTIM) $(CPEDANTIC) $(INCLUDE2)
+LIBS=$(OTHERLIBS)
+
+OBJS=AddComponentAction.o ClearEmulationAction.o LoadEmulationAction.o \
+	RemoveComponentAction.o ResetAction.o VariableAssignmentAction.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS)
+
+clean_all: clean
+	rm -f Makefile
+

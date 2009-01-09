@@ -3815,4 +3815,5 @@ Changelog for GXemul:
 		main GXemul class and the unit test framework have been
 		incorporated now.
 		Moving RELEASE.html to doc/.
-20090109	Merging in more C++ classes: Checksum.
+20090109	Merging in everything from the C++ branch. In other words,
+		_none_ of the legacy functionality currently works.

@@ -5,12 +5,16 @@
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 
 all: do_include
-	$(MAKE) do_console do_cpus do_debugger do_devices do_disk do_file \
+	$(MAKE) do_console do_components do_cpus do_debugger do_devices \
+		do_disk do_file \
 		do_ir do_machines do_main do_net do_old_core do_promemul \
-		do_symbol do_useremul
+		do_symbol do_ui do_useremul
 
 do_include:
 	cd include; $(MAKE)
+
+do_components:
+	cd components; $(MAKE)
 
 do_console:
 	cd console; $(MAKE)
@@ -51,6 +55,9 @@ do_promemul:
 do_symbol:
 	cd symbol; $(MAKE)
 
+do_ui:
+	cd ui; $(MAKE)
+
 do_useremul:
 	cd useremul; $(MAKE)
 
@@ -58,6 +65,7 @@ do_useremul:
 clean:
 	rm -f core *.core tmp_*.c
 	cd include; $(MAKE) clean
+	cd components; $(MAKE) clean
 	cd console; $(MAKE) clean
 	cd cpus; $(MAKE) clean
 	cd debugger; $(MAKE) clean
@@ -71,11 +79,13 @@ clean:
 	cd old_core; $(MAKE) clean
 	cd promemul; $(MAKE) clean
 	cd symbol; $(MAKE) clean
+	cd ui; $(MAKE) clean
 	cd useremul; $(MAKE) clean
 
 clean_all: clean
 	cd include; $(MAKE) clean_all
 	cd console; $(MAKE) clean_all
+	cd components; $(MAKE) clean_all
 	cd cpus; $(MAKE) clean_all
 	cd debugger; $(MAKE) clean_all
 	cd devices; $(MAKE) clean_all
@@ -88,6 +98,7 @@ clean_all: clean
 	cd old_core; $(MAKE) clean_all
 	cd promemul; $(MAKE) clean_all
 	cd symbol; $(MAKE) clean_all
+	cd ui; $(MAKE) clean_all
 	cd useremul; $(MAKE) clean_all
 	rm -f Makefile
 

@@ -63,7 +63,7 @@ extern int verbose;
 static int n_executables_loaded = 0;
 
 
-#include "exec_elf.h"		/*  Ugly; needed for ELFDATA2LSB etc.  */
+#include "thirdparty/exec_elf.h"	/*  Ugly; needed for ELFDATA2LSB etc. */
 
 #define	unencode(var,dataptr,typ)	{				\
 		int Wi;  unsigned char Wb;				\

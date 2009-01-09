@@ -100,6 +100,10 @@ using std::min;
 using std::max;
 
 
+#ifndef NDEBUG
+#include "thirdparty/debug_new.h"
+#endif
+
 // Reference counting is needed in lots of places, so it is best to
 // include it from this file.
 #include "refcount_ptr.h"  
@@ -174,6 +178,13 @@ struct cpu;
 struct emul;
 struct machine;
 struct memory;
+
+
+enum Endianness
+{
+	BigEndian = 0,
+	LittleEndian
+};
 
 
 #define	NO_BYTE_ORDER_OVERRIDE		-1

@@ -39,12 +39,18 @@ void ActionStack::Clear()
 {
 	m_undoActions.clear();
 	m_redoActions.clear();
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 }
 
 
 void ActionStack::ClearRedo()
 {
 	m_redoActions.clear();
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 }
 
 
@@ -85,6 +91,9 @@ void ActionStack::PushActionAndExecute(refcount_ptr<Action>& pAction)
 	// stack itself is done. This is because the Execute function may
 	// modify the stack too (e.g. by calling Clear()).
 	pAction->Execute();
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 }
 
 
@@ -99,6 +108,9 @@ bool ActionStack::Undo()
 	pAction->Undo();
 
 	m_redoActions.push_back(pAction);
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 
 	return true;
 }
@@ -115,6 +127,9 @@ bool ActionStack::Redo()
 	pAction->Execute();
 
 	m_undoActions.push_back(pAction);
+
+	if (m_gxemul != NULL)
+		m_gxemul->GetUI()->UpdateUI();
 
 	return true;
 }

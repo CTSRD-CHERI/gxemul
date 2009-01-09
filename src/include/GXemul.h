@@ -30,9 +30,27 @@
 
 #include "misc.h"
 
+#include "ActionStack.h"
+#include "CommandInterpreter.h"
+#include "Component.h"
+#include "UI.h"
+
 
 /**
  * \brief The main emulator class.
+ *
+ * Its main purpose is to run the UI main loop.
+ *
+ * A %GXemul instance basically has the following member variables:
+ *
+ * <ol>
+ *	<li>a tree of components, which make up the full
+ *		state of the current emulation setup
+ *	<li>an ActionStack, for undo/redo functionality
+ *	<li>a UI
+ *	<li>a CommandInterpreter
+ *	<li>a RunState
+ * </ol>
  *
  * The implementation file, GXemul.cc, contains both the class implementation
  * and the main() function of the application. The %GXemul class is also
@@ -66,11 +84,92 @@ public:
 	bool ParseOptions(int argc, char *argv[]);
 
 	/**
+	 * \brief Discards the current emulation, and starts anew with just
+	 *	an empty root component.
+	 */
+	void ClearEmulation();
+
+	/**
 	 * \brief Runs GXemul's main loop.
 	 *
 	 * @return Zero on success, non-zero on error.
 	 */
 	int Run();
+
+	/**
+	 * \brief Returns whether the emulation is dirty/modified or not.
+	 *
+	 * @return True if the emulation model has been modified in any way
+	 *	since it was last loaded or saved, false if it is untouched.
+	 */
+	bool GetDirtyFlag() const;
+
+	/**
+	 * \brief Sets whether the emulation is dirty/modified or not.
+	 *
+	 * @param dirtyFlag True if the emulation model has been modified in
+	 * any way since it was last loaded or saved, false if it is untouched.
+	 */
+	void SetDirtyFlag(bool dirtyFlag);
+
+	/**
+	 * \brief Gets the current emulation setup's filename.
+	 *
+	 * @return The name of the file that is used for the current emulation
+	 *	setup. If no filename is defined yet, this is an empty string.
+	 */
+	const string& GetEmulationFilename() const;
+
+	/**
+	 * \brief Sets the current emulation setup's filename.
+	 *
+	 * @param filename This is the name of the file that is used
+	 *	for the current emulation setup.
+	 */
+	void SetEmulationFilename(const string& filename);
+
+	/**
+	 * \brief Gets a reference to the CommandInterpreter.
+	 *
+	 * @return A reference to the %GXemul instance' CommandInterpreter.
+	 */
+	CommandInterpreter& GetCommandInterpreter();
+
+	/**
+	 * \brief Gets a reference to the ActionStack.
+	 *
+	 * @return A reference to the %GXemul instance' ActionStack.
+	 */
+	ActionStack& GetActionStack();
+
+	/**
+	 * \brief Gets a pointer to the %GXemul instance' active UI.
+	 *
+	 * Note: May return NULL if no UI has been initialized.
+	 *
+	 * @return A pointer to the UI in use.
+	 */
+	UI* GetUI();
+
+	/**
+	 * \brief Gets a pointer to the root configuration component.
+	 *
+	 * @return A pointer to the root component. If no configuration tree
+	 *	is loaded, then this is at least an empty dummy component.
+	 *	(The return value is never NULL.)
+	 */
+	refcount_ptr<Component> GetRootComponent();
+
+	/**
+	 * \brief Sets the root component, discarding the previous one.
+	 *
+	 * This function should not be used to set the root component
+	 * to NULL. Use ClearEmulation() instead.
+	 *
+	 * @param newRootComponent A reference counted pointer to the new
+	 *	root component. It may not be a NULL pointer.
+	 */
+	void SetRootComponent(refcount_ptr<Component> newRootComponent);
 
 	/**
 	 * \brief Sets the RunState.
@@ -86,7 +185,66 @@ public:
 	 */
 	RunState GetRunState() const;
 
+	/**
+	 * \brief Gets the current RunState as a string.
+	 *
+	 * @return The current RunState, formatted as a string.
+	 */
+	string GetRunStateAsString() const;
+
+	/**
+	 * \brief Gets the current global time of the emulation.
+	 *
+	 * Note: This is not necessarily equal to real-world time.
+	 *
+	 * @return The time, in seconds, that the emulation has been executing.
+	 */
+	double GetGlobalTime() const;
+
+	/**
+	 * \brief Sets the current global time of the emulation.
+	 *
+	 * Note: This is not necessarily equal to real-world time.
+	 *
+	 * @param globalTime The time, in seconds.
+	 */
+	void SetGlobalTime(double globalTime);
+
+	/**
+	 * \brief Gets the current quiet mode setting.
+	 *
+	 * @return True if running in quiet mode, false for normal operation.
+	 */
+	bool GetQuietMode() const;
+
+	/**
+	 * \brief Sets whether or not to run in quiet mode.
+	 *
+	 * @param quietMode true to run in quiet mode, false otherwise.
+	 */
+	void SetQuietMode(bool quietMode);
+
+	/**
+	 * \brief Run the emulation for a while.
+	 */
+	void ExecuteCycles(double timeslice = 0.01);
+
+	/**
+	 * \brief Returns the GXemul version string.
+	 *
+	 * @return A string describing the GXemul version.
+	 */
+	static string Version();
+
 private:
+	/**
+	 * \brief Creates an emulation setup from a template machine name.
+	 *
+	 * @param templateName The name of the template machine.
+	 * @return True if the emulation was created, false otherwise.
+	 */
+	bool CreateEmulationFromTemplateMachine(const string& templateName);
+
 	/**
 	 * \brief Prints help message to std::cout.
 	 *
@@ -96,7 +254,21 @@ private:
 	void PrintUsage(bool longUsage) const;
 
 private:
+	// Base:
+	bool			m_bRunUnitTests;
+	bool			m_quietMode;
+	refcount_ptr<UI>	m_ui;
+	ActionStack		m_actionStack;
+	CommandInterpreter	m_commandInterpreter;
+
+	// Runtime:
 	RunState		m_runState;
+	double			m_globalTime;	// TODO: Part of the model!
+
+	// Model:
+	string			m_emulationFileName;
+	bool			m_modelIsDirty;
+	refcount_ptr<Component>	m_rootComponent;
 };
 
 #endif	// GXEMUL_H

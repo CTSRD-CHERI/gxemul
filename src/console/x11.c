@@ -374,8 +374,11 @@ void x11_fb_resize(struct fb_window *win, int new_xsize, int new_ysize)
 void x11_set_standard_properties(struct fb_window *fb_window, char *name)
 {
 	XSetStandardProperties(fb_window->x11_display,
-	    fb_window->x11_fb_window, name, "GXemul "VERSION,
-	    None, NULL, 0, NULL);
+	    fb_window->x11_fb_window, name, "GXemul"
+#ifdef VERSION
+	    " "VERSION
+#endif
+	    , None, NULL, 0, NULL);
 }
 
 

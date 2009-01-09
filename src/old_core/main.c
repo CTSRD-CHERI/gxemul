@@ -201,7 +201,12 @@ void internal_w(char *arg)
  */
 static void usage(int longusage)
 {
+#ifdef VERSION
 	printf("GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n");
+#else
+	printf("GXemul (unknown version)   "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n");
+#endif
+
 	printf("Read the source code and/or documentation for "
 	    "other Copyright messages.\n");
 
@@ -733,7 +738,11 @@ int old_main(int argc, char *argv[])
 	}
 
 	/*  Print startup message:  */
+#ifdef VERSION
 	debug("GXemul "VERSION"     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n"
+#else
+	debug("GXemul (unknown version)     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n"
+#endif
 	    "Read the source code and/or documentation for other Copyright "
 	    "messages.\n\n");
 

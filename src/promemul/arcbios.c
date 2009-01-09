@@ -2447,7 +2447,11 @@ void arcbios_init(struct machine *machine, int is64bit, uint64_t sgi_ram_offset,
 		machine->md.arc->console_curx = 0;
 		machine->md.arc->console_cury = 0;
 
+#ifdef VERSION
 		arcbios_putstring(cpu, "GXemul "VERSION"  ARCBIOS emulation\n");
+#else
+		arcbios_putstring(cpu, "GXemul   ARCBIOS emulation\n");
+#endif
 
 		snprintf(tmpstr, sizeof(tmpstr), "%i cpu%s (%s), %i MB "
 		    "memory\n\n", machine->ncpus, machine->ncpus > 1? "s" : "",

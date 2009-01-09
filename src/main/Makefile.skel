@@ -5,16 +5,32 @@
 CXXFLAGS=$(CXXWARNINGS) $(CXXOPTIM) $(CPEDANTIC) $(INCLUDE1)
 LIBS=$(OTHERLIBS)
 
-OBJS=Action.o ActionStack.o Checksum.o Command.o GXemul.o UnitTest.o
+OBJS=Action.o ActionStack.o Checksum.o Command.o CommandInterpreter.o \
+	Component.o ComponentFactory.o debug_new.o EscapedString.o \
+	FileLoader.o GXemul.o StateVariable.o UnitTest.o
 
-all: $(OBJS)
+all: $(OBJS) do_actions do_commands do_fileloaders
 
 $(OBJS): Makefile
 
+do_actions:
+	cd actions; $(MAKE)
+
+do_commands:
+	cd commands; $(MAKE)
+
+do_fileloaders:
+	cd fileloaders; $(MAKE)
 
 clean:
+	cd actions; $(MAKE) clean
+	cd commands; $(MAKE) clean
+	cd fileloaders; $(MAKE) clean
 	rm -f $(OBJS) *core _test
 
 clean_all: clean
+	cd actions; $(MAKE) clean_all
+	cd commands; $(MAKE) clean_all
+	cd fileloaders; $(MAKE) clean_all
 	rm -f Makefile
 

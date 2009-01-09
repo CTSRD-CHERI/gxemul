@@ -31,7 +31,7 @@
 /*  Note: Included from file.c.  */
 
 
-#include "exec_elf.h"
+#include "thirdparty/exec_elf.h"
 
 /*  ELF machine types as strings: (same as exec_elf.h)  */
 #define N_ELF_MACHINE_TYPES     89

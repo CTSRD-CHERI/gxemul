@@ -43,7 +43,6 @@
 #include "debugger.h"
 #include "device.h"
 #include "diskimage.h"
-#include "exec_elf.h"
 #include "machine.h"
 #include "memory.h"
 #include "mips_cpu_types.h"
