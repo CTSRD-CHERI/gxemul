@@ -451,8 +451,10 @@ source distribution, some are marked as TODO in the source code itself.
 .Nm
 is in general not cycle-accurate; it does not simulate individual
 pipe-line stages or penalties caused by branch-prediction misses or
-cache misses, so it cannot be used for accurate simulation of any actual
-real-world processor.
+cache misses, so it cannot be used for accurate timing-simulation of any 
+actual real-world processor. A sequence of x instructions which takes y 
+cycles on a real processor will execute as x instructions in the emulator, 
+but the concept of cycles does not really exist.
 .Pp
 .Nm
 is in general not timing-accurate. Many emulation modes try to make the
