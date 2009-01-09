@@ -164,7 +164,7 @@ if [ z"$DEBUG" = zYES ]; then
 	# Debug-specific flags:
 	CXXFLAGS="-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC $CXXFLAGS"
 else
-	# Release flags:
+	# Normal build flags:
 	CXXFLAGS="-DNDEBUG $CXXFLAGS"
 	CFLAGS="-DNDEBUG $CFLAGS"
 fi

@@ -162,8 +162,8 @@
  * Unit tests are normally executed by <tt>make test</tt>. This is implicitly
  * done when doing <tt>make install</tt> as well, for non-release builds.
  * It is recommended to run the <tt>configure</tt> script with the
- * <tt>--debug</tt> option; this enables Wu Yongwei's new/debug memory leak
- * detector.
+ * <tt>--debug</tt> option during development; this enables Wu Yongwei's
+ * new/debug memory leak detector.
  *
  *
  * \section Model-view-controller
