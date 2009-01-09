@@ -51,11 +51,11 @@
  * <a href="http://gavare.se/gxemul/">http://gavare.se/gxemul/</a>
  *
  * Some people perhaps get a nice warm fuzzy feeling by knowing how a program
- * starts up. In %GXemul's case, the main() function creates a GXemul instance,
+ * starts up. In %GXemul's case, the %main() function creates a GXemul instance,
  * and after letting it parse command line options (which may create an
  * initial emulation configuration), calls GXemul::Run().
  * This is the main loop. It doesn't really do much, it simply calls the UI's
- * main loop, e.g. ConsoleUI::MainLoop() or GtkmmUI::MainLoop().
+ * main loop, i.e. ConsoleUI::MainLoop().
  *
  * Most of the source code in %GXemul centers around a few core concepts.
  * An overview of these concepts are given below. Anyone who wishes to
@@ -163,8 +163,7 @@
  * done when doing <tt>make install</tt> as well, for non-release builds.
  * It is recommended to run the <tt>configure</tt> script with the
  * <tt>--debug</tt> option; this enables Wu Yongwei's new/debug memory leak
- * detector. (It does not seem to work too well with GTKMM, so adding
- * <tt>--without-gtkmm</tt> is also useful.)
+ * detector.
  *
  *
  * \section Model-view-controller
@@ -183,7 +182,7 @@
  *		applications, this may be called "the document".)
  *	<p>
  *	<li><b>View:</b>
- *		<br>The active UI, e.g. a ConsoleUI or a GtkmmUI. The view's
+ *		<br>The active UI, e.g. the ConsoleUI. The view's
  *		purpose is to render the model visually (or textually), and
  *		if the user interacts with the view (clicks on buttons, uses
  *		drag'n'drop, or enters text commands), then the view calls the
