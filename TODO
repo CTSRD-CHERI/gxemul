@@ -11,7 +11,7 @@ Goals for 0.5.x:
   [ ]	Start to SLOWLY convert to C++. Instead of restarting from scratch
 	(which was my last experiment with GXemul/C++), only translate
 	things that make sense. Include UI abstraction but do _NOT_ include
-	a graphical UI.
+	a graphical UI. Merge stuff from the old C++ branch.
 
   [ ]	-K behavior on errors! Hopefully this will be the natural way...
 
