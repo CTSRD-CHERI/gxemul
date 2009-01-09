@@ -74,13 +74,12 @@ If more than one filename is supplied, all files are loaded into memory,
 and the entry point (if available) is taken from the last file.
 .Pp
 Apart from the name of a binary file, you must also use the
-.Fl E
-and/or
 .Fl e
-options to select which emulation mode to use. This is necessary because
+option to select which emulation mode to use. This is necessary because
 the emulator cannot in general deduce this from the file being executed.
 For example, a MIPS-based machine from DEC (a DECstation) is very different
-from a MIPS-based machine from SGI. Use
+from a MIPS-based machine from SGI, so simply supplying an ELF kernel is 
+not enough for the emulator. Use
 .Nm
 .Fl H
 to get a list of available emulation modes.
@@ -113,21 +112,12 @@ option.
 .Pp
 Machine selection options:
 .Bl -tag -width Ds
-.It Fl E Ar t
+.It Fl e Ar type
 Try to emulate machine type
-.Ar "t".
-This option is not always needed, if the
-.Fl e
-option uniquely selects a machine.
+.Ar "type".
 (Use
 .Fl H
 to get a list of types.)
-.It Fl e Ar st
-Try to emulate machine subtype
-.Ar "st".
-Use this together with
-.Fl E .
-(This option is not always needed, if a machine type has no subtypes.)
 .El
 .Pp
 Other options:

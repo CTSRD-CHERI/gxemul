@@ -10,8 +10,16 @@ Goals for 0.5.x:
 
   [ ]	Continue on the new (C++) framework.
 
+  [ ]	Supplying -e xxx, where xxx is NOT a newly implemented template,
+	should start old_main! That way, there is _some_ backward
+	compatibility for emulation modes that have not yet been
+	rewritten.
+
+  [ ]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
+	first thing to implement, without breaking other architectures.
+
   [ ]	Native code generation and faster/more generic bus access:
-	Goal would be as linear execution as possible, loads/stores are
+	Goal is to have as linear execution as possible, loads/stores are
 	obviously MOST important, and try to include things like device
 	access! I.e. host_load array(s) and host_store, which are for
 	memory accesses (and host_load_user and host_store_user for some
@@ -33,6 +41,12 @@ Before making a release:
 		Documentation
 		man page
 		RELEASE notes and README file
+
+Release date:
+
+	Obviously this is impossible to plan in advance. But I am hoping
+	that I will have enough time to work on the emulator framework
+	to make a 0.5.0 release some time during 2009.
 
 
 -------------------------------------------------------------------------------

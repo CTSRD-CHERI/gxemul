@@ -3819,3 +3819,5 @@ Changelog for GXemul:
 		_none_ of the legacy functionality currently works.
 		Removing everything which has to do with userland emulation.
 		Moving all thirdparty header files to src/include/thirdparty/.
+		Removing the -E option. (-e is now the only option used for
+		selecting which machine template to start with.)
