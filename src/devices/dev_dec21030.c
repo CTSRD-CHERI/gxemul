@@ -57,7 +57,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "tgareg.h"
+#include "thirdparty/tgareg.h"
 
 #define	MAX_XSIZE	2048
 

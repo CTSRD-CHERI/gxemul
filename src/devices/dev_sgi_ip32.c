@@ -50,9 +50,9 @@
 #include "misc.h"
 #include "net.h"
 
-#include "crimereg.h"
-#include "if_mecreg.h"
-#include "sgi_macereg.h"
+#include "thirdparty/crimereg.h"
+#include "thirdparty/if_mecreg.h"
+#include "thirdparty/sgi_macereg.h"
 
 
 #define	CRIME_TICKSHIFT			14

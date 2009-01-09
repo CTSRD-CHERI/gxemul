@@ -41,7 +41,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "ohcireg.h"
+#include "thirdparty/ohcireg.h"
 
 
 /*  Length is 0x1000 at least on Playstation 2  */

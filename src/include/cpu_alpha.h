@@ -33,7 +33,7 @@
 
 #include "misc.h"
 
-#include "alpha_cpu.h"
+#include "thirdparty/alpha_cpu.h"
 
 
 /*  ALPHA CPU types:  */

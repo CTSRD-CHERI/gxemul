@@ -50,8 +50,8 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "i80321reg.h"
-#include "iopi2creg.h"
+#include "thirdparty/i80321reg.h"
+#include "thirdparty/iopi2creg.h"
 
 
 #define	TICK_SHIFT		15

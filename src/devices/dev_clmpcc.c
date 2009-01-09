@@ -50,9 +50,8 @@
 #include "memory.h"
 #include "misc.h"
 
-
-#include "mvme_pcctworeg.h"
-#include "clmpccreg.h"
+#include "thirdparty/mvme_pcctworeg.h"
+#include "thirdparty/clmpccreg.h"
 
 #define debug fatal
 

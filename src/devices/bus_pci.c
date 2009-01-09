@@ -57,9 +57,9 @@
 #include "machine.h"
 #include "memory.h"
 #include "misc.h"
-
-#include "cpc700reg.h"
 #include "wdc.h"
+
+#include "thirdparty/cpc700reg.h"
 
 extern int verbose;
 

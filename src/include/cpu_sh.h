@@ -40,9 +40,9 @@
 
 #include "interrupt.h"
 #include "misc.h"
-
-#include "sh4_cpu.h"
 #include "sh4_dmacreg.h"
+
+#include "thirdparty/sh4_cpu.h"
 
 
 struct cpu_family;

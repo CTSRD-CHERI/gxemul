@@ -40,7 +40,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "pmppc.h"
+#include "thirdparty/pmppc.h"
 
 
 struct pmppc_data {

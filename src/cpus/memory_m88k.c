@@ -43,9 +43,8 @@
 #include "memory.h"
 #include "misc.h"
 
-
-#include "m8820x.h"
-#include "m8820x_pte.h"
+#include "thirdparty/m8820x.h"
+#include "thirdparty/m8820x_pte.h"
 
 
 /*  #define M8820X_TABLE_SEARCH_DEBUG  */

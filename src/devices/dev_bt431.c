@@ -38,7 +38,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "bt431reg.h"
+#include "thirdparty/bt431reg.h"
 
 
 struct bt431_data {

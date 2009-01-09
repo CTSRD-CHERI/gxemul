@@ -44,7 +44,7 @@
 #include "misc.h"
 #include "symbol.h"
 
-#include "alpha_prom.h"
+#include "thirdparty/alpha_prom.h"
 
 
 /*

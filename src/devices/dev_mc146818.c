@@ -49,7 +49,7 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "mc146818reg.h"
+#include "thirdparty/mc146818reg.h"
 
 
 #define	to_bcd(x)	( ((x)/10) * 16 + ((x)%10) )

@@ -41,12 +41,13 @@
 #include "misc.h"
 #include "of.h"
 #include "opcodes_ppc.h"
-#include "ppc_bat.h"
-#include "ppc_pte.h"
-#include "ppc_spr.h"
-#include "ppc_spr_strings.h"
 #include "settings.h"
 #include "symbol.h"
+#include "ppc_spr_strings.h"
+
+#include "thirdparty/ppc_bat.h"
+#include "thirdparty/ppc_pte.h"
+#include "thirdparty/ppc_spr.h"
 
 
 #define	DYNTRANS_DUALMODE_32

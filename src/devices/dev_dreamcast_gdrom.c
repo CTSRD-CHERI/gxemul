@@ -42,7 +42,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "dreamcast_sysasicvar.h"
+#include "thirdparty/dreamcast_sysasicvar.h"
 
 
 /*  #define debug fatal  */

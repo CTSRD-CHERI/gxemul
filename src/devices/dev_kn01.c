@@ -43,7 +43,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "dec_kn01.h"
+#include "thirdparty/dec_kn01.h"
 
 
 struct kn01_data {

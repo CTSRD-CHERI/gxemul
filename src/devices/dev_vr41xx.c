@@ -46,10 +46,10 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "bcureg.h"
-#include "vripreg.h"
-#include "vrkiureg.h"
-#include "vr_rtcreg.h"
+#include "thirdparty/bcureg.h"
+#include "thirdparty/vripreg.h"
+#include "thirdparty/vrkiureg.h"
+#include "thirdparty/vr_rtcreg.h"
 
 
 /*  #define debug fatal  */

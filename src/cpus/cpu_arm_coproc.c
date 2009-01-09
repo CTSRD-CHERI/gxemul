@@ -39,7 +39,7 @@
 #include "misc.h"
 #include "symbol.h"
 
-#include "i80321reg.h"
+#include "thirdparty/i80321reg.h"
 
 
 /*

@@ -38,7 +38,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "dec_5100.h"
+#include "thirdparty/dec_5100.h"
 
 
 #define	DEV_KN230_LENGTH		0x1c00000

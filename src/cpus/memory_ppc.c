@@ -29,8 +29,8 @@
  */
 
 
-#include "ppc_bat.h"
-#include "ppc_pte.h"
+#include "thirdparty/ppc_bat.h"
+#include "thirdparty/ppc_pte.h"
 
 
 /*

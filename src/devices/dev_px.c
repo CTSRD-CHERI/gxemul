@@ -88,7 +88,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "pxreg.h"
+#include "thirdparty/pxreg.h"
+
 
 #define	PX_XSIZE	1280
 #define	PX_YSIZE	1024

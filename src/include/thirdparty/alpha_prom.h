@@ -1,4 +1,3 @@
-/*  GXemul: $Id: alpha_prom.h,v 1.2 2006-09-01 16:40:57 debug Exp $  */
 /* $NetBSD: prom.h,v 1.12 2000/06/08 03:10:06 thorpej Exp $ */
 
 /*

@@ -43,7 +43,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "mvmeprom.h"
+#include "thirdparty/mvmeprom.h"
 
 
 #define	MVMEPROM_BRDID_ADDR	0x1100

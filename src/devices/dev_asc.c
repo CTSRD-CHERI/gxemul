@@ -67,7 +67,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "ncr53c9xreg.h"
+#include "thirdparty/ncr53c9xreg.h"
 
 
 /*  #define ASC_DEBUG  */

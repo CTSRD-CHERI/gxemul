@@ -218,7 +218,7 @@ DEVINIT(dec5800)
 /*****************************************************************************/
 
 
-#include "bireg.h"
+#include "thirdparty/bireg.h"
 
 /*  16 slots, 0x2000 bytes each  */
 #define DEV_DECBI_LENGTH		0x20000
@@ -405,7 +405,7 @@ void dev_deccca_init(struct memory *mem, uint64_t baseaddr)
  *  DEC 5800 XMI (this has to do with SMP...)
  */
 
-#include "xmireg.h"
+#include "thirdparty/xmireg.h"
 
 struct decxmi_data {
 	uint32_t		reg_0xc[NNODEXMI];

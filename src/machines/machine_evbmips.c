@@ -41,7 +41,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "maltareg.h"
+#include "thirdparty/maltareg.h"
 
 
 MACHINE_SETUP(evbmips)

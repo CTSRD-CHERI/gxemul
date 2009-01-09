@@ -34,7 +34,7 @@
 #include "misc.h"
 #include "interrupt.h"
 
-#include "m88k_psl.h"
+#include "thirdparty/m88k_psl.h"
 
 struct cpu_family;
 
