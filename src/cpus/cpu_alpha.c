@@ -667,14 +667,5 @@ int alpha_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 }
 
 
-#define MEMORY_RW       alpha_userland_memory_rw
-#define MEM_ALPHA
-#define MEM_USERLAND
-#include "memory_rw.c"
-#undef MEM_USERLAND
-#undef MEM_ALPHA
-#undef MEMORY_RW
-
-
 #include "tmp_alpha_tail.c"
 

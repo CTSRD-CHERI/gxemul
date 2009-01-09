@@ -2591,22 +2591,6 @@ X(sc)
 
 
 /*
- *  user_syscall:  Userland syscall.
- *
- *  arg[0] = syscall "level" (usually 0)
- */
-X(user_syscall)
-{
-	useremul_syscall(cpu, ic->arg[0]);
-
-	if (!cpu->running) {
-		cpu->n_translated_instrs --;
-		cpu->cd.ppc.next_ic = &nothing_call;
-	}
-}
-
-
-/*
  *  openfirmware:
  */
 X(openfirmware)
@@ -3003,9 +2987,7 @@ X(to_be_translated)
 	case PPC_HI6_SC:
 		ic->arg[0] = (iword >> 5) & 0x7f;
 		ic->arg[1] = (addr & 0xfff) + 4;
-		if (cpu->machine->userland_emul != NULL)
-			ic->f = instr(user_syscall);
-		else if (iword == 0x44ee0002) {
+		if (iword == 0x44ee0002) {
 			/*  Special case/magic hack for OpenFirmware emul:  */
 			ic->f = instr(openfirmware);
 		} else

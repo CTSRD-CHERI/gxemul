@@ -164,9 +164,6 @@ void alpha_init_64bit_dummy_tables(struct cpu *cpu);
 int alpha_run_instr(struct cpu *cpu);
 int alpha_memory_rw(struct cpu *cpu, struct memory *mem, uint64_t vaddr,
 	unsigned char *data, size_t len, int writeflag, int cache_flags);
-int alpha_userland_memory_rw(struct cpu *cpu, struct memory *mem,
-	uint64_t vaddr, unsigned char *data, size_t len, int writeflag,
-	int cache_flags);
 int alpha_cpu_family_init(struct cpu_family *);
 
 /*  cpu_alpha_palcode.c:  */

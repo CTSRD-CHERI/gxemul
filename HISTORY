@@ -3817,3 +3817,4 @@ Changelog for GXemul:
 		Moving RELEASE.html to doc/.
 20090109	Merging in everything from the C++ branch. In other words,
 		_none_ of the legacy functionality currently works.
+		Removing everything which has to do with userland emulation.

@@ -8,7 +8,7 @@ all: do_include
 	$(MAKE) do_console do_components do_cpus do_debugger do_devices \
 		do_disk do_file \
 		do_ir do_machines do_main do_net do_old_core do_promemul \
-		do_symbol do_ui do_useremul
+		do_symbol do_ui
 
 do_include:
 	cd include; $(MAKE)
@@ -58,9 +58,6 @@ do_symbol:
 do_ui:
 	cd ui; $(MAKE)
 
-do_useremul:
-	cd useremul; $(MAKE)
-
 
 clean:
 	rm -f core *.core tmp_*.c
@@ -80,7 +77,6 @@ clean:
 	cd promemul; $(MAKE) clean
 	cd symbol; $(MAKE) clean
 	cd ui; $(MAKE) clean
-	cd useremul; $(MAKE) clean
 
 clean_all: clean
 	cd include; $(MAKE) clean_all
@@ -99,6 +95,5 @@ clean_all: clean
 	cd promemul; $(MAKE) clean_all
 	cd symbol; $(MAKE) clean_all
 	cd ui; $(MAKE) clean_all
-	cd useremul; $(MAKE) clean_all
 	rm -f Makefile
 

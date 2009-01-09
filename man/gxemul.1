@@ -42,9 +42,6 @@
 .Nm
 .Op general options
 .Ar @configfile
-.Nm
-.Op userland, other, and general options
-.Ar file Op Ar args ...
 .Sh DESCRIPTION
 .Nm
 is a framework for full-system computer architecture emulation.
@@ -65,10 +62,6 @@ The emulator can be invoked in the following ways:
 supplied directly on the command line.
 .Pp
 2. Options can be read from a configuration file.
-.Pp
-3. When emulating a userland environment (syscall-only emulation, not
-emulating complete machines), then the program name and its argument
-should be given on the command line. (This mode is not really usable yet.)
 .Pp
 The easiest way to use the emulator is to supply settings directly on the 
 command line.
@@ -369,18 +362,6 @@ Add
 as an X11 display to use for framebuffers.
 .El
 .Pp
-Userland options:
-.Bl -tag -width Ds
-.It Fl u Ar emul-mode
-Userland-only (syscall) emulation. (Use
-.Fl H
-to get a list of available emulation modes.) Some (but not all) of the
-options listed under Other options above can also be used with 
-userland emulation.
-.Pp
-Note: Userland (syscall) emulation does not really work yet.
-.El
-.Pp
 General options:
 .Bl -tag -width Ds
 .It Fl c Ar cmd
@@ -397,13 +378,11 @@ However, if the emulated machine has clocks or timer interrupt sources,
 or if user interaction is taking place (e.g. keyboard input at irregular
 intervals), then this option is meaningless.
 .It Fl H
-Display a list of available CPU types, machine types, and userland
-emulation modes. (Most of these don't work. Please read the documentation
+Display a list of available template machine types (pre-defined emulation 
+modes). Many of these don't work. Please read the documentation
 included in the
 .Nm
-distribution for details on which modes that actually work. Userland
-emulation is not included in stable release builds, since it doesn't work 
-yet.)
+distribution for details on which modes that actually work.
 .It Fl h
 Display a list of all available command line options.
 .It Fl k Ar n
@@ -478,9 +457,6 @@ There are many bugs. Some of the known bugs are mentioned in the TODO
 file in the
 .Nm
 source distribution, some are marked as TODO in the source code itself.
-.Pp
-Userland (syscall-only) emulation, i.e. running a userland binary directly 
-without simulating an entire machine, doesn't really work yet.
 .Pp
 .Nm
 is in general not cycle-accurate; it does not simulate individual

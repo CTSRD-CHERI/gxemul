@@ -164,7 +164,6 @@ struct machine {
 	int	show_trace_tree;
 	int	emulated_hz;
 	int	allow_instruction_combinations;
-	char	*userland_emul;		/*  NULL for no userland emulation  */
 	int	force_netboot;
 	int	slow_serial_interrupts_hack_for_linux;
 	uint64_t file_loaded_end_addr;
@@ -271,7 +270,6 @@ struct machine {
 
 /*  Other "pseudo"-machines:  */
 #define	MACHINE_NONE		0
-#define	MACHINE_USERLAND	100000
 
 /*  DEC:  */
 #define	MACHINE_DEC_PMAX_3100		1

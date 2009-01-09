@@ -43,7 +43,6 @@
 #include "memory.h"
 #include "misc.h"
 #include "symbol.h"
-#include "useremul.h"
 
 #include "alpha_prom.h"
 
@@ -270,13 +269,9 @@ void alpha_palcode(struct cpu *cpu, uint32_t palcode)
 		cpu->running = 0;
 		break;
 	case 0x83:	/*  PAL_OSF1_syscall  */
-		if (cpu->machine->userland_emul != NULL)
-			useremul_syscall(cpu, 0);
-		else {
-			fatal("[ Alpha PALcode: syscall, but no"
-			    " syscall handler? ]\n");
-			cpu->running = 0;
-		}
+		fatal("[ Alpha PALcode: syscall, but no"
+		    " syscall handler? ]\n");
+		cpu->running = 0;
 		break;
 	case 0x86:	/*  PAL_OSF1_imb  */
 		/*  TODO  */

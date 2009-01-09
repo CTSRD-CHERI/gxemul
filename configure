@@ -1556,7 +1556,7 @@ D="$D src/main src/main/actions src/main/commands src/main/fileloaders"
 D="$D src/ui src/ui/console src/ui/nullui"
 D="$D src/include src/console src/cpus src/debugger src/devices"
 D="$D src/devices/fonts src/disk src/file src/ir src/machines"
-D="$D src/net src/old_core src/promemul src/symbol src/useremul"
+D="$D src/net src/old_core src/promemul src/symbol"
 for a in $D; do
 	echo "creating $a/Makefile"
 	touch $a/Makefile

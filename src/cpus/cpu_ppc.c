@@ -47,7 +47,6 @@
 #include "ppc_spr_strings.h"
 #include "settings.h"
 #include "symbol.h"
-#include "useremul.h"
 
 
 #define	DYNTRANS_DUALMODE_32

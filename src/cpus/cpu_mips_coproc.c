@@ -373,16 +373,9 @@ struct mips_coproc *mips_coproc_new(struct cpu *cpu, int coproc_nr)
 		 */
 		c->reg[COP0_STATUS] = 0;
 
-		/*  For userland emulation, enable all four coprocessors:  */
-		if (cpu->machine->userland_emul)
-			c->reg[COP0_STATUS] |=
-			    ((uint32_t)0xf << STATUS_CU_SHIFT);
-
-		/*  Hm. Enable coprocessors 0 and 1 even if we're not just
-		    emulating userland? TODO: Think about this.  */
-		/*  if (cpu->machine->prom_emulation)  */
-			c->reg[COP0_STATUS] |=
-			    ((uint32_t)0x3 << STATUS_CU_SHIFT);
+		/*  Enable coprocessors 0 and 1 by default.  */
+		c->reg[COP0_STATUS] |=
+		    ((uint32_t)0x3 << STATUS_CU_SHIFT);
 
 		if (!cpu->machine->prom_emulation)
 			c->reg[COP0_STATUS] |= STATUS_BEV;
