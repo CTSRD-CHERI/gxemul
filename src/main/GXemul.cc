@@ -68,7 +68,7 @@
  *
  * The most important core concept in %GXemul is the Component. Examples of
  * components are processors, networks interface cards, video displays, RAM
- * memory, busses, interrupt controllers, and all other kinds of devices.
+ * %memory, busses, %interrupt controllers, and all other kinds of devices.
  *
  * Each component has a parent, so the full set of components in an emulation
  * are in fact a tree. A GXemul instance has one such tree. The root
@@ -83,9 +83,9 @@
  *
  * The state of each component is stored within that component. The state
  * consists of a number of variables (see StateVariable) such as strings,
- * integers, bools, and other more high-level types such as zero-filled memory
- * arrays. Such memory arrays are used e.g. by the RAMComponent to emulate
- * RAM, and can also be used to emulate video framebuffer memory.
+ * integers, bools, and other more high-level types such as zero-filled %memory
+ * arrays. Such %memory arrays are used e.g. by the RAMComponent to emulate
+ * RAM, and can also be used to emulate video framebuffer %memory.
  *
  * Individual components are implemented in <tt>src/components/</tt>, with
  * header files in <tt>src/include/components/</tt>. The <tt>configure</tt>
@@ -163,7 +163,7 @@
  * done when doing <tt>make install</tt> as well, for non-release builds.
  * It is recommended to run the <tt>configure</tt> script with the
  * <tt>--debug</tt> option during development; this enables Wu Yongwei's
- * new/debug memory leak detector.
+ * new/debug %memory leak detector.
  *
  *
  * \section Model-view-controller
@@ -250,7 +250,7 @@
  *		of optimization.
  *	<li>Use several different compilers; try to build often on as many
  *		different systems as possible, to spot compatibility issues.
- *	<li>Build and run with --debug, and do not accept any memory leaks
+ *	<li>Build and run with --debug, and do not accept any %memory leaks
  *		or other debug warnings.
  *	<li>Insert uppercase <tt>TODO</tt> if something is unclear at the time
  *		of implementation. Periodically do a <tt>make todo</tt>
