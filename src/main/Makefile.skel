@@ -5,7 +5,7 @@
 CXXFLAGS=$(CXXWARNINGS) $(CXXOPTIM) $(CPEDANTIC) $(INCLUDE1)
 LIBS=$(OTHERLIBS)
 
-OBJS=Action.o ActionStack.o GXemul.o UnitTest.o
+OBJS=Action.o ActionStack.o Checksum.o GXemul.o UnitTest.o
 
 all: $(OBJS)
 
