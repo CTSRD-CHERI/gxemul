@@ -8,12 +8,7 @@ Some things, in no specific order, that I'd like to fix:
 
 Goals for 0.5.x:
 
-  [ ]	Start to SLOWLY convert to C++. Instead of restarting from scratch
-	(which was my last experiment with GXemul/C++), only translate
-	things that make sense. Include UI abstraction but do _NOT_ include
-	a graphical UI. Merge stuff from the old C++ branch.
-
-  [ ]	-K behavior on errors! Hopefully this will be the natural way...
+  [ ]	Continue on the new (C++) framework.
 
   [ ]	Native code generation and faster/more generic bus access:
 	Goal would be as linear execution as possible, loads/stores are
@@ -29,6 +24,15 @@ Goals for 0.5.x:
 	Cache simulation seems to naturally fit into this scheme
 	as well (direct calls to cache-handlers). Perhaps even
 	with multiprocessor snooping etc implemented?
+
+Before making a release:
+
+  [ ]	Make sure that the following reflect the actual capabilities of
+	the emulator:
+
+		Documentation
+		man page
+		RELEASE notes and README file
 
 
 -------------------------------------------------------------------------------
@@ -488,6 +492,7 @@ Floating point layer:
 	o)  non-IEEE modes (i.e. x86)?
 
 Userland emulation:
+	x)  Rewrite from scratch!
 	x)  Try to prefix "/emul/mips/" or similar to all filenames,
 	    and only if that fails, try the given filename.
             Read this setting from an environment variable, and only
@@ -543,9 +548,6 @@ File/disk/symbol handling:
 	o)  Better demangling of C++ names. Note: GNU's C++ differs from e.g.
 	    Microsoft's C++, so multiple schemes must be possible. See
 	    URL at top of src/symbol_demangle.c for more info.
-
-Userland ABI emulation:
-	o)  see src/useremul.c
 
 Better framebuffer and X-windows functionality:
 	o)  Do a complete rewrite of the framebuffer/console stuff, so that:
