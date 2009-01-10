@@ -216,8 +216,8 @@ static void Test_ComponentFactory_HasAttribute()
 	UnitTest::Assert("testmips is a machine",
 	    ComponentFactory::HasAttribute("testmips", "machine"));
 
-	UnitTest::Assert("testmips is stable",
-	    ComponentFactory::HasAttribute("testmips", "stable"));
+	UnitTest::Assert("mvme187 is stable",
+	    ComponentFactory::HasAttribute("mvme187", "stable"));
 
 	UnitTest::Assert("testmips has a description",
 	    ComponentFactory::HasAttribute("testmips", "description"));
