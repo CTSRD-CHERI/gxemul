@@ -65,6 +65,10 @@ refcount_ptr<Component> MVME187Machine::Create()
 
 	refcount_ptr<Component> cpu =
 	    ComponentFactory::CreateComponent("m88k_cpu");
+
+	// TODO: Should be moved some other place!
+	cpu->SetVariableValue("kind", "\"Motorola 88100\"");
+
 	if (cpu.IsNULL())
 		return NULL;
 
