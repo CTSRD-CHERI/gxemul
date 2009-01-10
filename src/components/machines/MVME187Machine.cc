@@ -25,18 +25,18 @@
  *  SUCH DAMAGE.
  */
 
-#include "components/MVME88KMachine.h"
+#include "components/MVME187Machine.h"
 #include "ComponentFactory.h"
 
 
-refcount_ptr<Component> MVME88KMachine::Create()
+refcount_ptr<Component> MVME187Machine::Create()
 {
 	refcount_ptr<Component> machine =
 	    ComponentFactory::CreateComponent("machine");
 	if (machine.IsNULL())
 		return NULL;
 
-	machine->SetVariableValue("template", "\"mvme88k\"");
+	machine->SetVariableValue("template", "\"MVME187\"");
 
 	refcount_ptr<Component> mainbus =
 	    ComponentFactory::CreateComponent("mainbus");
@@ -74,7 +74,7 @@ refcount_ptr<Component> MVME88KMachine::Create()
 }
 
 
-string MVME88KMachine::GetAttribute(const string& attributeName)
+string MVME187Machine::GetAttribute(const string& attributeName)
 {
 	if (attributeName == "template")
 		return "yes";
@@ -86,7 +86,10 @@ string MVME88KMachine::GetAttribute(const string& attributeName)
 		return "yes";
 
 	if (attributeName == "description")
-		return "MVME88K machine.";
+		return "MVME187 machine.";
+
+	if (attributeName == "comments")
+		return "For experiments with OpenBSD/mvme88k.";
 
 	return "";
 }

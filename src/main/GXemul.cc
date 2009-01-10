@@ -386,12 +386,13 @@ static void GenerateHTMLListOfComponents(bool machines)
 		"<tr>\n"
 		" <td><b><u>" <<
 		(machines? "Machine&nbsp;name" : "Component&nbsp;name") << ":"
-		"</u></b>&nbsp;&nbsp;&nbsp;</td>\n"
+		"</u></b>&nbsp;&nbsp;</td>\n"
 #ifdef UNSTABLE_DEVEL
-		" <td><b><u>Status:</u></b>&nbsp;&nbsp;&nbsp;</td>\n"
+		" <td><b><u>Status:</u></b>&nbsp;&nbsp;</td>\n"
 #endif
-		" <td><b><u>Description:</u></b>&nbsp;&nbsp;&nbsp;</td>\n"
-		" <td><b><u>Contributors:</u></b>&nbsp;&nbsp;&nbsp;</td>\n"
+		" <td><b><u>Description:</u></b>&nbsp;&nbsp;</td>\n"
+		" <td><b><u>Comments:</u></b>&nbsp;&nbsp;</td>\n"
+		" <td><b><u>Contributors:</u></b>&nbsp;&nbsp;</td>\n"
 		"</tr>\n";
 
 	bool everyOther = false;
@@ -474,12 +475,14 @@ static void GenerateHTMLListOfComponents(bool machines)
 		std::cout <<
 #ifdef UNSTABLE_DEVEL
 			" <td valign=top>" << (ComponentFactory::HasAttribute(
-				componentName, "stable")? "stable" :
-				"experimental") << "</td>\n"
+				componentName, "stable")? "stable&nbsp;&nbsp;" :
+				"experimental&nbsp;&nbsp;") << "</td>\n"
 #endif
 			" <td valign=top>" << ComponentFactory::GetAttribute(
 				componentName, "description") <<
 				treeDump << "</td>\n"
+			" <td valign=top>" << ComponentFactory::GetAttribute(
+				componentName, "comments") << "</td>\n"
 			" <td valign=top>" << ComponentFactory::GetAttribute(
 				componentName, "contributors") << "</td>\n"
 			"</tr>\n";

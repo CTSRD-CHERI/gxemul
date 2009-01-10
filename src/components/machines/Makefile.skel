@@ -5,7 +5,7 @@
 CXXFLAGS=$(CXXWARNINGS) $(CXXOPTIM) $(CPEDANTIC) $(INCLUDE2)
 LIBS=$(OTHERLIBS)
 
-OBJS=MachineComponent.o MVME88KMachine.o TestMIPSMachine.o
+OBJS=MachineComponent.o MVME187Machine.o TestMIPSMachine.o
 
 all: $(OBJS)
 

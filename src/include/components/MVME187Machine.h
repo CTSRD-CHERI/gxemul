@@ -1,5 +1,5 @@
-#ifndef MVME88KMACHINE_H
-#define	MVME88KMACHINE_H
+#ifndef MVME187MACHINE_H
+#define	MVME187MACHINE_H
 
 /*
  *  Copyright (C) 2009  Anders Gavare.  All rights reserved.
@@ -28,21 +28,21 @@
  *  SUCH DAMAGE.
  */
 
-// COMPONENT(mvme88k)
+// COMPONENT(mvme187)
 
 
 #include "Component.h"
 
 /**
- * \brief A template for creating a "mvme88k" Component.
+ * \brief A template for creating a MVME187 machine.
  *
  * Note: This class does not inherit from the Component class.
  */
-class MVME88KMachine
+class MVME187Machine
 {
 public:
 	/**
-	 * \brief Creates a "mvme88k" Component tree.
+	 * \brief Creates a MVME187 Component tree.
 	 */
 	static refcount_ptr<Component> Create();
 
@@ -52,8 +52,8 @@ public:
 	static string GetAttribute(const string& attributeName);
 
 private:
-	MVME88KMachine();
+	MVME187Machine();
 };
 
 
-#endif	// MVME88KMACHINE_H
+#endif	// MVME187MACHINE_H
