@@ -1438,7 +1438,7 @@ fi
 
 ###############################################################################
 
-GTKMM_VER="2.16.4"
+GLIBMM_VER="2.18.1"
 printf "checking for glibmm-2.4 >= $GLIBMM_VER... "
 
 if [ z$WITHGLIBMM = zNO ]; then
