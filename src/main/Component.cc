@@ -643,9 +643,7 @@ bool Component::SetVariableValue(const string& name, const string& expression)
 	if (it == m_stateVariables.end())
 		return false;
 
-	(it->second).SetValue(expression);
-
-	return true;
+	return (it->second).SetValue(expression);
 }
 
 
