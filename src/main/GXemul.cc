@@ -502,7 +502,7 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 	//	2. The option parsing in ParseOptions.
 	//	3. The man page.
 
-	const char *opts = "Ee:HhqVW:";
+	const char *opts = "Ee:HhLlqVW:";
 
 	while ((ch = getopt(argc, argv, opts)) != -1) {
 		switch (ch) {
@@ -514,6 +514,10 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 
 		case 'e':
 			templateMachine = optarg;
+			if (!ComponentFactory::HasAttribute(templateMachine, "template")) {
+				old_main(argc, argv);
+				return false;
+			}
 			break;
 
 		case 'H':
@@ -522,6 +526,28 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 
 		case 'h':
 			PrintUsage(true);
+			return false;
+
+		case 'L':
+			{
+				char *options[3];
+				options[0] = argv[0];
+				options[1] = strdup("-H");
+				options[2] = NULL;
+				old_main(2, options);
+				free(options[1]);
+			}
+			return false;
+
+		case 'l':
+			{
+				char *options[3];
+				options[0] = argv[0];
+				options[1] = strdup("-h");
+				options[2] = NULL;
+				old_main(2, options);
+				free(options[1]);
+			}
 			return false;
 
 		case 'q':
@@ -731,6 +757,11 @@ void GXemul::PrintUsage(bool longUsage) const
 			" to start gxemul\n"
 		"           without loading an emulation at all.)\n"
 		// -W is undocumented. It is only used internally.
+		"\n"
+		"Legacy options:\n"
+		"  -L       Displays a list of all legacy machine"
+			" templates (for use with -e).\n"
+		"  -l       Displays legacy command line options.\n"
 		"\n"
 		"An emulation setup created by either supplying machine "
 			"selection options\n"

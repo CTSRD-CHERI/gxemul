@@ -27,20 +27,28 @@ controllers, ethernet controllers, disk controllers, and serial port
 controllers.
 
 <p>The <a href="index.html">documentation</a> lists the machines and
-guest operating systems that 
-can be regarded as "working" in GXemul. The best working guest operating 
-systems are <a href="guestoses.html#netbsdpmaxinstall">NetBSD/pmax</a>
-and <a href="guestoses.html#netbsdcatsinstall">NetBSD/cats</a>.
+guest operating systems that can be regarded as "working" in GXemul.
 
 
 <p><br>The changes between release 0.4.7 and 0.5.0 are:
 
 <ul>
 
-  <li>TODO: C++ redesign
+  <li>A complete redesign of the main emulation framework has begun.
+	However, since this is such a huge undertaking, only very
+	few actual emulation modes (implementations) have been
+	reimplemented to use the new framework. Most of the old legacy
+	emulation modes are still available, side by side with the
+	new modes.
+
+	<p>The new framework is written in C++, and should hopefully
+	be a more robust and extensible platform than the old one was.
 
   <p>
+  <li>Initial I18N support. Apart from English, there is now
+	also a Swedish translation.
 
+  <p>
   <li>There is now (finally) a 'make install' Makefile target.
 
 </ul>

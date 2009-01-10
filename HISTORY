@@ -3822,3 +3822,7 @@ Changelog for GXemul:
 		Removing the -E option. (-e is now the only option used for
 		selecting which machine template to start with.)
 20090110	Beginning on a M88K_CPUComponent class.
+		Adding command line options -L and -l, to call the legacy
+		-H and -h help, respectively.
+		If an unknown template name is supplied to the -e option,
+		the legacy old_main is called with the entire command line.

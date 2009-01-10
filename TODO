@@ -10,11 +10,6 @@ Goals for 0.5.x:
 
   [ ]	Continue on the new (C++) framework.
 
-  [ ]	Supplying -e xxx, where xxx is NOT a newly implemented template,
-	should start old_main! That way, there is _some_ backward
-	compatibility for emulation modes that have not yet been
-	rewritten.
-
   [ ]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
 	first thing to implement, without breaking other architectures.
 
@@ -38,6 +33,8 @@ Before making a release:
   [ ]	Make sure that the following reflect the actual capabilities of
 	the emulator:
 
+		./gxemul     default error message
+		./gxemul -h  message
 		Documentation
 		man page
 		RELEASE notes and README file
@@ -635,20 +632,22 @@ C++:
 	    by native C++ templates instead.
 
 Release checklist:
+	Update the po translation files.
 	README
 	RELEASE NOTES
 	Send SVN dump to Sourceforge
-	Tarball creation
-	Sourceforge file release
 	Branch and tag in SVN
+	------------
+	Tarball creation
+	Home page update: Download (tar.gz file)
 	Home page update: version numbers
 	Home page News page update
+	Sourceforge file release
+	------------
 	#GXemul (version number in topic)
 	gxemul-users mail
-	Freshmeat
+	Freshmeat new release
 	Wikipedia page (version number and date)
-	Send mail to package maintainers (if they are not subscribed
-		to the mailing list(s))
 	If new arch:
 		Wikipedia page
 		Linux-MIPS wiki page

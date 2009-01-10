@@ -360,6 +360,11 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 #endif
 	    "Z:z:";
 
+	/*  Since old_main is called from C++ code, which already
+	    is in a getopt loop, we need to reset here:  */
+	optind = 1;
+	opterr = 1;
+
 	while ((ch = getopt(argc, argv, opts)) != -1) {
 		switch (ch) {
 		case 'C':
