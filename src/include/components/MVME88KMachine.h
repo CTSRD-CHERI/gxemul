@@ -1,8 +1,8 @@
-#ifndef EMULATIONDESIGNAREA_H
-#define	EMULATIONDESIGNAREA_H
+#ifndef MVME88KMACHINE_H
+#define	MVME88KMACHINE_H
 
 /*
- *  Copyright (C) 2007-2008  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,41 +28,32 @@
  *  SUCH DAMAGE.
  */
 
-#include <gtkmm.h>
+// COMPONENT(mvme88k)
 
-#include "misc.h"
+
 #include "Component.h"
 
-class GXemul;
-
 /**
- * \brief The main emulation design area.
+ * \brief A template for creating a "mvme88k" Component.
  *
- * TODO: Longer description.
+ * Note: This class does not inherit from the Component class.
  */
-class EmulationDesignArea : public Gtk::DrawingArea
+class MVME88KMachine
 {
 public:
 	/**
-	 * \brief Constructs an %EmulationDesignArea.
-	 *
-	 * \param gxemul The owner GXemul instance.
+	 * \brief Creates a "mvme88k" Component tree.
 	 */
-	EmulationDesignArea(GXemul* gxemul);
+	static refcount_ptr<Component> Create();
 
-	virtual ~EmulationDesignArea();
-
-protected:
-	virtual bool on_expose_event(GdkEventExpose* event);
-
-private:
-	void DrawComponentAndChildren(
-	    Cairo::RefPtr<Cairo::Context> cr,
-	    int x1, int y1, int x2, int y2,
-	    refcount_ptr<Component> component);
+	/**
+	 * \brief Gets a Component attribute value.
+	 */
+	static string GetAttribute(const string& attributeName);
 
 private:
-	GXemul *	m_gxemul;
+	MVME88KMachine();
 };
 
-#endif	// EMULATIONDESIGNAREA_H
+
+#endif	// MVME88KMACHINE_H
