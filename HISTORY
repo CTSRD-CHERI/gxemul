@@ -3826,4 +3826,5 @@ Changelog for GXemul:
 		-H and -h help, respectively.
 		If an unknown template name is supplied to the -e option,
 		the legacy old_main is called with the entire command line.
-20090113	Moving the TODO file to doc/TODO.html.
+20090113	Moving the TODO file to doc/TODO.html, and merging in parts
+		of the TODO file from the old C++ branch.

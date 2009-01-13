@@ -22,22 +22,152 @@ Some things, in no specific order, that I'd like to fix:
 
 <pre>
 
-Goals for 0.5.x:
+0.5.x:
 
   [/]	Continue on the new (C++) framework.
 
-	[ ]  RAM component save/load state!
+	[ ]  Read-only state variables, or special handlers! Even better.
+	     I.e. warn about (or refuse) to write to unimplemented bits
+	     of control registers.
 
-	[ ]  Main execution loop should probably be looked over...
+	[ ]  Main execution loop should probably be looked over, so
+	     that it is general enough to support lots of variants of
+	     execution.
+
+		[ ]  Unit tests for main loop/execution.
 
 	[ ]  Interrupt subsystem
 
 	[ ]  Timers
 
 	[ ]  File loaders:
+		[ ]  Loaded files should be part of state! But not part
+		     of the component tree. I.e. state = components +
+		     other configuration!
+		[ ]  Add a method on the CPUComponent, "loadfile", so
+		     that files can be loaded during runtime, and not
+		     only at startup. How about multiple files?
+		     And how about "reset"? The list of files must be
+		     stored somewhere.
 		[ ]  a.out (for OpenBSD/mvme88k)
-		[ ]  symbol handling
+		[ ]  symbol handling, line number info, data types?
 		[ ]  argument handling! (arg count, at least)
+		[ ]  all the others (macho, srec, raw, ...)
+
+	[ ]  Breakpoints    [per device? per executed instruction?]
+
+	[ ]  Function call trace
+
+	[ ]  Stack dump (of the emulated machine)
+
+  [ ]	Components (general):
+
+	[ ]  "help" about components could show a file:/// link to
+	     the installed documentation about that component or
+	     machine! (If it exists.)
+
+	[ ]  Limit where components can be added. Like "drop targets"?
+		E.g. a machine can be added at the root, but a machine can not
+		be added on a pcibus. Similarly, a pcibus can not be added
+		at the root. It has to be in a machine of some kind.
+		Think about this. Perhaps as simple as a "if parent class is
+		not blah blah then disallow adding".
+			A machine can be added into a dummy component.
+			A dummy component can be added into a dummy component.
+			A pcibus can be added into a mainbus (in a machine.)
+			etc.
+		bool IsItOkToAddItToThisProposedParentComponent(propsedParent) const;
+
+  [ ]	Actions and undo/redo:
+
+	[ ]  Undo/redo commands should show what they are doing, e.g.
+		Undoing "add component"
+	     or
+	        Redoing "remove component".
+	     Preferably even including arguments. :-) Think about this.
+
+	[ ]  CompoundAction
+		Contains multiple actions in a row. If ALL actions inside
+		are undoable, then the action is undoable, and executing
+		Undo should undo them all (in reverse order).
+
+	[/]  VariableAssignmentAction
+		[X]  Undoable by remembering old value of a state variable.
+		[ ]  Assignment of Component names! Currently bugs out!
+			cpu0.name = "monkey"
+		     must be undone by
+			monkey.name = "cpu0"
+		[ ]  Handler for 'name' should verify the name.
+		[ ]  Handlers for specific registers, e.g. bits fixed to
+			0 or 1 in registers...
+		[ ]  Assignment of arrays? Or elements in arrays...
+
+	[ ]  MoveComponentAction
+		Undoable by remembering position, similar to Remove, where
+		the component was before.
+
+  [ ]	Command interpreter:
+
+	[/]  State variable assignments:
+		[X]  Action, to allow Undo.
+		[ ]  Expression evaluator, +-*/, string concatenation, etc.
+		[ ]  Execution of _expressions_, not just variables. e.g.:
+			cpu.pc		prints the pc value
+			cpu.pc+4	should print the _expression_ pc+4
+			cpu.pc=expr	assignment
+
+	[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
+
+	[/]  Tab completion for everything:
+		[ ]  syntax based completion? e.g.:
+			help [cmd]   tab completes the first argument as a
+				     command
+			add component-name
+			load [filename [component-path]]
+
+		     This will require a uniform way of describing arguments,
+		     and whether or not they should be optional. The tab
+		     completer must then parse the command line, including
+		     figuring out which arguments were optional, etc.
+
+		     Also, when such syntax is taken into account, the
+		     CommandInterpreter can check syntax _before_ running
+		     Command::Execute. That means that individual Commands
+		     do not have to do manual checking on entry that the
+		     number of arguments is correct etc.
+
+			[ ]  filename
+			[ ]  command name
+			[ ]  component path
+			[ ]  optional vs mandatory args...?
+			[ ]  scan all commands' args at startup, and have an
+				assert() in place, so that unknown arg types
+				are caught during development!
+
+	[ ]	move  		Move a component from one path to another.
+	[ ]	copy		copy a component (and its children)
+				to the clipboard
+	[ ]	paste		paste a component from the clipboard
+
+	[ ]	step		single-step (Paused)
+
+  [ ]	Mainbus component:
+
+	[ ]  Maybe this should simply be a "Bus" base class? That way,
+	     it could be reused by PCI Busses, VME busses, and others.
+
+	[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
+
+	[ ]  AddressDataBus should be extended to allow for direct
+	     page mapping.
+
+	[ ]  Unit tests for the above!
+
+  [ ]	RAM component:
+
+	[ ]  save/load state!
+
+	[ ]  methods for searching for values (strings, words, etc?)
 
   [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
 	first thing to implement, without breaking other architectures.
@@ -47,52 +177,52 @@ Goals for 0.5.x:
 	[ ]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
 	     I.e. implement an a.out file loader.
 
-	[ ]  Implement instruction disassembly.
+	[ ]  Implement 88K instruction disassembly.
 
-	[ ]  Implement instruction execution (via slow interpretation).
+	[ ]  Implement 88K instruction execution (via slow interpretation).
 
-	[ ]  Implement virtual to physical memory translation.
+	[ ]  Implement 88K virtual to physical memory translation.
 
-	[ ]  Cache components.
+   [ ]  Cache components.
 
-	[ ]  Native code generation:
+   [ ]  Native code generation:
 
-		x)  Instruction cache emulation:  For each emulated
-		    instruction, call a stub handler with the current pc.
-		    It is responsible for updating statistics etc.
+	x)  Instruction cache emulation:  For each emulated
+	    instruction, call a stub handler with the current pc.
+	    It is responsible for updating statistics etc.
 
-		x)  More generic bus access:
-			o) Pointers to host memory pages, for fast
-			   loads and stores:
-			   +) host_load and host_store (as before)
-			   +) host_load_user and host_store_user (as before,
-				for those archs that need it, e.g.
-				ARM and M88K?)
-			o) Pointers to handler functions, for:
-			   +) device access
-			   +) data cache emulation
+	x)  More generic bus access:
+		o) Pointers to host memory pages, for fast
+		   loads and stores:
+		   +) host_load and host_store (as before)
+		   +) host_load_user and host_store_user (as before,
+			for those archs that need it, e.g.
+			ARM and M88K?)
+		o) Pointers to handler functions, for:
+		   +) device access
+		   +) data cache emulation
 
-		x)  Try to make the generated code as linear and branch
-		    free as possible. Experiment with making e.g. all
-		    "exceptional" branches go away to some place outside
-		    the basic block? If it is worth it.
+	x)  Try to make the generated code as linear and branch
+	    free as possible. Experiment with making e.g. all
+	    "exceptional" branches go away to some place outside
+	    the basic block? If it is worth it.
 
-		x)  Exceptions from device access, or from load/store to
-		    unmapped pages/devices/handlers should break the
-		    native code execution.
+	x)  Exceptions from device access, or from load/store to
+	    unmapped pages/devices/handlers should break the
+	    native code execution.
 
-		x)  Keep nr-of-instructions-executed up to date!
+	x)  Keep nr-of-instructions-executed up to date!
 
-		x)  Ability to show disassembly of generated host
-		    instruction sequence!
+	x)  Ability to show disassembly of generated host
+	    instruction sequence!
 
-		x)  Calls/branches within host pages should be
-		    reasonably simple (but check nr-of-instructions-executed
-		    to break out every now and then).
+	x)  Calls/branches within host pages should be
+	    reasonably simple (but check nr-of-instructions-executed
+	    to break out every now and then).
 
-		x)  Calls/branches to _different_ host pages could be
-		    allowed as well; then many more pages would need to
-		    be invalidated on context switches... hm.
+	x)  Calls/branches to _different_ host pages could be
+	    allowed as well; then many more pages would need to
+	    be invalidated on context switches... hm.
 
 Before making a release:
 
@@ -113,6 +243,8 @@ Release date:
 
 
 -------------------------------------------------------------------------------
+
+These things are from 0.4.x:
 
 To be translated prefetch:
 	o)  ONLY do this when able to read directly from memory
@@ -660,42 +792,7 @@ Better framebuffer and X-windows functionality:
 	o)  Generalize the framebuffer stuff by moving _ALL_ X11
 		specific code to a separate module.
 
-C++:
-	o)  SLOWLY try to convert the code from C to C++. What will this
-	    achieve? Well, one of the absolutely biggest problems in
-	    GXemul so far (in C) is that it has not been written in a
-	    way which would allow the following things:
-
-		x)  Adding and removing devices during runtime.
-		    This is hindered by the fact that the C code is
-		    written in a "construct only" kind of way, with no
-		    "destructors". It will be much easier to achieve this
-		    in C++ than having to rewrite EVERYTHING in C to
-		    use destructors.
-
-		x)  Serializing/deserializing a snapshot of the entire
-		    emulation to a file (which in the long run would
-		    allow things like "live migration").
-		    This will be much easier in C++ than in C.
-
-		x)  Allowing multiple _DIFFERENT_ CPU architectures per
-		    machine, and different cache configurations and
-		    busses.
-		    Also possible with C, but will be easier with C++.
-		    (Already tried some of it in the experimental C++
-		    branch.)
-		    Example: Dreamcast has both an SH4 and an ARM cpu.
-
-		x)  Controlled abort, when something fails. The C code
-		    right now is unable to use somthing similar to
-		    "exceptions", which would be good to abort emulation
-		    e.g. when something unimplemented is attempted.
-
-	    But for the future, it would also allow the code to be
-	    more easily maintained. Hopefully some of the template magic
-	    (which currently consists of programs creating temporary
-	    C files which are compiled into the program) can be replaced
-	    by native C++ templates instead.
+-------------------------------------------------------------------
 
 Release checklist:
 	Update the po translation files.
