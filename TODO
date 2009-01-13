@@ -10,6 +10,19 @@ Goals for 0.5.x:
 
   [/]	Continue on the new (C++) framework.
 
+	[ ]  RAM component save/load state!
+
+	[ ]  Main execution loop should probably be looked over...
+
+	[ ]  Interrupt subsystem
+
+	[ ]  Timers
+
+	[ ]  File loaders:
+		[ ]  a.out (for OpenBSD/mvme88k)
+		[ ]  symbol handling
+		[ ]  argument handling! (arg count, at least)
+
   [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
 	first thing to implement, without breaking other architectures.
 
@@ -24,24 +37,46 @@ Goals for 0.5.x:
 
 	[ ]  Implement virtual to physical memory translation.
 
+	[ ]  Cache components.
+
 	[ ]  Native code generation:
 
-		Native code generation and faster/more generic bus access:
-		Goal is to have as linear execution as possible, loads/stores are
-		obviously MOST important, and try to include things like device
-		access! I.e. host_load array(s) and host_store, which are for
-		memory accesses (and host_load_user and host_store_user for some
-		archs) just as before, but also pointers directly to handling
-		functions, e.g. nonhost_load and nonhost_store. And check the
-		result of those functions to know whether to simply continue
-		running (without branching away), or if there was an exception
-		(i.e. a bus error, or a need to abort execution for some other
-		reason).
-		Cache simulation seems to naturally fit into this scheme
-		as well (direct calls to cache-handlers). Perhaps even
-		with multiprocessor snooping etc implemented?
+		x)  Instruction cache emulation:  For each emulated
+		    instruction, call a stub handler with the current pc.
+		    It is responsible for updating statistics etc.
 
-	[ ]  Cache components.
+		x)  More generic bus access:
+			o) Pointers to host memory pages, for fast
+			   loads and stores:
+			   +) host_load and host_store (as before)
+			   +) host_load_user and host_store_user (as before,
+				for those archs that need it, e.g.
+				ARM and M88K?)
+			o) Pointers to handler functions, for:
+			   +) device access
+			   +) data cache emulation
+
+		x)  Try to make the generated code as linear and branch
+		    free as possible. Experiment with making e.g. all
+		    "exceptional" branches go away to some place outside
+		    the basic block? If it is worth it.
+
+		x)  Exceptions from device access, or from load/store to
+		    unmapped pages/devices/handlers should break the
+		    native code execution.
+
+		x)  Keep nr-of-instructions-executed up to date!
+
+		x)  Ability to show disassembly of generated host
+		    instruction sequence!
+
+		x)  Calls/branches within host pages should be
+		    reasonably simple (but check nr-of-instructions-executed
+		    to break out every now and then).
+
+		x)  Calls/branches to _different_ host pages could be
+		    allowed as well; then many more pages would need to
+		    be invalidated on context switches... hm.
 
 Before making a release:
 
