@@ -32,7 +32,7 @@
 
 
 struct ComponentListEntry {
-	const char*componentName;
+	const char* componentName;
 	refcount_ptr<Component> (*Create)();
 	string (*GetAttribute)(const string& attributeName);
 };
