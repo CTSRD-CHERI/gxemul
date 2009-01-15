@@ -79,8 +79,7 @@ public:
 	virtual void ShowCommandMessage(const string& command);
 
 	/**
-	 * \brief Shows a fata error message, by printing it
-	 * to stderr.
+	 * \brief Shows a fatal error message, by printing it to stderr.
 	 *
 	 * @param msg The error message to show.
 	 */
