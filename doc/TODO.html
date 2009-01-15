@@ -22,7 +22,15 @@ Some things, in no specific order, that I'd like to fix:
 
 <pre>
 
-0.5.x:
+<i>Legend:
+
+[ ] = not started yet, or just thinking about it
+[/] = started, either "on paper" or actual implementation
+[X] = done  (but usually these entries are removed from the TODO list)
+</i>
+
+
+0.5.x series:  (0.5.0 will hopefully contain at least _some_ of this)
 
   [/]	Continue on the new (C++) framework.
 
@@ -34,14 +42,44 @@ Some things, in no specific order, that I'd like to fix:
 	     that it is general enough to support lots of variants of
 	     execution.
 
+		[ ]  Use the "step" concept. A step on a single-cpu
+		     machine is one instruction for that cpu. For a multi-
+		     cpu machine, or where multiple devices run at different
+		     speeds, a step runs one "instruction" on _one_
+		     component. From the UI, if e.g. a CPU is in focus,
+		     stepping forward should probably execute steps until
+		     the CPU in question has been allowed to run 1 instruction.
+		     Other components may have run 0 or more instructions
+		     during that time.
+
+		     In other words, I plan for GXemul 0.5.x to support Cycle
+		     Accurate component implementations. But obviously, this
+		     does not mean automatically that all shipped implemented
+		     components will be Cycle Accurate. There will still be no
+		     superscalar CPU models, or pipelines CPU models,
+		     as shipped by me. Each instruction will execute in
+		     one cycle, by default. (Simple CPUs like AVR could
+		     perhaps be implemented as fully cycle accurate models,
+		     for fun.)
+
 		[ ]  Unit tests for main loop/execution.
 
 	[ ]  Interrupt subsystem
 
 	[ ]  Timers
+		[ ]  Host speed approaching timers:  a device that wishes
+		     to cause interrupts 100 times per emulated second
+		     will interrupt (approximately) 100 times per host
+		     second. This is most useful for running full guest
+		     operating systems at full speed, "virtual machine"
+		     mode.
+		[ ]  Exact emulation:  a device wishing to cause 100
+		     interrupts per emulated second may take much more
+		     or much less than one host second to execute.
+		     ("Cycle accurate" mode.)
 
 	[ ]  File loaders:
-		[ ]  Loaded files should be part of state! But not part
+		[ ]  Loaded files should be part of state/model! But not part
 		     of the component tree. I.e. state = components +
 		     other configuration!
 		[ ]  Add a method on the CPUComponent, "loadfile", so
@@ -54,7 +92,18 @@ Some things, in no specific order, that I'd like to fix:
 		[ ]  argument handling! (arg count, at least)
 		[ ]  all the others (macho, srec, raw, ...)
 
-	[ ]  Breakpoints    [per device? per executed instruction?]
+	[ ]  Think more about Reverse execution. Should reverse execution
+	     only work until the component tree is modified?
+
+	[ ]  Breakpoints
+
+		[ ]  Per device
+		     Only checked on device access, or on device cycle
+		     execution.
+
+		[ ]  Per instruction
+		     Should be possible to set both _before_ and _after_
+		     instructions have been executed.
 
 	[ ]  Function call trace
 
@@ -174,6 +223,9 @@ Some things, in no specific order, that I'd like to fix:
 
 	[ ]  Separate 88100 from 88110!
 
+	[ ]  Separate 88200 CMMUs? So that the two are really two
+	     separate devices.
+
 	[ ]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
 	     I.e. implement an a.out file loader.
 
@@ -185,11 +237,34 @@ Some things, in no specific order, that I'd like to fix:
 
    [ ]  Cache components.
 
+	[ ]  Implement the Addressable interface, but if data is contained
+	     in the cache (a small memory area), do not call the main memory.
+	     Rather straight-forward idea, but will take time to implement
+	     all common variants: associativity, statistics gathering (i.e.
+	     "who evicted who from the cache"), ...
+
+	[ ]  Unit tests.
+
+   [ ]	Floating point helper.
+	Make this more complete/accurate than the old one, i.e. support
+	inf/nan, exceptions, signaling stuff, denormalized/normalized?
+
+	[ ]  Unit tests
+
    [ ]  Native code generation:
+
+	x)  Target amd64 and Alpha hosts first, since those are the
+	    only realistic ones I have for testing.
+
+	x)  Try to make the generated code as linear and branch
+	    free as possible. Experiment with making e.g. all
+	    "exceptional" branches go away to some place outside
+	    the basic block? If it is worth it.
 
 	x)  Instruction cache emulation:  For each emulated
 	    instruction, call a stub handler with the current pc.
 	    It is responsible for updating statistics etc.
+	    Should not be enabled by default.
 
 	x)  More generic bus access:
 		o) Pointers to host memory pages, for fast
@@ -202,14 +277,14 @@ Some things, in no specific order, that I'd like to fix:
 		   +) device access
 		   +) data cache emulation
 
-	x)  Try to make the generated code as linear and branch
-	    free as possible. Experiment with making e.g. all
-	    "exceptional" branches go away to some place outside
-	    the basic block? If it is worth it.
-
 	x)  Exceptions from device access, or from load/store to
 	    unmapped pages/devices/handlers should break the
 	    native code execution.
+
+	x)  Conditional breakpoints before or after device accesses!
+
+	x)  Conditional breakpoints before or after CPU instruction
+	    execution (somewhat different from generic device access).
 
 	x)  Keep nr-of-instructions-executed up to date!
 
@@ -239,12 +314,14 @@ Release date:
 
 	Obviously this is impossible to plan in advance. But I am hoping
 	that I will have enough time to work on the emulator framework
-	to make a 0.5.0 release some time during 2009.
+	to make a 0.5.0 release some time during 2009 or 2010.
 
 
 -------------------------------------------------------------------------------
 
-These things are from 0.4.x:
+These things are from 0.4.x, and obviously, those that are applicable to
+0.5.x will need to be [re]implemented sooner or later as well:
+
 
 To be translated prefetch:
 	o)  ONLY do this when able to read directly from memory
