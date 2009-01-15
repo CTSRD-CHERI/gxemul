@@ -44,7 +44,8 @@ void StatusCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	stringstream ss;
 	ss << "Runstate: " << gxemul.GetRunStateAsString() <<
-	    "   Global time: " << gxemul.GetGlobalTime() << "\n";
+	    "   Step = " << gxemul.GetStep() <<
+	    "   Global time = " << gxemul.GetGlobalTime() << "\n";
 	gxemul.GetUI()->ShowDebugMessage(ss.str());
 }
 
@@ -58,6 +59,8 @@ string StatusCommand::GetShortDescription() const
 string StatusCommand::GetLongDescription() const
 {
 	return _("Shows the current status. This currently includes:\n"
-	    "  o)  Runstate (Running or Paused)\n");
+	    "  o)  Runstate (Running or Paused)\n"
+	    "  o)  Number of emulated step\n"
+	    "  o)  Emulated time\n");
 }
 

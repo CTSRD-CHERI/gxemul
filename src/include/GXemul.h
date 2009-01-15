@@ -193,6 +193,14 @@ public:
 	string GetRunStateAsString() const;
 
 	/**
+	 * \brief Gets the current step of the emulation.
+	 *
+	 * @return The nr of steps that the emulation has been executing,
+	 *	since the start.
+	 */
+	uint64_t GetStep() const;
+
+	/**
 	 * \brief Gets the current global time of the emulation.
 	 *
 	 * Note: This is not necessarily equal to real-world time.
@@ -225,9 +233,9 @@ public:
 	void SetQuietMode(bool quietMode);
 
 	/**
-	 * \brief Run the emulation for a while.
+	 * \brief Run the emulation for a specific number of steps.
 	 */
-	void ExecuteCycles(double timeslice = 0.01);
+	void ExecuteSteps(int nrOfSteps);
 
 	/**
 	 * \brief Returns the GXemul version string.
@@ -253,6 +261,11 @@ private:
 	 */
 	void PrintUsage(bool longUsage) const;
 
+
+	/********************************************************************/
+public:
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
 private:
 	// Base:
 	bool			m_bRunUnitTests;
@@ -263,9 +276,10 @@ private:
 
 	// Runtime:
 	RunState		m_runState;
-	double			m_globalTime;	// TODO: Part of the model!
 
 	// Model:
+	uint64_t		m_step;
+	double			m_globalTime;
 	string			m_emulationFileName;
 	bool			m_modelIsDirty;
 	refcount_ptr<Component>	m_rootComponent;

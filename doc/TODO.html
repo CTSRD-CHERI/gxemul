@@ -24,7 +24,7 @@ Some things, in no specific order, that I'd like to fix:
 
 <i>Legend:
 
-[ ] = not started yet, or just thinking about it
+[ ] = not started yet, or just planning/thinking about it
 [/] = started, either "on paper" or actual implementation
 [X] = done  (but usually these entries are removed from the TODO list)
 </i>
@@ -32,84 +32,147 @@ Some things, in no specific order, that I'd like to fix:
 
 0.5.x series:  (0.5.0 will hopefully contain at least _some_ of this)
 
-  [/]	Continue on the new (C++) framework.
+   [ ]  Main execution loop should probably be looked over, so
+	that it is general enough to support lots of variants of
+	execution.
 
-	[ ]  Read-only state variables, or special handlers! Even better.
+	A "step" should be the core concept. A step on a single-cpu
+	machine is one instruction for that cpu. For a multi-
+	cpu machine, or where multiple devices run at different
+	speeds, a step may run things from more than one component.
+
+	In other words, I plan for GXemul 0.5.x to support Cycle
+	Accurate component implementations. But obviously, this
+	does not mean automatically that all shipped/implemented
+	components will be Cycle Accurate. There will still be no
+	superscalar CPU models, or pipelines CPU models,
+	as shipped by me. Each instruction will execute in
+	one cycle, by default. (Simple CPUs like AVR could
+	perhaps be implemented as fully cycle accurate models,
+	for fun.)
+
+	Stepping should probably print the shortest possible part of the
+	component name, followed by the component's single-step printout.
+	E.g.:
+
+		step 42:
+		cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+	
+	if there is only one machine, or
+
+		step 43:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+	
+	if cpu0 was not unique (i.e. multiple machines exist).
+	If multiple components are affected in the step, then all should
+	print out what they do:
+
+		step 44:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+		machine0.mainbus0.intc: timer 2 tick, asserting interrupt T2
+		machine1.mainbus0.cpu0: 0x01234564  5e 9a 39 01  jmp 0x1234
+
+	Optionally print emulated time after the step:
+	
+		step 45, t = 0.418:
+		...
+
+	Running in reverse should show the step (and time), but does it need
+	to show the instruction being executed? No. I don't think so. But it
+	could show the change in state:
+
+		step 43:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+		machine0.mainbus0.cpu0: r1: 0x9512 -> 0x3456
+		GXemul> b			(to step backwards)
+		step 43 -> 42:
+		machine0.mainbus0.cpu0: r1: 0x3456 -> 0x9512
+
+	As in the example above, it might be good to show exactly what the
+	state change is also in the forward direction. For e.g. a load from
+	a zero-on-read register in a device, that would be e.g.:
+
+		machine0.mainbus0.cpu0: 0x12345678  ab cd 01 00  ld r12,[r13+0x100]
+		machine0.mainbus0.isabus0.somedevice0: status: 0x0014 -> 0x0000
+		machine0.mainbus0.cpu0: r12: 0x2828 -> 0x0014
+
+	This would be especially good on CISC machines, where instructions have
+	multiple side-effects (flags etc), or when an exception occurs.
+
+	In a GUI (or curses-based UI), a disassembly view should probably be
+	available, where the current pc is highlighted (for CPU components).
+	Registers/state changing between steps could be printed/displayed in bold.
+
+   [ ]  Unit tests for main loop/execution.
+
+   [ ]  Interrupt subsystem
+
+   [ ]  Timers
+	[ ]  Host speed approaching timers:  a device that wishes
+	     to cause interrupts 100 times per emulated second
+	     will interrupt (approximately) 100 times per host
+	     second. This is most useful for running full guest
+	     operating systems at full speed, "virtual machine"
+	     mode.
+	[ ]  Exact emulation:  a device wishing to cause 100
+	     interrupts per emulated second may take much more
+	     or much less than one host second to execute.
+	     ("Cycle accurate" mode.)
+
+   [ ]  State/model:
+        [ ]  Read-only state variables, or special handlers! Even better.
 	     I.e. warn about (or refuse) to write to unimplemented bits
 	     of control registers.
+	[ ]  Loaded files should be part of state/model! But not part
+	     of the component tree. I.e. state = components +
+	     other configuration!
+	[ ]  Disk images: reverse execution should reverse disk contents
 
-	[ ]  Main execution loop should probably be looked over, so
-	     that it is general enough to support lots of variants of
-	     execution.
+   [ ]  Reverse execution:
+	[ ]  Regular saving of state, and limiting the number of such
+	     saves by logarithmic removal
+	[ ]  In addition to saving state, all modifications done to the
+	     component tree, and e.g. breakpoints, need to be stored
+	     together with their time stamp ("step"). I.e. if a USB
+	     storage device is connected as step 1000, and we're
+	     running in reverse to step 800 to check something, and
+	     then continue again, the default behaviour should be that
+	     at step 1000 the USB device is connected again.
+	[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
+	[ ]  "c" = "continue", "backward-continue" commands
+	[ ]  Simulation across multiple hosts
 
-		[ ]  Use the "step" concept. A step on a single-cpu
-		     machine is one instruction for that cpu. For a multi-
-		     cpu machine, or where multiple devices run at different
-		     speeds, a step runs one "instruction" on _one_
-		     component. From the UI, if e.g. a CPU is in focus,
-		     stepping forward should probably execute steps until
-		     the CPU in question has been allowed to run 1 instruction.
-		     Other components may have run 0 or more instructions
-		     during that time.
+   [ ]  File loaders:
+	[ ]  Add a method on the CPUComponent, "loadfile", so
+	     that files can be loaded during runtime, and not
+	     only at startup. How about multiple files?
+	     And how about "reset"? The list of files must be
+	     stored somewhere.
+	[ ]  a.out (for OpenBSD/mvme88k)
+	[ ]  symbol handling, line number info, data types?
+	[ ]  argument handling! (arg count, at least)
+	[ ]  all the others (macho, srec, raw, ...)
 
-		     In other words, I plan for GXemul 0.5.x to support Cycle
-		     Accurate component implementations. But obviously, this
-		     does not mean automatically that all shipped implemented
-		     components will be Cycle Accurate. There will still be no
-		     superscalar CPU models, or pipelines CPU models,
-		     as shipped by me. Each instruction will execute in
-		     one cycle, by default. (Simple CPUs like AVR could
-		     perhaps be implemented as fully cycle accurate models,
-		     for fun.)
+   [ ]  Breakpoints
+	[ ]  For all breakpoints, it should be possible to break
+	     both _before_ and _after_ a change has occurred!
+	     
+	[ ]  General for all components:
+	     Checked on device cycle execution, if necessary.
+	     
+	[ ]  Per memory-mapped/addressable device
+	     Checked on load/store device access.
 
-		[ ]  Unit tests for main loop/execution.
+	[ ]  Per instruction (for CPU components)
+	     It may be easiest to simply turn off native code
+	     generation, except for stuff like "check if pc = xyz"-
+	     style breakpoints. Those can be embedded.
 
-	[ ]  Interrupt subsystem
+   [ ]  Function call trace
 
-	[ ]  Timers
-		[ ]  Host speed approaching timers:  a device that wishes
-		     to cause interrupts 100 times per emulated second
-		     will interrupt (approximately) 100 times per host
-		     second. This is most useful for running full guest
-		     operating systems at full speed, "virtual machine"
-		     mode.
-		[ ]  Exact emulation:  a device wishing to cause 100
-		     interrupts per emulated second may take much more
-		     or much less than one host second to execute.
-		     ("Cycle accurate" mode.)
+   [ ]  Stack dump (of the emulated machine)
 
-	[ ]  File loaders:
-		[ ]  Loaded files should be part of state/model! But not part
-		     of the component tree. I.e. state = components +
-		     other configuration!
-		[ ]  Add a method on the CPUComponent, "loadfile", so
-		     that files can be loaded during runtime, and not
-		     only at startup. How about multiple files?
-		     And how about "reset"? The list of files must be
-		     stored somewhere.
-		[ ]  a.out (for OpenBSD/mvme88k)
-		[ ]  symbol handling, line number info, data types?
-		[ ]  argument handling! (arg count, at least)
-		[ ]  all the others (macho, srec, raw, ...)
-
-	[ ]  Think more about Reverse execution. Should reverse execution
-	     only work until the component tree is modified?
-
-	[ ]  Breakpoints
-
-		[ ]  Per device
-		     Only checked on device access, or on device cycle
-		     execution.
-
-		[ ]  Per instruction
-		     Should be possible to set both _before_ and _after_
-		     instructions have been executed.
-
-	[ ]  Function call trace
-
-	[ ]  Stack dump (of the emulated machine)
-
-  [ ]	Components (general):
+   [ ]	Components (general):
 
 	[ ]  "help" about components could show a file:/// link to
 	     the installed documentation about that component or
@@ -128,6 +191,9 @@ Some things, in no specific order, that I'd like to fix:
 		bool IsItOkToAddItToThisProposedParentComponent(propsedParent) const;
 
   [ ]	Actions and undo/redo:
+
+	[ ]  ResetAction should reset Step and Time! Part of the model, but
+	     not part of the component tree!
 
 	[ ]  Undo/redo commands should show what they are doing, e.g.
 		Undoing "add component"
@@ -166,6 +232,9 @@ Some things, in no specific order, that I'd like to fix:
 			cpu.pc=expr	assignment
 
 	[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
+
+	[ ]  The "quit" command should ask about saving, if the emulation
+	     is marked dirty.
 
 	[/]  Tab completion for everything:
 		[ ]  syntax based completion? e.g.:
@@ -251,6 +320,10 @@ Some things, in no specific order, that I'd like to fix:
 
 	[ ]  Unit tests
 
+   [ ]	Userland emulation
+
+   	[ ]  Begin with e.g. FreeBSD/amd64, or FreeBSD/alpha, or Linux/something.
+
    [ ]  Native code generation:
 
 	x)  Target amd64 and Alpha hosts first, since those are the
@@ -298,6 +371,10 @@ Some things, in no specific order, that I'd like to fix:
 	x)  Calls/branches to _different_ host pages could be
 	    allowed as well; then many more pages would need to
 	    be invalidated on context switches... hm.
+
+	x)  Unit tests! When executed on a host which has native code generation,
+	    there can be unit tests not only to test that code gets generated,
+	    but that the result after executing that code is also correct.
 
 Before making a release:
 

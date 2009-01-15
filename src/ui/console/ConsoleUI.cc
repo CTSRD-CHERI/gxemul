@@ -209,7 +209,8 @@ int ConsoleUI::MainLoop()
 				m_gxemul->GetRootComponent()->
 				    FlushCachedState();
 			}
-			m_gxemul->ExecuteCycles();
+
+			m_gxemul->ExecuteSteps(1000);
 			break;
 			
 		case GXemul::Quitting:
