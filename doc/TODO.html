@@ -130,7 +130,7 @@ Some things, in no specific order, that I'd like to fix:
 
    [ ]  Reverse execution:
 	[ ]  Regular saving of state, and limiting the number of such
-	     saves by logarithmic removal
+	     saves by logarithmic removal.
 	[ ]  In addition to saving state, all modifications done to the
 	     component tree, and e.g. breakpoints, need to be stored
 	     together with their time stamp ("step"). I.e. if a USB
@@ -138,6 +138,11 @@ Some things, in no specific order, that I'd like to fix:
 	     running in reverse to step 800 to check something, and
 	     then continue again, the default behaviour should be that
 	     at step 1000 the USB device is connected again.
+   	[/]  Read these:
+		<a href="http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html">http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html</a>
+		<a href="http://www.codesourcery.com/publications/reversible_debugging.pdf">http://www.codesourcery.com/publications/reversible_debugging.pdf</a>
+		<a href="http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf">http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf</a>
+	     They resemble to a large degree what I have in mind.
 	[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
 	[ ]  "c" = "continue", "backward-continue" commands
 	[ ]  Simulation across multiple hosts
