@@ -735,8 +735,7 @@ int old_main(int argc, char *argv[])
 #else
 	debug("GXemul (unknown version)     "COPYRIGHT_MSG"\n"SECONDARY_MSG"\n"
 #endif
-	    "Read the source code and/or documentation for other Copyright "
-	    "messages.\n\n");
+	    "You started GXemul in LEGACY MODE.\n\n");
 
 	/*  Simple initialization, from command line arguments:  */
 	if (emul->machines[0]->machine_type != MACHINE_NONE) {
