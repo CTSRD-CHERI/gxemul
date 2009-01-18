@@ -379,7 +379,7 @@ string StateVariable::EvaluateExpression(const string& expression,
 	
 	// Remove leading and trailing spaces:
 	while (result.size() > 0 && result[0] == ' ')
-		result.erase(0);
+		result.erase((size_t) 0);
 	while (result.size() > 0 && result[result.size() - 1] == ' ')
 		result.erase(result.size()-1);
 
