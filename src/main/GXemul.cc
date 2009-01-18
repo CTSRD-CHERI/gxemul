@@ -279,6 +279,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <fstream>
 #include <iostream>
