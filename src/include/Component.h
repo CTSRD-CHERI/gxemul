@@ -131,10 +131,13 @@ public:
 	 *	string ("").
 	 * @param htmlLinksForClassNames Used to generate HTML links
 	 *	by 'make documentation'.
+	 * @param prefixForComponentUrls Placed before
+	 *	component/xyz.html in html links to components.
 	 * @return An ASCII string containing the tree.
 	 */
 	string GenerateTreeDump(const string& branchTemplate,
-		bool htmlLinksForClassNames = false) const;
+		bool htmlLinksForClassNames = false,
+		string prefixForComponentUrls = "") const;
 
 	/**
 	 * \brief Resets the state of this component and all its children.

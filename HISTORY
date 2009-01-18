@@ -3828,3 +3828,5 @@ Changelog for GXemul:
 		the legacy old_main is called with the entire command line.
 20090113	Moving the TODO file to doc/TODO.html, and merging in parts
 		of the TODO file from the old C++ branch.
+20090118	Machine component tree dumps are now automagically included
+		in the HTML documentation for individual machines.

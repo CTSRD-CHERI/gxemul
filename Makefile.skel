@@ -25,6 +25,7 @@ documentation: build
 	sed s/PAGETITLE/Components/g < doc/head.html > doc/components.html
 	./$(BIN) -W components >> doc/components.html
 	cat doc/tail.html >> doc/components.html
+	doc/generate_machine_doc.sh
 	$(DOXYGEN) doc/Doxyfile
 
 translations:

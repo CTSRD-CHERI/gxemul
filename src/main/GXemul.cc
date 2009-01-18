@@ -379,6 +379,19 @@ static void ListTemplates()
 }
 
 
+static void DumpMachineAsHTML(const string& machineName)
+{
+	refcount_ptr<Component> component =
+	    ComponentFactory::CreateComponent(machineName);
+
+	if (!component.IsNULL() &&
+	    component->GetChildren().size() != 0)
+		std::cout << "<pre>" <<
+		    component->GenerateTreeDump("", true, "../")
+		    << "</pre>";
+}
+
+
 static void GenerateHTMLListOfComponents(bool machines)
 {
 	std::cout <<
@@ -571,6 +584,9 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 			if (string(optarg) == "unittest") {
 				m_bRunUnitTests = true;
 				optionsEnoughToStartRunning = true;
+			} else if (string(optarg).substr(0,8) == "machine:") {
+				DumpMachineAsHTML(optarg+8);
+				return false;
 			} else if (string(optarg) == "machines") {
 				GenerateHTMLListOfComponents(true);
 				return false;

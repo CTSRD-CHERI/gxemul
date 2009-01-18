@@ -226,7 +226,7 @@ void Component::ExecuteMethod(GXemul* gxemul,
 
 
 string Component::GenerateTreeDump(const string& branchTemplate,
-	bool htmlLinksForClassNames) const
+	bool htmlLinksForClassNames, string prefixForComponentUrls) const
 {
 	// Basically, this generates a string which looks like:
 	//
@@ -273,7 +273,8 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 		    + className + ".html").c_str());
 
 		if (documentationComponentFile.is_open())
-			str += "<a href=\"components/component_" +
+			str += "<a href=\"" + prefixForComponentUrls +
+			    "components/component_" +
 			    className + ".html\">" + name + "</a>";
 		else
 			str += name;
@@ -360,7 +361,7 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 			subBranch += "|   ";
 
 		result += children[i]->GenerateTreeDump(subBranch,
-		    htmlLinksForClassNames);
+		    htmlLinksForClassNames, prefixForComponentUrls);
 	}
 
 	return result;
