@@ -36,18 +36,15 @@ IRNativeAMD64::IRNativeAMD64()
 }
 
 
-void IRNativeAMD64::Add(enum Opcode opcode, int widthInBits,
-	size_t arg1, size_t arg2, size_t arg3)
+void IRNativeAMD64::Clear()
+{
+	// TODO
+}
+
+
+void IRNativeAMD64::Add(enum Opcode opcode)
 {
 	switch (opcode) {
-
-	case OpcodeAdd2:
-
-		break;
-
-	case OpcodeStore:
-
-		break;
 
 	default:
 		std::cerr << "IRNativeAMD64::Add: Unimplemented opcode "
@@ -81,6 +78,7 @@ void IRNativeAMD64::Generate(size_t maxSize, uint8_t * dst) const
 
 
 #ifdef WITHUNITTESTS
+#ifdef NATIVE_ABI_AMD64
 
 #include <sys/mman.h>
 
@@ -89,10 +87,10 @@ void IRNativeAMD64::Generate(size_t maxSize, uint8_t * dst) const
 
 static void Test_IRNativeAMD64_DoNothing()
 {
-#ifdef NATIVE_ABI_AMD64
-	IRNativeAMD64 native;
+	IRNativeAMD64 nativeAMD64;
+	IRNative* native = &nativeAMD64;
 
-	size_t size = native.GetSize();
+	size_t size = native->GetSize();
 	UnitTest::Assert("size should be non-zero, since the return instruction"
 	    " must be in there somewhere", size >= 1);
 
@@ -100,19 +98,21 @@ static void Test_IRNativeAMD64_DoNothing()
 	    PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
 	UnitTest::Assert("unable to mmap?", buf != MAP_FAILED && buf != NULL);
 
-	native.Generate(size, buf);
-
-// TODO
-//	void (*func)() = (void (*)()) buf;
-//	func();
+	// Generate and execute the code. Nothing should happen, but
+	// at least there should be no crash/segfault.
+	native->Generate(size, buf);
+	IRNative::Execute(buf);
 
 	munmap(buf, size);
-#endif	// NATIVE_ABI_AMD64
 }
+
+#endif	// NATIVE_ABI_AMD64
 
 UNITTESTS(IRNativeAMD64)
 {
+#ifdef NATIVE_ABI_AMD64
 	UNITTEST(Test_IRNativeAMD64_DoNothing);
+#endif	// NATIVE_ABI_AMD64
 }
 
 #endif

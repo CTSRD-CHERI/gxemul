@@ -29,6 +29,7 @@
  */
 
 #include "misc.h"
+#include "UnitTest.h"
 
 class IRInstruction;
 
@@ -41,6 +42,7 @@ class IRInstruction;
  * corresponds to the IR code.
  */
 class IRNative
+	: public UnitTestable
 {
 public:
 	enum Opcode
@@ -64,16 +66,16 @@ public:
 	}
 
 	/**
+	 * \brief Clears the code generator's list of instructions.
+	 */
+	virtual void Clear() = 0;
+
+	/**
 	 * \brief Adds an instruction to the native code generator.
 	 *
 	 * \param opcode The main opcode.
-	 * \param widthInBits Width in bits (for some opcodes).
-	 * \param arg1 Optional argument 1.
-	 * \param arg2 Optional argument 2.
-	 * \param arg3 Optional argument 3.
 	 */
-	virtual void Add(enum Opcode opcode, int widthInBits = 0,
-		size_t arg1 = 0, size_t arg2 = 0, size_t arg3 = 0) = 0;
+	virtual void Add(enum Opcode opcode) = 0;
 	
 	/**
 	 * \brief Calculates the size of the code which is to be generated.
@@ -93,6 +95,19 @@ public:
 	 * \param dst The pointer to the buffer.
 	 */
 	virtual void Generate(size_t maxSize, uint8_t * dst) const = 0;
+
+	/**
+	 * \brief Executes code on the host, from a specified address in
+	 * host memory.
+	 *
+	 * \param addr The address of the (generated) code.
+	 */
+	static void Execute(void *addr);
+
+
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
 };
 
 

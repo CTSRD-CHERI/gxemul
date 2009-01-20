@@ -3830,3 +3830,4 @@ Changelog for GXemul:
 		of the TODO file from the old C++ branch.
 20090118	Machine component tree dumps are now automagically included
 		in the HTML documentation for individual machines.
+20090120	Continuing on native code generation.

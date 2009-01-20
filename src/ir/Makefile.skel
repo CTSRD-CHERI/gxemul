@@ -7,9 +7,14 @@ LIBS=$(OTHERLIBS)
 
 OBJS=	IRBlockCache.o IRNativeAMD64.o
 
-all: $(OBJS)
+all: $(OBJS) IRNative.o
 
 $(OBJS): Makefile
+
+# Special case without CPEDANTIC, since C++ gives warnings when
+# trying to call runtime generated code like this.
+IRNative.o: IRNative.cc Makefile
+	$(CXX) $(CXXWARNINGS) $(CXXOPTIM) $(INCLUDE1) IRNative.cc -c -o IRNative.o
 
 clean:
 	rm -f $(OBJS) *core

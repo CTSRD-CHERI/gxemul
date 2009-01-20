@@ -1,8 +1,5 @@
-#ifndef IRNATIVEAMD64_H
-#define	IRNATIVEAMD64_H
-
 /*
- *  Copyright (C) 2008-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,40 +25,59 @@
  *  SUCH DAMAGE.
  */
 
-#include "misc.h"
-
 #include "IRNative.h"
-#include "UnitTest.h"
+
+#ifdef NATIVE_CODE_GENERATION
 
 
-/**
- * \brief An AMD64 IRNative code generator.
+/*
+ *  Note: This .cc module needs to be compiled without -ansi -pedantic,
+ *  since calling generated code like this gives a warning.
  */
-class IRNativeAMD64
-	: public IRNative
+void IRNative::Execute(void *addr)
 {
-public:
-	/**
-	 * \brief Constructs an %IRNativeAMD64 instance.
-	 */
-	IRNativeAMD64();
-
-	virtual ~IRNativeAMD64() { }
-
-	// These are described in IRNative.h:
-	virtual void Clear();
-	virtual void Add(enum Opcode opcode);
-	virtual size_t GetSize() const;
-	virtual void Generate(size_t maxSize, uint8_t * dst) const;
+	void (*func)() = (void (*)()) addr;
+	func();
+}
 
 
-	/********************************************************************/
-
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
-
-private:
-	// TODO: something like  list<amd64instructions> m_instructions;
-};
+#endif	// NATIVE_CODE_GENERATION
 
 
-#endif	// IRNATIVEAMD64_H
+/*****************************************************************************/
+
+
+#ifdef WITHUNITTESTS
+#ifdef NATIVE_CODE_GENERATION
+
+#include <sys/mman.h>
+
+static int variable;
+static void SmallFunction()
+{
+	variable = 123;
+}
+
+static void Test_IRNative_Execute()
+{
+	// Tests that it is possible to execute code, given a pointer to
+	// a void function.
+
+	variable = 42;
+	UnitTest::Assert("variable before", variable, 42);
+
+	IRNative::Execute((void*)&SmallFunction);
+
+	UnitTest::Assert("variable after", variable, 123);
+}
+
+#endif	// NATIVE_CODE_GENERATION
+
+UNITTESTS(IRNative)
+{
+#ifdef NATIVE_CODE_GENERATION
+	UNITTEST(Test_IRNative_Execute);
+#endif	// NATIVE_CODE_GENERATION
+}
+
+#endif

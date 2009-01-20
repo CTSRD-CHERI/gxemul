@@ -58,10 +58,11 @@
 # Default prefix for "make install"
 DEFAULTPREFIX=/usr/local
 
-# Auto-detect X11 and I18N support:
+# Auto-detect X11, GLIBMM, I18N, and native code ABI support:
 WITHI18N=""
 WITHGLIBMM=""
 WITHX11=""
+WITHNATIVECODE=""
 
 DEBUG=NO
 
@@ -86,6 +87,8 @@ if [ z"$*" != z ]; then
 			WITHI18N=YES
 		else if [ z$a = z--without-i18n ]; then
 			WITHI18N=NO
+		else if [ z$a = z--without-native-code ]; then
+			WITHNATIVECODE=NO
 		else if [ z$a = z--with-x11 ]; then
 			WITHX11=YES
 		else if [ z$a = z--without-x11 ]; then
@@ -105,7 +108,8 @@ if [ z"$*" != z ]; then
 				echo "  --with-unit-tests          build with" \
 					"unit tests (increases binary size)"
 			fi
-			echo
+			echo "  --without-native-code      build without support for native code generation,"
+			echo "                             even if the host ABI is supported"
 			echo "  --with-x11                 build with X11 framebuffer support"
 			echo "  --without-x11              build without X11 framebuffer support"
 			echo "  --with-i18n                build with I18N support"
@@ -123,7 +127,7 @@ if [ z"$*" != z ]; then
 			echo "Run  $0 --help  to get a list of" \
 			    "available options."
 			exit
-		fi; fi; fi; fi; fi; fi; fi; fi
+		fi; fi; fi; fi; fi; fi; fi; fi; fi
 	done
 fi
 
@@ -772,7 +776,7 @@ if [ z"$UNSTABLE" = zYES ]; then
 	$CXX $CXXFLAGS -ansi _testprog.cc -o _testprog 2> /dev/null
 	if [ -x _testprog ]; then
 		printf "yes\n"
-		CXXFLAGS="$CXXFLAGS -ansi"
+		CPEDANTIC="$CPEDANTIC -ansi"
 	else
 		printf "no\n"
 	fi
@@ -782,10 +786,10 @@ fi
 
 if [ z"$UNSTABLE" = zYES ]; then
 	printf "checking whether -pedantic can be used... "
-	$CXX $CXXFLAGS -pedantic _testprog.cc -o _testprog 2> /dev/null
+	$CXX $CXXFLAGS $CPEDANTIC -pedantic _testprog.cc -o _testprog 2> /dev/null
 	if [ -x _testprog ]; then
 		printf "yes\n"
-		CXXFLAGS="$CXXFLAGS -pedantic"
+		CPEDANTIC="$CPEDANTIC -pedantic"
 	else
 		printf "no\n"
 	fi
@@ -1343,7 +1347,7 @@ rm -f _test_end*
 
 printf "detecting native code generation ABI... "
 
-if [ z$DISABLENATIVECODE = zYES ]; then
+if [ z$WITHNATIVECODE = zNO ]; then
 	echo "skipping"
 else
 	if [ z"`uname -m`" = zamd64 ]; then
@@ -1471,6 +1475,7 @@ INCLUDE2=-I../../include/
 rm -f _testprog*
 
 echo C++ compiler flags: $CXXFLAGS $CXXWARNINGS
+echo C++ pedantic flags: $CPEDANTIC
 echo C compiler flags: $CFLAGS $CWARNINGS
 echo Linker flags: $OTHERLIBS
 
@@ -1486,6 +1491,7 @@ echo "CWARNINGS=$CWARNINGS" >> _Makefile.header
 echo "COPTIM=$CFLAGS" >> _Makefile.header
 echo "CXXOPTIM=$CXXFLAGS" >> _Makefile.header
 echo "CXXWARNINGS=$CXXWARNINGS" >> _Makefile.header
+echo "CPEDANTIC=$CPEDANTIC" >> _Makefile.header
 
 echo "OTHERLIBS=$OTHERLIBS" >> _Makefile.header
 echo "CPU_ARCHS=$CPU_ARCHS" >> _Makefile.header
