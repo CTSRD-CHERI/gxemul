@@ -20,15 +20,13 @@ Tested:
 Didn't work:
   <li><a href="#netbsdmacppcinstall">NetBSD/macppc 5.0</a>  Some emulated PROM stuff not implemented yet
   <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 5.0</a>  PCMCIA problems
+  <li><a href="#netbsdprepinstall">NetBSD/prep 5.0</a>  No disk controller
 
-CURRENTLY TESTING:
-
-Non-tested:
+Not tested:
   <li><a href="#netbsdarcinstall">NetBSD/arc 4.0.1</a>
   <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
   <li><a href="#netbsdevbarminstall">NetBSD/evbarm 2.1</a>
   <li><a href="#netbsdnetwinderinstall">NetBSD/netwinder 3.1</a>
-  <li><a href="#netbsdprepinstall">NetBSD/prep 2.1</a>
   <li><a href="#netbsdpmppc">NetBSD/pmppc 3.1</a>
   <li><a href="#netbsdlandiskinstall">NetBSD/landisk 4.0.1</a>
   <li><a href="dreamcast.html#netbsd_generic_md">NetBSD/dreamcast 4.0</a>

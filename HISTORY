@@ -3828,3 +3828,5 @@ Changelog for GXemul:
 		possible to install and run OpenBSD/mvme88k 4.5.
 		NetBSD/evbmips, /sgimips, and /cobalt 5.0 have been verified
 		to work.
+
+==============  RELEASE 0.4.7.2  ==============
