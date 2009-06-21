@@ -968,6 +968,13 @@ PCIINIT(vt82c586_isa)
 
 	PCI_SET_DATA(PCI_BHLC_REG,
 	    PCI_BHLC_CODE(0,0, 1 /* multi-function */, 0x40,0));
+
+	/*
+	 *  NetBSD/cobalt specific: bits 7..4 are the "model id". See
+	 *  netbsd/usr/src/sys/arch/cobalt/cobalt/machdep.c read_board_id()
+	 *  for details.
+	 */
+	PCI_SET_DATA(0x94, 4 << 4);
 }
 
 struct vt82c586_ide_extra {

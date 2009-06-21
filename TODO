@@ -6,11 +6,13 @@ Some things, in no specific order, that I'd like to fix:
 
 -------------------------------------------------------------------------------
 
-0.4.x[.y] = maintenance + bugfixes
+0.4.7.2 = maintenance + bugfixes
 
 Tested:
   <li><a href="#netbsdpmaxinstall">NetBSD/pmax 5.0</a>
   <li><a href="#netbsdcatsinstall">NetBSD/cats 5.0</a>
+  <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0</a>
+  <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0</a>
   <li><a href="#openbsdlandiskinstall">OpenBSD/landisk 4.5</a>
   <li><a href="#openbsdmvme88kinstall">OpenBSD/mvme88k 4.5</a>
 
@@ -22,8 +24,6 @@ CURRENTLY TESTING:
 
 Non-tested:
   <li><a href="#netbsdarcinstall">NetBSD/arc 4.0.1</a>
-  <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 3.1</a>
-  <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 4.0.1</a>
   <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
   <li><a href="#netbsdsgimips">NetBSD/sgimips 3.1</a>
   <li><a href="#netbsdevbarminstall">NetBSD/evbarm 2.1</a>
@@ -37,7 +37,7 @@ Non-tested:
   <li><a href="#openbsdcatsinstall">OpenBSD/cats 4.0</a>
 
 
-0.5.x is skipped (it was the C++ version that I never had time to write.)
+0.5.x will be skipped (it was the C++ version that I never had time to write.)
 
 
 Goals for 0.6.x:
