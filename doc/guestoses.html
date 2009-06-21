@@ -601,7 +601,7 @@ time consuming, but necessary:
 <ol>
   <li>First of all, the "<tt>nfs server</tt>" machine must be set up.
 	This needs to have a 750 MB <tt>/tftpboot</tt> partition.
-	<a href="#netbsdpmaxinstall">Install NetBSD/pmax 3.1 from CDROM</a>.
+	<a href="#netbsdpmaxinstall">Install NetBSD/pmax from CDROM</a>.
 	(Don't forget to add the extra partition!)
   <p>
   <li>Configure the nfs server machine to act as an nfs server.
@@ -635,21 +635,23 @@ echo 10.0.0.1 client &gt; /etc/hosts
 reboot</b>
 </pre></td></tr></table>
   <p>
-  <li>Download the NetBSD/sgimips CD-ROM iso image, and the
+  <li>Download the files corresponding to a NetBSD/sgimips CD-ROM iso image, and the
 	GENERIC and INSTALL kernels:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/3.1/sgimipscd-3.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/3.1/sgimipscd-3.1.iso</a>
-	<a href="ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-3.1/sgimips/binary/kernel/netbsd-GENERIC32_IP3x.gz">ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-3.1/sgimips/binary/kernel/netbsd-GENERIC32_IP3x.gz</a>
-	<a href="ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-3.1/sgimips/binary/kernel/netbsd-INSTALL32_IP3x.gz">ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-3.1/sgimips/binary/kernel/netbsd-INSTALL32_IP3x.gz</a>
+	<a href="ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-5.0/sgimips/binary/kernel/netbsd-GENERIC32_IP3x.gz">ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-5.0/sgimips/binary/kernel/netbsd-GENERIC32_IP3x.gz</a>
+	<a href="ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-5.0/sgimips/binary/kernel/netbsd-INSTALL32_IP3x.gz">ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-5.0/sgimips/binary/kernel/netbsd-INSTALL32_IP3x.gz</a>
+
+	wget -np -l 0 -r <a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/sgimips/binary/sets/">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/sgimips/binary/sets/</a>
+	mkisofs -U -o sgimips.iso ftp.netbsd.org/pub/NetBSD/NetBSD-5.0
 
 </pre>
   <li>Start the DECstation emulation again:<pre>
-	<b>gxemul -e 3max -d nbsd_pmax.img -d sgimipscd-3.1.iso</b>
+	<b>gxemul -e 3max -d nbsd_pmax.img -d sgimips.iso</b>
 
 </pre>and extract the files from the sgimips CD-ROM image to the
 	DECstation disk image:
 <p><table border="0"><tr><td><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td><pre>
 <b>cd /tftpboot; mount /dev/cd0a /mnt
-for a in /mnt/*/binary/sets/[bcegmt]*; do echo $a; tar zxfp $a; done
+for a in /mnt/*/binary/sets/[bcegmt]*.tgz; do echo $a; tar zxfp $a; done
 echo 10.0.0.2:/tftpboot / nfs rw 0 0 &gt; /tftpboot/etc/fstab
 echo rc_configured=YES &gt;&gt; /tftpboot/etc/rc.conf
 echo 10.0.0.254 &gt;&gt; /tftpboot/etc/mygate

@@ -13,6 +13,7 @@ Tested:
   <li><a href="#netbsdcatsinstall">NetBSD/cats 5.0</a>
   <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0</a>
   <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0</a>
+  <li><a href="#netbsdsgimips">NetBSD/sgimips 5.0</a>
   <li><a href="#openbsdlandiskinstall">OpenBSD/landisk 4.5</a>
   <li><a href="#openbsdmvme88kinstall">OpenBSD/mvme88k 4.5</a>
 
@@ -25,7 +26,6 @@ CURRENTLY TESTING:
 Non-tested:
   <li><a href="#netbsdarcinstall">NetBSD/arc 4.0.1</a>
   <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
-  <li><a href="#netbsdsgimips">NetBSD/sgimips 3.1</a>
   <li><a href="#netbsdevbarminstall">NetBSD/evbarm 2.1</a>
   <li><a href="#netbsdnetwinderinstall">NetBSD/netwinder 3.1</a>
   <li><a href="#netbsdprepinstall">NetBSD/prep 2.1</a>
