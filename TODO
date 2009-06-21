@@ -12,6 +12,7 @@ Tested:
   <li><a href="#netbsdpmaxinstall">NetBSD/pmax 5.0</a>
   <li><a href="#netbsdcatsinstall">NetBSD/cats 5.0</a>
   <li><a href="#openbsdlandiskinstall">OpenBSD/landisk 4.5</a>
+  <li><a href="#openbsdmvme88kinstall">OpenBSD/mvme88k 4.5</a>
 
 Didn't work:
   <li><a href="#netbsdmacppcinstall">NetBSD/macppc 5.0</a>  Some emulated PROM stuff not implemented yet
@@ -34,7 +35,6 @@ Non-tested:
   <li><a href="dreamcast.html#linux_live_cd">Linux/dreamcast</a>
   <li><a href="#openbsdpmaxinstall">OpenBSD/pmax 2.8-BETA</a>
   <li><a href="#openbsdcatsinstall">OpenBSD/cats 4.0</a>
-  <li><a href="#openbsdmvme88kinstall">OpenBSD/mvme88k 4.4</a>
 
 
 0.5.x is skipped (it was the C++ version that I never had time to write.)

@@ -65,7 +65,7 @@ SUCH DAMAGE.
   <li><a href="#openbsdpmaxinstall">OpenBSD/pmax 2.8-BETA</a>
   <li><a href="#openbsdcatsinstall">OpenBSD/cats 4.0</a>
   <li><a href="#openbsdlandiskinstall">OpenBSD/landisk 4.5</a>
-  <li><a href="#openbsdmvme88kinstall">OpenBSD/mvme88k 4.4</a>
+  <li><a href="#openbsdmvme88kinstall">OpenBSD/mvme88k 4.5</a>
   <li><a href="#helenos">HelenOS 0.4.0</a>
   <li><a href="#ultrixinstall">Ultrix/RISC 4.5</a>
   <li><a href="#sprite">Sprite for DECstation</a>
@@ -1687,7 +1687,7 @@ instructions:
 
 </pre>
   <li>Download the entire mvme88k directory from the ftp server:<pre>
-	<b>wget -np -l 0 -r <a href="ftp://ftp.se.openbsd.org/pub/OpenBSD/4.4/mvme88k/">ftp://ftp.se.openbsd.org/pub/OpenBSD/4.4/mvme88k/</a></b>
+	<b>wget -np -l 0 -r <a href="ftp://ftp.se.openbsd.org/pub/OpenBSD/4.5/mvme88k/">ftp://ftp.se.openbsd.org/pub/OpenBSD/4.5/mvme88k/</a></b>
 
 </pre>
 
@@ -1695,17 +1695,17 @@ instructions:
 	(I recommend using <tt>mkisofs</tt> for that purpose. If you don't
 	already have <tt>mkisofs</tt> installed on your system, you need
 	to install it in order to do this.)<pre>
-	<b>mkisofs -o openbsd_mvme88k_4.4.iso -U ftp.se.openbsd.org/pub/OpenBSD/</b>
+	<b>mkisofs -o openbsd_mvme88k_4.5.iso -U ftp.se.openbsd.org/pub/OpenBSD/</b>
 
 </pre>
   <li>Copy away the kernel, we'll need it later. But remove the rest of the
 	downloaded tree.<pre>
-	<b>cp ftp.se.openbsd.org/pub/OpenBSD/4.4/mvme88k/bsd .
+	<b>cp ftp.se.openbsd.org/pub/OpenBSD/4.5/mvme88k/bsd .
 	rm -rf ftp.se.openbsd.org</b>
 </pre>
 
   <li>Start the emulator using this command line:<pre>
-	<b>gxemul -e mvme187 -d obsd_mvme88k.img -d b:openbsd_mvme88k_4.4.iso -j 4.4/mvme88k/bsd.rd</b>
+	<b>gxemul -e mvme187 -d obsd_mvme88k.img -d b:openbsd_mvme88k_4.5.iso -j 4.5/mvme88k/bsd.rd</b>
 
 </pre>
 	and proceed like you would do if you were installing OpenBSD
@@ -1713,7 +1713,7 @@ instructions:
 	the CDROM, since there is no disklabel [and/or because the emulator
 	perhaps does not simulate CDROM TOCs well enough], but it's possible
 	to mount
-	the filesystem using manual intervention. Here is an example of what
+	the filesystem using manual intervention. Here is an example (from 4.4) of what
 	an install can look like: (user input in <font color="#0000ff"><i>blue italic</i></font>)<pre>
 	CPU0 is associated to 2 MC88200 CMMUs
 	Copyright (c) 1982, 1986, 1989, 1991, 1993

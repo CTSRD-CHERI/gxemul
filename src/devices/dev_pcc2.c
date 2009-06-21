@@ -373,6 +373,18 @@ DEVICE_ACCESS(pcc2)
 			memcpy(d->pcctwo_reg + relative_addr, data, len);
 		break;
 
+	case PCCTWO_PSCALEADJ:
+		if (len != 1) {
+			fatal("TODO: pcc2: non-byte reads and writes of "
+			    "PCCTWO_PSCALEADJ\n");
+			exit(1);
+		}
+		if (writeflag == MEM_WRITE) {
+			fatal("[ pcc2: write to PSCALEADJ ignored (value "
+			    "0x%02x) ]\n", (int)idata);
+		}
+		break;
+
 	case PCCTWO_T2CTL:
 	case PCCTWO_T1CTL:
 		if (len != 1) {
@@ -589,6 +601,7 @@ DEVINIT(pcc2)
 	d->pcctwo_reg[PCCTWO_CHIPREV] = 0x00;
 	d->pcctwo_reg[PCCTWO_GENCTL] = 0x00;
 	d->pcctwo_reg[PCCTWO_VECBASE] = 0x0f;
+	d->pcctwo_reg[PCCTWO_PSCALEADJ] = 256 - 33;	// 256 - MHz (fake)
 
 	/*  Connect to the CPU's interrupt pin:  */
 	INTERRUPT_CONNECT(devinit->interrupt_path, d->cpu_irq);

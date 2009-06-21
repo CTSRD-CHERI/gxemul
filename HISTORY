@@ -3824,3 +3824,5 @@ Changelog for GXemul:
 20090610	Making configuration files work again! (Thanks to Wu Kan for
 		noticing this bug.)
 20090611	Documentation updates (NetBSD 5 etc).
+20090621	Adding a hack for the pcc2 PSCALEADJ register, making it
+		possible to install and run OpenBSD/mvme88k 4.5.
