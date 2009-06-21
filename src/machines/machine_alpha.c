@@ -39,8 +39,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/alpha_autoconf.h"
-#include "thirdparty/alpha_rpb.h"
+#include "alpha_autoconf.h"
+#include "alpha_rpb.h"
 
 
 MACHINE_SETUP(alpha)

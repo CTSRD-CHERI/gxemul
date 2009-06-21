@@ -2,12 +2,11 @@
 <html><head><title>Gavare's eXperimental Emulator:&nbsp;&nbsp;&nbsp;Unsupported guest OSes</title>
 <meta name="robots" content="noarchive,nofollow,noindex"></head>
 <body>
-<h1>GXemul: Unsupported guest OSes</h1><hr><p>
-
-
-
-
-
+<table border=0 width=100% bgcolor="#d0d0d0"><tr>
+<td width=100% align=center valign=center><table border=0 width=100%><tr>
+<td align="left" valign=center bgcolor="#d0efff"><font color="#6060e0" size="6">
+<b>GXemul:</b></font>&nbsp;&nbsp;<font color="#000000" size="6"><b>Unsupported guest OSes</b>
+</font></td></tr></table></td></tr></table><p>
 
 <!--
 
@@ -50,7 +49,8 @@ SUCH DAMAGE.
   <li><a href="unsupported.html#openbsdsgiinstall">OpenBSD/sgi</a>
   <li><a href="unsupported.html#openbsdarcinstall">OpenBSD/arc 2.3</a>
   <li><a href="unsupported.html#debiancats">Debian GNU/Linux for CATS</a>
-  <li><a href="unsupported.html#linux_malta">Linux/Malta</a>
+  <li><a href="unsupported.html#linux_malta">Linux/Malta</a> (variant 1)
+  <li><a href="unsupported.html#linux_malta2">Linux/Malta</a> (variant 2)
   <li><a href="unsupported.html#linux_qemu_mips">Linux/QEMU_MIPS</a>
   <li><a href="unsupported.html#windows_nt_mips">Windows NT/MIPS</a>
   <li><a href="unsupported.html#netbsdbeboxinstall">NetBSD/bebox 19981119</a>
@@ -539,7 +539,7 @@ fdisk and mke2fs, which are useful for creating Linux paritions on disk images.
 
 <p><br>
 <a name="linux_malta"></a>
-<h3>Linux/Malta:</h3>
+<h3>Linux/Malta (variant 1):</h3>
 
 <p>The Malta emulation mode is best suited for running <a 
 href="#netbsdevbmipsinstall">NetBSD/evbmips</a>, however, it is possible 
@@ -604,11 +604,52 @@ once.
 
 
 <p><br>
+<a name="linux_malta2"></a>
+<h3>Linux/Malta (variant 2):</h3>
+
+<p>The Malta emulation mode is best suited for running <a 
+href="#netbsdevbmipsinstall">NetBSD/evbmips</a>, however, it is possible 
+to experiment with Linux/Malta as well.
+
+<p>It is also possible to experiment with much newer Linux userland, compared
+to the Linux/Malta variant 1 above, by using a kernel and disk image from
+<a href="http://people.debian.org/~aurel32/qemu/mipsel/">http://people.debian.org/~aurel32/qemu/mipsel/</a>.
+
+<font color="#ff0000">THIS DOES <b>NOT</b> WORK YET!</font>
+
+<p><ol start="1">
+  <li>Download the Malta kernel and disk image:<pre>
+	wget <a href="http://people.debian.org/~aurel32/qemu/mipsel/vmlinux-2.6.26-1-4kc-malta">http://people.debian.org/~aurel32/qemu/mipsel/vmlinux-2.6.26-1-4kc-malta</a>
+	wget <a href="http://people.debian.org/~aurel32/qemu/mipsel/debian_lenny_mipsel_small.qcow.gz">http://people.debian.org/~aurel32/qemu/mipsel/debian_lenny_mipsel_small.qcow.gz</a> (142 MB)
+
+</pre>
+  <li>The disk image is both compressed and in QEMU format, so we need to extract it:<pre>
+	gunzip debian_lenny_mipsel_small.qcow.gz
+	qemu-img convert -f qcow -O raw debian_lenny_mipsel_small.qcow debian_lenny_mipsel_small.raw
+
+</pre>
+	(<tt>qemu-img</tt> actually requires that you have QEMU installed.)
+</ol>
+
+<p>It should now be possible to boot from the disk image, using the 
+following command:
+
+<p><pre>
+<b>	gxemul -e malta -d debian_lenny_mipsel_small.raw -o "root=/dev/hda1 console=ttyS0" vmlinux-2.6.26-1-4kc-malta</b>
+</pre>
+
+NOTE: <font color="#ff0000">IT DOES <b>NOT</b> WORK YET!</font>
+
+
+
+
+
+<p><br>
 <a name="linux_qemu_mips"></a>
 <h3>Linux/QEMU_MIPS:</h3>
 
 I've added a machine mode which emulates the MIPS machine mode used 
-in Fabrice Bellard's <a href="http://bellard.org/qemu/">QEMU</a>.
+in Fabrice Bellard's <a href="http://www.nongnu.org/qemu/">QEMU</a>.
 Starting with QEMU 0.9.0, there are other MIPS modes in QEMU (i.e. Malta); 
 the QEMU_MIPS mode in GXemul refers to the old QEMU-specific MIPS machine.
 
@@ -618,8 +659,8 @@ kernel, in way similar to the <tt>run-qemu</tt> script:
 <p>
 <ol>
   <li>Download the archive from
-	<a href="http://bellard.org/qemu/download.html">http://bellard.org/qemu/download.html</a> and extract it:<pre>
-	<b>wget <a href="http://bellard.org/qemu/mips-test-0.2.tar.gz">http://bellard.org/qemu/mips-test-0.2.tar.gz</a>
+	<a href="http://www.nongnu.org/qemu/download.html">http://www.nongnu.org/qemu/download.html</a> and extract it:<pre>
+	<b>wget <a href="http://www.nongnu.org/qemu/mips-test-0.2.tar.gz">http://www.nongnu.org/qemu/mips-test-0.2.tar.gz</a>
 	tar zxvf mips-test-0.2.tar.gz</b>
 
 </pre>

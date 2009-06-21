@@ -42,7 +42,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/comreg.h"
+#include "comreg.h"
 
 
 /*  #define debug fatal  */

@@ -43,7 +43,8 @@
 #include "misc.h"
 #include "net.h"
 
-#include "thirdparty/rtl81x9reg.h"
+
+#include "rtl81x9reg.h"
 
 
 #define	DEV_RTL8139C_LENGTH	0x100

@@ -137,6 +137,8 @@ unsigned char *memory_paddr_to_hostaddr(struct memory *mem,
 #define FLAG_NOEXCEPTIONS       2
 #define FLAG_INSTR              4
 
+int userland_memory_rw(struct cpu *cpu, struct memory *mem, uint64_t vaddr,
+	unsigned char *data, size_t len, int writeflag, int cache);
 #define	MEMORY_ACCESS_FAILED		0
 #define	MEMORY_ACCESS_OK		1
 #define	MEMORY_ACCESS_OK_WRITE		2

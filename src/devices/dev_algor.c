@@ -44,7 +44,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/algor_p5064reg.h"
+#include "algor_p5064reg.h"
 
 
 struct algor_data {

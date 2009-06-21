@@ -42,7 +42,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/alpha_lcareg.h"
+
+#include "alpha_lcareg.h"
 
 #define	LCA_ISA_BASE	(LCA_PCI_SIO + 0x10000000)
 #define	LCA_ISA_MEMBASE	(LCA_PCI_SIO + 0x18000000)

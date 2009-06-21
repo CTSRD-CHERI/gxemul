@@ -4,17 +4,15 @@
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 
+OBJS=emul.o emul_parse.o float_emul.o interrupt.o main.o memory.o misc.o \
+	net.o settings.o timer.o useremul.o
+
 all: do_include
-	$(MAKE) do_console do_components do_cpus do_debugger do_devices \
-		do_disk do_file \
-		do_ir do_machines do_main do_net do_old_core do_promemul \
-		do_symbol do_ui
+	$(MAKE) do_src do_console do_cpus do_debugger do_devices do_disk \
+	    do_file do_machines do_net do_promemul do_symbol do_useremul
 
 do_include:
 	cd include; $(MAKE)
-
-do_components:
-	cd components; $(MAKE)
 
 do_console:
 	cd console; $(MAKE)
@@ -34,20 +32,11 @@ do_disk:
 do_file:
 	cd file; $(MAKE)
 
-do_ir:
-	cd ir; $(MAKE)
-
 do_machines:
 	cd machines; $(MAKE)
 
-do_main:
-	cd main; $(MAKE)
-
 do_net:
 	cd net; $(MAKE)
-
-do_old_core:
-	cd old_core; $(MAKE)
 
 do_promemul:
 	cd promemul; $(MAKE)
@@ -55,45 +44,40 @@ do_promemul:
 do_symbol:
 	cd symbol; $(MAKE)
 
-do_ui:
-	cd ui; $(MAKE)
+do_useremul:
+	cd useremul; $(MAKE)
 
+do_src: $(OBJS)
+
+$(OBJS): Makefile
 
 clean:
-	rm -f core *.core tmp_*.c
+	rm -f $(OBJS) *core tmp_*.c
 	cd include; $(MAKE) clean
-	cd components; $(MAKE) clean
 	cd console; $(MAKE) clean
 	cd cpus; $(MAKE) clean
 	cd debugger; $(MAKE) clean
 	cd devices; $(MAKE) clean
 	cd disk; $(MAKE) clean
 	cd file; $(MAKE) clean
-	cd ir; $(MAKE) clean
 	cd machines; $(MAKE) clean
-	cd main; $(MAKE) clean
 	cd net; $(MAKE) clean
-	cd old_core; $(MAKE) clean
 	cd promemul; $(MAKE) clean
 	cd symbol; $(MAKE) clean
-	cd ui; $(MAKE) clean
+	cd useremul; $(MAKE) clean
 
 clean_all: clean
 	cd include; $(MAKE) clean_all
 	cd console; $(MAKE) clean_all
-	cd components; $(MAKE) clean_all
 	cd cpus; $(MAKE) clean_all
 	cd debugger; $(MAKE) clean_all
 	cd devices; $(MAKE) clean_all
 	cd disk; $(MAKE) clean_all
 	cd file; $(MAKE) clean_all
-	cd ir; $(MAKE) clean_all
 	cd machines; $(MAKE) clean_all
-	cd main; $(MAKE) clean_all
 	cd net; $(MAKE) clean_all
-	cd old_core; $(MAKE) clean_all
 	cd promemul; $(MAKE) clean_all
 	cd symbol; $(MAKE) clean_all
-	cd ui; $(MAKE) clean_all
+	cd useremul; $(MAKE) clean_all
 	rm -f Makefile
 

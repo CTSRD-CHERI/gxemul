@@ -31,15 +31,10 @@
  *  Motorola 88x00 CPU definitions.
  */
 
-#ifndef __cplusplus	// Legacy
-
 #include "misc.h"
 #include "interrupt.h"
 
-#endif
-
-
-#include "thirdparty/m88k_psl.h"
+#include "m88k_psl.h"
 
 struct cpu_family;
 
@@ -165,9 +160,7 @@ struct m88k_cpu_type_def {
 #define	M88K_ADDR_TO_PAGENR(a)		((a) >> (M88K_IC_ENTRIES_SHIFT \
 					+ M88K_INSTR_ALIGNMENT_SHIFT))
 
-#ifndef __cplusplus	// legacy C
 DYNTRANS_MISC_DECLARATIONS(m88k,M88K,uint32_t)
-#endif
 
 #define	M88K_MAX_VPH_TLB_ENTRIES		128
 
@@ -227,8 +220,6 @@ struct m8820x_cmmu {
 	int		patc_update_index;
 };
 
-
-#ifndef __cplusplus	// Legacy
 
 struct m88k_cpu {
 	struct m88k_cpu_type_def cpu_type;
@@ -298,7 +289,5 @@ void m88k_exception(struct cpu *cpu, int vector, int is_trap);
 int m88k_translate_v2p(struct cpu *cpu, uint64_t vaddr,
 	uint64_t *return_addr, int flags);
 
-
-#endif	// legacy C
 
 #endif	/*  CPU_M88K_H  */

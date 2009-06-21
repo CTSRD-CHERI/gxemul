@@ -27,9 +27,7 @@
  *
  *  COMMENT: VME bus
  *
- *  TODO:
- *	Probably almost everything.
- *	Make it independent of M88K!
+ *  TODO: Probably almost everything.
  */
 
 #include <stdio.h>
@@ -43,7 +41,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/mvme88k_vme.h"
+
+#include "mvme88k_vme.h"
 
 
 /*  #define debug fatal  */

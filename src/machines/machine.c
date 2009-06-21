@@ -44,6 +44,7 @@
 #include "misc.h"
 #include "settings.h"
 #include "symbol.h"
+#include "useremul.h"
 
 
 /*  This is initialized by machine_init():  */
@@ -847,6 +848,11 @@ void machine_list_available_types_and_cpus(void)
 	    "GXemul documentation\nfor information about which machine types "
 	    "that actually work. Use the alias\nwhen selecting a machine type "
 	    "or subtype, not the real name.\n");
+
+	debug("\n");
+
+	useremul_list_emuls();
+	debug("Userland emulation is not really working yet.\n");
 }
 
 

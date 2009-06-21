@@ -43,7 +43,7 @@
 #include "misc.h"
 #include "net.h"
 
-#include "thirdparty/yamon.h"
+#include "yamon.h"
 
 
 /*

@@ -45,7 +45,7 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "thirdparty/gtreg.h"
+#include "gtreg.h"
 
 
 #define	TICK_SHIFT		14

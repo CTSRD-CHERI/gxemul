@@ -42,8 +42,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/dreamcast_sysasicvar.h"
-#include "thirdparty/sh4_exception.h"
+#include "dreamcast_sysasicvar.h"
+#include "sh4_exception.h"
 
 
 #define debug fatal

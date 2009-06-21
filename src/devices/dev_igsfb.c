@@ -45,9 +45,9 @@
 #include "machine.h"
 #include "memory.h"
 #include "misc.h"
-#include "vga.h"
 
-#include "thirdparty/igsfbreg.h"
+#include "igsfbreg.h"
+#include "vga.h"
 
 
 struct dev_igsfb_data {

@@ -37,8 +37,8 @@
 #include "machine.h"
 #include "misc.h"
 
-#include "thirdparty/dc7085.h"	/*  for port names  */
-#include "thirdparty/lk201.h"
+#include "dc7085.h"	/*  for port names  */
+#include "lk201.h"
 
 
 /*

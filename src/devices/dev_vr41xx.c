@@ -46,10 +46,10 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "thirdparty/bcureg.h"
-#include "thirdparty/vripreg.h"
-#include "thirdparty/vrkiureg.h"
-#include "thirdparty/vr_rtcreg.h"
+#include "bcureg.h"
+#include "vripreg.h"
+#include "vrkiureg.h"
+#include "vr_rtcreg.h"
 
 
 /*  #define debug fatal  */
@@ -721,8 +721,10 @@ struct vr41xx_data *dev_vr41xx_init(struct machine *machine,
 
 	/*  TODO: VRC4173 has the KIU at offset 0x100?  */
 	d->kiu_offset = 0x180;
-	d->kiu_console_handle = console_start_slave_inputonly(
-	    machine, "kiu", 1);
+	d->kiu_console_handle = -1;
+	if (machine->x11_md.in_use)
+		d->kiu_console_handle = console_start_slave_inputonly(
+		    machine, "kiu", 1);
 
 	/*  Connect to the KIU and GIU interrupts:  */
 	snprintf(tmps, sizeof(tmps), "%s.cpu[%i].vrip.%i",

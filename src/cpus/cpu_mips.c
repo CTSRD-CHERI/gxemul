@@ -901,14 +901,8 @@ int mips_cpu_disassemble_instr(struct cpu *cpu, unsigned char *originstr,
 		case SPECIAL_DMULTU:
 		case SPECIAL_DIV:
 		case SPECIAL_DIVU:
-		case SPECIAL_DDIV:  
+		case SPECIAL_DDIV:
 		case SPECIAL_DDIVU:
-		case SPECIAL_TGE:                
-		case SPECIAL_TGEU:
-		case SPECIAL_TLT:
-		case SPECIAL_TLTU:
-		case SPECIAL_TEQ:
-		case SPECIAL_TNE:
 			rs = ((instr[3] & 3) << 3) + ((instr[2] >> 5) & 7);
 			rt = instr[2] & 31;
 			rd = (instr[1] >> 3) & 31;
@@ -926,6 +920,21 @@ int mips_cpu_disassemble_instr(struct cpu *cpu, unsigned char *originstr,
 			}
 			debug("%s", regnames[rs]);
 			debug(",%s", regnames[rt]);
+			break;
+		case SPECIAL_TGE:
+		case SPECIAL_TGEU:
+		case SPECIAL_TLT:
+		case SPECIAL_TLTU:
+		case SPECIAL_TEQ:
+		case SPECIAL_TNE:
+			rs = ((instr[3] & 3) << 3) + ((instr[2] >> 5) & 7);
+			rt = instr[2] & 31;
+			rd = ((instr[1] << 8) + instr[0]) >> 6;	// code, not rd
+			debug("%s\t", special_names[special6]);
+			debug("%s", regnames[rs]);
+			debug(",%s", regnames[rt]);
+			if (rd != 0)
+				debug(",0x%x", rd);
 			break;
 		case SPECIAL_SYNC:
 			imm = ((instr[1] & 7) << 2) + (instr[0] >> 6);

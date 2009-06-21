@@ -3727,12 +3727,6 @@ X(to_be_translated)
 			case SPECIAL_MULTU:
 			case SPECIAL_DMULT:
 			case SPECIAL_DMULTU:
-			case SPECIAL_TGE:
-			case SPECIAL_TGEU:
-			case SPECIAL_TLT:
-			case SPECIAL_TLTU:
-			case SPECIAL_TEQ:
-			case SPECIAL_TNE:
 				if (s6 == SPECIAL_MULT && rd != MIPS_GPR_ZERO) {
 					if (cpu->cd.mips.cpu_type.rev ==
 					    MIPS_R5900) {
@@ -3754,6 +3748,15 @@ X(to_be_translated)
 					goto bad;
 				}
 				/*  These instructions don't use rd.  */
+				break;
+			case SPECIAL_TGE:
+			case SPECIAL_TGEU:
+			case SPECIAL_TLT:
+			case SPECIAL_TLTU:
+			case SPECIAL_TEQ:
+			case SPECIAL_TNE:
+				/*  In these instructions, rd is a 'code',
+				    only read by trap handling software.  */
 				break;
 			default:if (rd == MIPS_GPR_ZERO)
 					ic->f = instr(nop);

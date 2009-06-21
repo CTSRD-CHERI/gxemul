@@ -55,8 +55,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/sh4_exception.h"
-#include "thirdparty/sh4_scireg.h"
+#include "sh4_exception.h"
+#include "sh4_scireg.h"
 
 
 /*  This is not really implemented yet: (experimental)  */

@@ -34,7 +34,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/alpha_rpb.h"
+#include "alpha_rpb.h"
 
 
 /*

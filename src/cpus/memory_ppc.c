@@ -29,8 +29,8 @@
  */
 
 
-#include "thirdparty/ppc_bat.h"
-#include "thirdparty/ppc_pte.h"
+#include "ppc_bat.h"
+#include "ppc_pte.h"
 
 
 /*
@@ -210,6 +210,8 @@ static int ppc_vtp32(struct cpu *cpu, uint32_t vaddr, uint64_t *return_paddr,
 
 /*
  *  ppc_translate_v2p():
+ *
+ *  Don't call this function if userland_emul is non-NULL, or cpu is NULL.
  *
  *  Return values:
  *	0  Failure

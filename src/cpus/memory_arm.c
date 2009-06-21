@@ -39,7 +39,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/armreg.h"
+#include "armreg.h"
 
 extern int quiet_mode;
 
@@ -101,6 +101,8 @@ static int arm_check_access(struct cpu *cpu, int ap, int dav, int user)
 
 /*
  *  arm_translate_v2p_mmu():
+ *
+ *  Don't call this function if userland_emul is non-NULL, or cpu is NULL.
  *
  *  Return values:
  *	0  Failure

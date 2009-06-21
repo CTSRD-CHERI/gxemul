@@ -2,12 +2,11 @@
 <html><head><title>Gavare's eXperimental Emulator:&nbsp;&nbsp;&nbsp;Introduction</title>
 <meta name="robots" content="noarchive,nofollow,noindex"></head>
 <body>
-<h1>GXemul: Introduction</h1><hr><p>
-
-
-
-
-
+<table border=0 width=100% bgcolor="#d0d0d0"><tr>
+<td width=100% align=center valign=center><table border=0 width=100%><tr>
+<td align="left" valign=center bgcolor="#d0efff"><font color="#6060e0" size="6">
+<b>GXemul:</b></font>&nbsp;&nbsp;<font color="#000000" size="6"><b>Introduction</b>
+</font></td></tr></table></td></tr></table><p>
 
 <!--
 
@@ -44,13 +43,9 @@ SUCH DAMAGE.
 <h2>Introduction</h2>
 
 <p>
-<table border="0" width="98%">
-<tr>
-
-<td valign="top" align="left" width="90%">
+<table border="0" width="99%"><tr><td valign="top" align="left">
 <ul>
   <li><a href="#overview">Overview</a>
-  <li><a href="#thanks">Thanks</a>
   <li><a href="#free">Is GXemul Free software?</a>
   <li><a href="#build">How to compile/build the emulator</a>
   <li><a href="#run">How to run the emulator</a>
@@ -59,18 +54,16 @@ SUCH DAMAGE.
   <li><a href="#accuracy">Emulation accuracy</a>
   <li><a href="#emulmodes">Which machines does GXemul emulate?</a>
 </ul>
-</td>
-
-<td valign="center" align="center">
+</td><td valign="center" align="center">
 <a href="20050317-example.png"><img src="20050317-example_small.png"></a>
-<p><small>NetBSD/pmax 1.6.2 with X11<br>running in GXemul</small></td>
-
-</tr>
-</table>
+<p>NetBSD/pmax 1.6.2 with X11<br>running in GXemul</td></tr></table>
 
 
+
+
+<p><br>
 <a name="overview"></a>
-<h3>Overview</h3>
+<h3>Overview:</h3>
 
 GXemul is a framework for full-system computer architecture emulation. 
 Several processor architectures and machine types have been implemented. 
@@ -89,7 +82,9 @@ various surrounding hardware components such as framebuffers, busses,
 interrupt controllers, ethernet controllers, disk controllers, and serial 
 port controllers.
 
-<p>GXemul, including the dynamic translation system, is implemented in C and C++,
+<p>GXemul, including the dynamic translation system, is implemented in
+portable
+<a href="http://en.wikipedia.org/wiki/C_(programming_language)">C</a>,
 which means that the emulator will run on practically any 64-bit or 32-bit
 <a href="http://en.wikipedia.org/wiki/Unix-like">Unix-like</a> systems,
 with few or no modifications.
@@ -120,28 +115,12 @@ image. This works for example with DECstation emulation, <a href="dreamcast.html
 emulation</a>, or when booting from generic <a href="http://en.wikipedia.org/wiki/ISO9660">ISO9660</a>
 CDROM images if the kernel is included in the image as a plain file.
 
-
-
-
-
-<p><br>
-<a name="thanks"></a>
-<h3>Thanks</h3>
-
-Thanks to (in no specific order) Joachim Buss, Olivier Houchard, Juli 
+<p>Thanks to (in no specific order) Joachim Buss, Olivier Houchard, Juli 
 Mallett, Juan Romero Pardines, Carl van Schaik, Miod Vallat, Alec Voropay,
-Göran Weinholt, Alexander Yurchenko, and everyone else who has provide
-feedback.
+Göran Weinholt, Alexander Yurchenko, and everyone else who has provided me
+with feedback.
 
-<!--
 
-<p>In addition to feedback, the following individuals have contributed
-larger portions of code:
-<ul>
-	<li>TODO.
-</ul>
-
--->
 
 
 
@@ -151,16 +130,16 @@ larger portions of code:
 <a name="free"></a>
 <h3>Is GXemul Free software?</h3>
 
-Yes. GXemul is released under a Free license. The code in GXemul is
+Yes. I have released GXemul under a Free license. The code in GXemul is
 Copyrighted software, it is <i>not</i> public domain. (If this is
 confusing to you, you might want to read up on the definitions of the
 four freedoms associated with Free software, <a
 href="http://www.gnu.org/philosophy/free-sw.html">http://www.gnu.org/philosophy/free-sw.html</a>.)
 
-<p>Most of the code is released under a 3-clause BSD-style license
-(or "revised BSD-style" if one wants to use <a 
+<p>The code I have written is released under a 3-clause BSD-style license
+(or "revised BSD-style" if one wants to use <a
 href="http://www.gnu.org/philosophy/bsd.html">GNU jargon</a>). Apart from
-the main code, some files are copied from other sources such as
+the code I have written, some files are copied from other sources such as
 NetBSD, for example header files containing symbolic names of bitfields in
 device registers. They are also covered by similar licenses, but with some
 additional clauses. The main point, however, is that the licenses require
@@ -170,17 +149,15 @@ copy or modification.
 <p>If you plan to redistribute GXemul <i>without</i> supplying the source
 code, then you need to comply with each individual source file some other
 way, for example by writing additional documentation containing copyright
-notes. (This is not done in the default distribution, since it is a source 
-code distribution. You need to check 
-all individual files for details. The <i>easiest way out</i> if you plan 
-to redistribute code from GXemul is, of course, to let it remain Free Software
-and simply include the source code.)
+notes. I have not done this, since I do not plan on making distributions
+without source code. You need to check all individual files for details.
+The "easiest way out" if you plan to redistribute code from GXemul is, of
+course, to let it remain Free Software and simply include the source code.
 
 <p>In case you want to reuse parts of GXemul, but you need to do that 
 under a different license (e.g. the
-<a href="http://www.gnu.org/licenses/gpl.html">GPL</a>), then contact
-the author of the files in question to see if the files can be
-dual-licensed.
+<a href="http://www.gnu.org/licenses/gpl.html">GPL</a>), then contact me and 
+I can probably re-license/dual-license files on a case-by-case basis.
 
 
 
@@ -188,7 +165,7 @@ dual-licensed.
 
 <p><br>
 <a name="build"></a>
-<h3>How to compile/build the emulator</h3>
+<h3>How to compile/build the emulator:</h3>
 
 Uncompress the .tar.gz distribution file, and run
 <pre>
@@ -196,26 +173,36 @@ Uncompress the .tar.gz distribution file, and run
 	$ <b>make</b>
 </pre>
 
-<p>This should work on most Unix-like systems. GXemul does not <i>require</i> any 
-specific libraries to build, however, having the following libraries available
-adds features that are otherwise unavailable:
-<ul>
-  <li>X11, for graphical framebuffer emulation
-  <li><tt>glibmm</tt>, for I18N support
-  <li><tt>libintl</tt>, for I18N support
-</ul>
+<p>This should work on most Unix-like systems. GXemul does not require any 
+specific libraries to build, however, if you build on a system which does 
+not have X11 libraries installed, some functionality will be lost.
 
 <p>The emulator's performance is highly dependent on both runtime settings 
 and on compiler settings, so you might want to experiment with using 
-different <tt>CC</tt>, <tt>CXX</tt>, <tt>CFLAGS</tt>, and <tt>CXXFLAGS</tt>
-environment variable values when running the <tt>configure</tt> script.
+different <tt>CC</tt> and <tt>CFLAGS</tt> environment variable values when 
+running the <tt>configure</tt> script.
+
+<p>On some platforms, it is possible that building GXemul will fail 
+because of too high optimization. When using GCC (the GNU compiler), 
+<tt>-O3</tt> is the default optimization level. This works fine on e.g. 
+amd64 and i386 systems, but on some more uncommon platforms, <tt>-O3</tt> 
+might trigger internal bugs in GCC itself. If this happens, try setting 
+<tt>CFLAGS</tt> to <tt>-O2</tt> before running <tt>./configure</tt>, and 
+try again,
+
+<p>Note that there is no <tt>make install</tt> functionality; package
+maintainers for individual operating systems solve this for their 
+corresponding OSes.
+
+
+
 
 
 
 
 <p><br>
 <a name="run"></a>
-<h3>How to run the emulator</h3>
+<h3>How to run the emulator:</h3>
 
 Once you have built GXemul, running it should be rather straight-forward.
 Running <tt><b>gxemul</b></tt> without arguments (or with the
@@ -224,7 +211,7 @@ display a help message.
 
 <p>To get some ideas about what is possible to run in the emulator, please 
 read the section about <a href="guestoses.html">installing "guest" 
-operating systems</a>. The most straight forward guest operating to 
+operating systems</a>. The most straight forward guest operating system to 
 install is NetBSD/pmax; the instructions provided <a 
 href="guestoses.html#netbsdpmaxinstall">here</a> should let you install 
 NetBSD/pmax in a way very similar to how it is done on a real DECstation.
@@ -286,11 +273,10 @@ architectures.)
 <h3>Which host architectures/platforms are supported?</h3>
 
 GXemul should compile and run on any modern host architecture (64-bit or 
-32-bit word-length). It is mostly tested on
-<a href="http://www.freebsd.org/platforms/amd64.html">FreeBSD/amd64</a> 7.x,
-and sometimes also on
+32-bit word-length). I generally test it on
+<a href="http://www.freebsd.org/platforms/amd64.html">FreeBSD/amd64</a> 7.0, 
 <a href="http://www.freebsd.org/platforms/alpha.html">FreeBSD/alpha</a> 4.9,
-Linux (various platforms), and every
+sometimes also on Linux (various platforms), and every
 now and then also on <a href="http://www.netbsd.org/">NetBSD</a> or
 <a href="http://www.openbsd.org/">OpenBSD</a> inside the emulator itself
 (various platforms).
@@ -313,7 +299,7 @@ the primary platform. Some functionality may be lost when running on Cygwin.
 
 <p><br>
 <a name="accuracy"></a>
-<h3>Emulation accuracy</h3>
+<h3>Emulation accuracy:</h3>
 
 GXemul is an instruction-level emulator; things that would happen in
 several steps within a real CPU are not taken into account (e.g. pipe-line
@@ -368,7 +354,7 @@ are emulated well enough to run at least one "guest OS":
     <li><b>Acer Pica-61</b> (<a href="guestoses.html#netbsdarcinstall">NetBSD/arc</a>)
     <li><b>NEC MobilePro 770, 780, 800, 880</b> (<a href="guestoses.html#netbsdhpcmipsinstall">NetBSD/hpcmips</a>)
     <li><b>Cobalt</b> (<a href="guestoses.html#netbsdcobaltinstall">NetBSD/cobalt</a>)
-    <li><b>Malta</b> (<a href="guestoses.html#netbsdevbmipsinstall">NetBSD/evbmips</a>, Linux/Malta <font color="#0000e0">(<super>*1</super>)</font>)
+    <li><b>Malta</b> (<a href="guestoses.html#netbsdevbmipsinstall">NetBSD/evbmips</a>, <a href="unsupported.html#linux_malta2">Linux/Malta</a> <font color="#0000e0">(<super>*1</super>)</font>)
     <li><b>Algorithmics P5064</b> (<a href="guestoses.html#netbsdalgorinstall">NetBSD/algor</a>)
     <li><b>SGI O2 (aka IP32)</b> <font color="#0000e0">(<super>*2</super>)</font>
 	(<a href="guestoses.html#netbsdsgimips">NetBSD/sgi</a>)
@@ -396,10 +382,9 @@ are emulated well enough to run at least one "guest OS":
 
 <p>
 <small><font color="#0000e0">(<super>*1</super>)</font> =
-Linux/Malta may be run as a guest OS, however I have not yet found any stable
-URL to pre-compiled Linux/Malta kernels. Thus, Linux/Malta emulation is not
-tested for every release of the emulator; sometimes it works, sometimes
-it doesn't.</small>
+Linux/Malta sometimes works as a guest OS, but running Linux/Malta in GXemul
+is much more experimental/unknown than NetBSD, so it is still on the
+<a href="unsupported.html">"unsupported"</a> page.</small>
 
 <br><small><font color="#0000e0">(<super>*2</super>)</font> =
 The emulation is enough for root-on-nfs, but no disk controller (SCSI nor 

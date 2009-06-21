@@ -3804,30 +3804,23 @@ Changelog for GXemul:
 
 ==============  RELEASE 0.4.7  ==============
 
-20090103	Implementing more M88K floating point instruction variants.
-		Merging in some parts from the (old) experimental C++ branch:
-		compiler detection (C++), po directory, Doxygen configuration,
-		"make install" functionality, etc.
-20090104	Attempting to reduce the "first-person"-ness of some parts of
-		the documentation; adding a Thanks section to the intro.html
-		page, where code contributions can be credited.
-20090108	Continuing to merge in code from the C++ branch; more of the
-		main GXemul class and the unit test framework have been
-		incorporated now.
-		Moving RELEASE.html to doc/.
-20090109	Merging in everything from the C++ branch. In other words,
-		_none_ of the legacy functionality currently works.
-		Removing everything which has to do with userland emulation.
-		Moving all thirdparty header files to src/include/thirdparty/.
-		Removing the -E option. (-e is now the only option used for
-		selecting which machine template to start with.)
-20090110	Beginning on a M88K_CPUComponent class.
-		Adding command line options -L and -l, to call the legacy
-		-H and -h help, respectively.
-		If an unknown template name is supplied to the -e option,
-		the legacy old_main is called with the entire command line.
-20090113	Moving the TODO file to doc/TODO.html, and merging in parts
-		of the TODO file from the old C++ branch.
-20090118	Machine component tree dumps are now automagically included
-		in the HTML documentation for individual machines.
-20090120	Continuing on native code generation.
+20090103	Merging fixes from the main trunk.
+20090122	Merging in fdiv.sss and fadd.dsd from the main trunk.
+20090123	NetBSD/hpcmips can now be installed and run using serial
+		console (i.e. without -X), in addition to using the
+		framebuffer.
+
+==============  RELEASE 0.4.7.1  ==============
+
+20090215	Updating the guest OS page for HelenOS 0.4.0.
+20090513	Fixing the MIPS tne, teq, tge, tgeu, tlt, and tltu instructions
+		to allow non-zero "code" values.
+		Adding a new Linux/Malta "variant 2" entry to the unsupported
+		guest OS page.
+20090518	Changing the 8253 interrupt mechanism to assert interrupts
+		regardless of "mode" bits, causing Linux/Malta to get further.
+		Hacking on piix4 a bit to attempt to please Linux/Malta;
+		interrupts are lost.
+20090610	Making configuration files work again! (Thanks to Wu Kan for
+		noticing this bug.)
+20090611	Documentation updates (NetBSD 5 etc).

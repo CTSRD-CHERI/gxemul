@@ -39,8 +39,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/hpc_bootinfo.h"
-#include "thirdparty/vripreg.h"
+#include "hpc_bootinfo.h"
+#include "vripreg.h"
 
 
 MACHINE_SETUP(hpcsh)

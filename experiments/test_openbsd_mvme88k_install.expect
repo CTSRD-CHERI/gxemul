@@ -1,9 +1,9 @@
 #!/usr/local/bin/expect
 
-set timeout 3000
+set timeout 4000
 spawn ./gxemul -e mvme187 -q -d obsd_mvme88k.img -d b:../../emul/m88k/openbsd_mvme88k_4.4.iso -j 4.4/mvme88k/bsd.rd
 
-set  send_slow  {1 .3}
+set  send_slow  {1 .5}
 
 expect "(I)nstall"
 send -s "i\r"

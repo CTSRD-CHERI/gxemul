@@ -2,7 +2,7 @@
 #  Makefile for GXemul src/disk
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(INCLUDE1)
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=bootblock.o bootblock_apple.o bootblock_iso9660.o \
 	diskimage.o diskimage_scsicmd.o

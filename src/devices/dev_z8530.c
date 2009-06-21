@@ -49,7 +49,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/z8530reg.h"
+#include "z8530reg.h"
 
 
 /*  #define debug fatal  */

@@ -377,6 +377,7 @@ struct cpu {
 			    uint64_t paddr, int flags);
 	void		(*invalidate_code_translation)(struct cpu *,
 			    uint64_t paddr, int flags);
+	void		(*useremul_syscall)(struct cpu *cpu, uint32_t code);
 	int		(*instruction_has_delayslot)(struct cpu *cpu,
 			    unsigned char *ib);
 

@@ -4,7 +4,7 @@
 #  Symbol handling support.
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(INCLUDE1)
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=symbol.o symbol_demangle.o
 

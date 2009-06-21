@@ -55,7 +55,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/sh4_exception.h"
+#include "sh4_exception.h"
 
 #include "testmachine/dev_cons.h"
 #include "testmachine/dev_disk.h"

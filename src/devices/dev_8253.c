@@ -6,8 +6,8 @@
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright  
- *     notice, this list of conditions and the following disclaimer in the 
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
  *  3. The name of the author may not be used to endorse or promote products
  *     derived from this software without specific prior written permission.
@@ -15,7 +15,7 @@
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE   
+ *  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
  *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  *  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  *  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -23,7 +23,7 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  *  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  *  SUCH DAMAGE.
- *   
+ *
  *
  *  COMMENT: Intel 8253/8254 Programmable Interval Timer
  *
@@ -48,7 +48,7 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "thirdparty/i8253reg.h"
+#include "i8253reg.h"
 
 
 /*  #define debug fatal  */
@@ -90,20 +90,10 @@ DEVICE_TICK(8253)
 	if (!d->in_use)
 		return;
 
-	switch (d->mode[0] & 0x0e) {
-
-	case I8253_TIMER_INTTC:
-		if (d->pending_interrupts_timer0 > 0)
-			INTERRUPT_ASSERT(d->irq);
-		break;
-
-	case I8253_TIMER_SQWAVE:
-	case I8253_TIMER_RATEGEN:
-		break;
-
-	default:fatal("[ 8253: unimplemented mode 0x%x ]\n", d->mode[0] & 0x0e);
-		exit(1);
-	}
+	// Generate interrupts regardless of (d->mode[0] & 0x0e)?
+	// (It seems like Linux/MALTA kernels like this.)
+	if (d->pending_interrupts_timer0 > 0)
+		INTERRUPT_ASSERT(d->irq);
 }
 
 
@@ -158,6 +148,7 @@ DEVICE_ACCESS(8253)
 			default:fatal("[ 8253: huh? writing to counter"
 				    " %i but neither from msb nor lsb? ]\n",
 				    relative_addr);
+				exit(1);
 			}
 		} else {
 			switch (d->mode_byte & 0x30) {
@@ -171,6 +162,7 @@ DEVICE_ACCESS(8253)
 			default:fatal("[ 8253: huh? reading from counter"
 				    " %i but neither from msb nor lsb? ]\n",
 				    relative_addr);
+				exit(1);
 			}
 		}
 

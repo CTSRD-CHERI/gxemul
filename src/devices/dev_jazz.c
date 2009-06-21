@@ -54,8 +54,8 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "thirdparty/jazz_r4030_dma.h"
-#include "thirdparty/pica.h"
+#include "jazz_r4030_dma.h"
+#include "pica.h"
 
 
 #define	DEV_JAZZ_LENGTH			0x280

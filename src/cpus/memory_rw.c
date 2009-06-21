@@ -71,7 +71,9 @@ int MEMORY_RW(struct cpu *cpu, struct memory *mem, uint64_t vaddr,
 	const int offset_mask = 0xfff;
 #endif
 
+#ifndef MEM_USERLAND
 	int ok = 2;
+#endif
 	uint64_t paddr;
 	int cache, no_exceptions, offset;
 	unsigned char *memblock;
@@ -81,6 +83,13 @@ int MEMORY_RW(struct cpu *cpu, struct memory *mem, uint64_t vaddr,
 	cache = misc_flags & CACHE_FLAGS_MASK;
 
 
+#ifdef MEM_USERLAND
+#ifdef MEM_ALPHA
+	paddr = vaddr;
+#else
+	paddr = vaddr & 0x7fffffff;
+#endif
+#else	/*  !MEM_USERLAND  */
 	if (misc_flags & PHYSICAL || cpu->translate_v2p == NULL) {
 		paddr = vaddr;
 	} else {
@@ -99,7 +108,10 @@ int MEMORY_RW(struct cpu *cpu, struct memory *mem, uint64_t vaddr,
 			return MEMORY_ACCESS_FAILED;
 	}
 
+#endif	/*  !MEM_USERLAND  */
 
+
+#ifndef MEM_USERLAND
 	/*
 	 *  Memory mapped device?
 	 *
@@ -332,6 +344,8 @@ not just the device in question.
 		}
 	}
 
+#endif	/*  ifndef MEM_USERLAND  */
+
 
 	/*
 	 *  Uncached access:
@@ -360,12 +374,18 @@ not just the device in question.
 	    && (cpu->cd.mips.cpu_type.mmu_model != MMU3K ||
             !(cpu->cd.mips.coproc[0]->reg[COP0_STATUS] & MIPS1_ISOL_CACHES))
 #endif
+#ifndef MEM_USERLAND
 	    && !(ok & MEMORY_NOT_FULL_PAGE)
+#endif
 	    && !no_exceptions)
 		cpu->update_translation_table(cpu, vaddr & ~offset_mask,
 		    memblock, (misc_flags & MEMORY_USER_ACCESS) |
+#if !defined(MEM_USERLAND)
 		    (cache == CACHE_INSTRUCTION?
 			(writeflag == MEM_WRITE? 1 : 0) : ok - 1),
+#else
+		    (writeflag == MEM_WRITE? 1 : 0),
+#endif
 		    paddr & ~offset_mask);
 
 	/*
@@ -374,7 +394,9 @@ not just the device in question.
 	 */
 
 	if ((writeflag == MEM_WRITE
+#if !defined(MEM_USERLAND)
 	    || (ok == 2 && cache == CACHE_DATA)
+#endif
 	    ) && cpu->invalidate_code_translation != NULL)
 		cpu->invalidate_code_translation(cpu, paddr, INVALIDATE_PADDR);
 

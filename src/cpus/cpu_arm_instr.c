@@ -865,6 +865,35 @@ X(reboot)
 
 
 /*
+ *  swi_useremul: Syscall.
+ *
+ *  arg[0] = swi number
+ */
+X(swi_useremul)
+{
+	/*  Synchronize the program counter:  */
+	uint32_t old_pc, low_pc = ((size_t)ic - (size_t)
+	    cpu->cd.arm.cur_ic_page) / sizeof(struct arm_instr_call);
+	cpu->pc &= ~((ARM_IC_ENTRIES_PER_PAGE-1)
+	    << ARM_INSTR_ALIGNMENT_SHIFT);
+	cpu->pc += (low_pc << ARM_INSTR_ALIGNMENT_SHIFT);
+	old_pc = cpu->pc;
+
+	useremul_syscall(cpu, ic->arg[0]);
+
+	if (!cpu->running) {
+		cpu->n_translated_instrs --;
+		cpu->cd.arm.next_ic = &nothing_call;
+	} else if (cpu->pc != old_pc) {
+		/*  PC was changed by the SWI call. Find the new physical
+		    page and update the translation pointers:  */
+		quick_pc_to_pointers(cpu);
+	}
+}
+Y(swi_useremul)
+
+
+/*
  *  swi:  Software interrupt.
  */
 X(swi)
@@ -3138,6 +3167,15 @@ X(to_be_translated)
 		} else if (iword == 0xef8c64be) {
 			/*  Hack for openfirmware prom emulation:  */
 			ic->f = instr(openfirmware);
+		} else if (cpu->machine->userland_emul != NULL) {
+			if ((iword & 0x00f00000) == 0x00a00000) {
+				ic->arg[0] = iword & 0x00ffffff;
+				ic->f = cond_instr(swi_useremul);
+			} else {
+				if (!cpu->translation_readahead)
+					fatal("Bad userland SWI?\n");
+				goto bad;
+			}
 		}
 		break;
 

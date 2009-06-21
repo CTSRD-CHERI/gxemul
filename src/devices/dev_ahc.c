@@ -46,7 +46,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/aic7xxx_reg.h"
+#include "aic7xxx_reg.h"
 
 
 /* #define	AHC_DEBUG

@@ -29,7 +29,7 @@
 .\"
 .\"     groff -man -Tascii gxemul.1    or    nroff -man gxemul.1
 .\"
-.Dd JANUARY 2009
+.Dd MAY 2009
 .Dt GXEMUL 1
 .Os
 .Sh NAME
@@ -42,6 +42,9 @@
 .Nm
 .Op general options
 .Ar @configfile
+.Nm
+.Op userland, other, and general options
+.Ar file Op Ar args ...
 .Sh DESCRIPTION
 .Nm
 is a framework for full-system computer architecture emulation.
@@ -63,6 +66,10 @@ supplied directly on the command line.
 .Pp
 2. Options can be read from a configuration file.
 .Pp
+3. When emulating a userland environment (syscall-only emulation, not
+emulating complete machines), then the program name and its argument
+should be given on the command line. (This mode is not really usable yet.)
+.Pp
 The easiest way to use the emulator is to supply settings directly on the 
 command line.
 .Pp
@@ -74,12 +81,13 @@ If more than one filename is supplied, all files are loaded into memory,
 and the entry point (if available) is taken from the last file.
 .Pp
 Apart from the name of a binary file, you must also use the
+.Fl E
+and/or
 .Fl e
-option to select which emulation mode to use. This is necessary because
+options to select which emulation mode to use. This is necessary because
 the emulator cannot in general deduce this from the file being executed.
 For example, a MIPS-based machine from DEC (a DECstation) is very different
-from a MIPS-based machine from SGI, so simply supplying an ELF kernel is 
-not enough for the emulator. Use
+from a MIPS-based machine from SGI. Use
 .Nm
 .Fl H
 to get a list of available emulation modes.
@@ -112,12 +120,21 @@ option.
 .Pp
 Machine selection options:
 .Bl -tag -width Ds
-.It Fl e Ar type
+.It Fl E Ar t
 Try to emulate machine type
-.Ar "type".
+.Ar "t".
+This option is not always needed, if the
+.Fl e
+option uniquely selects a machine.
 (Use
 .Fl H
 to get a list of types.)
+.It Fl e Ar st
+Try to emulate machine subtype
+.Ar "st".
+Use this together with
+.Fl E .
+(This option is not always needed, if a machine type has no subtypes.)
 .El
 .Pp
 Other options:
@@ -352,6 +369,18 @@ Add
 as an X11 display to use for framebuffers.
 .El
 .Pp
+Userland options:
+.Bl -tag -width Ds
+.It Fl u Ar emul-mode
+Userland-only (syscall) emulation. (Use
+.Fl H
+to get a list of available emulation modes.) Some (but not all) of the
+options listed under Other options above can also be used with 
+userland emulation.
+.Pp
+Note: Userland (syscall) emulation does not really work yet.
+.El
+.Pp
 General options:
 .Bl -tag -width Ds
 .It Fl c Ar cmd
@@ -368,11 +397,13 @@ However, if the emulated machine has clocks or timer interrupt sources,
 or if user interaction is taking place (e.g. keyboard input at irregular
 intervals), then this option is meaningless.
 .It Fl H
-Display a list of available template machine types (pre-defined emulation 
-modes). Many of these don't work. Please read the documentation
+Display a list of available CPU types, machine types, and userland
+emulation modes. (Most of these don't work. Please read the documentation
 included in the
 .Nm
-distribution for details on which modes that actually work.
+distribution for details on which modes that actually work. Userland
+emulation is not included in stable release builds, since it doesn't work 
+yet.)
 .It Fl h
 Display a list of all available command line options.
 .It Fl k Ar n
@@ -448,13 +479,14 @@ file in the
 .Nm
 source distribution, some are marked as TODO in the source code itself.
 .Pp
+Userland (syscall-only) emulation, i.e. running a userland binary directly 
+without simulating an entire machine, doesn't really work yet.
+.Pp
 .Nm
 is in general not cycle-accurate; it does not simulate individual
 pipe-line stages or penalties caused by branch-prediction misses or
-cache misses, so it cannot be used for accurate timing-simulation of any 
-actual real-world processor. A sequence of x instructions which takes y 
-cycles on a real processor will execute as x instructions in the emulator, 
-but the concept of cycles does not really exist.
+cache misses, so it cannot be used for accurate simulation of any actual
+real-world processor.
 .Pp
 .Nm
 is in general not timing-accurate. Many emulation modes try to make the

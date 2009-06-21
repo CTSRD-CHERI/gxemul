@@ -69,9 +69,9 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/mvme187.h"
-#include "thirdparty/mvme88k_vme.h"
-#include "thirdparty/mvme_pcctworeg.h"
+#include "mvme187.h"
+#include "mvme88k_vme.h"
+#include "mvme_pcctworeg.h"
 
 
 MACHINE_SETUP(mvme88k)

@@ -38,6 +38,7 @@
 #include <sys/resource.h>
 
 #include "arcbios.h"
+#include "arcbios_other.h"
 #include "console.h"
 #include "cpu.h"
 #include "cpu_mips.h"
@@ -46,8 +47,6 @@
 #include "machine_arc.h"
 #include "memory.h"
 #include "misc.h"
-
-#include "thirdparty/arcbios_other.h"
 
 
 extern int quiet_mode;
@@ -2448,11 +2447,7 @@ void arcbios_init(struct machine *machine, int is64bit, uint64_t sgi_ram_offset,
 		machine->md.arc->console_curx = 0;
 		machine->md.arc->console_cury = 0;
 
-#ifdef VERSION
 		arcbios_putstring(cpu, "GXemul "VERSION"  ARCBIOS emulation\n");
-#else
-		arcbios_putstring(cpu, "GXemul   ARCBIOS emulation\n");
-#endif
 
 		snprintf(tmpstr, sizeof(tmpstr), "%i cpu%s (%s), %i MB "
 		    "memory\n\n", machine->ncpus, machine->ncpus > 1? "s" : "",

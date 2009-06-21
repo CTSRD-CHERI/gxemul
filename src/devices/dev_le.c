@@ -62,7 +62,7 @@
 #include "misc.h"
 #include "net.h"
 
-#include "thirdparty/if_lereg.h"
+#include "if_lereg.h"
 
 
 #define	LE_TICK_SHIFT		14

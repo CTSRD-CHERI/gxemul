@@ -34,7 +34,7 @@
 #include <misc.h>
 
 /*  MIPS CPU types:  */
-#include "thirdparty/mips_cpuregs.h"
+#include "mips_cpuregs.h"
 
 #define	EXC3K		3
 #define	EXC4K		4

@@ -39,7 +39,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/dc7085.h"
+#include "dc7085.h"
 
 
 #define	DC_TICK_SHIFT		14

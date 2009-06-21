@@ -57,9 +57,9 @@
 #include "machine.h"
 #include "memory.h"
 #include "misc.h"
-#include "wdc.h"
 
-#include "thirdparty/cpc700reg.h"
+#include "cpc700reg.h"
+#include "wdc.h"
 
 extern int verbose;
 
@@ -152,9 +152,8 @@ void bus_pci_data_access(struct cpu *cpu, struct pci_data *pci_data,
 			return;
 		}
 
-		if (dev->cfg_reg_write != NULL) {
-			dev->cfg_reg_write(dev, pci_data->cur_reg, *data);
-		} else {
+		if (dev->cfg_reg_write == NULL ||
+		    dev->cfg_reg_write(dev, pci_data->cur_reg, *data) == 0) {
 			/*  Print a warning for unhandled writes:  */
 			debug("[ bus_pci: write to PCI DATA: data = 0x%08llx"
 			    " (current value = 0x%08llx); NOT YET"
@@ -722,6 +721,22 @@ PCIINIT(i31244)
 	}
 }
 
+int piix_isa_cfg_reg_write(struct pci_device *pd, int reg, uint32_t value)
+{
+	switch (reg) {
+	case PCI_MAPREG_START:
+	case PCI_MAPREG_START + 4:
+	case PCI_MAPREG_START + 8:
+	case PCI_MAPREG_START + 12:
+	case PCI_MAPREG_START + 16:
+	case PCI_MAPREG_START + 20:
+		PCI_SET_DATA(reg, value);
+		return 1;
+	}
+
+	return 0;
+}
+
 PCIINIT(piix3_isa)
 {
 	PCI_SET_DATA(PCI_ID_REG, PCI_ID_CODE(PCI_VENDOR_INTEL,
@@ -744,6 +759,8 @@ PCIINIT(piix4_isa)
 
 	PCI_SET_DATA(PCI_BHLC_REG,
 	    PCI_BHLC_CODE(0,0, 1 /* multi-function */, 0x40,0));
+
+	pd->cfg_reg_write = piix_isa_cfg_reg_write;
 }
 
 PCIINIT(i82378zb)
@@ -784,6 +801,13 @@ int piix_ide_cfg_reg_write(struct pci_device *pd, int reg, uint32_t value)
 			wdc_set_io_enabled(wdc0, enabled);
 		if (wdc1 != NULL)
 			wdc_set_io_enabled(wdc1, enabled);
+		return 1;
+	case PCI_MAPREG_START:
+	case PCI_MAPREG_START + 4:
+	case PCI_MAPREG_START + 8:
+	case PCI_MAPREG_START + 12:
+	case PCI_MAPREG_START + 16:
+	case PCI_MAPREG_START + 20:
 		return 1;
 	}
 
@@ -840,6 +864,11 @@ PCIINIT(piix4_ide)
 	/*  Possibly not correct:  */
 	PCI_SET_DATA(PCI_CLASS_REG, PCI_CLASS_CODE(PCI_CLASS_MASS_STORAGE,
 	    PCI_SUBCLASS_MASS_STORAGE_IDE, 0x80) + 0x01);
+
+	/*  PIIX_BMIBA (see NetBSD's pciide_piix_reg.h)  */
+	/*  2009-05-18: Needs to have the lowest bit set, or Linux/Malta
+	    crashes.  */
+	PCI_SET_DATA(0x20, 1);
 
 	/*  PIIX_IDETIM (see NetBSD's pciide_piix_reg.h)  */
 	/*  channel 0 and 1 enabled as IDE  */

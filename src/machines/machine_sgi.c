@@ -48,8 +48,8 @@
 #include "misc.h"
 #include "net.h"
 
-#include "thirdparty/crimereg.h"
-#include "thirdparty/sgi_arcbios.h"
+#include "sgi_arcbios.h"
+#include "crimereg.h"
 
 
 #define ETHERNET_STRING_MAXLEN  	40

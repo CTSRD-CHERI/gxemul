@@ -5,7 +5,7 @@
 #  handling.
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE1)
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=console.o x11.o
 

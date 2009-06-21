@@ -38,7 +38,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/imcreg.h"
+#include "imcreg.h"
 
 
 #define	SGI_IP22_TICK_SHIFT		14

@@ -47,6 +47,7 @@
 #include "of.h"
 #include "settings.h"
 #include "symbol.h"
+#include "useremul.h"
 
 #define DYNTRANS_32
 #include "tmp_arm_head.c"
@@ -203,6 +204,12 @@ void arm_setup_initial_translation_table(struct cpu *cpu, uint32_t ttb_addr)
 {
 	unsigned char nothing[16384];
 	unsigned int i, j;
+
+	if (cpu->machine->userland_emul != NULL) {
+		fatal("arm_setup_initial_translation_table(): should not "
+		    "be called for userland emulation!\n");
+		exit(1);
+	}
 
 	cpu->cd.arm.control |= ARM_CONTROL_MMU;
 	cpu->translate_v2p = arm_translate_v2p_mmu;

@@ -41,8 +41,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/dec_kn02.h"
 
+#include "dec_kn02.h"
 
 #define	DEV_KN02_LENGTH		0x1000
 

@@ -1,0 +1,23 @@
+#
+#  Makefile for GXemul src/useremul
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+
+OBJS=useremul.o \
+	useremul_freebsd.o useremul_netbsd.o \
+	useremul_syscalls.o
+
+all: $(OBJS)
+	../../experiments/make_index.sh
+
+$(OBJS): Makefile
+
+useremul.o: useremul.c
+
+clean:
+	rm -f $(OBJS) *core
+
+clean_all: clean
+	rm -f Makefile
+

@@ -40,7 +40,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/lptreg.h"
+#include "lptreg.h"
 
 
 /*  #define debug fatal  */

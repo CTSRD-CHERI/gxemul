@@ -47,7 +47,7 @@
 #include "misc.h"
 #include "net.h"
 
-#include "thirdparty/mb86960reg.h"
+#include "mb86960reg.h"
 
 
 #ifdef UNSTABLE_DEVEL

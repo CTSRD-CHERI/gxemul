@@ -47,12 +47,12 @@
 #include "machine.h"
 #include "memory.h"
 #include "misc.h"
+#include "mvmeprom.h"
 #include "settings.h"
 #include "symbol.h"
 
-#include "thirdparty/m8820x_pte.h"
-#include "thirdparty/m88k_dmt.h"
-#include "thirdparty/mvmeprom.h"
+#include "m8820x_pte.h"
+#include "m88k_dmt.h"
 
 #define DYNTRANS_32
 #define DYNTRANS_DELAYSLOT

@@ -42,13 +42,14 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/sfbreg.h"
+#include "sfbreg.h"
+
+#define	SFB_XSIZE	1280
+#define	SFB_YSIZE	1024
 
 
 /*  #define debug fatal  */
 
-#define	SFB_XSIZE	1280
-#define	SFB_YSIZE	1024
 
 #define	SFB_REG_SIZE	0x80
 #define	N_SFB_REGS	(SFB_REG_SIZE / 4)

@@ -44,8 +44,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/i82365reg.h"
-#include "thirdparty/pcmciareg.h"
+#include "i82365reg.h"
+#include "pcmciareg.h"
 
 
 /*  #define debug fatal  */

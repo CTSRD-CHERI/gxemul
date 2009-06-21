@@ -2,7 +2,7 @@
 #  Makefile for GXemul devices
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(INCLUDE1) $(XINCLUDE)
+CFLAGS=$(CWARNINGS) $(COPTIM) $(DINCLUDE) $(XINCLUDE)
 OBJS=device.o bus_isa.o bus_pci.o lk201.o \
 	dev_8253.o dev_8259.o dev_adb.o dev_ahc.o dev_algor.o dev_asc.o \
 	dev_bebox.o dev_bt431.o dev_bt455.o dev_bt459.o dev_clmpcc.o \
@@ -26,7 +26,10 @@ OBJS=device.o bus_isa.o bus_pci.o lk201.o \
 	dev_uninorth.o dev_unreadable.o dev_v3.o dev_vga.o dev_vme.o \
 	dev_vr41xx.o dev_wdc.o dev_z8530.o dev_zero.o
 
-all: $(OBJS)
+all:
+	cd fonts; $(MAKE)
+	$(MAKE) font8x8.c font8x10.c font8x16.c
+	$(MAKE) objs
 	$(MAKE) autodev.o
 
 autodev.c: autodev_head.c autodev_middle.c autodev_tail.c makeautodev.sh bus_pci.c $(OBJS)

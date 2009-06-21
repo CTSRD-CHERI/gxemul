@@ -41,7 +41,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/siireg.h"
+#include "siireg.h"
 
 
 #define	SII_TICK_SHIFT		14

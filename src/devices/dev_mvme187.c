@@ -39,9 +39,10 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/mvme187.h"
-#include "thirdparty/mvme_memcreg.h"
-#include "thirdparty/m8820x.h"
+
+#include "mvme187.h"
+#include "mvme_memcreg.h"
+#include "m8820x.h"
 
 
 struct mvme187_data {

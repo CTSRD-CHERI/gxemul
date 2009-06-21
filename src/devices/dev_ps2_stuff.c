@@ -47,9 +47,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "thirdparty/ee_timerreg.h"
-#include "thirdparty/ps2_dmacreg.h"
-
+#include "ee_timerreg.h"
+#include "ps2_dmacreg.h"
 
 #define	TICK_STEPS_SHIFT	14
 
