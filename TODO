@@ -6,55 +6,38 @@ Some things, in no specific order, that I'd like to fix:
 
 -------------------------------------------------------------------------------
 
-0.4.7.2 = maintenance + bugfixes
 
-Tested:
-  <li><a href="#netbsdpmaxinstall">NetBSD/pmax 5.0</a>
-  <li><a href="#netbsdcatsinstall">NetBSD/cats 5.0</a>
-  <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0</a>
-  <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0</a>
-  <li><a href="#netbsdsgimips">NetBSD/sgimips 5.0</a>
-  <li><a href="#openbsdlandiskinstall">OpenBSD/landisk 4.5</a>
-  <li><a href="#openbsdmvme88kinstall">OpenBSD/mvme88k 4.5</a>
+Goals for 0.4.8 (hopefully some time during Summer 2009):
 
-Didn't work:
-  <li><a href="#netbsdmacppcinstall">NetBSD/macppc 5.0</a>  Some emulated PROM stuff not implemented yet
-  <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 5.0</a>  PCMCIA problems
-  <li><a href="#netbsdprepinstall">NetBSD/prep 5.0</a>  No disk controller
-
-Not tested:
-  <li><a href="#netbsdarcinstall">NetBSD/arc 4.0.1</a>
-  <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
-  <li><a href="#netbsdevbarminstall">NetBSD/evbarm 2.1</a>
-  <li><a href="#netbsdnetwinderinstall">NetBSD/netwinder 3.1</a>
-  <li><a href="#netbsdpmppc">NetBSD/pmppc 3.1</a>
-  <li><a href="#netbsdlandiskinstall">NetBSD/landisk 4.0.1</a>
-  <li><a href="dreamcast.html#netbsd_generic_md">NetBSD/dreamcast 4.0</a>
-  <li><a href="dreamcast.html#linux_live_cd">Linux/dreamcast</a>
-  <li><a href="#openbsdpmaxinstall">OpenBSD/pmax 2.8-BETA</a>
-  <li><a href="#openbsdcatsinstall">OpenBSD/cats 4.0</a>
-
-
-0.5.x will be skipped (it was the C++ version that I never had time to write.)
-
-
-Goals for 0.6.x:
-
-  [ ]   Home page: move to sourceforge!
-  	 [ ]  Remove personal references (from the old home page).
-  	 [ ]  Go back to C-style c2html browsable tree.
-  	 [ ]  How to deal with SVN?
-
-  [ ]   Maybe remove some unused/nonworking devices/machines?
-
-  [ ]   Make everything build with make -j X.
-  
   [ ]	Overhaul of the device framework: break out memory busses! This
   	would (in the best case) allow a correct implementation of e.g. PCI,
   	and cache emulation! :-)  Ideal solution would be if all devices
   	were runtime attachable/removable, and if there was a fast path for
   	device access (virtual memory page => immediate device function call).
 
+  [ ]   Continue moving stuff to DEVINIT.
+  
+  [ ]   Add _destructors_ (_free() something) to DEVINIT requirements, in
+  	addition to the constructors/allocators.
+
+  [ ]   Clean up the documentation in regards to the old homepage (gavare.se)
+        and less first-person-ism.
+
+  [ ]   Maybe remove some unused/nonworking devices/machines?
+
+  [ ]   Make everything build with make -j X.
+
+
+Goals for 0.4.9 (?):
+
+  [ ]   Moving to a more component based architecture (like was done in the
+        experimental C++ branch): allow e.g. different kinds of CPUs in the
+        same machine (like SH4 and ARM in the same machine for Dreamcast
+        emulation).  
+
+
+(The name "0.5.x" will be skipped. This was the C++ version that I never had
+time to write.)
 
 -------------------------------------------------------------------------------
 
@@ -606,52 +589,16 @@ Better framebuffer and X-windows functionality:
 	o)  Generalize the framebuffer stuff by moving _ALL_ X11
 		specific code to a separate module.
 
-C++:
-	o)  SLOWLY try to convert the code from C to C++. What will this
-	    achieve? Well, one of the absolutely biggest problems in
-	    GXemul so far (in C) is that it has not been written in a
-	    way which would allow the following things:
-
-		x)  Adding and removing devices during runtime.
-		    This is hindered by the fact that the C code is
-		    written in a "construct only" kind of way, with no
-		    "destructors". It will be much easier to achieve this
-		    in C++ than having to rewrite EVERYTHING in C to
-		    use destructors.
-
-		x)  Serializing/deserializing a snapshot of the entire
-		    emulation to a file (which in the long run would
-		    allow things like "live migration").
-		    This will be much easier in C++ than in C.
-
-		x)  Allowing multiple _DIFFERENT_ CPU architectures per
-		    machine, and different cache configurations and
-		    busses.
-		    Also possible with C, but will be easier with C++.
-		    (Already tried some of it in the experimental C++
-		    branch.)
-		    Example: Dreamcast has both an SH4 and an ARM cpu.
-
-		x)  Controlled abort, when something fails. The C code
-		    right now is unable to use somthing similar to
-		    "exceptions", which would be good to abort emulation
-		    e.g. when something unimplemented is attempted.
-
-	    But for the future, it would also allow the code to be
-	    more easily maintained. Hopefully some of the template magic
-	    (which currently consists of programs creating temporary
-	    C files which are compiled into the program) can be replaced
-	    by native C++ templates instead.
-
 Release checklist:
 	README
 	RELEASE NOTES
 	Send SVN dump to Sourceforge
-	Tarball creation
-	Sourceforge file release
+	Tarball creation (make_release.sh)
 	Home page update: version numbers
 	Home page News page update
+	sync homepage to sourceforge
 	#GXemul (version number in topic)
+	Sourceforge file release
 	gxemul-users mail
 	Freshmeat
 	Wikipedia page (version number and date)
