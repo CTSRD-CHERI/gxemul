@@ -207,17 +207,17 @@ static void start_xterm(int handle)
 
 	a[0] = getenv("XTERM");
 	if (a[0] == NULL)
-		a[0] = "xterm";
-	a[1] = "-geometry";
-	a[2] = "80x25";
-	a[3] = "-title";
+		a[0] = strdup("xterm");
+	a[1] = strdup("-geometry");
+	a[2] = strdup("80x25");
+	a[3] = strdup("-title");
 	mlen = strlen(console_handles[handle].name) +
 	    strlen(console_handles[handle].machine_name) + 30;
 	CHECK_ALLOCATION(a[4] = (char *) malloc(mlen));
 	snprintf(a[4], mlen, "GXemul: %s %s",
 	    console_handles[handle].machine_name,
 	    console_handles[handle].name);
-	a[5] = "-e";
+	a[5] = strdup("-e");
 	a[6] = progname;
 	CHECK_ALLOCATION(a[7] = (char *) malloc(80));
 	snprintf(a[7], 80, "-WW@S%i,%i", filedes[0], filedesB[1]);
@@ -533,7 +533,7 @@ static void console_slave_sigcont(int x)
  *  This function is used when running with X11, and gxemul opens up
  *  separate xterms for each emulated terminal or serial port.
  */
-void console_slave(char *arg)
+void console_slave(const char *arg)
 {
 	int inputd;
 	int len;
@@ -597,7 +597,7 @@ void console_slave(char *arg)
  *
  *  For internal use.
  */
-static struct console_handle *console_new_handle(char *name, int *handlep)
+static struct console_handle *console_new_handle(const char *name, int *handlep)
 {
 	struct console_handle *chp;
 	int i, n, found_free = -1;
@@ -624,7 +624,7 @@ static struct console_handle *console_new_handle(char *name, int *handlep)
 	memset(chp, 0, sizeof(struct console_handle));
 
 	chp->in_use = 1;
-	chp->machine_name = "";
+	chp->machine_name = strdup("");
 	CHECK_ALLOCATION(chp->name = strdup(name));
 
 	*handlep = found_free;
@@ -657,7 +657,7 @@ static struct console_handle *console_new_handle(char *name, int *handlep)
  *
  *  On failure, -1 is returned.
  */
-int console_start_slave(struct machine *machine, char *consolename,
+int console_start_slave(struct machine *machine, const char *consolename,
 	int use_for_input)
 {
 	struct console_handle *chp;
@@ -703,7 +703,7 @@ int console_start_slave(struct machine *machine, char *consolename,
  *
  *  On failure, -1 is returned.
  */
-int console_start_slave_inputonly(struct machine *machine, char *consolename,
+int console_start_slave_inputonly(struct machine *machine, const char *consolename,
 	int use_for_input)
 {
 	struct console_handle *chp;

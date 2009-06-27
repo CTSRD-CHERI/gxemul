@@ -59,10 +59,10 @@ MACHINE_SETUP(evbmips)
 		if (machine->emulated_hz == 0)
 			machine->emulated_hz = 33000000;
 		cpu->byte_order = EMUL_LITTLE_ENDIAN;
-		machine->machine_name = "MALTA (evbmips, little endian)";
+		machine->machine_name = strdup("MALTA (evbmips, little endian)");
 
 		if (machine->machine_subtype == MACHINE_EVBMIPS_MALTA_BE) {
-			machine->machine_name = "MALTA (evbmips, big endian)";
+			machine->machine_name = strdup("MALTA (evbmips, big endian)");
 			cpu->byte_order = EMUL_BIG_ENDIAN;
 		}
 

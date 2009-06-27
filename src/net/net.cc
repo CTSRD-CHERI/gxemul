@@ -754,7 +754,7 @@ struct net *net_init(struct emul *emul, int init_flags,
 	net->netmask_ipv4_len = netipv4len;
 
 	net->nameserver_known = 0;
-	net->domain_name = "";
+	net->domain_name = strdup("");
 	parse_resolvconf(net);
 
 	/*  Distributed network? Then add remote hosts:  */

@@ -1244,7 +1244,7 @@ static int fpu_function(struct cpu *cpu, struct mips_coproc *cp,
 	/*  bc1f, bc1t, bc1fl, bc1tl:  */
 	if ((function & 0x03e00000) == 0x01000000) {
 		int nd, tf, imm;
-		char *instr_mnem;
+		const char *instr_mnem;
 
 		/*  cc are bits 20..18:  */
 		cc = (function >> 18) & 7;

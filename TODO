@@ -32,9 +32,6 @@ Goals for 0.6.0 (hopefully some time during Summer 2009):
 
   [ ]   Remove unused/nonworking devices/machines and features.
 
-  [ ]   Make everything build with "make -j X"?
-
-
 
 (The name "0.5.x" will be skipped. This was the C++ version that was supposed
 to be a complete rewrite from scratch. There was not enough spare time.)

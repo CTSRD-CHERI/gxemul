@@ -40,7 +40,7 @@ struct cpu_family;
 
 /*  M88K CPU types:  */
 struct m88k_cpu_type_def {
-	char		*name;
+	const char	*name;
 	int		type;
 	uint32_t	pid;
 };

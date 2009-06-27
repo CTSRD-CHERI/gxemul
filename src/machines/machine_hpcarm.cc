@@ -66,7 +66,7 @@ MACHINE_SETUP(hpcarm)
 
 	case MACHINE_HPCARM_IPAQ:
 		/*  SA-1110 206MHz  */
-		machine->machine_name = "Compaq iPAQ H3600";
+		machine->machine_name = strdup("Compaq iPAQ H3600");
 		hpc_fb_addr = 0x48200000;	/*  TODO  */
 		hpc_fb_xsize = 240;
 		hpc_fb_ysize = 320;

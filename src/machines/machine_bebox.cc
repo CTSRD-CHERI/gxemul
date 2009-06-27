@@ -49,7 +49,7 @@ MACHINE_SETUP(bebox)
 {
 	char tmpstr[300];
 
-	machine->machine_name = "BeBox";
+	machine->machine_name = strdup("BeBox");
 	if (machine->emulated_hz == 0)
 		machine->emulated_hz = 33000000;
 

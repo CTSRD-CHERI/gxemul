@@ -81,7 +81,7 @@ struct osiop_data {
 	/*  Current transfer:  */
 	int			selected_id;
 	struct scsi_transfer	*xferp;
-	int			data_offset;
+	size_t			data_offset;
 
 	/*  Cached emulated physical RAM page lookup:  */
 	uint32_t		last_phys_page;
@@ -328,7 +328,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 			uint32_t addr, xfer_byte_count, xfer_addr;
 			int32_t tmp = ofs2 << 8;
 			int res;
-			int i;
+			size_t i;
 			tmp >>= 8;
 			
 			opcode = (dcmd >> 3) & 1;

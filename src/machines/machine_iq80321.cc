@@ -52,7 +52,7 @@ MACHINE_SETUP(iq80321)
 	 *  for more details about the memory map.
 	 */
 
-	machine->machine_name = "Intel IQ80321";
+	machine->machine_name = strdup("Intel IQ80321");
 
 	cpu->cd.arm.coproc[6] = arm_coproc_i80321_6;
 

@@ -51,7 +51,7 @@ MACHINE_SETUP(cats)
 	char bs[300], tmpstr[400];
 	int boot_id = machine->bootdev_id >= 0? machine->bootdev_id : 0;
 
-	machine->machine_name = "CATS evaluation board";
+	machine->machine_name = strdup("CATS evaluation board");
 
 	if (machine->emulated_hz == 0)
 		machine->emulated_hz = 50000000;

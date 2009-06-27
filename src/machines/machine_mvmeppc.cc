@@ -60,7 +60,7 @@ MACHINE_SETUP(mvmeppc)
 	switch (machine->machine_subtype) {
 
 	case MACHINE_MVMEPPC_1600:
-		machine->machine_name = "MVME1600";
+		machine->machine_name = strdup("MVME1600");
 
 		snprintf(tmpstr, sizeof(tmpstr), "eagle irq=%s.cpu[%i]",
 		    machine->path, machine->bootstrap_cpu);
@@ -84,7 +84,7 @@ MACHINE_SETUP(mvmeppc)
 		break;
 
 	case MACHINE_MVMEPPC_2100:
-		machine->machine_name = "MVME2100";
+		machine->machine_name = strdup("MVME2100");
 
 		/*  0xfe000000 isa bus space  */
 		/*  0xfec00000 pci indirect addr  */
@@ -96,7 +96,7 @@ MACHINE_SETUP(mvmeppc)
 		break;
 
 	case MACHINE_MVMEPPC_5500:
-		machine->machine_name = "MVME5500";
+		machine->machine_name = strdup("MVME5500");
 
 		/*  GT64260 interrupt and PCI controller:  */
 		pci_data = dev_gt_init(machine, machine->memory,

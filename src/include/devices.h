@@ -231,7 +231,7 @@ struct vfb_data *dev_fb_init(struct machine *machine, struct memory *mem,
 int dev_gt_access(struct cpu *cpu, struct memory *mem, uint64_t relative_addr,
 	unsigned char *data, size_t len, int writeflag, void *);
 struct pci_data *dev_gt_init(struct machine *machine, struct memory *mem,
-	uint64_t baseaddr, char *timer_irq_path, char *isa_irq_path, int type);
+	uint64_t baseaddr, const char *timer_irq_path, const char *isa_irq_path, int type);
 
 /*  dev_jazz.c:  */
 size_t dev_jazz_dma_controller(void *dma_controller_data,
@@ -317,7 +317,7 @@ struct px_data {
 	struct memory		*fb_mem;
 	struct vfb_data		*vfb_data;
 	int			type;
-	char			*px_name;
+	const char		*px_name;
 	struct interrupt	irq;
 	int			bitdepth;
 	int			xconfig;
@@ -435,7 +435,7 @@ void dev_sii_init(struct machine *machine, struct memory *mem,
 int dev_ssc_access(struct cpu *cpu, struct memory *mem, uint64_t relative_addr,
 	unsigned char *data, size_t len, int writeflag, void *);
 void dev_ssc_init(struct machine *machine, struct memory *mem,
-	uint64_t baseaddr, char *irq_path, int use_fb);
+	uint64_t baseaddr, const char *irq_path, int use_fb);
 
 /*  dev_turbochannel.c:  */
 #define	DEV_TURBOCHANNEL_LEN		0x0470

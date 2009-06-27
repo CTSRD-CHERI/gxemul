@@ -50,7 +50,7 @@ MACHINE_SETUP(arc)
 	char tmpstr[1000];
 	char tmpstr2[1000];
 	int i, j;
-	char *eaddr_string = "eaddr=10:20:30:40:50:60";		/*  bogus  */
+	const char *eaddr_string = "eaddr=10:20:30:40:50:60";		/*  bogus  */
 	unsigned char macaddr[6];
 
 	CHECK_ALLOCATION(machine->machine_name = (char *) malloc(MACHINE_NAME_MAXBUF));

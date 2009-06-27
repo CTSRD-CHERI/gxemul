@@ -46,13 +46,13 @@
 #include "tmp_sparc_head.cc"
 
 
-static char *sparc_regnames[N_SPARC_REG] = SPARC_REG_NAMES;
-static char *sparc_pregnames[N_SPARC_PREG] = SPARC_PREG_NAMES;
-static char *sparc_regbranch_names[N_SPARC_REGBRANCH_TYPES] =
+static const char *sparc_regnames[N_SPARC_REG] = SPARC_REG_NAMES;
+static const char *sparc_pregnames[N_SPARC_PREG] = SPARC_PREG_NAMES;
+static const char *sparc_regbranch_names[N_SPARC_REGBRANCH_TYPES] =
 	SPARC_REGBRANCH_NAMES;
-static char *sparc_branch_names[N_SPARC_BRANCH_TYPES] = SPARC_BRANCH_NAMES;
-static char *sparc_alu_names[N_ALU_INSTR_TYPES] = SPARC_ALU_NAMES;
-static char *sparc_loadstore_names[N_LOADSTORE_TYPES] = SPARC_LOADSTORE_NAMES;
+static const char *sparc_branch_names[N_SPARC_BRANCH_TYPES] = SPARC_BRANCH_NAMES;
+static const char *sparc_alu_names[N_ALU_INSTR_TYPES] = SPARC_ALU_NAMES;
+static const char *sparc_loadstore_names[N_LOADSTORE_TYPES] = SPARC_LOADSTORE_NAMES;
 
 
 /*
@@ -83,7 +83,7 @@ int sparc_cpu_new(struct cpu *cpu, struct memory *mem, struct machine *machine,
 	cpu->memory_rw = sparc_memory_rw;
 
 	cpu->cd.sparc.cpu_type = cpu_type_defs[i];
-	cpu->name              = cpu->cd.sparc.cpu_type.name;
+	cpu->name              = strdup(cpu->cd.sparc.cpu_type.name);
 	cpu->byte_order        = EMUL_BIG_ENDIAN;
 	cpu->is_32bit = (cpu->cd.sparc.cpu_type.bits == 32)? 1 : 0;
 
@@ -437,7 +437,7 @@ int sparc_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 	uint32_t iword;
 	int hi2, op2, rd, rs1, rs2, siconst, btype, tmps, no_rd = 0;
 	int asi, no_rs1 = 0, no_rs2 = 0, jmpl = 0, shift_x = 0, cc, p;
-	char *symbol, *mnem, *rd_name, *rs_name;
+	const char *symbol, *mnem, *rd_name, *rs_name;
 
 	if (running)
 		dumpaddr = cpu->pc;

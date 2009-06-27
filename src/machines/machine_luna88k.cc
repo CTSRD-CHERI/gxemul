@@ -55,11 +55,11 @@ MACHINE_SETUP(luna88k)
 	switch (machine->machine_subtype) {
 
 	case MACHINE_LUNA_88K:
-		machine->machine_name = "LUNA 88K";
+		machine->machine_name = strdup("LUNA 88K");
 		break;
 
 	case MACHINE_LUNA_88K2:
-		machine->machine_name = "LUNA 88K2";
+		machine->machine_name = strdup("LUNA 88K2");
 		break;
 
 	default:fatal("Unimplemented LUNA88K machine subtype %i\n",

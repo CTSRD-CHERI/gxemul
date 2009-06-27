@@ -38,7 +38,7 @@
 
 /*  ALPHA CPU types:  */
 struct alpha_cpu_type_def { 
-	char		*name;
+	const char	*name;
 	uint64_t	pcs_type;	/*  See alpha_rpb.h  */
 	int		features;
 	int		implver;

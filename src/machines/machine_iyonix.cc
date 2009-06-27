@@ -59,7 +59,7 @@ MACHINE_SETUP(iyonix)
 	uint32_t bootblock_addr;
 	struct bootconfig bootconfig;
 
-	machine->machine_name = "Iyonix";
+	machine->machine_name = strdup("Iyonix");
 
 	cpu->cd.arm.coproc[6] = arm_coproc_i80321_6;
 

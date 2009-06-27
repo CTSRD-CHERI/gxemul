@@ -969,7 +969,7 @@ int arm_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 		 *  xxxx000P U1WLnnnn ddddHHHH 1SH1LLLL load/store rd,imm(rn)
 		 */
 		if ((iw & 0x0e000090) == 0x00000090) {
-			char *op = "st";
+			const char *op = "st";
 			int imm = ((iw >> 4) & 0xf0) | (iw & 0xf);
 			int regform = !(iw & 0x00400000);
 			p_bit = main_opcode & 1;

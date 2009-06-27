@@ -45,27 +45,27 @@ MACHINE_SETUP(sparc)
 	switch (machine->machine_subtype) {
 
 	case MACHINE_SPARC_SS5:
-		machine->machine_name = "SUN SPARCstation 5";
+		machine->machine_name = strdup("SUN SPARCstation 5");
 
 		break;
 
 	case MACHINE_SPARC_SS20:
-		machine->machine_name = "SUN SPARCstation 20";
+		machine->machine_name = strdup("SUN SPARCstation 20");
 
 		break;
 
 	case MACHINE_SPARC_ULTRA1:
-		machine->machine_name = "SUN Ultra1";
+		machine->machine_name = strdup("SUN Ultra1");
 
 		break;
 
 	case MACHINE_SPARC_ULTRA60:
-		machine->machine_name = "SUN Ultra60";
+		machine->machine_name = strdup("SUN Ultra60");
 
 		break;
 
 	case MACHINE_SPARC_SUN4V:
-		machine->machine_name = "SUN Generic sun4v";
+		machine->machine_name = strdup("SUN Generic sun4v");
 
 		break;
 

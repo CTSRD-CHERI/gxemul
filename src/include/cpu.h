@@ -505,7 +505,7 @@ void cpu_init(void);
 #define CPU_FAMILY_INIT(n,s)	int n ## _cpu_family_init(		\
 	struct cpu_family *fp) {					\
 	/*  Fill in the cpu_family struct with valid data for this arch.  */ \
-	fp->name = s;							\
+	fp->name = strdup(s);						\
 	fp->cpu_new = n ## _cpu_new;					\
 	fp->list_available_types = n ## _cpu_list_available_types;	\
 	fp->disassemble_instr = n ## _cpu_disassemble_instr;		\

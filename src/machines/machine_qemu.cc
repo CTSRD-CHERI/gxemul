@@ -47,7 +47,7 @@ MACHINE_SETUP(qemu_mips)
 {
 	char tmpstr[300];
 
-	machine->machine_name = "QEMU MIPS";
+	machine->machine_name = strdup("QEMU MIPS");
 	cpu->byte_order = EMUL_BIG_ENDIAN;
 
 	/*

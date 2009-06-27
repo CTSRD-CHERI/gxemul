@@ -48,13 +48,13 @@ MACHINE_SETUP(prep)
 	char tmpstr[300];
 
 	struct pci_data *pci_data;
-	char *model_name = "";
+	const char *model_name = "";
 
 	switch (machine->machine_subtype) {
 
 	case MACHINE_PREP_IBM6050:
 		machine->machine_name =
-		    "PowerPC Reference Platform, IBM 6050/6070";
+		    strdup("PowerPC Reference Platform, IBM 6050/6070");
 		model_name = "IBM PPS Model 6050/6070 (E)";
 
 		if (machine->emulated_hz == 0)
@@ -78,7 +78,7 @@ MACHINE_SETUP(prep)
 		break;
 
 	case MACHINE_PREP_MVME2400:
-		machine->machine_name = "PowerPC Reference Platform, MVME2400";
+		machine->machine_name = strdup("PowerPC Reference Platform, MVME2400");
 
 		/*  TODO: _EXACT_ model name for mvme2400?  */
 		model_name = "MOT MVME2400";

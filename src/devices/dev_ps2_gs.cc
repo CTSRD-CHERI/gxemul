@@ -65,20 +65,20 @@ struct gs_data {
 #define	GS_S_EXTWRITE_REG	0x0d
 #define	GS_S_BGCOLOR_REG	0x0e
 
-char *gs_reg_names[15] = {
-	"PMODE", "SMODE1", "SMODE2", "SRFSH",
-	"SYNCH1", "SYNCH2", "SYNCV", "DISPFB1",
-	"DISPLAY1", "DISPFB2", "DISPLAY2", "EXTBUF",
-	"EXTDATA", "EXTWRITE", "BGCOLOR"  };
+//static const char *gs_reg_names[15] = {
+//	"PMODE", "SMODE1", "SMODE2", "SRFSH",
+//	"SYNCH1", "SYNCH2", "SYNCV", "DISPFB1",
+//	"DISPLAY1", "DISPFB2", "DISPLAY2", "EXTBUF",
+//	"EXTDATA", "EXTWRITE", "BGCOLOR"  };
 
 #define	GS_S_CSR_REG		0x100
 #define	GS_S_IMR_REG		0x101
 #define	GS_S_BUSDIR_REG		0x104
 #define	GS_S_SIGLBLID_REG	0x108
 
-char *gs_reg_high_names[4] = {
-	"CSR", "IMR", "BUSDIR", "SIGLBLID"
-	};
+//static const char *gs_reg_high_names[4] = {
+//	"CSR", "IMR", "BUSDIR", "SIGLBLID"
+//	};
 
 
 DEVICE_ACCESS(ps2_gs)

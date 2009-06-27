@@ -92,7 +92,7 @@ void alpha_prom_call(struct cpu *cpu)
 	uint64_t addr, a1 = cpu->cd.alpha.r[ALPHA_A1];
 	uint64_t a2 = cpu->cd.alpha.r[ALPHA_A2], a3 = cpu->cd.alpha.r[ALPHA_A3];
 	uint64_t len;
-	char *s = "";
+	const char *s = "";
 
 	switch (cpu->cd.alpha.r[ALPHA_A0]) {
 

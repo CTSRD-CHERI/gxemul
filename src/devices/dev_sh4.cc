@@ -933,7 +933,7 @@ DEVICE_ACCESS(sh4_pcic)
 DEVICE_ACCESS(sh4_sq)
 {
 	struct sh4_data *d = (struct sh4_data *) extra;
-	int i;
+	size_t i;
 
 	if (writeflag == MEM_WRITE) {
 		for (i=0; i<len; i++)

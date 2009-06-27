@@ -100,11 +100,12 @@ int iso_load_bootblock(struct machine *m, struct cpu *cpu,
 	int *n_loadp, char ***load_namesp)
 {
 	int filenr, dirlen, res = 0, res2, iadd = DEBUG_INDENTATION, found_dir;
-	uint64_t dirofs, fileofs, filelen;
+	uint64_t dirofs, fileofs;
+	ssize_t filelen;
 	unsigned char *dirbuf = NULL, *dp, *match_entry = NULL, *filebuf = NULL;
 	char *p, *filename_orig, *filename, *tmpfname = NULL;
 	char **new_array;
-	char *tmpdir = getenv("TMPDIR");
+	const char *tmpdir = getenv("TMPDIR");
 	int tmpfile_handle;
 
 	if (tmpdir == NULL)

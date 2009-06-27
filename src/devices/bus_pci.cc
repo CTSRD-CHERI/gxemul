@@ -351,10 +351,10 @@ static void allocate_device_space(struct pci_device *pd,
  *  isa_portbase, isa_membase, and isa_irqbase are the port, memory, and
  *  interrupt bases for legacy ISA devices.
  */
-struct pci_data *bus_pci_init(struct machine *machine, char *irq_path,
+struct pci_data *bus_pci_init(struct machine *machine, const char *irq_path,
 	uint64_t pci_actual_io_offset, uint64_t pci_actual_mem_offset,
-	uint64_t pci_portbase, uint64_t pci_membase, char *pci_irqbase,
-	uint64_t isa_portbase, uint64_t isa_membase, char *isa_irqbase)
+	uint64_t pci_portbase, uint64_t pci_membase, const char *pci_irqbase,
+	uint64_t isa_portbase, uint64_t isa_membase, const char *isa_irqbase)
 {
 	struct pci_data *d;
 

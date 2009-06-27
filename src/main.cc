@@ -350,7 +350,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 	int msopts = 0;		/*  Machine-specific options used  */
 	struct machine *m = emul_add_machine(emul, NULL);
 
-	char *opts =
+	const char *opts =
 	    "C:c:Dd:E:e:HhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUu:VvW:"
 #ifdef WITH_X11
 	    "XxY:"
@@ -552,9 +552,9 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 	if (type != NULL || subtype != NULL) {
 		if (type == NULL)
-			type = "";
+			type = strdup("");
 		if (subtype == NULL)
-			subtype = "";
+			subtype = strdup("");
 		res = machine_name_to_type(type, subtype,
 		    &m->machine_type, &m->machine_subtype, &m->arch);
 		if (!res)

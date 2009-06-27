@@ -55,24 +55,24 @@ MACHINE_SETUP(alpha)
 	switch (machine->machine_subtype) {
 
 	case ST_ALPHABOOK1:
-		machine->machine_name = "AlphaBook 1";
+		machine->machine_name = strdup("AlphaBook 1");
 		if (machine->emulated_hz == 0)
 			machine->emulated_hz = 233000000;
 		device_add(machine, "lca");
 		break;
 
 	case ST_DEC_4100:
-		machine->machine_name = "AlphaServer 4100";
+		machine->machine_name = strdup("AlphaServer 4100");
 		break;
 
 	case ST_DEC_3000_300:
-		machine->machine_name = "DEC 3000/300";
+		machine->machine_name = strdup("DEC 3000/300");
 		machine->main_console_handle = (size_t)device_add(machine,
 		    "z8530 addr=0x1b0200000 irq=0 addr_mult=4");
 		break;
 
 	case ST_EB164:
-		machine->machine_name = "EB164";
+		machine->machine_name = strdup("EB164");
 		break;
 
 	default:fatal("Unimplemented Alpha machine type %i\n",

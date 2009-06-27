@@ -46,7 +46,7 @@ MACHINE_SETUP(netwinder)
 	char tmpstr[300];
 	struct pci_data *pci_bus;
 
-	machine->machine_name = "NetWinder";
+	machine->machine_name = strdup("NetWinder");
 
 	if (machine->physical_ram_in_mb > 256)
 		fprintf(stderr, "WARNING! Real NetWinders cannot"

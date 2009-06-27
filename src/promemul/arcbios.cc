@@ -2169,7 +2169,7 @@ void arcbios_console_init(struct machine *machine,
  *  Initialize the emulated environment variables.
  */
 static void arc_environment_setup(struct machine *machine, int is64bit,
-	char *primary_ether_addr)
+	const char *primary_ether_addr)
 {
 	size_t bootpath_len = 500;
 	char *init_bootpath;
@@ -2397,7 +2397,7 @@ static void arc_environment_setup(struct machine *machine, int is64bit,
  *  TODO: Refactor; this is too long.
  */
 void arcbios_init(struct machine *machine, int is64bit, uint64_t sgi_ram_offset,
-	char *primary_ether_addr, uint8_t *primary_ether_macaddr)
+	const char *primary_ether_addr, uint8_t *primary_ether_macaddr)
 {
 	int i, alloclen = 20;
 	char *name;
@@ -2584,10 +2584,10 @@ void arcbios_init(struct machine *machine, int is64bit, uint64_t sgi_ram_offset,
 		/*  ARC:  */
 		switch (machine->machine_subtype) {
 		case MACHINE_ARC_JAZZ_PICA:
-			name = "PICA-61";
+			name = strdup("PICA-61");
 			break;
 		case MACHINE_ARC_JAZZ_MAGNUM:
-			name = "Microsoft-Jazz";
+			name = strdup("Microsoft-Jazz");
 			break;
 		default:
 			fatal("Unimplemented ARC machine type %i\n",

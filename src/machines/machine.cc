@@ -82,7 +82,7 @@ struct machine *machine_new(char *name, struct emul *emul, int id)
 	m->prom_emulation = 1;
 	m->allow_instruction_combinations = 1;
 	m->byte_order_override = NO_BYTE_ORDER_OVERRIDE;
-	m->boot_kernel_filename = "";
+	m->boot_kernel_filename = strdup("");
 	m->boot_string_argument = NULL;
 	m->x11_md.scaledown = 1;
 	m->x11_md.scaleup = 1;
@@ -323,7 +323,7 @@ void machine_statistics_init(struct machine *machine, char *fname)
 {
 	int n_fields = 0;
 	char *pcolon = fname;
-	char *mode = "a";	/*  Append by default  */
+	const char *mode = "a";	/*  Append by default  */
 
 	machine->allow_instruction_combinations = 0;
 
@@ -463,18 +463,18 @@ void machine_setup(struct machine *machine)
 	if (machine->boot_string_argument == NULL) {
 		switch (machine->machine_type) {
 		case MACHINE_ARC:
-			machine->boot_string_argument = "-aN";
+			machine->boot_string_argument = strdup("-aN");
 			break;
 		case MACHINE_CATS:
-			machine->boot_string_argument = "-A";
+			machine->boot_string_argument = strdup("-A");
 			break;
 		case MACHINE_PMAX:
-			machine->boot_string_argument = "-a";
+			machine->boot_string_argument = strdup("-a");
 			break;
 		default:
 			/*  Important, because boot_string_argument should
 			    not be set to NULL:  */
-			machine->boot_string_argument = "";
+			machine->boot_string_argument = strdup("");
 		}
 	}
 

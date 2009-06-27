@@ -59,7 +59,7 @@ MACHINE_SETUP(macppc)
 	uint64_t b, a;
 	int i;
 
-	machine->machine_name = "Macintosh (PPC)";
+	machine->machine_name = strdup("Macintosh (PPC)");
 	if (machine->emulated_hz == 0)
 		machine->emulated_hz = 40000000;
 

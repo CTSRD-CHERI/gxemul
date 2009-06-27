@@ -71,7 +71,7 @@ MACHINE_SETUP(hpcmips)
 
 	case MACHINE_HPCMIPS_CASIO_BE300:
 		/*  166MHz VR4131  */
-		machine->machine_name = "Casio Cassiopeia BE-300";
+		machine->machine_name = strdup("Casio Cassiopeia BE-300");
 		hpc_fb_addr = 0x0a200000;
 		hpc_fb_xsize = 240;
 		hpc_fb_ysize = 320;
@@ -101,7 +101,7 @@ MACHINE_SETUP(hpcmips)
 
 	case MACHINE_HPCMIPS_CASIO_E105:
 		/*  131MHz VR4121  */
-		machine->machine_name = "Casio Cassiopeia E-105";
+		machine->machine_name = strdup("Casio Cassiopeia E-105");
 		hpc_fb_addr = 0x0a200000;	/*  TODO?  */
 		hpc_fb_xsize = 240;
 		hpc_fb_ysize = 320;
@@ -130,7 +130,7 @@ MACHINE_SETUP(hpcmips)
 
 	case MACHINE_HPCMIPS_NEC_MOBILEPRO_770:
 		/*  131 MHz VR4121  */
-		machine->machine_name = "NEC MobilePro 770";
+		machine->machine_name = strdup("NEC MobilePro 770");
 		hpc_fb_addr = 0xa000000;
 		hpc_fb_xsize = 640;
 		hpc_fb_ysize = 240;
@@ -153,7 +153,7 @@ MACHINE_SETUP(hpcmips)
 
 	case MACHINE_HPCMIPS_NEC_MOBILEPRO_780:
 		/*  166 (or 168) MHz VR4121  */
-		machine->machine_name = "NEC MobilePro 780";
+		machine->machine_name = strdup("NEC MobilePro 780");
 		hpc_fb_addr = 0xa180100;
 		hpc_fb_xsize = 640;
 		hpc_fb_ysize = 240;
@@ -176,7 +176,7 @@ MACHINE_SETUP(hpcmips)
 
 	case MACHINE_HPCMIPS_NEC_MOBILEPRO_800:
 		/*  131 MHz VR4121  */
-		machine->machine_name = "NEC MobilePro 800";
+		machine->machine_name = strdup("NEC MobilePro 800");
 		hpc_fb_addr = 0xa000000;
 		hpc_fb_xsize = 800;
 		hpc_fb_ysize = 600;
@@ -199,7 +199,7 @@ MACHINE_SETUP(hpcmips)
 
 	case MACHINE_HPCMIPS_NEC_MOBILEPRO_880:
 		/*  168 MHz VR4121  */
-		machine->machine_name = "NEC MobilePro 880";
+		machine->machine_name = strdup("NEC MobilePro 880");
 		hpc_fb_addr = 0xa0ea600;
 		hpc_fb_xsize = 800;
 		hpc_fb_ysize = 600;
@@ -222,7 +222,7 @@ MACHINE_SETUP(hpcmips)
 
 	case MACHINE_HPCMIPS_AGENDA_VR3:
 		/*  66 MHz VR4181  */
-		machine->machine_name = "Agenda VR3";
+		machine->machine_name = strdup("Agenda VR3");
 		/*  TODO:  */
 		hpc_fb_addr = 0x1000;
 		hpc_fb_xsize = 160;
@@ -261,7 +261,7 @@ MACHINE_SETUP(hpcmips)
 
 	case MACHINE_HPCMIPS_IBM_WORKPAD_Z50:
 		/*  131 MHz VR4121  */
-		machine->machine_name = "IBM Workpad Z50";
+		machine->machine_name = strdup("IBM Workpad Z50");
 		/*  TODO:  */
 		hpc_fb_addr = 0xa000000;
 		hpc_fb_xsize = 640;

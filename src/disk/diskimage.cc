@@ -48,7 +48,7 @@
 
 extern int single_step;
 
-static char *diskimage_types[] = DISKIMAGE_TYPES;
+static const char *diskimage_types[] = DISKIMAGE_TYPES;
 
 
 /**************************************************************************/

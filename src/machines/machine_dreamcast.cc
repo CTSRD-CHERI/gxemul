@@ -42,7 +42,7 @@
 
 MACHINE_SETUP(dreamcast)
 {
-	machine->machine_name = "Dreamcast";
+	machine->machine_name = strdup("Dreamcast");
 
 	if (machine->emulated_hz == 0)
 		machine->emulated_hz = 200000000;

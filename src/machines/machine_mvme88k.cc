@@ -81,7 +81,7 @@ MACHINE_SETUP(mvme88k)
 	switch (machine->machine_subtype) {
 
 	case MACHINE_MVME88K_187:
-		machine->machine_name = "MVME187";
+		machine->machine_name = strdup("MVME187");
 
 		/*  The mvme187 device contains 187-specific stuff, such
 		    as motherboard registers, and the memory controller:  */
@@ -125,12 +125,12 @@ MACHINE_SETUP(mvme88k)
 		break;
 
 	case MACHINE_MVME88K_188:
-		machine->machine_name = "MVME188";
+		machine->machine_name = strdup("MVME188");
 		/*  TODO  */
 		break;
 
 	case MACHINE_MVME88K_197:
-		machine->machine_name = "MVME197";
+		machine->machine_name = strdup("MVME197");
 		/*  TODO  */
 		break;
 

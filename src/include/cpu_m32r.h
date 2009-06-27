@@ -39,7 +39,7 @@ struct cpu_family;
 
 /*  M32R CPU types:  */
 struct m32r_cpu_type_def {
-	char		*name;
+	const char		*name;
 };
 
 #define	M32R_CPU_TYPE_DEFS				{	\

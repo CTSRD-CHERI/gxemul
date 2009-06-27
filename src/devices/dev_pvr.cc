@@ -219,7 +219,8 @@ void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 		while (count > 0) {
 			unsigned char buf[32];
 			int ofs;
-			int chunksize = transmit_size;
+			size_t chunksize = transmit_size;
+
 			if (chunksize > sizeof(uint32_t))
 				chunksize = sizeof(uint32_t);
 

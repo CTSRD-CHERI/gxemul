@@ -85,7 +85,7 @@ int m32r_cpu_new(struct cpu *cpu, struct memory *mem,
 	cpu->translate_v2p = m32r_translate_v2p;
 
 	cpu->cd.m32r.cpu_type = cpu_type_defs[found];
-	cpu->name            = cpu->cd.m32r.cpu_type.name;
+	cpu->name            = strdup(cpu->cd.m32r.cpu_type.name);
 	cpu->is_32bit        = 1;
 	cpu->byte_order      = EMUL_BIG_ENDIAN;
 

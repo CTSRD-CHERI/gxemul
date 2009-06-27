@@ -62,7 +62,7 @@ DEVICE_ACCESS(ohci)
 {
 	struct ohci_data *d = (struct ohci_data *) extra;
 	uint64_t idata = 0, odata = 0;
-	char *name = NULL;
+	const char *name = NULL;
 
 	if (writeflag == MEM_WRITE)
 		idata = memory_readmax64(cpu, data, len);

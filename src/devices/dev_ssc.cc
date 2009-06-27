@@ -223,7 +223,7 @@ DEVICE_ACCESS(ssc)
 
 
 void dev_ssc_init(struct machine *machine, struct memory *mem,
-	uint64_t baseaddr, char *irq_path, int use_fb)
+	uint64_t baseaddr, const char *irq_path, int use_fb)
 {
 	struct ssc_data *d;
 

@@ -50,7 +50,7 @@ struct cpu_family;
 
 /*  SH CPU types:  */
 struct sh_cpu_type_def {
-	char		*name;
+	const char	*name;
 	int		bits;
 	int		arch;
 	uint32_t	pvr;

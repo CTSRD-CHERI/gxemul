@@ -51,10 +51,10 @@ MACHINE_SETUP(algor)
 
 	switch (machine->machine_subtype) {
 	case MACHINE_ALGOR_P4032:
-		machine->machine_name = "Algor P4032";
+		machine->machine_name = strdup("Algor P4032");
 		break;
 	case MACHINE_ALGOR_P5064:
-		machine->machine_name = "Algor P5064";
+		machine->machine_name = strdup("Algor P5064");
 		break;
 	default:fatal("Unimplemented Algor machine.\n");
 		exit(1);

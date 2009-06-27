@@ -381,7 +381,7 @@ static void file_load_ecoff(struct machine *m, struct memory *mem,
 		CHECK_ALLOCATION(symbol_data = (char *) malloc(issExtMax + 2));
 		memset(symbol_data, 0, issExtMax + 2);
 		fseek(f, cbSsExtOffset, SEEK_SET);
-		if (fread(symbol_data, 1, issExtMax + 1, f) != issExtMax+1) {
+		if (fread(symbol_data, 1, issExtMax + 1, f) != (size_t) issExtMax+1) {
 			fprintf(stderr, "error reading symbol data from %s\n", filename);
 			exit(1);
 		}

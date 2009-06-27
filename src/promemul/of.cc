@@ -807,7 +807,7 @@ void of_emul_init_uninorth(struct machine *machine)
 	unsigned char *macio_aa, *ata_interrupts, *ata_reg;
 	struct of_device *ic;
 	const char *n = "pci@e2000000";
-	char *macio = "mac-io";
+	const char *macio = "mac-io";
 
 	of_add_device(ofd, n, "/");
 	of_add_prop_str(machine, ofd, n, "name", "pci");

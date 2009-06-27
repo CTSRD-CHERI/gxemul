@@ -215,7 +215,7 @@ DEVICE_ACCESS(gt)
  *  is added to the bus, then a pointer to the bus is returned.
  */
 struct pci_data *dev_gt_init(struct machine *machine, struct memory *mem,
-	uint64_t baseaddr, char *timer_irq_path, char *isa_irq_path, int type)
+	uint64_t baseaddr, const char *timer_irq_path, const char *isa_irq_path, int type)
 {
 	struct gt_data *d;
 	uint64_t pci_portbase = 0, pci_membase = 0;

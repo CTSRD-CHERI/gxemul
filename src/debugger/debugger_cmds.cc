@@ -1181,11 +1181,11 @@ static void debugger_cmd_version(struct machine *m, char *cmd_line)
 
 
 struct cmd {
-	char	*name;
-	char	*args;
-	int	tmp_flag;
-	void	(*f)(struct machine *, char *cmd_line);
-	char	*description;
+	const char	*name;
+	const char	*args;
+	int		tmp_flag;
+	void		(*f)(struct machine *, char *cmd_line);
+	const char	*description;
 };
 
 static struct cmd cmds[] = {

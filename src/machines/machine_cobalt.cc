@@ -49,7 +49,7 @@ MACHINE_SETUP(cobalt)
 	struct memory *mem = machine->memory;
 
 	cpu->byte_order = EMUL_LITTLE_ENDIAN;
-	machine->machine_name = "Cobalt";
+	machine->machine_name = strdup("Cobalt");
 
 	/*
 	 *  Interrupts seem to be the following:
@@ -118,7 +118,7 @@ MACHINE_SETUP(cobalt)
 	 */
 	cpu->cd.mips.gpr[MIPS_GPR_A0] =
 	    machine->physical_ram_in_mb * 1048576 + 0xffffffff80000000ULL;
-	machine->bootstr = "root=/dev/hda1 ro";
+	machine->bootstr = strdup("root=/dev/hda1 ro");
 	/*  bootstr = "nfsroot=/usr/cobalt/";  */
 	/*  TODO: bootarg, and/or automagic boot device detection  */
 	store_string(cpu, cpu->cd.mips.gpr[MIPS_GPR_A0] - 512,

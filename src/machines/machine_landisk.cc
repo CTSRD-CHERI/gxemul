@@ -71,7 +71,7 @@ MACHINE_SETUP(landisk)
 #endif
 	char tmpstr[300];
 
-	machine->machine_name = "Landisk USL-5P";
+	machine->machine_name = strdup("Landisk USL-5P");
 
 	/*  266.67 MHz SH4 CPU clock:  */
 	if (machine->emulated_hz == 0)

@@ -61,7 +61,7 @@ static void add_string(char *p, size_t *curlenp, const char *to_add)
  *  Try to demangle a nested cplusplus name. name points to the first character
  *  after "_ZN".
  */
-static char *symbol_demangle_cplusplus_nested(char *name)
+static char *symbol_demangle_cplusplus_nested(const char *name)
 {
 	char *result;
 	size_t result_len = 0, len;
@@ -233,7 +233,7 @@ fail:
  *  is returned. Otherwise, a newly allocated string is returned, containing
  *  the demangled name.
  */
-char *symbol_demangle_cplusplus(char *name)
+char *symbol_demangle_cplusplus(const char *name)
 {
 	/*  Only support _Z-style mangled names, for now:  */
 	if (strlen(name) < 2 || name[0] != '_' || name[1] != 'Z')

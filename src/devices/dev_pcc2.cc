@@ -81,7 +81,7 @@ struct pcc2_data {
 static uint32_t read32(unsigned char *p)
 {
 	uint32_t x = 0;
-	int i;
+	size_t i;
 
 	for (i=0; i<sizeof(x); i++) {
 		x <<= 8;
@@ -94,7 +94,7 @@ static uint32_t read32(unsigned char *p)
 
 static void write32(unsigned char *p, uint32_t x)
 {
-	int i;
+	size_t i;
 
 	for (i=0; i<sizeof(x); i++) {
 		p[sizeof(x) - 1 - i] = x;

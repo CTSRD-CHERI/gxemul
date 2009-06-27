@@ -3838,3 +3838,4 @@ Changelog for GXemul:
 20090627	Continuing on the C to C++ switch.
 		Updating the OpenBSD/mvme88k regression test expect script
 		from 4.4 to 4.5.
+		Everything now builds with "make -j X".

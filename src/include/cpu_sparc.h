@@ -39,7 +39,7 @@ struct cpu_family;
 
 /*  SPARC CPU types:  */
 struct sparc_cpu_type_def { 
-	char		*name;
+	const char	*name;
 	int		v;			/*  v8, v9 etc  */
 	int		h;			/*  hypervisor? sun4v = 1  */
 	int		bits;			/*  32 or 64  */

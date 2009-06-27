@@ -45,8 +45,8 @@
 #  The main things that are detected by this script:
 #
 #    o)  special hacks for some OSes
-#    o)  which compiler to use  (overridden by setting CC)
-#    o)  which compiler flags to use  (overridden by setting CFLAGS)
+#    o)  which compiler(s) to use  (overridden by setting CC and CXX)
+#    o)  which compiler flags to use  (overridden by setting CFLAGS and CXXFLAGS)
 #    o)  X11 flags and libraries  (TODO: should be possible to override
 #	 via command line options?)
 #
@@ -314,11 +314,6 @@ printf "$CC $CFLAGS"
 
 
 CCTYPE="generic"
-
-if $CC $CFLAGS -V 2> /dev/null | grep ompaq 1> /dev/null 2> /dev/null; then
-	COMPAQCC=YES
-	CCTYPE="Compaq CC"
-fi
 
 if $CC $CFLAGS -V 2>&1 | grep Sun 1> /dev/null 2> /dev/null; then
 	SUNCC=YES
@@ -635,24 +630,17 @@ if [ -x _testprog ]; then
 	printf "yes\n"
 	CWARNINGS="-Wall $CWARNINGS"
 
-	#  Compaq's compiler always seems to warn about the long long type,
-	#  and unusedtop suppresses warnings about include files being
-	#  included more than once.
-	if [ z"$COMPAQCC" = zYES ]; then
-		CWARNINGS="$CWARNINGS -msg_disable longlongtype,unusedtop"
+	if [ z"$UNSTABLE" = zYES ]; then
+		printf "checking whether -Werror can be used... "
+		rm -f _testprog
+		$CC $CFLAGS $CWARNINGS _testprog.c -o _testprog -Werror 2> /dev/null
+		if [ -x _testprog ]; then
+			printf "yes\n"
+			CWARNINGS="$CWARNINGS -Werror"
+		else
+			printf "no\n"
+		fi
 	fi
-
-#	if [ z"$UNSTABLE" = zYES ]; then
-#		printf "checking whether -Werror can be used... "
-#		rm -f _testprog
-#		$CC $CFLAGS $CWARNINGS _testprog.c -o _testprog -Werror 2> /dev/null
-#		if [ -x _testprog ]; then
-#			printf "yes\n"
-#			CWARNINGS="$CWARNINGS -Werror"
-#		else
-#			printf "no\n"
-#		fi
-#	fi
 else
 	printf "no\n"
 fi
@@ -678,88 +666,32 @@ if [ ! z"$DEBUG" = zYES ]; then
 	rm -f _testprog _testprog.error _testprog.stdout
 fi
 
-
-if [ z"$COMPAQCC" = zYES ]; then
-	#  -O4 is possible, but sometimes -O3 is better?
+if [ z"`uname`" = zSunOS ]; then
+	#  "cc", the system's default compiler:
 	if [ ! z"$DEBUG" = zYES ]; then
-		CFLAGS="-O4 $CFLAGS"
-	fi
-else
-	if [ z"`uname`" = zSunOS ]; then
-		#  "cc", the system's default compiler:
-		if [ ! z"$DEBUG" = zYES ]; then
-			if [ z"$SUNCC" = zYES ]; then
-				CFLAGS="-xO5 -xdepend $CFLAGS"
-			fi
+		if [ z"$SUNCC" = zYES ]; then
+			CFLAGS="-xO5 -xdepend $CFLAGS"
 		fi
-		printf "#define SOLARIS\n" >> config.h
-		OTHERLIBS="-lsocket $OTHERLIBS"
-	else
-		#  gcc or something else:
-		if [ ! z"$DEBUG" = zYES ]; then
-			$CC $CFLAGS _testprog.c -o _testprog -O 2> /dev/null
+	fi
+	printf "#define SOLARIS\n" >> config.h
+	OTHERLIBS="-lsocket $OTHERLIBS"
+else
+	#  gcc or something else:
+	if [ ! z"$DEBUG" = zYES ]; then
+		$CC $CFLAGS _testprog.c -o _testprog -O 2> /dev/null
+		if [ -x _testprog ]; then
+			rm -f _testprog
+			$CC $CFLAGS _testprog.c -o _testprog	\
+				-O3 2> /dev/null
 			if [ -x _testprog ]; then
-				rm -f _testprog
-				$CC $CFLAGS _testprog.c -o _testprog	\
-					-O3 2> /dev/null
-				if [ -x _testprog ]; then
-					CFLAGS="-O3 $CFLAGS"
-				else
-					CFLAGS="-O $CFLAGS"
-				fi
+				CFLAGS="-O3 $CFLAGS"
+			else
+				CFLAGS="-O $CFLAGS"
 			fi
 		fi
 	fi
 fi
 rm -f _testprog
-
-
-#  -fschedule-insns causes bugs on i386 with gcc,
-#  but works OK on my alpha with ccc (compaq's cc).
-if [ ! z"$DEBUG" = zYES ]; then
-    if [ z"$COMPAQCC" = zYES ]; then
-	printf "checking whether -fschedule-insns2 can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fschedule-insns2 2> /dev/null
-	if [ -x _testprog ]; then
-		CFLAGS="-fschedule-insns2 $CFLAGS"
-		printf "yes\n"
-	else
-		printf "no\n"
-	fi
-	rm -f _testprog
-
-	printf "checking whether -fschedule-insns can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fschedule-insns 2> /dev/null
-	if [ -x _testprog ]; then
-		CFLAGS="-fschedule-insns $CFLAGS"
-		printf "yes\n"
-	else
-		printf "no\n"
-	fi
-	rm -f _testprog
-
-	#  -intrinsics
-	printf "checking whether -intrinsics can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -intrinsics 2> /dev/null
-	if [ -x _testprog ]; then
-		CFLAGS="-intrinsics $CFLAGS"
-		printf "yes\n"
-	else
-		printf "no\n"
-	fi
-	rm -f _testprog
-
-	#  -fast
-	printf "checking whether -fast can be used... "
-	$CC $CFLAGS _testprog.c -o _testprog -fast 2> /dev/null
-	if [ -x _testprog ]; then
-		CFLAGS="-fast $CFLAGS"
-		printf "yes\n"
-	else
-		printf "no\n"
-	fi
-	rm -f _testprog
-fi; fi
 
 
 #  -fpeephole
@@ -824,24 +756,13 @@ fi
 #  -g, for development builds
 if [ z"$UNSTABLE" = zYES ]; then
 	printf "checking whether -g can be used... "
-	if [ z"$COMPAQCC" = zYES ]; then
-		$CC $CFLAGS -g3 _testprog.c -o _testprog > _testprog.stdout 2>&1
-		cat _testprog.stdout >> _testprog.error
-		if [ -x _testprog ]; then
-			CFLAGS="-g3 $CFLAGS"
-			printf "yes (-g3)\n"
-		else
-			printf "no\n"
-		fi
+	$CC $CFLAGS -g _testprog.c -o _testprog > _testprog.stdout 2>&1
+	cat _testprog.stdout >> _testprog.error
+	if [ -x _testprog ]; then
+		CFLAGS="-g $CFLAGS"
+		printf "yes\n"
 	else
-		$CC $CFLAGS -g _testprog.c -o _testprog > _testprog.stdout 2>&1
-		cat _testprog.stdout >> _testprog.error
-		if [ -x _testprog ]; then
-			CFLAGS="-g $CFLAGS"
-			printf "yes\n"
-		else
-			printf "no\n"
-		fi
+		printf "no\n"
 	fi
 	rm -f _testprog _testprog.error _testprog.stdout
 fi

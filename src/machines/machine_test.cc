@@ -143,13 +143,13 @@ static void default_test(struct machine *machine, struct cpu *cpu)
 
 MACHINE_SETUP(barealpha)
 {
-	machine->machine_name = "Generic \"bare\" Alpha machine";
+	machine->machine_name = strdup("Generic \"bare\" Alpha machine");
 }
 
 
 MACHINE_SETUP(testalpha)
 {
-	machine->machine_name = "Alpha test machine";
+	machine->machine_name = strdup("Alpha test machine");
 
 	default_test(machine, cpu);
 }
@@ -187,13 +187,13 @@ MACHINE_REGISTER(testalpha)
 
 MACHINE_SETUP(barearm)
 {
-	machine->machine_name = "Generic \"bare\" ARM machine";
+	machine->machine_name = strdup("Generic \"bare\" ARM machine");
 }
 
 
 MACHINE_SETUP(testarm)
 {
-	machine->machine_name = "ARM test machine";
+	machine->machine_name = strdup("ARM test machine");
 
 	default_test(machine, cpu);
 
@@ -242,13 +242,13 @@ MACHINE_REGISTER(testarm)
 
 MACHINE_SETUP(barem32r)
 {
-	machine->machine_name = "Generic \"bare\" M32R machine";
+	machine->machine_name = strdup("Generic \"bare\" M32R machine");
 }
 
 
 MACHINE_SETUP(testm32r)
 {
-	machine->machine_name = "M32R test machine";
+	machine->machine_name = strdup("M32R test machine");
 
 	default_test(machine, cpu);
 }
@@ -286,13 +286,13 @@ MACHINE_REGISTER(testm32r)
 
 MACHINE_SETUP(barem88k)
 {
-	machine->machine_name = "Generic \"bare\" M88K machine";
+	machine->machine_name = strdup("Generic \"bare\" M88K machine");
 }
 
 
 MACHINE_SETUP(testm88k)
 {
-	machine->machine_name = "M88K test machine";
+	machine->machine_name = strdup("M88K test machine");
 
 	default_test(machine, cpu);
 }
@@ -330,7 +330,7 @@ MACHINE_REGISTER(testm88k)
 
 MACHINE_SETUP(baremips)
 {
-	machine->machine_name = "Generic \"bare\" MIPS machine";
+	machine->machine_name = strdup("Generic \"bare\" MIPS machine");
 	cpu->byte_order = EMUL_BIG_ENDIAN;
 }
 
@@ -354,7 +354,7 @@ MACHINE_SETUP(testmips)
 
 	char tmpstr[300];
 
-	machine->machine_name = "MIPS test machine";
+	machine->machine_name = strdup("MIPS test machine");
 	cpu->byte_order = EMUL_BIG_ENDIAN;
 
 	snprintf(tmpstr, sizeof(tmpstr), "cons addr=0x%"PRIx64" irq=%s."
@@ -418,13 +418,13 @@ MACHINE_REGISTER(testmips)
 
 MACHINE_SETUP(bareppc)
 {
-	machine->machine_name = "Generic \"bare\" PPC machine";
+	machine->machine_name = strdup("Generic \"bare\" PPC machine");
 }
 
 
 MACHINE_SETUP(testppc)
 {
-	machine->machine_name = "PPC test machine";
+	machine->machine_name = strdup("PPC test machine");
 
 	default_test(machine, cpu);
 }
@@ -461,13 +461,13 @@ MACHINE_REGISTER(testppc)
 
 MACHINE_SETUP(baresh)
 {
-	machine->machine_name = "Generic \"bare\" SH machine";
+	machine->machine_name = strdup("Generic \"bare\" SH machine");
 }
 
 
 MACHINE_SETUP(testsh)
 {
-	machine->machine_name = "SH test machine";
+	machine->machine_name = strdup("SH test machine");
 
 	default_test(machine, cpu);
 }
@@ -504,13 +504,13 @@ MACHINE_REGISTER(testsh)
 
 MACHINE_SETUP(baresparc)
 {
-	machine->machine_name = "Generic \"bare\" SPARC machine";
+	machine->machine_name = strdup("Generic \"bare\" SPARC machine");
 }
 
 
 MACHINE_SETUP(testsparc)
 {
-	machine->machine_name = "SPARC test machine";
+	machine->machine_name = strdup("SPARC test machine");
 
 	default_test(machine, cpu);
 }

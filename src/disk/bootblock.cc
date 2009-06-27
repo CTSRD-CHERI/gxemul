@@ -49,7 +49,7 @@
 #include "machine.h"
 #include "memory.h"
 
-static char *diskimage_types[] = DISKIMAGE_TYPES;
+static const char *diskimage_types[] = DISKIMAGE_TYPES;
 
 
 /*

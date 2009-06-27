@@ -60,7 +60,7 @@ MACHINE_SETUP(playstation2)
 	time_t timet;
 	struct tm *tm_ptr;
 
-	machine->machine_name = "Playstation 2";
+	machine->machine_name = strdup("Playstation 2");
 	cpu->byte_order = EMUL_LITTLE_ENDIAN;
 
 	if (machine->physical_ram_in_mb != 32)

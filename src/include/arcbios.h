@@ -58,7 +58,7 @@ void arcbios_set_default_exception_handler(struct cpu *cpu);
 void arcbios_console_init(struct machine *machine,
 	uint64_t vram, uint64_t ctrlregs);
 void arcbios_init(struct machine *machine, int is64bit, uint64_t sgi_ram_offset,
-	char *primary_ether_string, uint8_t *primary_ether_macaddr);
+	const char *primary_ether_string, uint8_t *primary_ether_macaddr);
 
 
 /*  For internal use in arcbios.c:  */

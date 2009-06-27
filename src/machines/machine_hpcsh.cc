@@ -62,7 +62,7 @@ MACHINE_SETUP(hpcsh)
 
 	memset(&hpc_bootinfo, 0, sizeof(hpc_bootinfo));
 */
-	machine->machine_name = "HPCsh";
+	machine->machine_name = strdup("HPCsh");
 	cpu->byte_order = EMUL_LITTLE_ENDIAN;
 
 	if (!machine->x11_md.in_use)

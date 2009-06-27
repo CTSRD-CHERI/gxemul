@@ -50,7 +50,7 @@ MACHINE_SETUP(pmppc)
 	/*
 	 *  NetBSD/pmppc (http://www.netbsd.org/ports/pmppc/)
 	 */
-	machine->machine_name = "Artesyn's PM/PPC board";
+	machine->machine_name = strdup("Artesyn's PM/PPC board");
 
 	/*  Bogus default speed = 33 MHz  */
 	if (machine->emulated_hz == 0)

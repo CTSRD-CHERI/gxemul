@@ -55,10 +55,11 @@
 
 MACHINE_SETUP(pmax)
 {
-	char *framebuffer_console_name, *serial_console_name, *init_bootpath;
+	const char *framebuffer_console_name, *serial_console_name;
+	char *init_bootpath;
 	int color_fb_flag, i;
 	int boot_scsi_boardnumber = 3, boot_net_boardnumber = 3;
-	char *turbochannel_default_gfx_card = "PMAG-BA";
+	const char *turbochannel_default_gfx_card = "PMAG-BA";
 		/*  PMAG-AA, -BA, -CA/DA/EA/FA, -JA, -RO, PMAGB-BA  */
 	struct xx {
 		struct btinfo_magic a;
@@ -86,7 +87,7 @@ MACHINE_SETUP(pmax)
 	case MACHINE_DEC_PMAX_3100:		/*  type  1, KN01  */
 		/*  Supposed to have 12MHz or 16.67MHz R2000 CPU, R2010 FPC,
 		    R2020 Memory coprocessor  */
-		machine->machine_name = "DEC PMAX 3100 (KN01)";
+		machine->machine_name = strdup("DEC PMAX 3100 (KN01)");
 
 		/*  12 MHz for 2100, 16.67 MHz for 3100  */
 		if (machine->emulated_hz == 0)
@@ -151,7 +152,7 @@ MACHINE_SETUP(pmax)
 	case MACHINE_DEC_3MAX_5000:		/*  type  2, KN02  */
 		/*  Supposed to have 25MHz R3000 CPU, R3010 FPC,  */
 		/*  and a R3220 Memory coprocessor  */
-		machine->machine_name = "DECstation 5000/200 (3MAX, KN02)";
+		machine->machine_name = strdup("DECstation 5000/200 (3MAX, KN02)");
 
 		if (machine->emulated_hz == 0)
 			machine->emulated_hz = 25000000;
@@ -249,8 +250,8 @@ MACHINE_SETUP(pmax)
 		break;
 
 	case MACHINE_DEC_3MIN_5000:		/*  type 3, KN02BA  */
-		machine->machine_name = "DECstation 5000/112 or 145 (3MIN,"
-		    " KN02BA)";
+		machine->machine_name = strdup("DECstation 5000/112 or 145 (3MIN,"
+		    " KN02BA)");
 		if (machine->emulated_hz == 0)
 			machine->emulated_hz = 33000000;
 		if (machine->physical_ram_in_mb > 128)
@@ -332,7 +333,7 @@ abort();
 		break;
 
 	case MACHINE_DEC_3MAXPLUS_5000:	/*  type 4, KN03  */
-		machine->machine_name = "DECsystem 5900 or 5000 (3MAX+) (KN03)";
+		machine->machine_name = strdup("DECsystem 5900 or 5000 (3MAX+) (KN03)");
 
 		/*  5000/240 (KN03-GA, R3000): 40 MHz  */
 		/*  5000/260 (KN05-NB, R4000): 60 MHz  */
@@ -431,7 +432,7 @@ abort();
 		break;
 
 	case MACHINE_DEC_5800:		/*  type 5, KN5800  */
-		machine->machine_name = "DECsystem 5800";
+		machine->machine_name = strdup("DECsystem 5800");
 
 		/*  TODO: this is incorrect, banks multiply by 8 etc  */
 		if (machine->physical_ram_in_mb < 48)
@@ -468,7 +469,7 @@ abort();
 		break;
 
 	case MACHINE_DEC_5400:		/*  type 6, KN210  */
-		machine->machine_name = "DECsystem 5400 (KN210)";
+		machine->machine_name = strdup("DECsystem 5400 (KN210)");
 		/*
 		 *  Misc. info from the KN210 manual:
 		 *
@@ -502,8 +503,8 @@ abort();
 		break;
 
 	case MACHINE_DEC_MAXINE_5000:	/*  type 7, KN02CA  */
-		machine->machine_name = "Personal DECstation 5000/xxx "
-		    "(MAXINE) (KN02CA)";
+		machine->machine_name = strdup("Personal DECstation 5000/xxx "
+		    "(MAXINE) (KN02CA)");
 		if (machine->emulated_hz == 0)
 			machine->emulated_hz = 33000000;
 
@@ -594,7 +595,7 @@ abort();
 		break;
 
 	case MACHINE_DEC_5500:	/*  type 11, KN220  */
-		machine->machine_name = "DECsystem 5500 (KN220)";
+		machine->machine_name = strdup("DECsystem 5500 (KN220)");
 
 		/*
 		 *  According to NetBSD's pmax ports page:
@@ -642,7 +643,7 @@ abort();
 		break;
 
 	case MACHINE_DEC_MIPSMATE_5100:	/*  type 12  */
-		machine->machine_name = "DEC MIPSMATE 5100 (KN230)";
+		machine->machine_name = strdup("DEC MIPSMATE 5100 (KN230)");
 
 		if (machine->emulated_hz == 0)
 			machine->emulated_hz = 20000000;
@@ -814,7 +815,7 @@ abort();
 		exit(1);
 	}
 
-	machine->bootstr = "boot";
+	machine->bootstr = strdup("boot");
 
 	store_string(cpu, DEC_PROM_INITIAL_ARGV+0x10, machine->bootstr);
 	store_string(cpu, DEC_PROM_INITIAL_ARGV+0x70, machine->bootarg);

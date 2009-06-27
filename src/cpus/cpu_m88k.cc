@@ -125,7 +125,7 @@ int m88k_cpu_new(struct cpu *cpu, struct memory *mem,
 	cpu->translate_v2p = m88k_translate_v2p;
 
 	cpu->cd.m88k.cpu_type = cpu_type_defs[found];
-	cpu->name            = cpu->cd.m88k.cpu_type.name;
+	cpu->name            = strdup(cpu->cd.m88k.cpu_type.name);
 	cpu->is_32bit        = 1;
 	cpu->byte_order      = EMUL_BIG_ENDIAN;
 

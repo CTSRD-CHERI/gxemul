@@ -63,7 +63,7 @@ MACHINE_SETUP(sgi)
 	struct memory *mem = machine->memory;
 	char tmpstr[1000];
 	int i, j;
-	char *eaddr_string = "eaddr=10:20:30:40:50:60";		/*  bogus  */
+	char *eaddr_string = strdup("eaddr=10:20:30:40:50:60");		/*  bogus  */
 	unsigned char macaddr[6];
 
 	struct pci_data *pci_data = NULL;
