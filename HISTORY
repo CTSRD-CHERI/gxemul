@@ -3836,3 +3836,5 @@ Changelog for GXemul:
 		all occurances of 'template' and 'class' to other things.
 		Step 3: Fix malloc/realloc cast errors.
 20090627	Continuing on the C to C++ switch.
+		Updating the OpenBSD/mvme88k regression test expect script
+		from 4.4 to 4.5.

@@ -1,7 +1,7 @@
 #!/usr/local/bin/expect
 
 set timeout 4000
-spawn ./gxemul -e mvme187 -q -d obsd_mvme88k.img -d b:../../emul/m88k/openbsd_mvme88k_4.4.iso -j 4.4/mvme88k/bsd.rd
+spawn ./gxemul -e mvme187 -q -d obsd_mvme88k.img -d b:../../emul/m88k/openbsd_mvme88k_4.5.iso -j 4.5/mvme88k/bsd.rd
 
 set  send_slow  {1 .5}
 
@@ -32,7 +32,7 @@ send -s "!mount -t cd9660 /dev/cd0c /mnt2\r"
 expect "Is the disk partition already mounted"
 send -s "yes\r"
 expect "Pathname to the sets"
-send -s "/mnt2/4.4/mvme88k\r"
+send -s "/mnt2/4.5/mvme88k\r"
 expect "Set name"
 send -s "done\r"
 expect "Ready to install sets"

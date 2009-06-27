@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #  A small test to measure how long time it takes (real time) to install
-#  OpenBSD/mvme88k 4.4, without interaction.
+#  OpenBSD/mvme88k 4.5, without interaction.
 #
 #  Start with:
 #
