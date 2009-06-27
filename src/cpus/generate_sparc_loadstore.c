@@ -73,7 +73,7 @@ void loadstore(int mode32, int use_imm, int store, int size, int signedness)
 	if (signedness && !store)
 		printf("#define LS_SIGNED\n");
 
-	printf("#include \"cpu_sparc_instr_loadstore.c\"\n");
+	printf("#include \"cpu_sparc_instr_loadstore.cc\"\n");
 
 	if (signedness && !store)
 		printf("#undef LS_SIGNED\n");

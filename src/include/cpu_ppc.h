@@ -41,7 +41,7 @@ struct cpu_family;
 
 /*  PPC CPU types:  */
 struct ppc_cpu_type_def { 
-	char		*name;
+	const char	*name;
 	int		pvr;
 	int		bits;
 	int		flags;

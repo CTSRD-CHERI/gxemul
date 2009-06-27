@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 			if (u)	printf("#define A__U\n");
 			if (p)	printf("#define A__P\n");
 			if (reg)printf("#define A__REG\n");
-			printf("#include \"cpu_arm_instr_loadstore.c\"\n");
+			printf("#include \"cpu_arm_instr_loadstore.cc\"\n");
 			if (l)	printf("#undef A__L\n");
 			if (w)	printf("#undef A__W\n");
 			if (b)	printf("#undef A__B\n");
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 			if (u)	printf("#define A__U\n");
 			if (p)	printf("#define A__P\n");
 			if (reg)printf("#define A__REG\n");
-			printf("#include \"cpu_arm_instr_loadstore.c\"\n");
+			printf("#include \"cpu_arm_instr_loadstore.cc\"\n");
 			if (s)	printf("#undef A__SIGNED\n");
 			if (l)	printf("#undef A__L\n");
 			if (w)	printf("#undef A__W\n");

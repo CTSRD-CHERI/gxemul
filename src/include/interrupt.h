@@ -92,9 +92,9 @@ struct interrupt {
  *  controllers) should call interrupt_handler_register() to register itself.
  */
 
-void interrupt_handler_register(struct interrupt *template);
-void interrupt_handler_remove(char *name);
-int interrupt_handler_lookup(char *name, struct interrupt *template);
+void interrupt_handler_register(struct interrupt *templ);
+void interrupt_handler_remove(const char *name);
+int interrupt_handler_lookup(const char *name, struct interrupt *templ);
 
 
 /*

@@ -6,7 +6,7 @@
 #
 
 rm -f .index
-for a in *.c; do
+for a in *.cc; do
 	B=`grep COMMENT $a`
 	if [ z"$B" != z ]; then
 		printf "$a " >> .index

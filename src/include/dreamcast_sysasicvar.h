@@ -80,7 +80,7 @@
 	uint64_t tmp2 = SYSASIC_EVENT_TO_BITMASK(e);			\
 	tmp2 |= 0x100000000ULL;		/*  Internal GXemul hack  */	\
 	memory_writemax64(cpu, buf, 8, tmp2);				\
-	cpu->memory_rw(cpu, cpu->mem, tmp1, (void *) &tmp2, 8,		\
+	cpu->memory_rw(cpu, cpu->mem, tmp1, buf, 8,			\
 	    MEM_WRITE, PHYSICAL);					\
 	}
 

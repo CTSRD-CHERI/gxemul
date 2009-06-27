@@ -3,12 +3,15 @@
 #
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
+CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 
 OBJS=emul.o emul_parse.o float_emul.o interrupt.o main.o memory.o misc.o \
 	net.o settings.o timer.o useremul.o
 
 all: do_include
-	$(MAKE) do_src do_console do_cpus do_debugger do_devices do_disk \
+	$(MAKE) the_rest
+
+the_rest: do_src do_console do_cpus do_debugger do_devices do_disk \
 	    do_file do_machines do_net do_promemul do_symbol do_useremul
 
 do_include:
@@ -50,6 +53,7 @@ do_useremul:
 do_src: $(OBJS)
 
 $(OBJS): Makefile
+
 
 clean:
 	rm -f $(OBJS) *core tmp_*.c

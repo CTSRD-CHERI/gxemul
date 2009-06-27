@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 		}
 		if (pc)	printf("#define A__PC\n");
 		printf("#define A__%s\n", uppercase(op[a]));
-		printf("#include \"cpu_arm_instr_dpi.c\"\n");
+		printf("#include \"cpu_arm_instr_dpi.cc\"\n");
 		printf("#undef A__%s\n", uppercase(op[a]));
 		if (s)	printf("#undef A__S\n");
 		switch (reg) {

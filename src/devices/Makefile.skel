@@ -3,6 +3,8 @@
 #
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(DINCLUDE) $(XINCLUDE)
+CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+
 OBJS=device.o bus_isa.o bus_pci.o lk201.o \
 	dev_8253.o dev_8259.o dev_adb.o dev_ahc.o dev_algor.o dev_asc.o \
 	dev_bebox.o dev_bt431.o dev_bt455.o dev_bt459.o dev_clmpcc.o \
@@ -28,34 +30,34 @@ OBJS=device.o bus_isa.o bus_pci.o lk201.o \
 
 all:
 	cd fonts; $(MAKE)
-	$(MAKE) font8x8.c font8x10.c font8x16.c
+	$(MAKE) font8x8.cc font8x10.cc font8x16.cc
 	$(MAKE) objs
 	$(MAKE) autodev.o
 
-autodev.c: autodev_head.c autodev_middle.c autodev_tail.c makeautodev.sh bus_pci.c $(OBJS)
+autodev.cc: autodev_head.cc autodev_middle.cc autodev_tail.cc makeautodev.sh bus_pci.cc $(OBJS)
 	./makeautodev.sh
 
 objs: $(OBJS)
 
 $(OBJS): Makefile
 
-dev_vga.o: font8x8.c font8x16.c font8x10.c
+dev_vga.o: font8x8.cc font8x16.cc font8x10.cc
 
-dev_fb.o: fb_include.c dev_fb.c
+dev_fb.o: fb_include.cc dev_fb.cc
 
-font8x8.c:
-	cp -f fonts/font8x8.c .
+font8x8.cc:
+	cp -f fonts/font8x8.cc .
 
-font8x10.c:
-	cp -f fonts/font8x10.c .
+font8x10.cc:
+	cp -f fonts/font8x10.cc .
 
-font8x16.c:
-	cp -f fonts/font8x16.c .
+font8x16.cc:
+	cp -f fonts/font8x16.cc .
 
 
 clean:
-	rm -f $(OBJS) *core font8x16.c font8x10.c font8x8.c
-	rm -f autodev.[co]
+	rm -f $(OBJS) *core font8x16.cc font8x10.cc font8x8.cc
+	rm -f autodev.[co]*
 	cd fonts; $(MAKE) clean
 
 clean_all: clean

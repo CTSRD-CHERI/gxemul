@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	}
 
 	printf("/*\n *  AUTOMATICALLY GENERATED from ppc_spr.h! Do "
-	    "not edit.\n */\n\nstatic char *ppc_spr_names[1024] = {\n");
+	    "not edit.\n */\n\nstatic const char *ppc_spr_names[1024] = {\n");
 
 	for (i=0; i<1024; i++)
 		printf(" \"%s\"%s%s", names[i]? names[i] : "(unknown)",

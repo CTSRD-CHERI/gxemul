@@ -88,7 +88,7 @@ void loadstore(int mode32, int store, int size, int signedness, int endianness)
 	if (endianness == 0)
 		printf("#define LS_INCLUDE_GENERIC\n");
 
-	printf("#include \"cpu_mips_instr_loadstore.c\"\n");
+	printf("#include \"cpu_mips_instr_loadstore.cc\"\n");
 
 	if (endianness == 0)
 		printf("#undef LS_INCLUDE_GENERIC\n");

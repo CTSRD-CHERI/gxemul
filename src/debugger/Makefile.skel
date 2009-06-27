@@ -3,6 +3,7 @@
 #
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=debugger.o debugger_expr.o
 
@@ -10,10 +11,10 @@ all: $(OBJS)
 
 $(OBJS): Makefile
 
-debugger.c: debugger_cmds.c
+debugger.cc: debugger_cmds.cc
 
 clean:
-	rm -f $(OBJS) *core tmp_*.c
+	rm -f $(OBJS) *core tmp_*.*c
 
 clean_all: clean
 	rm -f Makefile

@@ -1,7 +1,7 @@
 #!/bin/sh
 ###############################################################################
 #
-#  Copyright (C) 2005-2008  Anders Gavare.  All rights reserved.
+#  Copyright (C) 2005-2009  Anders Gavare.  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are met:
@@ -25,22 +25,19 @@
 #  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 #  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 #  SUCH DAMAGE.
-#
-#
-#  $Id: makeautomachine.sh,v 1.5.2.1 2008-01-18 19:12:33 debug Exp $
 
 
-printf "Generating automachine.c... "
+printf "Generating automachine.cc... "
 
-rm -f automachine.c
+rm -f automachine.cc
 
-printf "/*\n *  DO NOT EDIT. AUTOMATICALLY CREATED\n */\n\n" >> automachine.c
+printf "/*\n *  DO NOT EDIT. AUTOMATICALLY CREATED\n */\n\n" >> automachine.cc
 
-cat automachine_head.c >> automachine.c
+cat automachine_head.cc >> automachine.cc
 
 printf "3"
 rm -f .index
-for a in *.c; do
+for a in *.cc; do
 	B=`grep COMMENT $a`
 	if [ z"$B" != z ]; then
 		printf "$a " >> .index
@@ -49,29 +46,29 @@ for a in *.c; do
 done
 
 printf "2"
-for a in machine_*.c; do
+for a in machine_*.cc; do
 	B=`grep MACHINE_REGISTER $a`
 	if [ z"$B" != z ]; then
 		C=`grep MACHINE_REGISTER $a | cut -d \( -f 2|cut -d \) -f 1`
 		for B in $C; do
-			printf "void machine_register_$B(void);\n" >> automachine.c
+			printf "void machine_register_$B(void);\n" >> automachine.cc
 		done
 	fi
 done
 
-cat automachine_middle.c >> automachine.c
+cat automachine_middle.cc >> automachine.cc
 
 printf "1"
-for a in machine_*.c; do
+for a in machine_*.cc; do
 	B=`grep MACHINE_REGISTER $a`
 	if [ z"$B" != z ]; then
 		C=`grep MACHINE_REGISTER $a | cut -d \( -f 2|cut -d \) -f 1`
 		for B in $C; do
-			printf "\tmachine_register_$B();\n" >> automachine.c
+			printf "\tmachine_register_$B();\n" >> automachine.cc
 		done
 	fi
 done
 
-cat automachine_tail.c >> automachine.c
+cat automachine_tail.cc >> automachine.cc
 
 printf " done\n"

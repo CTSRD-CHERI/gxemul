@@ -3,6 +3,7 @@
 #
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=useremul.o \
 	useremul_freebsd.o useremul_netbsd.o \
@@ -13,7 +14,6 @@ all: $(OBJS)
 
 $(OBJS): Makefile
 
-useremul.o: useremul.c
 
 clean:
 	rm -f $(OBJS) *core

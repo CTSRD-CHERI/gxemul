@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 			if (scale)
 				printf("#define ALU_S%i\n", scale);
 
-			printf("#include \"cpu_alpha_instr_alu.c\"\n");
+			printf("#include \"cpu_alpha_instr_alu.cc\"\n");
 
 			if (imm)
 				printf("#undef ALU_IMM\n");
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 			}
 			if (not)
 				printf("#define ALU_NOT\n");
-			printf("#include \"cpu_alpha_instr_alu.c\"\n");
+			printf("#include \"cpu_alpha_instr_alu.cc\"\n");
 
 			if (imm)
 				printf("#undef ALU_IMM\n");
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 		if (strcmp(cmps[op]+strlen(cmps[op])-2,"eq") == 0)
 			printf("#define ALU_CMP_EQ\n");
 
-		printf("#include \"cpu_alpha_instr_alu.c\"\n");
+		printf("#include \"cpu_alpha_instr_alu.cc\"\n");
 
 		if (cmps[op][0] == 'u')
 			printf("#undef ALU_UNSIGNED\n");
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
 		if (imm)
 			printf("#define ALU_IMM\n");
 		printf("#define ALU_CMOV_%s\n", cmov[op]);
-		printf("#include \"cpu_alpha_instr_alu.c\"\n");
+		printf("#include \"cpu_alpha_instr_alu.cc\"\n");
 		printf("#undef ALU_CMOV_%s\n", cmov[op]);
 		if (imm)
 			printf("#undef ALU_IMM\n");
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 		printf("\n");
 		if (imm)
 			printf("#define ALU_IMM\n");
-		printf("#include \"cpu_alpha_instr_alu.c\"\n");
+		printf("#include \"cpu_alpha_instr_alu.cc\"\n");
 		if (imm)
 			printf("#undef ALU_IMM\n");
 		printf("#undef ALU_N\n");
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 		}
 		if (lo)
 			printf("#define ALU_LO\n");
-		printf("#include \"cpu_alpha_instr_alu.c\"\n");
+		printf("#include \"cpu_alpha_instr_alu.cc\"\n");
 		switch (size) {
 		case 0:	printf("#undef ALU_B\n"); break;
 		case 1:	printf("#undef ALU_W\n"); break;
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
 			if (llsc)
 				printf("_llsc");
 			printf("\n");
-			printf("#include \"cpu_alpha_instr_loadstore.c\"\n");
+			printf("#include \"cpu_alpha_instr_loadstore.cc\"\n");
 			printf("#undef LS_N\n");
 			printf("#undef LS_GENERIC_N\n");
 			switch (size) {
@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
 			printf("%s", sizechar[size]);
 			printf("_u");		/*  NOTE: unaligned  */
 			printf("\n");
-			printf("#include \"cpu_alpha_instr_loadstore.c\"\n");
+			printf("#include \"cpu_alpha_instr_loadstore.cc\"\n");
 			printf("#undef LS_N\n");
 			printf("#undef LS_GENERIC_N\n");
 			printf("#undef LS_Q\n");

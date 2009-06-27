@@ -71,48 +71,48 @@ int main(int argc, char *argv[])
 
 	printf("#define DYNTRANS_FUNCTION_TRACE_DEF "
 	    "%s_cpu_functioncall_trace\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_FUNCTION_TRACE_DEF\n\n");
 
 	printf("#define DYNTRANS_INIT_TABLES "
 	    "%s_cpu_init_tables\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_INIT_TABLES\n\n");
 
 	printf("#define DYNTRANS_TC_ALLOCATE_DEFAULT_PAGE_DEF "
 	    "%s_tc_allocate_default_page\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_TC_ALLOCATE_DEFAULT_PAGE_DEF\n\n");
 
 	printf("#define DYNTRANS_INVAL_ENTRY\n");
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_INVAL_ENTRY\n\n");
 
 	printf("#define DYNTRANS_INVALIDATE_TC "
 	    "%s_invalidate_translation_caches\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_INVALIDATE_TC\n\n");
 
 	printf("#define DYNTRANS_INVALIDATE_TC_CODE "
 	    "%s_invalidate_code_translation\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_INVALIDATE_TC_CODE\n\n");
 
 	printf("#define DYNTRANS_UPDATE_TRANSLATION_TABLE "
 	    "%s_update_translation_table\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_UPDATE_TRANSLATION_TABLE\n\n");
 
 	printf("#define MEMORY_RW %s_memory_rw\n", a);
 	printf("#define MEM_%s\n", uppercase(a));
-	printf("#include \"memory_rw.c\"\n");
+	printf("#include \"memory_rw.cc\"\n");
 	printf("#undef MEM_%s\n", uppercase(a));
 	printf("#undef MEMORY_RW\n\n");
 
 	printf("#define DYNTRANS_PC_TO_POINTERS_FUNC %s_pc_to_pointers\n", a);
 	printf("#define DYNTRANS_PC_TO_POINTERS_GENERIC "
 	    "%s_pc_to_pointers_generic\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_PC_TO_POINTERS_FUNC\n\n");
 	printf("#undef DYNTRANS_PC_TO_POINTERS_GENERIC\n\n");
 
@@ -129,10 +129,10 @@ int main(int argc, char *argv[])
 	printf("#endif\n");
 	printf("#define COMBINE(n) %s_combine_ ## n\n", a);
 	printf("#include \"quick_pc_to_pointers.h\"\n");
-	printf("#include \"cpu_%s_instr.c\"\n\n", a);
+	printf("#include \"cpu_%s_instr.cc\"\n\n", a);
 
 	printf("#define DYNTRANS_RUN_INSTR_DEF %s_run_instr\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_RUN_INSTR_DEF\n\n");
 
 
@@ -157,39 +157,39 @@ int main(int argc, char *argv[])
 	printf("#undef DYNTRANS_INVALIDATE_TLB_ENTRY\n"
 	    "#define DYNTRANS_INVALIDATE_TLB_ENTRY "
 	    "%s32_invalidate_tlb_entry\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_INVAL_ENTRY\n\n");
 	printf("#define DYNTRANS_INVALIDATE_TC "
 	    "%s32_invalidate_translation_caches\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_INVALIDATE_TC\n\n");
 	printf("#define DYNTRANS_INVALIDATE_TC_CODE "
 	    "%s32_invalidate_code_translation\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_INVALIDATE_TC_CODE\n\n");
 	printf("#define DYNTRANS_UPDATE_TRANSLATION_TABLE "
 	    "%s32_update_translation_table\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_UPDATE_TRANSLATION_TABLE\n\n");
 	printf("#define DYNTRANS_PC_TO_POINTERS_FUNC %s32_pc_to_pointers\n", a);
 	printf("#define DYNTRANS_PC_TO_POINTERS_GENERIC "
 	    "%s32_pc_to_pointers_generic\n", a);
 	printf("#undef DYNTRANS_PC_TO_POINTERS\n"
 	    "#define DYNTRANS_PC_TO_POINTERS %s32_pc_to_pointers\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_PC_TO_POINTERS_FUNC\n\n");
 	printf("#undef DYNTRANS_PC_TO_POINTERS_GENERIC\n\n");
 	printf("#undef COMBINE\n");
 	printf("#define COMBINE(n) %s32_combine_ ## n\n", a);
 	printf("#include \"quick_pc_to_pointers.h\"\n");
-	printf("#include \"cpu_%s_instr.c\"\n", a);
+	printf("#include \"cpu_%s_instr.cc\"\n", a);
 
 	printf("\n#undef DYNTRANS_PC_TO_POINTERS\n"
 	    "#define DYNTRANS_PC_TO_POINTERS %s_pc_to_pointers\n"
 	    "#define DYNTRANS_PC_TO_POINTERS32 %s32_pc_to_pointers\n\n", a, a);
 
 	printf("#define DYNTRANS_RUN_INSTR_DEF %s32_run_instr\n", a);
-	printf("#include \"cpu_dyntrans.c\"\n");
+	printf("#include \"cpu_dyntrans.cc\"\n");
 	printf("#undef DYNTRANS_RUN_INSTR_DEF\n\n");
 
 	printf("#endif /*  DYNTRANS_DUALMODE_32  */\n\n\n");

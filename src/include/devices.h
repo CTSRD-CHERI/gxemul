@@ -94,7 +94,7 @@ struct dec_ioasic_data *dev_dec_ioasic_init(struct cpu *cpu, struct memory *mem,
 #define	DEV_ASC_PICA		2
 int dev_asc_access(struct cpu *cpu, struct memory *mem, uint64_t relative_addr, unsigned char *data, size_t len, int writeflag, void *);
 void dev_asc_init(struct machine *machine, struct memory *mem, uint64_t baseaddr,
-	char *irq_path, void *turbochannel, int mode,
+	const char *irq_path, void *turbochannel, int mode,
 	size_t (*dma_controller)(void *dma_controller_data,
 		unsigned char *data, size_t len, int writeflag),
 	void *dma_controller_data);
@@ -130,7 +130,7 @@ int dev_bt459_access(struct cpu *cpu, struct memory *mem,
 struct vfb_data;
 void dev_bt459_init(struct machine *machine, struct memory *mem,
 	uint64_t baseaddr, uint64_t baseaddr_irq, struct vfb_data *vfb_data,
-	int color_fb_flag, char *irq_path, int type);
+	int color_fb_flag, const char *irq_path, int type);
 
 /*  dev_colorplanemask.c:  */
 #define	DEV_COLORPLANEMASK_LENGTH	0x0000000000000010
@@ -224,7 +224,7 @@ int dev_fb_access(struct cpu *cpu, struct memory *mem, uint64_t relative_addr,
 	unsigned char *data, size_t len, int writeflag, void *);
 struct vfb_data *dev_fb_init(struct machine *machine, struct memory *mem,
 	uint64_t baseaddr, int vfb_type, int visible_xsize, int visible_ysize,
-	int xsize, int ysize, int bit_depth, char *name);
+	int xsize, int ysize, int bit_depth, const char *name);
 
 /*  dev_gt.c:  */
 #define	DEV_GT_LENGTH			0x1000
@@ -272,7 +272,7 @@ int dev_le_access(struct cpu *cpu, struct memory *mem,
 	int writeflag, void *);
 void dev_le_init(struct machine *machine, struct memory *mem,
 	uint64_t baseaddr, uint64_t buf_start, uint64_t buf_end,
-	char *irq_path, int len);
+	const char *irq_path, int len);
 
 /*  dev_mc146818.c:  */
 #define	DEV_MC146818_LENGTH		0x0000000000000100
@@ -310,7 +310,7 @@ int dev_pmagja_access(struct cpu *cpu, struct memory *mem,
 	uint64_t relative_addr, unsigned char *data, size_t len,
 	int writeflag, void *);
 void dev_pmagja_init(struct machine *machine, struct memory *mem,
-	uint64_t baseaddr, char *irq_path);
+	uint64_t baseaddr, const char *irq_path);
 
 /*  dev_px.c:  */
 struct px_data {
@@ -335,7 +335,7 @@ struct px_data {
 int dev_px_access(struct cpu *cpu, struct memory *mem, uint64_t relative_addr,
 	unsigned char *data, size_t len, int writeflag, void *);
 void dev_px_init(struct machine *machine, struct memory *mem,
-	uint64_t baseaddr, int px_type, char *irq_path);
+	uint64_t baseaddr, int px_type, const char *irq_path);
 
 /*  dev_ram.c:  */
 #define	DEV_RAM_RAM				0
@@ -443,8 +443,8 @@ int dev_turbochannel_access(struct cpu *cpu, struct memory *mem,
 	uint64_t relative_addr, unsigned char *data, size_t len,
 	int writeflag, void *);
 void dev_turbochannel_init(struct machine *machine, struct memory *mem,
-	int slot_nr, uint64_t baseaddr, uint64_t endaddr, char *device_name,
-	char *irq_path);
+	int slot_nr, uint64_t baseaddr, uint64_t endaddr, const char *device_name,
+	const char *irq_path);
 
 /*  dev_uninorth.c:  */
 struct pci_data *dev_uninorth_init(struct machine *machine, struct memory *mem,

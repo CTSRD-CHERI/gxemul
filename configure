@@ -255,6 +255,7 @@ int main(int argc, char *argv[])
 }
 ' > _testprog.c
 
+cp _testprog.c _testprog.cc
 
 #  Try to detect which C compiler to use, if CC is not set:
 printf "checking which C compiler to use... "
@@ -295,22 +296,8 @@ if [ z"$CC" = z ]; then
 		fi
 	fi
 	rm -f _testprog
-
-#  Actually, don't try ccc on Alpha. ccc generates broken code :(
-
-#	#  Try ccc (FreeBSD/Alpha):
-#	printf "#!/bin/sh\nccc $CFLAGS _testprog.c -o _testprog >" > _test.sh
-#	printf " /dev/null 2> /dev/null\n" >> _test.sh
-#	chmod 755 _test.sh
-#	./_test.sh > /dev/null 2> /dev/null
-#	if [ -x _testprog ]; then
-#		CC="ccc"
-#	fi
-#	rm -f _testprog
-
 	rm -f _test.sh
 fi
-
 
 rm -f _testprog
 
@@ -348,6 +335,62 @@ if [ z"$CYGWIN" = zYES ]; then
 fi
 
 echo " ($CCTYPE)"
+
+
+#  Try to detect which C++ compiler to use, if CXX is not set:
+printf "checking which C++ compiler to use... "
+rm -f _testprog
+if [ z"$CXX" = z ]; then
+	#  Try g++ first:
+	printf "#!/bin/sh\ng++ $CXXFLAGS _testprog.cc -o _testprog >" > _test.sh
+	printf " /dev/null 2> /dev/null\n" >> _test.sh
+	chmod 755 _test.sh
+	./_test.sh > /dev/null 2> /dev/null
+	if [ -x _testprog ]; then
+		if [ z`./_testprog` = z0,1 ]; then
+			CXX=g++
+		else
+			printf "broken g++ detected\n"
+			printf "The test program:\n\n"
+			cat _testprog.cc
+			printf "\nshould have resulted in 0,1, but the"
+			printf " result was: "
+			./_testprog
+			printf "\n\nchecking for other C++ compilers... "
+		fi
+	fi
+	rm -f _testprog
+
+	#  If both g++ and c++ exist, then c++ might be a vendor specific
+	#  compiler which produces faster code:
+	printf "#!/bin/sh\nc++ $CXXFLAGS _testprog.cc -o _testprog >" > _test.sh
+	printf " /dev/null 2> /dev/null\n" >> _test.sh
+	chmod 755 _test.sh
+	./_test.sh > /dev/null 2> /dev/null
+	if [ -x _testprog ]; then
+		if [ z`./_testprog` = z0,1 ]; then
+			CXX=c++
+		else
+			printf "broken c++ detected\n"
+			printf "checking for other C++ compilers... "
+		fi
+	fi
+	rm -f _testprog
+	rm -f _test.sh
+fi
+
+rm -f _testprog
+
+if [ z"$CXX" = z ]; then
+	printf "no working compiler detected\n"
+	printf "\nPlease set the CXX environment variable to a working C++ "
+	printf "compiler before running\nthe configure script, and make"
+	printf " sure that the CXXFLAGS environment variable is\nalso valid"
+	printf " for that compiler.\n"
+	exit
+fi
+
+echo "$CXX $CXXFLAGS"
 
 
 if [ z$NOX11 = z ]; then
@@ -599,17 +642,17 @@ if [ -x _testprog ]; then
 		CWARNINGS="$CWARNINGS -msg_disable longlongtype,unusedtop"
 	fi
 
-	if [ z"$UNSTABLE" = zYES ]; then
-		printf "checking whether -Werror can be used... "
-		rm -f _testprog
-		$CC $CFLAGS $CWARNINGS _testprog.c -o _testprog -Werror 2> /dev/null
-		if [ -x _testprog ]; then
-			printf "yes\n"
-			CWARNINGS="$CWARNINGS -Werror"
-		else
-			printf "no\n"
-		fi
-	fi
+#	if [ z"$UNSTABLE" = zYES ]; then
+#		printf "checking whether -Werror can be used... "
+#		rm -f _testprog
+#		$CC $CFLAGS $CWARNINGS _testprog.c -o _testprog -Werror 2> /dev/null
+#		if [ -x _testprog ]; then
+#			printf "yes\n"
+#			CWARNINGS="$CWARNINGS -Werror"
+#		else
+#			printf "no\n"
+#		fi
+#	fi
 else
 	printf "no\n"
 fi
@@ -1195,6 +1238,8 @@ echo "COPTIM=$CFLAGS" >> _Makefile.header
 echo "INCLUDE=$INCLUDE" >> _Makefile.header
 echo "DINCLUDE=$DINCLUDE" >> _Makefile.header
 echo "CC=$CC" >> _Makefile.header
+echo "CXX=$CXX" >> _Makefile.header
+echo "CXXFLAGS=$CXXFLAGS" >> _Makefile.header
 echo "OTHERLIBS=$OTHERLIBS" >> _Makefile.header
 echo "CPU_ARCHS=$CPU_ARCHS" >> _Makefile.header
 echo "CPU_TOOLS=$CPU_TOOLS" >> _Makefile.header

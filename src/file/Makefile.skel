@@ -3,6 +3,7 @@
 #
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=file.o
 
@@ -11,8 +12,8 @@ all: $(OBJS)
 
 $(OBJS): Makefile
 
-file.o: file.c file_aout.c file_ecoff.c file_elf.c file_macho.c \
-	file_raw.c file_srec.c
+file.o: file.cc file_aout.cc file_ecoff.cc file_elf.cc file_macho.cc \
+	file_raw.cc file_srec.cc
 
 
 clean:

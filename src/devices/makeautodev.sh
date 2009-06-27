@@ -1,7 +1,7 @@
 #!/bin/sh
 ###############################################################################
 #
-#  Copyright (C) 2005-2008  Anders Gavare.  All rights reserved.
+#  Copyright (C) 2005-2009  Anders Gavare.  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are met:
@@ -27,17 +27,17 @@
 #  SUCH DAMAGE.
 
 
-printf "Generating autodev.c... "
+printf "Generating autodev.cc... "
 
-rm -f autodev.c
+rm -f autodev.cc
 
-printf "/*\n *  DO NOT EDIT. AUTOMATICALLY CREATED\n */\n\n" >> autodev.c
+printf "/*\n *  DO NOT EDIT. AUTOMATICALLY CREATED\n */\n\n" >> autodev.cc
 
-cat autodev_head.c >> autodev.c
+cat autodev_head.cc >> autodev.cc
 
 printf "5"
 rm -f .index
-for a in *.c; do
+for a in *.cc; do
 	B=`grep COMMENT $a`
 	if [ z"$B" != z ]; then
 		printf "$a " >> .index
@@ -46,54 +46,54 @@ for a in *.c; do
 done
 
 printf "4"
-for a in dev_*.c; do
+for a in dev_*.cc; do
 	B=`grep DEVINIT $a`
 	if [ z"$B" != z ]; then
 		C=`grep DEVINIT $a | cut -d \( -f 2|cut -d \) -f 1`
 		for B in $C; do
-			printf "int devinit_$B(struct devinit *);\n" >> autodev.c
+			printf "int devinit_$B(struct devinit *);\n" >> autodev.cc
 		done
 	fi
 done
 
 printf "3"
-for a in bus_pci.c; do
+for a in bus_pci.cc; do
 	B=`grep PCIINIT $a`
 	if [ z"$B" != z ]; then
 		C=`grep PCIINIT $a | cut -d \( -f 2|cut -d \) -f 1`
 		for B in $C; do
-			printf "void pciinit_$B(struct machine *, " >> autodev.c
-			printf "struct memory *, struct pci_device *);\n" >> autodev.c
+			printf "void pciinit_$B(struct machine *, " >> autodev.cc
+			printf "struct memory *, struct pci_device *);\n" >> autodev.cc
 		done
 	fi
 done
 
-cat autodev_middle.c >> autodev.c
+cat autodev_middle.cc >> autodev.cc
 
 printf "2"
-for a in dev_*.c; do
+for a in dev_*.cc; do
 	B=`grep DEVINIT $a`
 	if [ z"$B" != z ]; then
 		C=`grep DEVINIT $a | cut -d \( -f 2|cut -d \) -f 1`
 		for B in $C; do
-			printf "\tdevice_register(\""$B"\"," >> autodev.c
-			printf " devinit_$B);\n" >> autodev.c
+			printf "\tdevice_register(\""$B"\"," >> autodev.cc
+			printf " devinit_$B);\n" >> autodev.cc
 		done
 	fi
 done
 
 printf "1"
-for a in bus_pci.c; do
+for a in bus_pci.cc; do
 	B=`grep PCIINIT $a`
 	if [ z"$B" != z ]; then
 		C=`grep PCIINIT $a | cut -d \( -f 2|cut -d \) -f 1`
 		for B in $C; do
-			printf "\tpci_register(\""$B"\"," >> autodev.c
-			printf " pciinit_$B);\n" >> autodev.c
+			printf "\tpci_register(\""$B"\"," >> autodev.cc
+			printf " pciinit_$B);\n" >> autodev.cc
 		done
 	fi
 done
 
-cat autodev_tail.c >> autodev.c
+cat autodev_tail.cc >> autodev.cc
 
 printf " done\n"

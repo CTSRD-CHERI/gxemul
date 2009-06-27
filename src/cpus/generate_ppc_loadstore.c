@@ -99,7 +99,7 @@ void do_it(int mode)
 				printf("_0");
 			printf("\n");
 
-			printf("#include \"cpu_ppc_instr_loadstore.c\"\n");
+			printf("#include \"cpu_ppc_instr_loadstore.cc\"\n");
 
 			printf("#undef LS_N\n");
 			printf("#undef LS_GENERIC_N\n");
@@ -180,7 +180,7 @@ void do_it(int mode)
 			printf("x");
 			printf("\n");
 
-			printf("#include \"cpu_ppc_instr_loadstore.c\"\n");
+			printf("#include \"cpu_ppc_instr_loadstore.cc\"\n");
 
 			printf("#undef LS_N\n");
 			printf("#undef LS_GENERIC_N\n");
@@ -286,13 +286,13 @@ cont_x:
 	    "#define LS_GENERIC_N ppc%s_generic_lhbrx\n"
 	    "#define LS_N ppc%s_instr_lhbrx\n"
 	    "#define LS_LOAD\n"
-	    "#include \"cpu_ppc_instr_loadstore.c\"\n"
+	    "#include \"cpu_ppc_instr_loadstore.cc\"\n"
 	    "#undef LS_LOAD\n"
 	    "#undef LS_N\n"
 	    "#undef LS_GENERIC_N\n"
 	    "#define LS_GENERIC_N ppc%s_generic_sthbrx\n"
 	    "#define LS_N ppc%s_instr_sthbrx\n"
-	    "#include \"cpu_ppc_instr_loadstore.c\"\n"
+	    "#include \"cpu_ppc_instr_loadstore.cc\"\n"
 	    "#undef LS_N\n"
 	    "#undef LS_GENERIC_N\n"
 	    "#undef LS_H\n"
@@ -303,13 +303,13 @@ cont_x:
 	    "#define LS_GENERIC_N ppc%s_generic_lwbrx\n"
 	    "#define LS_N ppc%s_instr_lwbrx\n"
 	    "#define LS_LOAD\n"
-	    "#include \"cpu_ppc_instr_loadstore.c\"\n"
+	    "#include \"cpu_ppc_instr_loadstore.cc\"\n"
 	    "#undef LS_LOAD\n"
 	    "#undef LS_N\n"
 	    "#undef LS_GENERIC_N\n"
 	    "#define LS_GENERIC_N ppc%s_generic_stwbrx\n"
 	    "#define LS_N ppc%s_instr_stwbrx\n"
-	    "#include \"cpu_ppc_instr_loadstore.c\"\n"
+	    "#include \"cpu_ppc_instr_loadstore.cc\"\n"
 	    "#undef LS_N\n"
 	    "#undef LS_GENERIC_N\n"
 	    "#undef LS_W\n"

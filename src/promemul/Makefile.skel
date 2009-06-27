@@ -3,6 +3,7 @@
 #
 
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
+CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=arcbios.o dec_prom.o dreamcast.o dreamcast_scramble.o \
 	mvmeprom.o of.o ps2_bios.o sh_ipl_g.o yamon.o

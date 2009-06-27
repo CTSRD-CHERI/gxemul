@@ -452,26 +452,28 @@ struct crb {
 /*
  * MDDT: Memory Data Descriptor Table
  */
+struct mddt_cluster {
+	u_int64_t	mddt_pfn;	/*   0: starting PFN */
+	u_int64_t	mddt_pg_cnt;	/*   8: 8KB page count */
+	u_int64_t	mddt_pg_test;	/*  10: tested page count */
+	u_int64_t	mddt_v_bitaddr;	/*  18: bitmap virt addr */
+	u_int64_t	mddt_p_bitaddr;	/*  20: bitmap phys addr */
+	int64_t		mddt_bit_cksum;	/*  28: bitmap checksum */
+
+#define	MDDT_NONVOLATILE		0x10	/* cluster is non-volatile */
+#define	MDDT_PALCODE			0x01	/* console and PAL only */
+#define	MDDT_SYSTEM			0x00	/* system software only */
+#define	MDDT_mbz	  0xfffffffffffffffc	/* 2:63 -- must be zero */
+	int64_t		mddt_usage;	/*  30: bitmap permissions */
+};
+
 struct mddt {
 	int64_t	 	mddt_cksum;		/*   0: 7-N checksum */
 	u_int64_t	mddt_physaddr;		/*   8: bank config addr
 						 * IMPLEMENTATION SPECIFIC
 						 */
 	u_int64_t	mddt_cluster_cnt;	/*  10: memory cluster count */
-	struct mddt_cluster {
-		u_int64_t	mddt_pfn;	/*   0: starting PFN */
-		u_int64_t	mddt_pg_cnt;	/*   8: 8KB page count */
-		u_int64_t	mddt_pg_test;	/*  10: tested page count */
-		u_int64_t	mddt_v_bitaddr;	/*  18: bitmap virt addr */
-		u_int64_t	mddt_p_bitaddr;	/*  20: bitmap phys addr */
-		int64_t		mddt_bit_cksum;	/*  28: bitmap checksum */
-
-#define	MDDT_NONVOLATILE		0x10	/* cluster is non-volatile */
-#define	MDDT_PALCODE			0x01	/* console and PAL only */
-#define	MDDT_SYSTEM			0x00	/* system software only */
-#define	MDDT_mbz	  0xfffffffffffffffc	/* 2:63 -- must be zero */
-		int64_t		mddt_usage;	/*  30: bitmap permissions */
-	} mddt_clusters[2];			/* variable length array */
+	struct mddt_cluster mddt_clusters[2];			/* variable length array */
 };
 
 /*

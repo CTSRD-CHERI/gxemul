@@ -10,7 +10,7 @@ all: build
 
 build:
 	cd src; $(MAKE)
-	$(CC) $(COPTIM) src/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/net/*.o src/promemul/*.o src/symbol/*.o src/useremul/*.o $(LIBS) -o $(BIN)
+	$(CXX) $(COPTIM) src/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/net/*.o src/promemul/*.o src/symbol/*.o src/useremul/*.o $(LIBS) -o $(BIN)
 
 install: build
 	@echo

@@ -73,16 +73,16 @@ struct pci_entry {
 void autodev_init(void);
 
 /*  device.c:  */
-int device_register(char *name, int (*initf)(struct devinit *));
+int device_register(const char *name, int (*initf)(struct devinit *));
 struct device_entry *device_lookup(char *name);
 int device_unregister(char *name);
-void *device_add(struct machine *machine, char *name_and_params);
+void *device_add(struct machine *machine, const char *name_and_params);
 void device_dumplist(void);
 void device_set_exit_on_error(int exit_on_error);
 void device_init(void);
 
 /*  PCI stuff:  (TODO: move somewhere else?)  */
-int pci_register(char *name, void (*initf)(struct machine *, struct memory *,
+int pci_register(const char *name, void (*initf)(struct machine *, struct memory *,
 	struct pci_device *));
 void (*pci_lookup_initf(const char *name))(struct machine *machine,
 	struct memory *mem, struct pci_device *pd);

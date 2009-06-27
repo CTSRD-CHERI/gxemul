@@ -3830,3 +3830,9 @@ Changelog for GXemul:
 		to work.
 
 ==============  RELEASE 0.4.7.2  ==============
+
+20090626	Attempting to switch from C to C++ (_WITHOUT_ starting over
+		from scratch). Step 1: Rename all .c files to .cc. 2. Rename
+		all occurances of 'template' and 'class' to other things.
+		Step 3: Fix malloc/realloc cast errors.
+20090627	Continuing on the C to C++ switch.

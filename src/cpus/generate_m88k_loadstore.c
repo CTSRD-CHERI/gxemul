@@ -140,7 +140,7 @@ void loadstore(int size, int store, int signedness,
 	if (registeroffset)
 		printf("#define LS_REGOFS\n");
 
-	printf("#include \"cpu_m88k_instr_loadstore.c\"\n");
+	printf("#include \"cpu_m88k_instr_loadstore.cc\"\n");
 	generated_functions ++;
 
 	if (registeroffset)

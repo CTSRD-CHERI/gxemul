@@ -7,37 +7,38 @@ Some things, in no specific order, that I'd like to fix:
 -------------------------------------------------------------------------------
 
 
-Goals for 0.4.8 (hopefully some time during Summer 2009):
+Goals for 0.6.0 (hopefully some time during Summer 2009):
 
-  [ ]	Overhaul of the device framework: break out memory busses! This
-  	would (in the best case) allow a correct implementation of e.g. PCI,
-  	and cache emulation! :-)  Ideal solution would be if all devices
+  [/]	Switch from C to C++ compilation. Note: This doesn't mean that the
+	bulk of the framework will be written in C++, only that it will be
+	compiled using a C++ compiler.
+
+	[ ]  Use -Werror again, and fix all warnings!
+
+  [ ]	Overhaul of the device framework:
+
+	[ ]  Break out address/memory busses! This would (in the best case)
+	     allow a correct implementation of e.g. PCI, and cache emulation!
+
+	[ ]  Convert DEVINIT _AND_ the non-DEVINIT crap to something
+	     more C++ like. (Reasonable destructors, serialization, etc.)
+
+	Ideal solution would be if all devices
   	were runtime attachable/removable, and if there was a fast path for
   	device access (virtual memory page => immediate device function call).
-
-  [ ]   Continue moving stuff to DEVINIT.
-  
-  [ ]   Add _destructors_ (_free() something) to DEVINIT requirements, in
-  	addition to the constructors/allocators.
 
   [ ]   Clean up the documentation in regards to the old homepage (gavare.se)
         and less first-person-ism.
 
-  [ ]   Maybe remove some unused/nonworking devices/machines?
+  [ ]   Remove unused/nonworking devices/machines and features.
 
-  [ ]   Make everything build with make -j X.
-
-
-Goals for 0.4.9 (?):
-
-  [ ]   Moving to a more component based architecture (like was done in the
-        experimental C++ branch): allow e.g. different kinds of CPUs in the
-        same machine (like SH4 and ARM in the same machine for Dreamcast
-        emulation).  
+  [ ]   Make everything build with "make -j X"?
 
 
-(The name "0.5.x" will be skipped. This was the C++ version that I never had
-time to write.)
+
+(The name "0.5.x" will be skipped. This was the C++ version that was supposed
+to be a complete rewrite from scratch. There was not enough spare time.)
+
 
 -------------------------------------------------------------------------------
 
@@ -597,7 +598,7 @@ Release checklist:
 	Home page update: version numbers
 	Home page News page update
 	sync homepage to sourceforge
-	#GXemul (version number in topic)
+	#GXemul on FreeNode (IRC): version number in topic
 	Sourceforge file release
 	gxemul-users mail
 	Freshmeat

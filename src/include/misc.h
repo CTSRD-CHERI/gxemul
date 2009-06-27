@@ -232,13 +232,13 @@ void file_load(struct machine *machine, struct memory *mem,
 
 /*  main.c:  */
 void debug_indentation(int diff);
-void debug(char *fmt, ...);
-void fatal(char *fmt, ...);
+void debug(const char *fmt, ...);
+void fatal(const char *fmt, ...);
 
 
 /*  misc.c:  */
 unsigned long long mystrtoull(const char *s, char **endp, int base);
-int mymkstemp(char *template);
+int mymkstemp(char *templ);
 #ifdef USE_STRLCPY_REPLACEMENTS
 size_t mystrlcpy(char *dst, const char *src, size_t size);
 size_t mystrlcat(char *dst, const char *src, size_t size);

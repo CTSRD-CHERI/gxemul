@@ -38,7 +38,7 @@ struct cpu_family;
 
 /*  ARM CPU types:  */
 struct arm_cpu_type_def {
-	char		*name;
+	const char	*name;
 	uint32_t	cpu_id;
 	int		flags;
 	int		icache_shift;

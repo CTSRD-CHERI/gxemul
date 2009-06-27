@@ -108,7 +108,7 @@ typedef struct arc_sid
 /* Wonder how this is aligned... */
 typedef struct arc_config
 {
-	u_int32_t		class;
+	u_int32_t		cclass;		// class
 	u_int32_t		type;
 	u_int32_t		flags;
 	u_int16_t		version;

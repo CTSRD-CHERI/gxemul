@@ -44,7 +44,7 @@ struct timer;
  */
 
 struct mips_cpu_type_def {
-	char		*name;
+	const char	*name;
 	int		rev;
 	int		sub;
 	char		flags;
