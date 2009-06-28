@@ -181,19 +181,6 @@ and on compiler settings, so you might want to experiment with using
 different <tt>CC</tt> and <tt>CFLAGS</tt> environment variable values when 
 running the <tt>configure</tt> script.
 
-<p>On some platforms, it is possible that building GXemul will fail 
-because of too high optimization. When using GCC (the GNU compiler), 
-<tt>-O3</tt> is the default optimization level. This works fine on e.g. 
-amd64 and i386 systems, but on some more uncommon platforms, <tt>-O3</tt> 
-might trigger internal bugs in GCC itself. If this happens, try setting 
-<tt>CFLAGS</tt> to <tt>-O2</tt> before running <tt>./configure</tt>, and 
-try again,
-
-<p>Note that there is no <tt>make install</tt> functionality; package
-maintainers for individual operating systems solve this for their 
-corresponding OSes.
-
-
 
 
 
