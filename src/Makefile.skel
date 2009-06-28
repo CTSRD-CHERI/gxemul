@@ -5,13 +5,10 @@
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 
-OBJS=emul.o emul_parse.o float_emul.o interrupt.o main.o memory.o misc.o \
-	net.o settings.o timer.o useremul.o
-
 all: do_include
 	$(MAKE) the_rest
 
-the_rest: do_src do_console do_cpus do_debugger do_devices do_disk \
+the_rest: do_main do_console do_cpus do_debugger do_devices do_disk \
 	    do_file do_machines do_net do_promemul do_symbol do_useremul
 
 do_include:
@@ -50,7 +47,9 @@ do_symbol:
 do_useremul:
 	cd useremul; $(MAKE)
 
-do_src: $(OBJS)
+do_main:
+	cd main; $(MAKE)
+
 
 $(OBJS): Makefile
 
@@ -65,6 +64,7 @@ clean:
 	cd disk; $(MAKE) clean
 	cd file; $(MAKE) clean
 	cd machines; $(MAKE) clean
+	cd main; $(MAKE) clean
 	cd net; $(MAKE) clean
 	cd promemul; $(MAKE) clean
 	cd symbol; $(MAKE) clean
@@ -79,6 +79,7 @@ clean_all: clean
 	cd disk; $(MAKE) clean_all
 	cd file; $(MAKE) clean_all
 	cd machines; $(MAKE) clean_all
+	cd main; $(MAKE) clean_all
 	cd net; $(MAKE) clean_all
 	cd promemul; $(MAKE) clean_all
 	cd symbol; $(MAKE) clean_all

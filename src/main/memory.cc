@@ -486,7 +486,7 @@ void memory_device_remove(struct memory *mem, int i)
 
 #define MEMORY_RW	userland_memory_rw
 #define MEM_USERLAND
-#include "cpus/memory_rw.cc"
+#include "../cpus/memory_rw.cc"
 #undef MEM_USERLAND
 #undef MEMORY_RW
 

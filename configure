@@ -1169,7 +1169,7 @@ echo "" >> _Makefile.header
 
 #  Create the Makefiles:
 D=". src src/include src/console src/cpus src/debugger src/devices"
-D="$D src/devices/fonts src/disk src/file src/machines"
+D="$D src/devices/fonts src/disk src/file src/machines src/main"
 D="$D src/net src/promemul src/symbol src/useremul"
 for a in $D; do
 	echo "creating $a/Makefile"

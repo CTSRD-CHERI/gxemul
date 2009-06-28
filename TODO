@@ -9,13 +9,16 @@ Some things, in no specific order, that I'd like to fix:
 
 Goals for 0.6.0 (hopefully some time during Summer 2009):
 
-  [/]	Switch from C to C++ compilation. Note: This doesn't mean that the
+  [X]	Switch from C to C++ compilation. Note: This doesn't mean that the
 	bulk of the framework will be written in C++, only that it will be
 	compiled using a C++ compiler.
+	
+	NOTE: GXemul consists of a LOT of legacy code. Rewriting all of this
+	within a reasonable short time is out of the question. Slowly converting
+	one subsystem after another into something more modern _is_ feasible,
+	however, and that's my goal.
 
-	[ ]  Use -Werror again, and fix all warnings!
-
-  [ ]	Overhaul of the device framework:
+  [ ]	Rewrite the device framework (as planned in the other C++ branches):
 
 	[ ]  Break out address/memory busses! This would (in the best case)
 	     allow a correct implementation of e.g. PCI, and cache emulation!
@@ -26,9 +29,6 @@ Goals for 0.6.0 (hopefully some time during Summer 2009):
 	Ideal solution would be if all devices
   	were runtime attachable/removable, and if there was a fast path for
   	device access (virtual memory page => immediate device function call).
-
-  [ ]   Clean up the documentation in regards to the old homepage (gavare.se)
-        and less first-person-ism.
 
   [ ]   Remove unused/nonworking devices/machines and features.
 
