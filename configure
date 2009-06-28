@@ -56,6 +56,9 @@
 #
 ###############################################################################
 
+# Default prefix for "make install"
+DEFAULTPREFIX=/usr/local
+
 #  Figure out if this is a stable version (0.x.x).
 X=`basename \`pwd\`|cut -d \- -f 2-|cut -c1-2`
 if [ z"$X" = z0. ]; then
@@ -78,9 +81,13 @@ if [ z"$*" != z ]; then
 			echo "  --disable-x         don't include X11 support,"\
 			    "even if the host supports it"
 			if [ z"$UNSTABLE" = zYES ]; then
-				echo "  --debug             configure" \
-					"for a debug build"
+				echo "  --debug             configure for a" \
+					"debug build (turn off optimizations)"
 			fi
+			echo
+			echo "If the PREFIX environment variable is set," \
+			    "it will override the default"
+			echo "value, which is: $DEFAULTPREFIX"
 			echo
 			exit
 		else
@@ -1147,6 +1154,27 @@ rm -f _test_end*
 
 ###############################################################################
 
+printf "checking for Doxygen... "
+
+if (doxygen --version > /dev/null); then
+	echo found
+	DOXYGEN=doxygen
+else
+	# Not found is already printed, if doxygen is not found.
+	DOXYGEN="\#"
+fi
+
+
+###############################################################################
+
+if [ "z$PREFIX" = z ]; then
+	PREFIX="$DEFAULTPREFIX"
+fi
+echo "checking for 'make install' prefix: $PREFIX"
+
+
+###############################################################################
+
 INCLUDE=-Iinclude/
 DINCLUDE=-I../include/
 
@@ -1164,6 +1192,8 @@ echo "CXXFLAGS=$CXXFLAGS" >> _Makefile.header
 echo "OTHERLIBS=$OTHERLIBS" >> _Makefile.header
 echo "CPU_ARCHS=$CPU_ARCHS" >> _Makefile.header
 echo "CPU_TOOLS=$CPU_TOOLS" >> _Makefile.header
+echo "DOXYGEN=$DOXYGEN" >> _Makefile.header
+echo "PREFIX=$PREFIX" >> _Makefile.header
 echo "" >> _Makefile.header
 
 

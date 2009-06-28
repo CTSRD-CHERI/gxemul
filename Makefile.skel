@@ -15,13 +15,19 @@ do_src:
 	cd src; $(MAKE)
 
 install: build
-	@echo
-	@echo "There is no automatic 'make install'. You need to manually copy the gxemul"
-	@echo "binary and any other files you need to where you want them to reside. The man/"
-	@echo "subdirectory contains a small man-page, it should probably be placed in"
-	@echo "'/usr/.../man/man1' on most systems, and the contents of the doc/ subdirectory"
-	@echo "could be placed in '/usr/.../share/doc/gxemul'."
-	@echo
+	@echo Installing binaries, man page, and documentation...
+	mkdir -p $(PREFIX)/bin
+	cp -f $(BIN) $(PREFIX)/bin/
+	mkdir -p $(PREFIX)/man/man1
+	cp -f man/gxemul.1 $(PREFIX)/man/man1/
+	mkdir -p $(PREFIX)/share/doc/gxemul
+	cp -R doc/* $(PREFIX)/share/doc/gxemul/
+
+uninstall:
+	@echo Removing binaries, man pages, and documentation...
+	rm -f $(PREFIX)/bin/gxemul
+	rm -f $(PREFIX)/man/man1/gxemul.1
+	rm -rf $(PREFIX)/share/doc/gxemul
 
 clean:
 	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out
