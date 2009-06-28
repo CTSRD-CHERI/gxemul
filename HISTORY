@@ -3841,3 +3841,5 @@ Changelog for GXemul:
 		Everything now builds with "make -j X".
 20090628	Moving src/*.cc into a new directory, src/main/.
 		Finally adding the "make install" target (again).
+		Moving TODO and RELEASE notes to doc/.
+		Adding Doxygen documentation generation (again).

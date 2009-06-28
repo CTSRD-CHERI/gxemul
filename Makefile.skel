@@ -14,7 +14,10 @@ build: do_src
 do_src:
 	cd src; $(MAKE)
 
-install: build
+documentation:
+	$(DOXYGEN) doc/Doxyfile
+
+install: documentation build
 	@echo Installing binaries, man page, and documentation...
 	mkdir -p $(PREFIX)/bin
 	cp -f $(BIN) $(PREFIX)/bin/
@@ -31,6 +34,7 @@ uninstall:
 
 clean:
 	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out
+	rm -rf doc/doxygen
 	cd src; $(MAKE) clean
 
 #  experiments and demos are not cleaned on a normal clean, only on a clean_all.
