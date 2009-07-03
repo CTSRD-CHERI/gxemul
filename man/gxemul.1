@@ -362,18 +362,6 @@ Add
 as an X11 display to use for framebuffers.
 .El
 .Pp
-Userland options:
-.Bl -tag -width Ds
-.It Fl u Ar emul-mode
-Userland-only (syscall) emulation. (Use
-.Fl H
-to get a list of available emulation modes.) Some (but not all) of the
-options listed under Other options above can also be used with 
-userland emulation.
-.Pp
-Note: Userland (syscall) emulation does not really work yet.
-.El
-.Pp
 General options:
 .Bl -tag -width Ds
 .It Fl c Ar cmd
@@ -390,13 +378,10 @@ However, if the emulated machine has clocks or timer interrupt sources,
 or if user interaction is taking place (e.g. keyboard input at irregular
 intervals), then this option is meaningless.
 .It Fl H
-Display a list of available CPU types, machine types, and userland
-emulation modes. (Most of these don't work. Please read the documentation
-included in the
+Display a list of available CPU types and machine types.
+(Most of these don't work. Please read the documentation included in the
 .Nm
-distribution for details on which modes that actually work. Userland
-emulation is not included in stable release builds, since it doesn't work 
-yet.)
+distribution for details on which modes that actually work.)
 .It Fl h
 Display a list of all available command line options.
 .It Fl k Ar n
@@ -471,9 +456,6 @@ There are many bugs. Some of the known bugs are mentioned in the TODO
 file in the
 .Nm
 source distribution, some are marked as TODO in the source code itself.
-.Pp
-Userland (syscall-only) emulation, i.e. running a userland binary directly 
-without simulating an entire machine, doesn't really work yet.
 .Pp
 .Nm
 is in general not cycle-accurate; it does not simulate individual
