@@ -15,7 +15,7 @@ OBJS=device.o bus_isa.o bus_pci.o lk201.o \
 	dev_eagle.o dev_ether.o dev_fb.o dev_fbctrl.o dev_fdc.o \
 	dev_footbridge.o dev_gc.o dev_gt.o dev_hammerhead.o dev_i80321.o \
 	dev_igsfb.o dev_iq80321_7seg.o dev_irqc.o dev_jazz.o dev_kn01.o \
-	dev_kn02.o dev_kn220.o dev_kn230.o dev_lca.o dev_le.o \
+	dev_kn02.o dev_kn220.o dev_kn230.o dev_le.o \
 	dev_lpt.o dev_m8820x.o dev_malta_lcd.o dev_mb8696x.o dev_mc146818.o \
 	dev_mk48txx.o dev_mp.o dev_mvme187.o dev_ns16550.o dev_ohci.o \
 	dev_osiop.o dev_pcc2.o dev_pccmos.o dev_pcic.o dev_pckbc.o \

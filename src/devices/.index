@@ -43,7 +43,6 @@ dev_kn01.cc  DEC KN01 ("PMAX", DECstation type 1) control register and VDAC
 dev_kn02.cc  DEC KN02 mainbus (TurboChannel interrupt controller)
 dev_kn220.cc  DEC KN220 (DECsystem 5500) devices
 dev_kn230.cc  DEC KN230 (MIPSMATE 5100) stuff
-dev_lca.cc  LCA PCI bus, for Alpha machines
 dev_le.cc  LANCE ethernet, as used in DECstations
 dev_lpt.cc  LPT (parallel printer) controller
 dev_m8820x.cc  M88200/M88204 CMMU (Cache/Memory Management Unit)
