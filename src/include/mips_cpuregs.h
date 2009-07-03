@@ -466,55 +466,55 @@
  * 31	MIPS_COP_0_DESAVE	.... DESAVE JTAG register.
  */
 #ifdef _LOCORE
-#define	_(n)	__CONCAT($,n)
+#define	MIPS_BIT(n)	__CONCAT($,n)
 #else
-#define	_(n)	n
+#define	MIPS_BIT(n)	n
 #endif
-#define	MIPS_COP_0_TLB_INDEX	_(0)
-#define	MIPS_COP_0_TLB_RANDOM	_(1)
+#define	MIPS_COP_0_TLB_INDEX	MIPS_BIT(0)
+#define	MIPS_COP_0_TLB_RANDOM	MIPS_BIT(1)
 	/* Name and meaning of	TLB bits for $2 differ on r3k and r4k. */
 
-#define	MIPS_COP_0_TLB_CONTEXT	_(4)
+#define	MIPS_COP_0_TLB_CONTEXT	MIPS_BIT(4)
 					/* $5 and $6 new with MIPS-III */
-#define	MIPS_COP_0_BAD_VADDR	_(8)
-#define	MIPS_COP_0_TLB_HI	_(10)
-#define	MIPS_COP_0_STATUS	_(12)
-#define	MIPS_COP_0_CAUSE	_(13)
-#define	MIPS_COP_0_EXC_PC	_(14)
-#define	MIPS_COP_0_PRID		_(15)
+#define	MIPS_COP_0_BAD_VADDR	MIPS_BIT(8)
+#define	MIPS_COP_0_TLB_HI	MIPS_BIT(10)
+#define	MIPS_COP_0_STATUS	MIPS_BIT(12)
+#define	MIPS_COP_0_CAUSE	MIPS_BIT(13)
+#define	MIPS_COP_0_EXC_PC	MIPS_BIT(14)
+#define	MIPS_COP_0_PRID		MIPS_BIT(15)
 
 
 /* MIPS-I */
-#define	MIPS_COP_0_TLB_LOW	_(2)
+#define	MIPS_COP_0_TLB_LOW	MIPS_BIT(2)
 
 /* MIPS-III */
-#define	MIPS_COP_0_TLB_LO0	_(2)
-#define	MIPS_COP_0_TLB_LO1	_(3)
+#define	MIPS_COP_0_TLB_LO0	MIPS_BIT(2)
+#define	MIPS_COP_0_TLB_LO1	MIPS_BIT(3)
 
-#define	MIPS_COP_0_TLB_PG_MASK	_(5)
-#define	MIPS_COP_0_TLB_WIRED	_(6)
+#define	MIPS_COP_0_TLB_PG_MASK	MIPS_BIT(5)
+#define	MIPS_COP_0_TLB_WIRED	MIPS_BIT(6)
 
-#define	MIPS_COP_0_COUNT	_(9)
-#define	MIPS_COP_0_COMPARE	_(11)
+#define	MIPS_COP_0_COUNT	MIPS_BIT(9)
+#define	MIPS_COP_0_COMPARE	MIPS_BIT(11)
 
-#define	MIPS_COP_0_CONFIG	_(16)
-#define	MIPS_COP_0_LLADDR	_(17)
-#define	MIPS_COP_0_WATCH_LO	_(18)
-#define	MIPS_COP_0_WATCH_HI	_(19)
-#define	MIPS_COP_0_TLB_XCONTEXT _(20)
-#define	MIPS_COP_0_ECC		_(26)
-#define	MIPS_COP_0_CACHE_ERR	_(27)
-#define	MIPS_COP_0_TAG_LO	_(28)
-#define	MIPS_COP_0_TAG_HI	_(29)
-#define	MIPS_COP_0_ERROR_PC	_(30)
+#define	MIPS_COP_0_CONFIG	MIPS_BIT(16)
+#define	MIPS_COP_0_LLADDR	MIPS_BIT(17)
+#define	MIPS_COP_0_WATCH_LO	MIPS_BIT(18)
+#define	MIPS_COP_0_WATCH_HI	MIPS_BIT(19)
+#define	MIPS_COP_0_TLB_XCONTEXT MIPS_BIT(20)
+#define	MIPS_COP_0_ECC		MIPS_BIT(26)
+#define	MIPS_COP_0_CACHE_ERR	MIPS_BIT(27)
+#define	MIPS_COP_0_TAG_LO	MIPS_BIT(28)
+#define	MIPS_COP_0_TAG_HI	MIPS_BIT(29)
+#define	MIPS_COP_0_ERROR_PC	MIPS_BIT(30)
 
 /* MIPS32/64 */
-#define	MIPS_COP_0_DEBUG	_(23)
-#define	MIPS_COP_0_DEPC		_(24)
-#define	MIPS_COP_0_PERFCNT	_(25)
-#define	MIPS_COP_0_DATA_LO	_(28)
-#define	MIPS_COP_0_DATA_HI	_(29)
-#define	MIPS_COP_0_DESAVE	_(31)
+#define	MIPS_COP_0_DEBUG	MIPS_BIT(23)
+#define	MIPS_COP_0_DEPC		MIPS_BIT(24)
+#define	MIPS_COP_0_PERFCNT	MIPS_BIT(25)
+#define	MIPS_COP_0_DATA_LO	MIPS_BIT(28)
+#define	MIPS_COP_0_DATA_HI	MIPS_BIT(29)
+#define	MIPS_COP_0_DESAVE	MIPS_BIT(31)
 
 /*
  * Values for the code field in a break instruction.

@@ -46,6 +46,7 @@
 #include "settings.h"
 #include "timer.h"
 #include "useremul.h"
+#include "UnitTest.h"
 
 
 extern int single_step;
@@ -178,6 +179,9 @@ void internal_w(char *arg)
 	switch (arg[0]) {
 	case 'S':
 		console_slave(arg + 1);
+		break;
+	case 'U':
+		exit(UnitTest::RunTests());
 		break;
 	default:
 		fprintf(stderr, "internal_w(): UNIMPLEMENTED arg = '%s'\n",

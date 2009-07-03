@@ -14,10 +14,13 @@ build: do_src
 do_src:
 	cd src; $(MAKE)
 
+test: build
+	./gxemul -WW@U
+
 documentation:
 	$(DOXYGEN) doc/Doxyfile
 
-install: documentation build
+install: documentation test
 	@echo Installing binaries, man page, and documentation...
 	mkdir -p $(PREFIX)/bin
 	cp -f $(BIN) $(PREFIX)/bin/
@@ -34,6 +37,7 @@ uninstall:
 
 clean:
 	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out
+	rm -f unittest*.h components*.h
 	rm -rf doc/doxygen
 	cd src; $(MAKE) clean
 

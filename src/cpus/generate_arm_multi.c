@@ -36,8 +36,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "misc.h"
-
+#include <sys/types.h>
+#define PRIx32	"x"
 
 /*
  *  generate_opcode():

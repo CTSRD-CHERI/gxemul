@@ -3843,3 +3843,5 @@ Changelog for GXemul:
 		Finally adding the "make install" target (again).
 		Moving TODO and RELEASE notes to doc/.
 		Adding Doxygen documentation generation (again).
+20090703	Moving more C++ code from the old branch into the main trunk.
+		(UnitTest, Component*, StateVariable, debug_new, ...)

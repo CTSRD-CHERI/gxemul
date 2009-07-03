@@ -2,10 +2,12 @@
 #  Makefile for GXemul main
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(DINCLUDE) $(XINCLUDE)
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
-OBJS=emul.o emul_parse.o float_emul.o interrupt.o main.o memory.o misc.o \
+OBJS=Checksum.o Component.o ComponentFactory.o EscapedString.o StateVariable.o \
+	UnitTest.o \
+	debug_new.o emul.o emul_parse.o float_emul.o \
+	interrupt.o main.o memory.o misc.o \
 	net.o settings.o timer.o useremul.o
 
 all: $(OBJS)

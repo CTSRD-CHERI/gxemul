@@ -43,6 +43,38 @@
 
 #include "../../config.h"
 
+#include <string>
+using std::string;
+
+typedef char stringchar;
+
+#define _(X)	X
+
+#include <map>
+using std::map;
+
+#include <list>
+using std::list;
+
+#include <vector>
+using std::vector;
+
+#include <sstream>
+using std::stringstream;
+
+#include <ostream>
+using std::ostream;
+
+#include <iostream>
+using std::cout;
+using std::cerr;
+
+#ifndef NDEBUG
+#include "thirdparty/debug_new.h"
+#endif
+
+#include "refcount_ptr.h"
+
 
 #ifdef NO_C99_PRINTF_DEFINES
 /*
