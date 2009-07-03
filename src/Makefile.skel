@@ -9,7 +9,7 @@ all: do_include
 	$(MAKE) the_rest
 
 the_rest: do_main do_console do_cpus do_debugger do_devices do_disk \
-	    do_file do_machines do_net do_promemul do_symbol do_useremul
+	    do_file do_machines do_net do_promemul do_symbol
 
 do_include:
 	cd include; $(MAKE)
@@ -44,9 +44,6 @@ do_promemul:
 do_symbol:
 	cd symbol; $(MAKE)
 
-do_useremul:
-	cd useremul; $(MAKE)
-
 do_main:
 	cd main; $(MAKE)
 
@@ -68,7 +65,6 @@ clean:
 	cd net; $(MAKE) clean
 	cd promemul; $(MAKE) clean
 	cd symbol; $(MAKE) clean
-	cd useremul; $(MAKE) clean
 
 clean_all: clean
 	cd include; $(MAKE) clean_all
@@ -83,6 +79,5 @@ clean_all: clean
 	cd net; $(MAKE) clean_all
 	cd promemul; $(MAKE) clean_all
 	cd symbol; $(MAKE) clean_all
-	cd useremul; $(MAKE) clean_all
 	rm -f Makefile
 

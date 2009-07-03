@@ -1,5 +1,4 @@
 machine_algor.cc  Algorithmic P4032 and P5064 evaluation boards
-machine_alpha.cc  DEC Alpha machines
 machine_arc.cc  ARC (Advanced RISC Computing) machines
 machine_bebox.cc  BeBox
 machine_cats.cc  Simtec Electronics' CATS board
@@ -23,5 +22,4 @@ machine_pmppc.cc  Artesyn's PM/PPC board
 machine_prep.cc  Machines conforming to the PowerPC Reference Platform specs
 machine_qemu.cc  Machine mimicing QEMU's default MIPS emulation mode
 machine_sgi.cc  Silicon Graphics' MIPS-based machines
-machine_sparc.cc  SUN SPARC machines
 machine_test.cc  Various test machines

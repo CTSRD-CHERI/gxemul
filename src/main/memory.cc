@@ -164,8 +164,6 @@ struct memory *memory_new(uint64_t physical_max, int arch)
 
 	mem->physical_max = physical_max;
 	mem->dev_dyntrans_alignment = 4095;
-	if (arch == ARCH_ALPHA)
-		mem->dev_dyntrans_alignment = 8191;
 
 	s = entries_per_pagetable * sizeof(void *);
 
@@ -482,13 +480,6 @@ void memory_device_remove(struct memory *mem, int i)
 	if (mem->last_accessed_device < 0)
 		mem->last_accessed_device = 0;
 }
-
-
-#define MEMORY_RW	userland_memory_rw
-#define MEM_USERLAND
-#include "../cpus/memory_rw.cc"
-#undef MEM_USERLAND
-#undef MEMORY_RW
 
 
 /*

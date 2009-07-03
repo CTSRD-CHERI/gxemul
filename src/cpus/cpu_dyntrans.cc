@@ -453,14 +453,10 @@ void DYNTRANS_FUNCTION_TRACE_DEF(struct cpu *cpu, int n_args)
 	char *symbol;
 	uint64_t ot;
 	int x, print_dots = 1, n_args_to_print =
-#if defined(DYNTRANS_ALPHA) || defined(DYNTRANS_SPARC)
-	    6
-#else
 #if defined(DYNTRANS_SH) || defined(DYNTRANS_M88K)
 	    8	/*  Both for 32-bit and 64-bit SuperH, and M88K  */
 #else
 	    4	/*  Default value for most archs  */
-#endif
 #endif
 	    ;
 
@@ -489,22 +485,11 @@ void DYNTRANS_FUNCTION_TRACE_DEF(struct cpu *cpu, int n_args)
 	 */
 	for (x=0; x<n_args_to_print; x++) {
 		int64_t d = cpu->cd.DYNTRANS_ARCH.
-#ifdef DYNTRANS_ALPHA
-		    r[ALPHA_A0
-#endif
 #ifdef DYNTRANS_ARM
 		    r[0
 #endif
-#ifdef DYNTRANS_AVR
-		    /*  TODO: 24,25 = first register, but then
-			they go downwards, ie. 22,23 and so on  */
-		    r[24
-#endif
 #ifdef DYNTRANS_MIPS
 		    gpr[MIPS_GPR_A0
-#endif
-#ifdef DYNTRANS_M32R
-		    r[0		/*  r0..r3?  */
 #endif
 #ifdef DYNTRANS_M88K
 		    r[2		/*  r2..r9  */
@@ -515,9 +500,6 @@ void DYNTRANS_FUNCTION_TRACE_DEF(struct cpu *cpu, int n_args)
 #ifdef DYNTRANS_SH
 		    r[4		/*  NetBSD seems to use 4? But 2 seems
 					to be used by other code? TODO  */
-#endif
-#ifdef DYNTRANS_SPARC
-		    r[8		/*  o0..o5  */
 #endif
 		    + x];
 

@@ -3845,3 +3845,5 @@ Changelog for GXemul:
 		Adding Doxygen documentation generation (again).
 20090703	Moving more C++ code from the old branch into the main trunk.
 		(UnitTest, Component*, StateVariable, debug_new, ...)
+		Removing bogus/unfinished archs (Alpha, SPARC, M32R) and
+		the skeleton "userland emulation".

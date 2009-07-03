@@ -229,14 +229,11 @@ struct physpage_ranges {
 
 
 /*  Include all CPUs' header files here:  */
-#include "cpu_alpha.h"
 #include "cpu_arm.h"
-#include "cpu_m32r.h"
 #include "cpu_m88k.h"
 #include "cpu_mips.h"
 #include "cpu_ppc.h"
 #include "cpu_sh.h"
-#include "cpu_sparc.h"
 
 struct cpu;
 struct emul;
@@ -439,14 +436,11 @@ struct cpu {
 	 *  specifics, etc.
 	 */
 	union {
-		struct alpha_cpu      alpha;
 		struct arm_cpu        arm;
-		struct m32r_cpu       m32r;
 		struct m88k_cpu       m88k;
 		struct mips_cpu       mips;
 		struct ppc_cpu        ppc;
 		struct sh_cpu         sh;
-		struct sparc_cpu      sparc;
 	} cd;
 };
 

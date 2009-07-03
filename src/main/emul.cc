@@ -51,7 +51,6 @@
 #include "net.h"
 #include "settings.h"
 #include "timer.h"
-#include "useremul.h"
 #include "x11.h"
 
 
@@ -366,16 +365,6 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 
 	debug_indentation(iadd);
 
-	/*  For userland-only, this decides which ARCH/cpu_name to use:  */
-	if (m->machine_type == MACHINE_USERLAND && m->userland_emul != NULL) {
-		useremul_name_to_useremul(NULL, m->userland_emul,
-		    &m->arch, &m->machine_name, &m->cpu_name);
-		if (m->arch == ARCH_NOARCH) {
-			printf("Unsupported userland emulation mode.\n");
-			exit(1);
-		}
-	}
-
 	if (m->machine_type == MACHINE_NONE) {
 		fatal("No machine type specified?\n");
 		exit(1);
@@ -383,19 +372,12 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 
 	m->cpu_family = cpu_family_ptr_by_number(m->arch);
 
-	if (m->arch == ARCH_ALPHA)
-		m->arch_pagesize = 8192;
-
 	machine_memsize_fix(m);
 
 	/*
 	 *  Create the system's memory:
-	 *
-	 *  (Don't print the amount for userland-only emulation; the
-	 *  size doesn't matter.)
 	 */
-	if (m->machine_type != MACHINE_USERLAND)
-		debug("memory: %i MB", m->physical_ram_in_mb);
+	debug("memory: %i MB", m->physical_ram_in_mb);
 	memory_amount = (uint64_t)m->physical_ram_in_mb * 1048576;
 	if (m->memory_offset_in_mb > 0) {
 		/*
@@ -407,8 +389,7 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 		memory_amount += 1048576 * m->memory_offset_in_mb;
 	}
 	m->memory = memory_new(memory_amount, m->arch);
-	if (m->machine_type != MACHINE_USERLAND)
-		debug("\n");
+	debug("\n");
 
 	/*  Create CPUs:  */
 	if (m->cpu_name == NULL)
@@ -445,22 +426,6 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 
 	cpu = m->cpus[m->bootstrap_cpu];
 
-	/*  Set cpu->useremul_syscall, and use userland_memory_rw:  */
-	if (m->userland_emul != NULL) {
-		useremul_name_to_useremul(cpu,
-		    m->userland_emul, NULL, NULL, NULL);
-
-		switch (m->arch) {
-
-		case ARCH_ALPHA:
-			cpu->memory_rw = alpha_userland_memory_rw;
-			break;
-
-		default:
-			cpu->memory_rw = userland_memory_rw;
-		}
-	}
-
 	if (m->x11_md.in_use)
 		x11_init(m);
 
@@ -476,17 +441,10 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 		}
 	}
 
-	if (m->userland_emul != NULL) {
-		/*
-		 *  For userland-only emulation, no machine emulation
-		 *  is needed.
-		 */
-	} else {
-		for (i=0; i<n_devices; i++)
-			device_add(m, device_names[i]);
+	for (i=0; i<n_devices; i++)
+		device_add(m, device_names[i]);
 
-		machine_setup(m);
-	}
+	machine_setup(m);
 
 	diskimage_dump_info(m);
 	console_debug_dump(m);
@@ -602,22 +560,9 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 
 		switch (m->arch) {
 
-		case ARCH_ALPHA:
-			/*  For position-independent code:  */
-			cpu->cd.alpha.r[ALPHA_T12] = cpu->pc;
-			break;
-
 		case ARCH_ARM:
 			if (cpu->pc & 3) {
 				fatal("ARM: lowest bits of pc set: TODO\n");
-				exit(1);
-			}
-			cpu->pc &= 0xfffffffc;
-			break;
-
-		case ARCH_M32R:
-			if (cpu->pc & 3) {
-				fatal("M32R: lowest bits of pc set: TODO\n");
 				exit(1);
 			}
 			cpu->pc &= 0xfffffffc;
@@ -658,25 +603,11 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 			cpu->pc &= ~1;
 			break;
 
-		case ARCH_SPARC:
-			break;
-
 		default:
 			fatal("emul_machine_setup(): Internal error: "
 			    "Unimplemented arch %i\n", m->arch);
 			exit(1);
 		}
-
-		/*
-		 *  For userland emulation, the remaining items
-		 *  on the command line will be passed as parameters
-		 *  to the emulated program, and will not be treated
-		 *  as filenames to load into the emulator.
-		 *  The program's name will be in load_names[0], and the
-		 *  rest of the parameters in load_names[1] and up.
-		 */
-		if (m->userland_emul != NULL)
-			break;
 
 		n_load --;
 		load_names ++;
@@ -691,9 +622,6 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 			m->cpus[i]->byte_order = cpu->byte_order;
 			m->cpus[i]->pc = cpu->pc;
 		}
-
-	if (m->userland_emul != NULL)
-		useremul_setup(cpu, n_load, load_names);
 
 	/*  Startup the bootstrap CPU:  */
 	cpu->running = 1;
@@ -787,10 +715,6 @@ void emul_dumpinfo(struct emul *e)
  *
  *	o)  Initialize a network.
  *	o)  Initialize one machine.
- *
- *  For a userland-only setup:
- *
- *	o)  Initialize a "pseudo"-machine.
  */
 void emul_simple_init(struct emul *emul)
 {
@@ -804,20 +728,14 @@ void emul_simple_init(struct emul *emul)
 
 	m = emul->machines[0];
 
-	if (m->userland_emul == NULL) {
-		debug("Simple setup...\n");
-		debug_indentation(iadd);
+	debug("Simple setup...\n");
+	debug_indentation(iadd);
 
-		/*  Create a simple network:  */
-		emul->net = net_init(emul, NET_INIT_FLAG_GATEWAY,
-		    NET_DEFAULT_IPV4_MASK,
-		    NET_DEFAULT_IPV4_LEN,
-		    NULL, 0, 0, NULL);
-	} else {
-		/*  Userland pseudo-machine:  */
-		debug("Syscall emulation (userland-only) setup...\n");
-		debug_indentation(iadd);
-	}
+	/*  Create a simple network:  */
+	emul->net = net_init(emul, NET_INIT_FLAG_GATEWAY,
+	    NET_DEFAULT_IPV4_MASK,
+	    NET_DEFAULT_IPV4_LEN,
+	    NULL, 0, 0, NULL);
 
 	/*  Create the machine:  */
 	emul_machine_setup(m, extra_argc, extra_argv, 0, NULL);

@@ -141,50 +141,6 @@ static void default_test(struct machine *machine, struct cpu *cpu)
 }
 
 
-MACHINE_SETUP(barealpha)
-{
-	machine->machine_name = strdup("Generic \"bare\" Alpha machine");
-}
-
-
-MACHINE_SETUP(testalpha)
-{
-	machine->machine_name = strdup("Alpha test machine");
-
-	default_test(machine, cpu);
-}
-
-
-MACHINE_DEFAULT_CPU(barealpha)
-{
-	machine->cpu_name = strdup("21264");
-}
-
-
-MACHINE_DEFAULT_CPU(testalpha)
-{
-	machine->cpu_name = strdup("21264");
-}
-
-
-MACHINE_REGISTER(barealpha)
-{
-	MR_DEFAULT(barealpha, "Generic \"bare\" Alpha machine",
-	    ARCH_ALPHA, MACHINE_BAREALPHA);
-
-	machine_entry_add_alias(me, "barealpha");
-}
-
-
-MACHINE_REGISTER(testalpha)
-{
-	MR_DEFAULT(testalpha, "Test-machine for Alpha",
-	    ARCH_ALPHA, MACHINE_TESTALPHA);
-
-	machine_entry_add_alias(me, "testalpha");
-}
-
-
 MACHINE_SETUP(barearm)
 {
 	machine->machine_name = strdup("Generic \"bare\" ARM machine");
@@ -238,50 +194,6 @@ MACHINE_REGISTER(testarm)
 	machine_entry_add_alias(me, "testarm");
 }
 
-
-
-MACHINE_SETUP(barem32r)
-{
-	machine->machine_name = strdup("Generic \"bare\" M32R machine");
-}
-
-
-MACHINE_SETUP(testm32r)
-{
-	machine->machine_name = strdup("M32R test machine");
-
-	default_test(machine, cpu);
-}
-
-
-MACHINE_DEFAULT_CPU(barem32r)
-{
-	machine->cpu_name = strdup("M32R");
-}
-
-
-MACHINE_DEFAULT_CPU(testm32r)
-{
-	machine->cpu_name = strdup("M32R");
-}
-
-
-MACHINE_REGISTER(barem32r)
-{
-	MR_DEFAULT(barem32r, "Generic \"bare\" M32R machine",
-	    ARCH_M32R, MACHINE_BAREM32R);
-
-	machine_entry_add_alias(me, "barem32r");
-}
-
-
-MACHINE_REGISTER(testm32r)
-{
-	MR_DEFAULT(testm32r, "Test-machine for M32R",
-	    ARCH_M32R, MACHINE_TESTM32R);
-
-	machine_entry_add_alias(me, "testm32r");
-}
 
 
 MACHINE_SETUP(barem88k)
@@ -501,48 +413,5 @@ MACHINE_REGISTER(testsh)
 	machine_entry_add_alias(me, "testsh");
 }
 
-
-MACHINE_SETUP(baresparc)
-{
-	machine->machine_name = strdup("Generic \"bare\" SPARC machine");
-}
-
-
-MACHINE_SETUP(testsparc)
-{
-	machine->machine_name = strdup("SPARC test machine");
-
-	default_test(machine, cpu);
-}
-
-
-MACHINE_DEFAULT_CPU(baresparc)
-{
-	machine->cpu_name = strdup("UltraSPARC");
-}
-
-
-MACHINE_DEFAULT_CPU(testsparc)
-{
-	machine->cpu_name = strdup("UltraSPARC");
-}
-
-
-MACHINE_REGISTER(baresparc)
-{
-	MR_DEFAULT(baresparc, "Generic \"bare\" SPARC machine",
-	    ARCH_SPARC, MACHINE_BARESPARC);
-
-	machine_entry_add_alias(me, "baresparc");
-}
-
-
-MACHINE_REGISTER(testsparc)
-{
-	MR_DEFAULT(testsparc, "Test-machine for SPARC",
-	    ARCH_SPARC, MACHINE_TESTSPARC);
-
-	machine_entry_add_alias(me, "testsparc");
-}
 
 

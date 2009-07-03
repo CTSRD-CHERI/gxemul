@@ -42,9 +42,6 @@
 .Nm
 .Op general options
 .Ar @configfile
-.Nm
-.Op userland, other, and general options
-.Ar file Op Ar args ...
 .Sh DESCRIPTION
 .Nm
 is a framework for full-system computer architecture emulation.
@@ -65,10 +62,6 @@ The emulator can be invoked in the following ways:
 supplied directly on the command line.
 .Pp
 2. Options can be read from a configuration file.
-.Pp
-3. When emulating a userland environment (syscall-only emulation, not
-emulating complete machines), then the program name and its argument
-should be given on the command line. (This mode is not really usable yet.)
 .Pp
 The easiest way to use the emulator is to supply settings directly on the 
 command line.

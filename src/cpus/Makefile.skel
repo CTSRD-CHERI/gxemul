@@ -22,23 +22,6 @@ $(OBJS): Makefile
 
 ###############################################################################
 
-cpu_alpha.o: cpu_alpha.cc cpu_alpha_instr.cc cpu_dyntrans.cc memory_rw.cc \
-	tmp_alpha_head.cc tmp_alpha_tail.cc
-
-cpu_alpha_instr.cc: cpu_alpha_instr_alu.cc tmp_alpha_misc.cc
-
-tmp_alpha_misc.cc: cpu_alpha_instr_loadstore.cc generate_alpha_misc
-	./generate_alpha_misc > tmp_alpha_misc.cc
-
-tmp_alpha_head.cc: generate_head
-	./generate_head alpha Alpha > tmp_alpha_head.cc
-
-tmp_alpha_tail.cc: generate_tail
-	./generate_tail alpha Alpha > tmp_alpha_tail.cc
-
-
-###############################################################################
-
 cpu_arm.o: cpu_arm.cc cpu_arm_instr.cc cpu_dyntrans.cc memory_rw.cc \
 	tmp_arm_head.cc tmp_arm_tail.cc
 
@@ -116,18 +99,6 @@ tmp_arm_tail.cc: generate_tail
 
 ###############################################################################
 
-cpu_m32r.o: cpu_m32r.cc cpu_m32r_instr.cc cpu_dyntrans.cc memory_rw.cc \
-	tmp_m32r_head.cc tmp_m32r_tail.cc
-
-tmp_m32r_head.cc: generate_head
-	./generate_head m32r M32R > tmp_m32r_head.cc
-
-tmp_m32r_tail.cc: generate_tail
-	./generate_tail m32r M32R > tmp_m32r_tail.cc
-
-
-###############################################################################
-
 cpu_m88k.o: cpu_m88k.cc cpu_m88k_instr.cc cpu_dyntrans.cc memory_rw.cc \
 	tmp_m88k_loadstore.cc tmp_m88k_head.cc tmp_m88k_tail.cc tmp_m88k_bcnd.cc
 
@@ -190,21 +161,6 @@ tmp_sh_head.cc: generate_head
 
 tmp_sh_tail.cc: generate_tail
 	./generate_tail sh SH > tmp_sh_tail.cc
-
-
-###############################################################################
-
-cpu_sparc.o: cpu_sparc.cc cpu_sparc_instr.cc cpu_dyntrans.cc memory_rw.cc \
-	tmp_sparc_head.cc tmp_sparc_tail.cc tmp_sparc_loadstore.cc
-
-tmp_sparc_loadstore.cc: cpu_sparc_instr_loadstore.cc generate_sparc_loadstore
-	./generate_sparc_loadstore > tmp_sparc_loadstore.cc
-
-tmp_sparc_head.cc: generate_head
-	./generate_head sparc SPARC > tmp_sparc_head.cc
-
-tmp_sparc_tail.cc: generate_tail
-	./generate_tail sparc SPARC > tmp_sparc_tail.cc
 
 
 ###############################################################################

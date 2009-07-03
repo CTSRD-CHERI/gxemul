@@ -204,13 +204,13 @@ static void file_load_elf(struct machine *m, struct memory *mem,
 
 	ok = 0;
 	switch (arch) {
-	case ARCH_ALPHA:
+	/*case ARCH_ALPHA:
 		switch (emachine) {
 		case EM_ALPHA:
 		case -28634:
 			ok = 1;
 		}
-		break;
+		break;*/
 	case ARCH_ARM:
 		switch (emachine) {
 		case EM_ARM:
@@ -252,13 +252,13 @@ static void file_load_elf(struct machine *m, struct memory *mem,
 		case EM_68K:
 			ok = 1;
 		}
-		break;  */
+		break;
 	case ARCH_M32R:
 		switch (emachine) {
 		case EM_M32R:
 			ok = 1;
 		}
-		break;
+		break;*/
 	case ARCH_MIPS:
 		switch (emachine) {
 		case EM_MIPS:
@@ -279,14 +279,14 @@ static void file_load_elf(struct machine *m, struct memory *mem,
 			ok = 1;
 		}
 		break;
-	case ARCH_SPARC:
+	/*case ARCH_SPARC:
 		switch (emachine) {
 		case EM_SPARC:
 		case EM_SPARCV9:
 			ok = 1;
 		}
 		break;
-	/*  case ARCH_X86:
+	case ARCH_X86:
 		switch (emachine) {
 		case EM_386:
 		case EM_486:

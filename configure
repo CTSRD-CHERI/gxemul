@@ -144,11 +144,6 @@ printf "#define COMPILE_DATE \"$ZZ\"\n" >> config.h
 #  Include support for all CPU types:
 printf "#define ADD_ALL_CPU_FAMILIES    " >> config.h
 
-#  Alpha
-printf " add_cpu_family(alpha_cpu_family_init, ARCH_ALPHA);" >> config.h
-CPU_ARCHS="$CPU_ARCHS cpu_alpha.o cpu_alpha_palcode.o memory_alpha.o"
-CPU_TOOLS="$CPU_TOOLS generate_alpha_misc"
-
 #  ARM
 printf " add_cpu_family(arm_cpu_family_init, ARCH_ARM);" >> config.h
 CPU_ARCHS="$CPU_ARCHS cpu_arm.o cpu_arm_coproc.o memory_arm.o "
@@ -173,10 +168,6 @@ CPU_ARCHS="$CPU_ARCHS tmp_arm_re.o tmp_arm_rf.o tmp_arm_multi.o"
 CPU_TOOLS="$CPU_TOOLS generate_arm_dpi generate_arm_r"
 CPU_TOOLS="$CPU_TOOLS generate_arm_loadstore generate_arm_multi"
 
-#  M32R
-printf " add_cpu_family(m32r_cpu_family_init, ARCH_M32R);" >> config.h
-CPU_ARCHS="$CPU_ARCHS cpu_m32r.o memory_m32r.o"
-
 #  M88K
 printf " add_cpu_family(m88k_cpu_family_init, ARCH_M88K);" >> config.h
 CPU_ARCHS="$CPU_ARCHS cpu_m88k.o memory_m88k.o"
@@ -198,11 +189,6 @@ CPU_TOOLS="$CPU_TOOLS generate_ppc_loadstore"
 #  SuperH
 printf " add_cpu_family(sh_cpu_family_init, ARCH_SH);" >> config.h
 CPU_ARCHS="$CPU_ARCHS cpu_sh.o memory_sh.o"
-
-#  SPARC
-printf " add_cpu_family(sparc_cpu_family_init, ARCH_SPARC);" >> config.h
-CPU_ARCHS="$CPU_ARCHS cpu_sparc.o memory_sparc.o"
-CPU_TOOLS="$CPU_TOOLS generate_sparc_loadstore"
 
 printf "\n" >> config.h
 
@@ -507,37 +493,6 @@ fi
 if [ z$OSF1 = zYES ]; then
 	CFLAGS="-D_XOPEN_SOURCE=500 -D_OSF_SOURCE -D_POSIX_PII_SOCKET $CFLAGS"
 fi
-
-
-#  Check for 'alpha' define.
-printf "checking for 'alpha' define... "
-printf "#include <stdio.h>\nint main(int argc, char *argv[]){
-#ifdef alpha
-printf(\"1\");
-#undef alpha
-#ifdef alpha
-printf(\"2\");
-#endif
-#endif
-printf(\"\\\n\");return 0;}\n" > _testm.c
-$CC $CFLAGS _testm.c -o _testm 2> /dev/null
-if [ ! -x _testm ]; then
-	printf "\nWARNING! COULD NOT COMPILE alpha define TEST"
-	printf " PROGRAM AT ALL!\n"
-else
-	if [ z`./_testm` = z1 ]; then
-		printf "yes, workaround applied\n"
-		echo "#undef alpha" >> config.h
-	else
-		if [ z`./_testm` = z12 ]; then
-			printf "yes, but workaround not possible\n"
-			exit
-		else
-			printf "no\n"
-		fi
-	fi
-fi
-rm -f _testm*
 
 
 #  Some OSes on MIPS seems to define 'mips' to 1. (eg OpenBSD/arc)

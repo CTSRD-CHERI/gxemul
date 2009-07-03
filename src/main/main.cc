@@ -45,7 +45,6 @@
 #include "misc.h"
 #include "settings.h"
 #include "timer.h"
-#include "useremul.h"
 #include "UnitTest.h"
 
 
@@ -207,8 +206,6 @@ static void usage(int longusage)
 	printf("\nusage: %s [machine, other, and general options] [file "
 	    "[...]]\n", progname);
 	printf("   or  %s [general options] @configfile\n", progname);
-	printf("   or  %s [userland, other, and general options] file "
-	    "[args ...]\n", progname);
 
 	if (!longusage) {
 		printf("\nRun  %s -h  for help on command line options.\n",
@@ -302,10 +299,6 @@ static void usage(int longusage)
 	printf("  -z disp   add disp as an X11 display to use for "
 	    "framebuffers\n");
 
-	printf("\nUserland options:\n");
-	printf("  -u emul   userland-only (syscall) emulation (use -H to"
-	    " get a list of\n            available emulation modes)\n");
-
 	printf("\nGeneral options:\n");
 	printf("  -c cmd    add cmd as a command to run before starting "
 	    "the simulation\n");
@@ -355,7 +348,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 	struct machine *m = emul_add_machine(emul, NULL);
 
 	const char *opts =
-	    "C:c:Dd:E:e:HhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUu:VvW:"
+	    "C:c:Dd:E:e:HhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUVvW:"
 #ifdef WITH_X11
 	    "XxY:"
 #endif
@@ -498,11 +491,6 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 			break;
 		case 'U':
 			m->slow_serial_interrupts_hack_for_linux = 1;
-			msopts = 1;
-			break;
-		case 'u':
-			CHECK_ALLOCATION(m->userland_emul = strdup(optarg));
-			m->machine_type = MACHINE_USERLAND;
 			msopts = 1;
 			break;
 		case 'V':
@@ -709,7 +697,6 @@ int main(int argc, char *argv[])
 	device_init();
 	machine_init();
 	timer_init();
-	useremul_init();
 
 	/*  Create a simple emulation setup:  */
 	emul = emul_new(NULL);
