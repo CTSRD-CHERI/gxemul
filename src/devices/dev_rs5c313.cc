@@ -46,7 +46,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "rs5c313reg.h"
+#include "thirdparty/rs5c313reg.h"
 
 
 #define	DEV_RS5C313_LENGTH	16

@@ -55,8 +55,8 @@
 #include "memory.h"
 #include "misc.h"
 
+#include "thirdparty/osiopreg.h"
 
-#include "osiopreg.h"
 
 /*  #define debug fatal  */
 const int osiop_debug = 0;

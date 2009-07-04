@@ -52,9 +52,9 @@
 #include "memory.h"
 #include "misc.h"
 
+#include "thirdparty/mvme187.h"
+#include "thirdparty/mvme_pcctworeg.h"
 
-#include "mvme187.h"
-#include "mvme_pcctworeg.h"
 
 #define	INTERRUPT_LEVEL_MASK	0x07
 

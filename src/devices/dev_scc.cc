@@ -62,7 +62,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "sccreg.h"
+#include "thirdparty/sccreg.h"
 
 
 #define	SCC_TICK_SHIFT		14

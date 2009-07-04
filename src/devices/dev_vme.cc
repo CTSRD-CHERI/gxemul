@@ -41,8 +41,7 @@
 #include "memory.h"
 #include "misc.h"
 
-
-#include "mvme88k_vme.h"
+#include "thirdparty/mvme88k_vme.h"
 
 
 /*  #define debug fatal  */

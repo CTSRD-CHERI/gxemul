@@ -39,7 +39,6 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "armreg.h"
 
 extern int quiet_mode;
 

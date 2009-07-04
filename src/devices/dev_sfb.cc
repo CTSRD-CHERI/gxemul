@@ -42,7 +42,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "sfbreg.h"
+#include "thirdparty/sfbreg.h"
+
 
 #define	SFB_XSIZE	1280
 #define	SFB_YSIZE	1024

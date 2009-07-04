@@ -43,7 +43,6 @@
 #include "debugger.h"
 #include "device.h"
 #include "diskimage.h"
-#include "exec_elf.h"
 #include "machine.h"
 #include "memory.h"
 #include "mips_cpu_types.h"
@@ -52,6 +51,8 @@
 #include "settings.h"
 #include "timer.h"
 #include "x11.h"
+
+#include "thirdparty/exec_elf.h"
 
 
 extern int extra_argc;

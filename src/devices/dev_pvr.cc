@@ -62,8 +62,8 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "dreamcast_pvr.h"
-#include "dreamcast_sysasicvar.h"
+#include "thirdparty/dreamcast_pvr.h"
+#include "thirdparty/dreamcast_sysasicvar.h"
 
 
 #define	TA_DEBUG

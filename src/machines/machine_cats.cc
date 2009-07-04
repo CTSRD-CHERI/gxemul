@@ -41,7 +41,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "cyclone_boot.h"
+#include "thirdparty/cyclone_boot.h"
 
 
 MACHINE_SETUP(cats)

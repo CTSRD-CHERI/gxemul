@@ -38,7 +38,6 @@
 #include <sys/resource.h>
 
 #include "arcbios.h"
-#include "arcbios_other.h"
 #include "console.h"
 #include "cpu.h"
 #include "cpu_mips.h"
@@ -47,6 +46,8 @@
 #include "machine_arc.h"
 #include "memory.h"
 #include "misc.h"
+
+#include "thirdparty/arcbios_other.h"
 
 
 extern int quiet_mode;

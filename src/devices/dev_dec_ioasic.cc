@@ -39,8 +39,9 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "dec_kn03.h"
-#include "tc_ioasicreg.h"
+#include "thirdparty/dec_kn03.h"
+#include "thirdparty/tc_ioasicreg.h"
+
 
 #define IOASIC_DEBUG
 /* #define debug fatal */

@@ -49,8 +49,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "netbsd_iyonix_bootconfig.h"
-#include "i80321reg.h"
+#include "thirdparty/netbsd_iyonix_bootconfig.h"
+#include "thirdparty/i80321reg.h"
 
 
 MACHINE_SETUP(iyonix)

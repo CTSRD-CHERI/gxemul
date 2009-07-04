@@ -39,9 +39,9 @@
 #include "memory.h"
 #include "misc.h"
 
+#include "thirdparty/m8820x.h"
+#include "thirdparty/m8820x_pte.h"
 
-#include "m8820x.h"
-#include "m8820x_pte.h"
 
 struct m8820x_data {
 	int		cmmu_nr;

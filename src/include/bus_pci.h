@@ -32,7 +32,8 @@
  */
 
 #include "misc.h"
-#include "pcireg.h"
+
+#include "thirdparty/pcireg.h"
 
 struct machine;
 struct memory;

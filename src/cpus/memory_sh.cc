@@ -34,8 +34,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "sh4_exception.h"
-#include "sh4_mmu.h"
+#include "thirdparty/sh4_exception.h"
+#include "thirdparty/sh4_mmu.h"
 
 
 /*

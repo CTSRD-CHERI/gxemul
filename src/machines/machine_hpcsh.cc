@@ -39,8 +39,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "hpc_bootinfo.h"
-#include "vripreg.h"
+#include "thirdparty/hpc_bootinfo.h"
+#include "thirdparty/vripreg.h"
 
 
 MACHINE_SETUP(hpcsh)
@@ -68,7 +68,7 @@ MACHINE_SETUP(hpcsh)
 	if (!machine->x11_md.in_use)
 		fprintf(stderr, "-------------------------------------"
 		    "------------------------------------------\n"
-		    "\n  WARNING!  You are emulating a Dreamcast without -X."
+		    "\n  WARNING!  You are emulating a HPCsh without -X."
 		    "\n            You will miss graphical output!\n\n"
 		    "-------------------------------------"
 		    "------------------------------------------\n");

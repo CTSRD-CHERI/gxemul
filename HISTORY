@@ -3847,3 +3847,4 @@ Changelog for GXemul:
 		(UnitTest, Component*, StateVariable, debug_new, ...)
 		Removing bogus/unfinished archs (Alpha, SPARC, M32R) and
 		the skeleton "userland emulation".
+20090704	Moving thirdparty includes into src/include/thirdparty/.

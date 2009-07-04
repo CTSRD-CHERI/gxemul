@@ -43,8 +43,7 @@
 #include "memory.h"
 #include "misc.h"
 
-
-#include "mk48txxreg.h"
+#include "thirdparty/mk48txxreg.h"
 
 
 #define	MK48TXX_LEN		MK48T08_CLKSZ

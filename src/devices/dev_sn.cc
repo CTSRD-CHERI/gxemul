@@ -42,7 +42,7 @@
 #include "misc.h"
 #include "net.h"
 
-#include "dp83932reg.h"
+#include "thirdparty/dp83932reg.h"
 
 
 #define	DEV_SN_LENGTH		0x1000

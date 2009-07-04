@@ -36,7 +36,8 @@
 #include "machine.h"
 #include "memory.h"
 #include "misc.h"
-#include "sfbreg.h"
+
+#include "thirdparty/sfbreg.h"
 
 
 #define	DEVICE_MAX_NAMELEN		9

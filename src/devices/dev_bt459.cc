@@ -39,7 +39,7 @@
 #include "misc.h"
 #include "x11.h"
 
-#include "bt459.h"
+#include "thirdparty/bt459.h"
 
 
 #ifdef WITH_X11

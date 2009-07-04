@@ -49,8 +49,8 @@
 #include "settings.h"
 #include "symbol.h"
 
-#include "sh4_exception.h"
-#include "sh4_mmu.h"
+#include "thirdparty/sh4_exception.h"
+#include "thirdparty/sh4_mmu.h"
 
 
 #define DYNTRANS_32

@@ -40,7 +40,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "cpc700reg.h"
+#include "thirdparty/cpc700reg.h"
 
 
 struct cpc700_data {

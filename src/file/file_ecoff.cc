@@ -31,7 +31,7 @@
 /*  Note: Included from file.c.  */
 
 
-#include "exec_ecoff.h"
+#include "thirdparty/exec_ecoff.h"
 
 
 /*  Special symbol format used by Microsoft-ish COFF files:  */

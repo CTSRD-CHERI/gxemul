@@ -41,14 +41,14 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "dec_prom.h"
-#include "dec_bootinfo.h"
-#include "dec_5100.h"
-#include "dec_kn01.h"
-#include "dec_kn02.h"  
-#include "dec_kn03.h"
-#include "dec_kmin.h"
-#include "dec_maxine.h"
+#include "thirdparty/dec_prom.h"
+#include "thirdparty/dec_bootinfo.h"
+#include "thirdparty/dec_5100.h"
+#include "thirdparty/dec_kn01.h"
+#include "thirdparty/dec_kn02.h"  
+#include "thirdparty/dec_kn03.h"
+#include "thirdparty/dec_kmin.h"
+#include "thirdparty/dec_maxine.h"
 
 #define	BOOTARG_BUFLEN		2000
 

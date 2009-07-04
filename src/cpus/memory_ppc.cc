@@ -29,10 +29,6 @@
  */
 
 
-#include "ppc_bat.h"
-#include "ppc_pte.h"
-
-
 /*
  *  ppc_bat():
  *

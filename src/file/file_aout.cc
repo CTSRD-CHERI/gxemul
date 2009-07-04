@@ -31,7 +31,7 @@
 /*  Note: Included from file.c.  */
 
 
-#include "exec_aout.h"
+#include "thirdparty/exec_aout.h"
 
 
 #define	AOUT_FLAG_DECOSF1		1

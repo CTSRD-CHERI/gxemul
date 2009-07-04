@@ -39,7 +39,8 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "wdcreg.h"
+#include "thirdparty/wdcreg.h"
+
 
 #define	DEV_WDC_LENGTH		8
 #define	WDC_TICK_SHIFT		14

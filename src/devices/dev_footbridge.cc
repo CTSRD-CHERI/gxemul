@@ -49,8 +49,8 @@
 #include "misc.h"
 #include "timer.h"
 
+#include "thirdparty/dc21285reg.h"
 
-#include "dc21285reg.h"
 
 #define	DEV_FOOTBRIDGE_TICK_SHIFT	14
 #define	DEV_FOOTBRIDGE_LENGTH		0x400

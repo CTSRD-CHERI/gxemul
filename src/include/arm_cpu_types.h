@@ -41,7 +41,7 @@
 #define	ARM_DUAL_ENDIAN		2
 #define	ARM_XSCALE		4
 
-#include "armreg.h"
+#include "thirdparty/armreg.h"
 
 /*
  *  NOTE: Most of these are bogus!

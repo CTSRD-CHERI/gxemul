@@ -35,7 +35,9 @@
  */
 
 #include "misc.h"
-#include "sgi_arcbios.h"
+
+#include "thirdparty/sgi_arcbios.h"
+
 
 struct cpu;
 

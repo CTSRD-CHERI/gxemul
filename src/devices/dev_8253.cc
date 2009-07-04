@@ -48,7 +48,7 @@
 #include "misc.h"
 #include "timer.h"
 
-#include "i8253reg.h"
+#include "thirdparty/i8253reg.h"
 
 
 /*  #define debug fatal  */

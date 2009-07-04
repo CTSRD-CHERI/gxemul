@@ -64,8 +64,8 @@
 #include "misc.h"
 #include "net.h"
 
-#include "mii.h"
-#include "tulipreg.h"
+#include "thirdparty/mii.h"
+#include "thirdparty/tulipreg.h"
 
 
 /*  #define debug fatal  */

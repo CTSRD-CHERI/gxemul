@@ -51,7 +51,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "adb_viareg.h"
+#include "thirdparty/adb_viareg.h"
 
 
 #define debug fatal

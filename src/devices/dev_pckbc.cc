@@ -47,7 +47,7 @@
 #include "memory.h"
 #include "misc.h"
 
-#include "kbdreg.h"
+#include "thirdparty/kbdreg.h"
 
 
 /*  #define PCKBC_DEBUG  */
