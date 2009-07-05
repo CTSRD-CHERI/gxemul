@@ -5,11 +5,10 @@
 CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
-OBJS=	machine.o \
-	machine_algor.o machine_arc.o machine_bebox.o \
+OBJS=	machine.o machine_algor.o machine_arc.o \
 	machine_cats.o machine_cobalt.o machine_dreamcast.o machine_evbmips.o \
 	machine_hpcarm.o machine_hpcmips.o machine_hpcsh.o machine_iq80321.o \
-	machine_iyonix.o machine_landisk.o machine_luna88k.o machine_macppc.o \
+	machine_iyonix.o machine_landisk.o machine_macppc.o \
 	machine_mvme88k.o machine_mvmeppc.o machine_netwinder.o \
 	machine_playstation2.o machine_pmax.o machine_pmppc.o machine_prep.o \
 	machine_qemu.o machine_sgi.o machine_test.o 

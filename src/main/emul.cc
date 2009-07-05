@@ -395,13 +395,8 @@ void emul_machine_setup(struct machine *m, int n_load, char **load_names,
 	/*  Create CPUs:  */
 	if (m->cpu_name == NULL)
 		machine_default_cputype(m);
-	if (m->ncpus == 0) {
-		/*  TODO: This should be moved elsewhere...  */
-		if (m->machine_type == MACHINE_BEBOX)
-			m->ncpus = 2;
-		else
-			m->ncpus = 1;
-	}
+	if (m->ncpus == 0)
+		m->ncpus = 1;
 
 	CHECK_ALLOCATION(m->cpus = (struct cpu **) malloc(sizeof(struct cpu *) * m->ncpus));
 	memset(m->cpus, 0, sizeof(struct cpu *) * m->ncpus);

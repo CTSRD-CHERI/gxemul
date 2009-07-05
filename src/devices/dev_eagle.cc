@@ -126,12 +126,12 @@ DEVINIT(eagle)
 	isa_membase    = 0xc0000000ULL;
 
 	switch (devinit->machine->machine_type) {
-	case MACHINE_BEBOX:
+	/* case MACHINE_BEBOX:
 		snprintf(pci_irq_base, sizeof(pci_irq_base), "%s.bebox",
 		    devinit->interrupt_path);
 		snprintf(isa_irq_base, sizeof(isa_irq_base), "%s.bebox.5",
 		    devinit->interrupt_path);
-		break;
+		break; */
 	default:
 		snprintf(pci_irq_base, sizeof(pci_irq_base), "%s",
 		    devinit->interrupt_path);
@@ -156,12 +156,12 @@ DEVINIT(eagle)
 
 	switch (devinit->machine->machine_type) {
 
-	case MACHINE_BEBOX:
+	/* case MACHINE_BEBOX:
 		bus_isa_init(devinit->machine, isa_irq_base,
 		    BUS_ISA_IDE0 | BUS_ISA_VGA, isa_portbase, isa_membase);
 		bus_pci_add(devinit->machine, d->pci_data,
 		    devinit->machine->memory, 0, 11, 0, "i82378zb");
-		break;
+		break; */
 
 	case MACHINE_PREP:
 		bus_pci_add(devinit->machine, d->pci_data,

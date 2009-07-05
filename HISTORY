@@ -3850,3 +3850,4 @@ Changelog for GXemul:
 20090704	Moving thirdparty includes into src/include/thirdparty/.
 20090705	Beginning to import various Components from the experimental
 		C++ branch (starting with the MVME187Machine).
+		Removing more bogus/unfinished code: Bebox and Luna88k.

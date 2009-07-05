@@ -137,7 +137,6 @@ DEVINIT(pccmos)
 		break;
 	case MACHINE_QEMU_MIPS:
 	case MACHINE_COBALT:
-	case MACHINE_BEBOX:
 	case MACHINE_PREP:
 	case MACHINE_MVMEPPC:
 	case MACHINE_IYONIX:	// TODO: not sure about exact type.

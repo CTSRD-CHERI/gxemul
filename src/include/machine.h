@@ -223,10 +223,9 @@ struct machine {
 #define	MACHINE_BAREPPC		2000
 #define	MACHINE_TESTPPC		2001
 #define	MACHINE_PMPPC		2002
-#define	MACHINE_BEBOX		2003
-#define	MACHINE_PREP		2004
-#define	MACHINE_MACPPC		2005
-#define	MACHINE_MVMEPPC		2006
+#define	MACHINE_PREP		2003
+#define	MACHINE_MACPPC		2004
+#define	MACHINE_MVMEPPC		2005
 
 /*  ARM:  */
 #define	MACHINE_BAREARM		5000
@@ -249,7 +248,6 @@ struct machine {
 #define	MACHINE_BAREM88K	7000
 #define	MACHINE_TESTM88K	7001
 #define	MACHINE_MVME88K		7002
-#define	MACHINE_LUNA88K		7003
 
 /*  Other "pseudo"-machines:  */
 #define	MACHINE_NONE		0
@@ -321,10 +319,6 @@ struct machine {
 #define	MACHINE_MVME88K_187		1
 #define	MACHINE_MVME88K_188		2
 #define	MACHINE_MVME88K_197		3
-
-/*  LUNA88K  */
-#define	MACHINE_LUNA_88K		1
-#define	MACHINE_LUNA_88K2		2
 
 
 /*  For the automachine system:  */
