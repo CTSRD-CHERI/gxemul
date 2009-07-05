@@ -8,11 +8,14 @@ CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 all: do_include
 	$(MAKE) the_rest
 
-the_rest: do_main do_console do_cpus do_debugger do_devices do_disk \
-	    do_file do_machines do_net do_promemul do_symbol
+the_rest: do_main do_components do_console do_cpus do_debugger do_devices \
+	do_disk do_file do_machines do_net do_promemul do_symbol
 
 do_include:
 	cd include; $(MAKE)
+
+do_components:
+	cd components; $(MAKE)
 
 do_console:
 	cd console; $(MAKE)
@@ -54,6 +57,7 @@ $(OBJS): Makefile
 clean:
 	rm -f $(OBJS) *core tmp_*.c
 	cd include; $(MAKE) clean
+	cd components; $(MAKE) clean
 	cd console; $(MAKE) clean
 	cd cpus; $(MAKE) clean
 	cd debugger; $(MAKE) clean
@@ -68,6 +72,7 @@ clean:
 
 clean_all: clean
 	cd include; $(MAKE) clean_all
+	cd components; $(MAKE) clean_all
 	cd console; $(MAKE) clean_all
 	cd cpus; $(MAKE) clean_all
 	cd debugger; $(MAKE) clean_all

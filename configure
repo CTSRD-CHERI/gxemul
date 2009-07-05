@@ -1137,6 +1137,7 @@ echo "checking for 'make install' prefix: $PREFIX"
 
 INCLUDE=-Iinclude/
 DINCLUDE=-I../include/
+INCLUDE2=-I../../include/
 
 rm -f _testprog.c*
 
@@ -1146,6 +1147,7 @@ echo "CWARNINGS=$CWARNINGS" >> _Makefile.header
 echo "COPTIM=$CFLAGS" >> _Makefile.header
 echo "INCLUDE=$INCLUDE" >> _Makefile.header
 echo "DINCLUDE=$DINCLUDE" >> _Makefile.header
+echo "INCLUDE2=$INCLUDE2" >> _Makefile.header
 echo "CC=$CC" >> _Makefile.header
 echo "CXX=$CXX" >> _Makefile.header
 echo "CXXFLAGS=$CXXFLAGS" >> _Makefile.header
@@ -1192,9 +1194,12 @@ cd ../../..
 rm -f _components.tmp
 
 #  Create the Makefiles:
-D=". src src/include src/console src/cpus src/debugger src/devices"
-D="$D src/devices/fonts src/disk src/file src/machines src/main"
-D="$D src/net src/promemul src/symbol src/useremul"
+D=". src src/components"
+#D="$D src/components/busses src/components/cpu src/components/dummy"
+D="$D src/components/machines"
+D="$D src/console src/cpus src/debugger src/devices"
+D="$D src/devices/fonts src/disk src/file src/include src/machines src/main"
+D="$D src/net src/promemul src/symbol"
 for a in $D; do
 	echo "creating $a/Makefile"
 	touch $a/Makefile

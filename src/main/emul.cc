@@ -25,7 +25,7 @@
  *  SUCH DAMAGE.
  *
  *
- *  Emulation startup and misc. routines.
+ *  LEGACY emulation startup and misc. routines.
  */
 
 #include <signal.h>
@@ -779,6 +779,8 @@ void emul_run(struct emul *emul)
 	int i = 0, j, go = 1, n, anything;
 
 	atexit(fix_console);
+
+	printf("\nNOTE: This is a LEGACY emulation mode.\n\n");
 
 	if (emul == NULL) {
 		printf("No emulation defined. Aborting.\n");

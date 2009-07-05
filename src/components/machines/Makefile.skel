@@ -1,0 +1,19 @@
+#
+#  Makefile for GXemul src/components/machines
+#
+
+CXXFLAGS=$(CXXWARNINGS) $(COPTIM) $(CPEDANTIC) $(INCLUDE2)
+LIBS=$(OTHERLIBS)
+
+OBJS=MachineComponent.o MVME187Machine.o
+
+all: $(OBJS)
+
+$(OBJS): Makefile
+
+clean:
+	rm -f $(OBJS)
+
+clean_all: clean
+	rm -f Makefile
+

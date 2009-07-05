@@ -3848,3 +3848,5 @@ Changelog for GXemul:
 		Removing bogus/unfinished archs (Alpha, SPARC, M32R) and
 		the skeleton "userland emulation".
 20090704	Moving thirdparty includes into src/include/thirdparty/.
+20090705	Beginning to import various Components from the experimental
+		C++ branch (starting with the MVME187Machine).
