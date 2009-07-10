@@ -1009,9 +1009,8 @@ cd ../../..
 rm -f _components.tmp
 
 #  Create the Makefiles:
-D=". src src/components src/components/dummy"
-#D="$D src/components/busses src/components/cpu"
-D="$D src/components/machines"
+D=". src src/components src/components/dummy src/components/busses src/components/cpu"
+D="$D src/components/machines src/components/memory"
 D="$D src/console src/cpus src/debugger src/devices"
 D="$D src/devices/fonts src/disk src/file src/include src/machines src/main"
 D="$D src/main/commands src/main/fileloaders src/net src/promemul src/symbol"

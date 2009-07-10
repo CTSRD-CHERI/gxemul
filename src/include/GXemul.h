@@ -250,6 +250,9 @@ public:
 	 */
 	bool IsTemplateMachine(const string& templateName);
 
+	static void DumpMachineAsHTML(const string& machineName);
+	static void GenerateHTMLListOfComponents(bool machines);
+
 private:
 	/**
 	 * \brief Creates an emulation setup from a template machine name.

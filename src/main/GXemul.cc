@@ -243,7 +243,7 @@ void GXemul::ListTemplates()
 }
 
 
-static void DumpMachineAsHTML(const string& machineName)
+void GXemul::DumpMachineAsHTML(const string& machineName)
 {
 	refcount_ptr<Component> component =
 	    ComponentFactory::CreateComponent(machineName);
@@ -256,7 +256,7 @@ static void DumpMachineAsHTML(const string& machineName)
 }
 
 
-static void GenerateHTMLListOfComponents(bool machines)
+void GXemul::GenerateHTMLListOfComponents(bool machines)
 {
 	std::cout <<
 		"Available " <<
@@ -376,24 +376,6 @@ static void GenerateHTMLListOfComponents(bool machines)
 bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *filenames[])
 {
 	bool optionsEnoughToStartRunning = false;
-
-	if (false) {
-		if (string(optarg) == "unittest") {
-			optionsEnoughToStartRunning = true;
-		} else if (string(optarg).substr(0,8) == "machine:") {
-			DumpMachineAsHTML(optarg+8);
-			return false;
-		} else if (string(optarg) == "machines") {
-			GenerateHTMLListOfComponents(true);
-			return false;
-		} else if (string(optarg) == "components") {
-			GenerateHTMLListOfComponents(false);
-			return false;
-		} else {
-			PrintUsage(false);
-			return false;
-		}
-	}
 
 	if (templateMachine != "") {
 		if (CreateEmulationFromTemplateMachine(templateMachine)) {

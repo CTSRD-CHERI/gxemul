@@ -177,8 +177,19 @@ void internal_w(char *arg)
 	arg += 2;
 
 	switch (arg[0]) {
+	case 'C':
+		GXemul::GenerateHTMLListOfComponents(false);
+		exit(0);
+		break;
+	case 'D':
+		GXemul::DumpMachineAsHTML(arg + 1);
+		break;
 	case 'S':
 		console_slave(arg + 1);
+		break;
+	case 'M':
+		GXemul::GenerateHTMLListOfComponents(true);
+		exit(0);
 		break;
 	case 'U':
 		exit(UnitTest::RunTests());
@@ -401,6 +412,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 			break;
 		case 'H':
 			GXemul::ListTemplates();
+			printf("The following applies to the LEGACY modes:\n\n");
 			machine_list_available_types_and_cpus();
 			exit(1);
 		case 'h':

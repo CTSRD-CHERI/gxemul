@@ -1,11 +1,11 @@
 #
-#  Makefile for GXemul src/components/machines
+#  Makefile for GXemul src/components/memory
 #
 
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(INCLUDE2)
 LIBS=$(OTHERLIBS)
 
-OBJS=MachineComponent.o MVME187Machine.o TestMIPSMachine.o
+OBJS=MemoryMappedComponent.o RAMComponent.o
 
 all: $(OBJS)
 

@@ -3863,3 +3863,5 @@ Changelog for GXemul:
 		used for new template machines.
 		Making everything build on Linux (missing includes etc.).
 		Removing all $CC stuff from configure (only $CXX remains).
+		Merging in the automated component and machine HTML
+		documentation stuff from the C++ branch.
