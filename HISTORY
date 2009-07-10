@@ -3855,3 +3855,5 @@ Changelog for GXemul:
 		branch: the GXemul main class, command interpreter and related
 		commands, file loader, UIs, etc.
 20090710	Moving in more code.
+		Added a note in guestoses.html that all current modes are
+		legacy modes, using the old framework.

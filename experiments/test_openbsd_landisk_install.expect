@@ -1,7 +1,7 @@
 #!/usr/local/bin/expect
 
 set timeout 4000
-spawn ./gxemul -E landisk -q -d obsd_landisk.img -d bd:../../emul/sh/openbsd_landisk_4.1.iso -j 4.1/landisk/bsd.rd
+spawn ./gxemul -E landisk -q -d obsd_landisk.img -d bd:../../emul/sh/openbsd_landisk_4.5.iso -j 4.5/landisk/bsd.rd
 
 set  send_slow  {1 .5}
 

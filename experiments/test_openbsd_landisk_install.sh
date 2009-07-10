@@ -1,11 +1,8 @@
 #!/bin/sh
 #
-#  $Id: test_openbsd_landisk_install.sh,v 1.1 2007-05-26 09:04:03 debug Exp $
+#  Regression test  --  automated install of OpenBSD/landisk 4.5
 #
-#  Litet enkelt test för att mäta hur lång tid det tar att installera
-#  OpenBSD/landisk 4.1, utan interaktion.
-#
-#  Starta med:
+#  Starta with:
 #
 #	experiments/test_openbsd_landisk_install.sh
 #
@@ -22,3 +19,4 @@ echo
 echo
 echo
 cat /tmp/gxemul_result
+
