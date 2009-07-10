@@ -3861,3 +3861,5 @@ Changelog for GXemul:
 		from 4.1 to 4.5.
 		Attempting to connect -V and -e so that the new framework is
 		used for new template machines.
+		Making everything build on Linux (missing includes etc.).
+		Removing all $CC stuff from configure (only $CXX remains).

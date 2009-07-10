@@ -2,7 +2,6 @@
 #  Makefile for GXemul src/promemul
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=arcbios.o dec_prom.o dreamcast.o dreamcast_scramble.o \

@@ -2,7 +2,6 @@
 #  Makefile for GXemul src/cpus
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=cpu.o $(CPU_ARCHS) $(CPU_BACKENDS)
@@ -27,8 +26,6 @@ cpu_arm.o: cpu_arm.cc cpu_arm_instr.cc cpu_dyntrans.cc memory_rw.cc \
 
 cpu_arm_instr.cc: cpu_arm_instr_misc.cc
 
-generate_arm_loadstore: generate_arm_loadstore.c
-	$(CC) generate_arm_loadstore.c -o generate_arm_loadstore
 tmp_arm_loadstore.cc: cpu_arm_instr_loadstore.cc generate_arm_loadstore
 	./generate_arm_loadstore > tmp_arm_loadstore.cc
 tmp_arm_loadstore_p0_u0_w0.cc: cpu_arm_instr_loadstore.cc generate_arm_loadstore

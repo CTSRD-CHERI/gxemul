@@ -24,8 +24,8 @@ controllers, ethernet controllers, disk controllers, and serial port
 controllers.
 
 GXemul, including the dynamic translation system, is implemented in portable
-C, which means that the emulator will run on practically any modern host
-architecture.
+C++, which means that the emulator will run on practically any modern host
+architecture for which a C++ compiler is available.
 
 The documentation lists the machines and guest operating systems that can
 be regarded as "working" in GXemul. The best working guest operating
@@ -51,6 +51,15 @@ Possible uses of GXemul include:
  o)  debugging code in general
 
 Use your imagination :-)
+
+
+
+Note regarding the new 0.6 framework
+------------------------------------
+
+Only very few emulation modes have been rewritten to use the 0.6 (C++)
+framework; the bulk of GXemul is still made up of legacy emulation modes,
+written in C.
 
 
 

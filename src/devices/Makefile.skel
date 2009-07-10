@@ -2,7 +2,6 @@
 #  Makefile for GXemul devices
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(DINCLUDE) $(XINCLUDE)
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=device.o bus_isa.o bus_pci.o lk201.o \

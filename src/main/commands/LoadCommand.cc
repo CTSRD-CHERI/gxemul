@@ -26,6 +26,8 @@
  */
 
 #include <fstream>
+#include <stdlib.h>
+#include <string.h>
 #include "commands/LoadCommand.h"
 #include "GXemul.h"
 

@@ -2,7 +2,6 @@
 #  Makefile for GXemul
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XDEF) $(XINCLUDE)
 BIN=gxemul
 LIBS=$(XLIB) $(OTHERLIBS)
 

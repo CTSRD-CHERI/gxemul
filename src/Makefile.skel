@@ -2,7 +2,6 @@
 #  Makefile for GXemul src
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(INCLUDE)
 
 all: do_include

@@ -2,7 +2,6 @@
 #  Makefile for GXemul src/file
 #
 
-CFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
 OBJS=file.o
