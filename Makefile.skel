@@ -47,6 +47,7 @@ clean_all: clean
 	cd experiments; $(MAKE) clean_all
 	cd demos; $(MAKE) clean
 	rm -f config.h Makefile src/Makefile src/cpus/Makefile
+	rm -f src/ui/*/Makefile src/ui/Makefile src/main/fileloaders/Makefile
 	rm -f src/components/Makefile src/components/*/Makefile
 	rm -f src/debugger/Makefile src/devices/Makefile
 	rm -f src/devices/fonts/Makefile src/disk/Makefile

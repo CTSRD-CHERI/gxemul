@@ -162,8 +162,7 @@ extern int optind;
 
 
 GXemul::GXemul()
-	: m_bRunUnitTests(false)
-	, m_quietMode(false)
+	: m_quietMode(false)
 	, m_ui(new NullUI(this))
 	, m_commandInterpreter(this)
 	, m_runState(NotRunning)
@@ -187,16 +186,22 @@ void GXemul::ClearEmulation()
 }
 
 
+bool GXemul::IsTemplateMachine(const string& templateName)
+{
+	if (!ComponentFactory::HasAttribute(templateName, "template"))
+		return false;
+
+	if (!ComponentFactory::HasAttribute(templateName, "machine"))
+		return false;
+
+	return true;
+}
+
+
 bool GXemul::CreateEmulationFromTemplateMachine(const string& templateName)
 {
-	if (!ComponentFactory::HasAttribute(templateName, "template")) {
-		std::cerr << templateName << " is not a known template name.\n"
-		    "Use gxemul -H to get a list of valid machine templates.\n";
-		return false;
-	}
-
-	if (!ComponentFactory::HasAttribute(templateName, "machine")) {
-		std::cerr << templateName << " is not a machine template.\n"
+	if (!IsTemplateMachine(templateName)) {
+		std::cerr << templateName << " is not a known template machine name.\n"
 		    "Use gxemul -H to get a list of valid machine templates.\n";
 		return false;
 	}
@@ -211,7 +216,7 @@ bool GXemul::CreateEmulationFromTemplateMachine(const string& templateName)
 }
 
 
-static void ListTemplates()
+void GXemul::ListTemplates()
 {
 	std::cout << "Available template machines:\n\n";
 
@@ -368,78 +373,23 @@ static void GenerateHTMLListOfComponents(bool machines)
 }
 
 
-bool GXemul::ParseOptions(int argc, char *argv[])
+bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *filenames[])
 {
-	string templateMachine = "";
 	bool optionsEnoughToStartRunning = false;
-	int ch;
 
-	// REMEMBER to keep the following things in synch:
-	//	1. The help message.
-	//	2. The option parsing in ParseOptions.
-	//	3. The man page.
-
-	const char *opts = "Ee:HhqVW:";
-
-	while ((ch = getopt(argc, argv, opts)) != -1) {
-		switch (ch) {
-
-		case 'E':
-			std::cerr << "The -E option is deprecated. "
-			    "Use -e instead.\n";
-			return false;
-
-		case 'e':
-			templateMachine = optarg;
-			break;
-
-		case 'H':
-			ListTemplates();
-			return false;
-
-		case 'h':
-			PrintUsage(true);
-			return false;
-
-		case 'q':
-			SetQuietMode(true);
-			break;
-
-		case 'V':
-			SetRunState(Paused);
-
-			// Note: -V allows the user to start the console version
-			// of gxemul without an initial emulation setup.
+	if (false) {
+		if (string(optarg) == "unittest") {
 			optionsEnoughToStartRunning = true;
-			break;
-
-		case 'W':
-			if (string(optarg) == "unittest") {
-				m_bRunUnitTests = true;
-				optionsEnoughToStartRunning = true;
-			} else if (string(optarg).substr(0,8) == "machine:") {
-				DumpMachineAsHTML(optarg+8);
-				return false;
-			} else if (string(optarg) == "machines") {
-				GenerateHTMLListOfComponents(true);
-				return false;
-			} else if (string(optarg) == "components") {
-				GenerateHTMLListOfComponents(false);
-				return false;
-			} else {
-				PrintUsage(false);
-				return false;
-			}
-			break;
-
-		default:
-			std::cout << "\n"
-				"It is possible that you are attempting to use"
-				    " an option which was available\n"
-				"in older versions of GXemul, but has not been"
-				    " reimplemented in GXemul 0.5.x.\n"
-				"Please see the man page or the  gxemul -h "
-				    " help message for available options.\n\n";
+		} else if (string(optarg).substr(0,8) == "machine:") {
+			DumpMachineAsHTML(optarg+8);
+			return false;
+		} else if (string(optarg) == "machines") {
+			GenerateHTMLListOfComponents(true);
+			return false;
+		} else if (string(optarg) == "components") {
+			GenerateHTMLListOfComponents(false);
+			return false;
+		} else {
 			PrintUsage(false);
 			return false;
 		}
@@ -456,15 +406,12 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 		}
 	}
 
-	// Any remaining arguments?
 	//  1. If a machine template has been selected, then treat the following
 	//     arguments as files to load. (Legacy compatibility with previous
 	//     versions of GXemul.)
 	//  2. Otherwise, treat the argument as a configuration file.
-	argc -= optind;
-	argv += optind;
 
-	if (argc > 0) {
+	if (filenameCount > 0) {
 		if (templateMachine != "") {
 			// Machine template.
 
@@ -474,25 +421,25 @@ bool GXemul::ParseOptions(int argc, char *argv[])
 			    LookupPath("root.machine0.mainbus0.cpu0");
 			// TODO: Don't hardcode the CPU path!
 
-			while (argc > 0) {
-				FileLoader loader(argv[0]);
+			while (filenameCount > 0) {
+				FileLoader loader(filenames[0]);
 				if (!loader.Load(main_cpu)) {
 					std::cerr << "Failed to load "
 					    "binary: " <<
-					    argv[0] << "\n" <<
+					    filenames[0] << "\n" <<
 					    "Aborting." << "\n";
 					return false;
 				}
 
-				argc --;
-				argv ++;
+				filenameCount --;
+				filenames ++;
 			}
 
 			optionsEnoughToStartRunning = true;
 		} else {
 			// Config file.
-			if (argc == 1) {
-				string configfileName = argv[0];
+			if (filenameCount == 1) {
+				string configfileName = filenames[0];
 				optionsEnoughToStartRunning = true;
 
 std::cerr << "TODO: loadaction\n";
@@ -621,10 +568,6 @@ void GXemul::PrintUsage(bool longUsage) const
 
 int GXemul::Run()
 {
-	// Run unit tests? Then only run those, and then exit.
-	if (m_bRunUnitTests)
-		return UnitTest::RunTests();
-
 	// Default to the console UI:
 	m_ui = new ConsoleUI(this);
 

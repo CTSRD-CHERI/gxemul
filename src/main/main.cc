@@ -41,6 +41,7 @@
 #include "device.h"
 #include "diskimage.h"
 #include "emul.h"
+#include "GXemul.h"
 #include "machine.h"
 #include "misc.h"
 #include "settings.h"
@@ -399,6 +400,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 			msopts = 1;
 			break;
 		case 'H':
+			GXemul::ListTemplates();
 			machine_list_available_types_and_cpus();
 			exit(1);
 		case 'h':
@@ -542,23 +544,48 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 		}
 	}
 
-	if (type != NULL || subtype != NULL) {
-		if (type == NULL)
-			type = strdup("");
-		if (subtype == NULL)
-			subtype = strdup("");
-		res = machine_name_to_type(type, subtype,
-		    &m->machine_type, &m->machine_subtype, &m->arch);
-		if (!res)
-			exit(1);
-	}
-
 	argc -= optind;
 	argv += optind;
 
 	extra_argc = argc;
 	extra_argv = argv;
 
+	if (type == NULL && subtype == NULL && single_step == ENTER_SINGLE_STEPPING) {
+		GXemul gxemul;
+		gxemul.SetRunState(GXemul::Paused);
+		if (quiet_mode)
+			gxemul.SetQuietMode(true);
+		exit(gxemul.Run());
+	}
+
+	if (type != NULL || subtype != NULL) {
+		if (type == NULL)
+			type = strdup("");
+		if (subtype == NULL)
+			subtype = strdup("");
+
+		/*  Is it a new machine mode?  */
+		if (subtype[0] != '\0') {
+			GXemul gxemul;
+			if (single_step == ENTER_SINGLE_STEPPING)
+				gxemul.SetRunState(GXemul::Paused);
+			if (quiet_mode)
+				gxemul.SetQuietMode(true);
+
+			if (gxemul.IsTemplateMachine(subtype)) {
+				if (!gxemul.ParseFilenames(subtype, argc, argv))
+					exit(0);
+
+				exit(gxemul.Run());
+			}
+		}
+
+		/*  Legacy mode?  */
+		res = machine_name_to_type(type, subtype,
+		    &m->machine_type, &m->machine_subtype, &m->arch);
+		if (!res)
+			exit(1);
+	}
 
 	if (m->machine_type == MACHINE_NONE && msopts) {
 		fprintf(stderr, "Machine specific options used directly on "
@@ -704,22 +731,6 @@ int main(int argc, char *argv[])
 	    SETTINGS_TYPE_SUBSETTINGS, 0, emul->settings);
 
 	get_cmd_args(argc, argv, emul, &diskimages, &n_diskimages);
-
-
-
-/*
-int main(int argc, char *argv[])
-{
-	GXemul gxemul;
-
-	if (!gxemul.ParseOptions(argc, argv))
-		return 0;
-
-	return gxemul.Run();
-}
-
-*/
-
 
 	if (!skip_srandom_call) {
 		struct timeval tv;

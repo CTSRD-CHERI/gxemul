@@ -72,14 +72,15 @@ public:
 	GXemul();
 
 	/**
-	 * \brief Parses command line arguments.
+	 * \brief Parses command line arguments (file names).
 	 *
-	 * @param argc for parsing command line options
-	 * @param argv for parsing command line options
+	 * @param templateMachine The template machine to use.
+	 * @param filenameCount for parsing command line options.
+	 * @param filenames for parsing command line options.
 	 * @return true if options were parsable, false if there was
 	 *		some error.
 	 */
-	bool ParseOptions(int argc, char *argv[]);
+	bool ParseFilenames(string templateMachine, int filenameCount, char *filenames[]);
 
 	/**
 	 * \brief Discards the current emulation, and starts anew with just
@@ -229,11 +230,25 @@ public:
 	void ExecuteSteps(int nrOfSteps);
 
 	/**
+	 * \brief Dump a list to stdout with all available machine templates.
+	 */
+	static void ListTemplates();
+
+	/**
 	 * \brief Returns the GXemul version string.
 	 *
 	 * @return A string describing the GXemul version.
 	 */
 	static string Version();
+
+	/**
+	 * \brief Returns whether a component name is a template machine.
+	 *
+	 * @param templateName The name of the component/machine.
+	 * @return True if the name is an existing template machine, false
+	 *	otherwise.
+	 */
+	bool IsTemplateMachine(const string& templateName);
 
 private:
 	/**
@@ -259,7 +274,6 @@ public:
 
 private:
 	// Base:
-	bool			m_bRunUnitTests;
 	bool			m_quietMode;
 	refcount_ptr<UI>	m_ui;
 	CommandInterpreter	m_commandInterpreter;

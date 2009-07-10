@@ -3857,3 +3857,5 @@ Changelog for GXemul:
 20090710	Moving in more code.
 		Added a note in guestoses.html that all current modes are
 		legacy modes, using the old framework.
+		Attempting to connect -V and -e so that the new framework is
+		used for new template machines.
