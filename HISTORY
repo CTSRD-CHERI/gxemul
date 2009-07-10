@@ -3865,3 +3865,5 @@ Changelog for GXemul:
 		Removing all $CC stuff from configure (only $CXX remains).
 		Merging in the automated component and machine HTML
 		documentation stuff from the C++ branch.
+		Applying a patch from Izumi Tsutsui which makes NetBSD/hpcmips
+		work well with the clock again.

@@ -590,6 +590,7 @@ DEVICE_ACCESS(vr41xx)
 			switch (relative_addr) {
 			case 0xc0:
 				odata = (tv.tv_sec & 1) << 15;
+				odata += (uint64_t)tv.tv_usec * 32768 / 1000000;
 				break;
 			case 0xc2:
 				odata = (tv.tv_sec >> 1) & 0xffff;
