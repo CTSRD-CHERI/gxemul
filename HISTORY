@@ -3857,5 +3857,7 @@ Changelog for GXemul:
 20090710	Moving in more code.
 		Added a note in guestoses.html that all current modes are
 		legacy modes, using the old framework.
+		Updating the OpenBSD/landisk regression test expect script
+		from 4.4 to 4.5.
 		Attempting to connect -V and -e so that the new framework is
 		used for new template machines.
