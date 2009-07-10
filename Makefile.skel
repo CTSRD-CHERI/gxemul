@@ -9,7 +9,7 @@ LIBS=$(XLIB) $(OTHERLIBS)
 all: build
 
 build: do_src
-	$(CXX) $(COPTIM) src/components/*/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/main/*.o src/net/*.o src/promemul/*.o src/symbol/*.o $(LIBS) -o $(BIN)
+	$(CXX) $(COPTIM) src/components/*/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/main/*.o src/main/*/*.o src/net/*.o src/promemul/*.o src/symbol/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
 
 do_src:
 	cd src; $(MAKE)
@@ -37,7 +37,7 @@ uninstall:
 
 clean:
 	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out
-	rm -f unittest*.h components*.h
+	rm -f unittest*.h components*.h commands*.h
 	rm -rf doc/doxygen
 	cd src; $(MAKE) clean
 
@@ -47,6 +47,7 @@ clean_all: clean
 	cd experiments; $(MAKE) clean_all
 	cd demos; $(MAKE) clean
 	rm -f config.h Makefile src/Makefile src/cpus/Makefile
+	rm -f src/components/Makefile src/components/*/Makefile
 	rm -f src/debugger/Makefile src/devices/Makefile
 	rm -f src/devices/fonts/Makefile src/disk/Makefile
 	rm -f src/file/Makefile src/machines/Makefile

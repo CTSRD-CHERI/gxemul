@@ -2,7 +2,7 @@
 #  Makefile for GXemul src/components
 #
 
-all: do_machines
+all: do_dummy do_machines
 #do_busses do_cpu do_dummy do_machines do_memory
 
 do_busses:
@@ -23,14 +23,14 @@ do_memory:
 clean:
 	#cd busses; $(MAKE) clean
 	#cd cpu; $(MAKE) clean
-	#cd dummy; $(MAKE) clean
+	cd dummy; $(MAKE) clean
 	cd machines; $(MAKE) clean
 	#cd memory; $(MAKE) clean
 
 clean_all: clean
 	#cd busses; $(MAKE) clean_all
 	#cd cpu; $(MAKE) clean_all
-	#cd dummy; $(MAKE) clean_all
+	cd dummy; $(MAKE) clean_all
 	cd machines; $(MAKE) clean_all
 	#cd memory; $(MAKE) clean_all
 	rm -f Makefile

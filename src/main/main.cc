@@ -705,6 +705,22 @@ int main(int argc, char *argv[])
 
 	get_cmd_args(argc, argv, emul, &diskimages, &n_diskimages);
 
+
+
+/*
+int main(int argc, char *argv[])
+{
+	GXemul gxemul;
+
+	if (!gxemul.ParseOptions(argc, argv))
+		return 0;
+
+	return gxemul.Run();
+}
+
+*/
+
+
 	if (!skip_srandom_call) {
 		struct timeval tv;
 		gettimeofday(&tv, NULL);

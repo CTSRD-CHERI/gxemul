@@ -43,12 +43,21 @@
 
 #include "../../config.h"
 
+
+#define	COPYRIGHT_MSG	"Copyright (C) 2003-2009  Anders Gavare"
+
+// The recommended way to add a specific message to the startup banner or
+// about box is to use the SECONDARY_MSG. This should end with a newline
+// character, unless it is completely empty.
+//
+// Example:  "Modified by XYZ to include support for machine type UVW.\n"
+//
+#define	SECONDARY_MSG	""
+
+
 #include <string>
 using std::string;
-
 typedef char stringchar;
-
-#define _(X)	X
 
 #include <map>
 using std::map;
@@ -144,6 +153,11 @@ struct emul;
 struct machine;
 struct memory;
 
+enum Endianness
+{
+	BigEndian = 0,
+	LittleEndian
+};
 
 #define	NO_BYTE_ORDER_OVERRIDE		-1
 #define	EMUL_UNDEFINED_ENDIAN		0

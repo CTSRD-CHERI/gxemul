@@ -332,11 +332,11 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 		else if (nBytes >= (1 << 10))
 			ss << (nBytes >> 10) << " KB";
 		else if (nBytes != 1)
-			ss << nBytes << _(" bytes");
+			ss << nBytes << " bytes";
 		else
-			ss << nBytes << _(" byte");
+			ss << nBytes << " byte";
 
-		ss << _(" at offset ");
+		ss << " at offset ";
 		ss.flags(std::ios::hex | std::ios::showbase);
 		ss << memoryMappedBase->ToInteger();
 

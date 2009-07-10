@@ -1,24 +1,33 @@
 #
-#  Makefile for GXemul main
+#  Makefile for GXemul src/main
 #
 
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(XINCLUDE) $(DINCLUDE)
 
-OBJS=Checksum.o Component.o ComponentFactory.o EscapedString.o StateVariable.o \
-	UnitTest.o \
+OBJS=Checksum.o Command.o CommandInterpreter.o Component.o ComponentFactory.o \
+	EscapedString.o FileLoader.o GXemul.o StateVariable.o UnitTest.o \
 	debug_new.o emul.o emul_parse.o float_emul.o \
 	interrupt.o main.o memory.o misc.o \
 	net.o settings.o timer.o useremul.o
 
-all: $(OBJS)
+all: $(OBJS) do_commands do_fileloaders
 
 $(OBJS): Makefile
 
+do_commands:
+	cd commands; $(MAKE)
+
+do_fileloaders:
+	cd fileloaders; $(MAKE)
 
 clean:
-	rm -f $(OBJS) *core
+	cd commands; $(MAKE) clean
+	cd fileloaders; $(MAKE) clean
+	rm -f $(OBJS) *core _test
 
 clean_all: clean
+	cd commands; $(MAKE) clean_all
+	cd fileloaders; $(MAKE) clean_all
 	rm -f Makefile
 
 

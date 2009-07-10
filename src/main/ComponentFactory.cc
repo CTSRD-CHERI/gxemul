@@ -189,13 +189,13 @@ static void Test_ComponentFactory_SimpleDummy()
 static void Test_ComponentFactory_FromTemplate()
 {
 	refcount_ptr<Component> component =
-	    ComponentFactory::CreateComponent("testmips");
+	    ComponentFactory::CreateComponent("mvme187");
 	UnitTest::Assert("component should be possible to create from template",
 	    component.IsNULL() == false);
 
-	UnitTest::Assert("the class name of a testmips should be 'machine'",
+	UnitTest::Assert("the class name of a mvme187 should be 'machine'",
 	    component->GetClassName(), "machine");
-	UnitTest::Assert("the testmips component should have children",
+	UnitTest::Assert("the mvme187 component should have children",
 	    component->GetChildren().size() > 0);
 
 	refcount_ptr<Component> clone = component->Clone();
@@ -211,16 +211,16 @@ static void Test_ComponentFactory_FromTemplate()
 static void Test_ComponentFactory_HasAttribute()
 {
 	UnitTest::Assert("nonexistantattr should not exist",
-	    !ComponentFactory::HasAttribute("testmips", "nonexistantattr"));
+	    !ComponentFactory::HasAttribute("mvme187", "nonexistantattr"));
 
-	UnitTest::Assert("testmips is a machine",
-	    ComponentFactory::HasAttribute("testmips", "machine"));
+	UnitTest::Assert("mvme187 is a machine",
+	    ComponentFactory::HasAttribute("mvme187", "machine"));
 
 	UnitTest::Assert("mvme187 is stable",
 	    ComponentFactory::HasAttribute("mvme187", "stable"));
 
-	UnitTest::Assert("testmips has a description",
-	    ComponentFactory::HasAttribute("testmips", "description"));
+	UnitTest::Assert("mvme187 has a description",
+	    ComponentFactory::HasAttribute("mvme187", "description"));
 }
 
 UNITTESTS(ComponentFactory)

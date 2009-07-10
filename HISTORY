@@ -3851,3 +3851,7 @@ Changelog for GXemul:
 20090705	Beginning to import various Components from the experimental
 		C++ branch (starting with the MVME187Machine).
 		Removing more bogus/unfinished code: Bebox and Luna88k.
+		Attempting to move in more code from the experimental C++
+		branch: the GXemul main class, command interpreter and related
+		commands, file loader, UIs, etc.
+20090710	Moving in more code.
