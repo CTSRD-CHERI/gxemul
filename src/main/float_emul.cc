@@ -211,7 +211,7 @@ uint64_t ieee_store_float_value(double nf, int fmt, int nan)
 		 *  If nf < 0.0, then r2 will begin with a sequence of binary
 		 *  1's, which is ok.
 		 */
-		r3 = nf;
+		r3 = (int64_t) nf;
 		r2 = r3;
 		r |= r2;
 
