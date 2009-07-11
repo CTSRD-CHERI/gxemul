@@ -179,8 +179,8 @@ static void timer_tick(int signal_nr)
 		timer_current_time = ( (tv.tv_usec * 0.000001 + tv.tv_sec) +
 		    timer_current_time ) / 2;
 
-		timer_countdown_to_next_gettimeofday = timer_freq *
-		    SECONDS_BETWEEN_GETTIMEOFDAY_SYNCH;
+		timer_countdown_to_next_gettimeofday = (int64_t) (timer_freq *
+		    SECONDS_BETWEEN_GETTIMEOFDAY_SYNCH);
 	}
 
 	while (timer != NULL) {
@@ -223,9 +223,9 @@ void timer_start(void)
 		timer = timer->next;
 	}
 	val.it_interval.tv_sec = 0;
-	val.it_interval.tv_usec = 1000000.0 / timer_freq;
+	val.it_interval.tv_usec = (int) (1000000.0 / timer_freq);
 	val.it_value.tv_sec = 0;
-	val.it_value.tv_usec = 1000000.0 / timer_freq;
+	val.it_value.tv_usec = (int) (1000000.0 / timer_freq);
 
 	memset(&saction, 0, sizeof(saction));
 	saction.sa_handler = timer_tick;
