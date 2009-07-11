@@ -197,7 +197,7 @@ static void sh4_timer_tick(struct timer *t, void *extra)
 			continue;
 
 		/*  Update the current count:  */
-		d->tcnt[i] -= d->timer_hz[i] / SH4_PSEUDO_TIMER_HZ;
+		d->tcnt[i] -= (uint32_t) (d->timer_hz[i] / SH4_PSEUDO_TIMER_HZ);
 
 		/*  Has the timer underflowed?  */
 		if ((int32_t)d->tcnt[i] < 0 && old >= 0) {

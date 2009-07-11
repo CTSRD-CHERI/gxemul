@@ -996,8 +996,9 @@ X(fctiwz)
 		else if (frb.f <= -2147483648.0)
 			res = 0x80000000;
 		else
-			res = frb.f;
+			res = (int32_t) frb.f;
 	}
+
 	*(uint64_t *)ic->arg[1] = (uint32_t)res;
 }
 

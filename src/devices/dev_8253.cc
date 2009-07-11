@@ -123,9 +123,9 @@ DEVICE_ACCESS(8253)
 				d->counter[relative_addr] &= 0x00ff;
 				d->counter[relative_addr] |= ((idata&0xff)<<8);
 				if (d->counter[relative_addr] != 0)
-					d->hz[relative_addr] =
+					d->hz[relative_addr] = (int) (
 					    I8253_TIMER_FREQ / (float)
-					    d->counter[relative_addr] + 0.5;
+					    d->counter[relative_addr] + 0.5);
 				else
 					d->hz[relative_addr] = 0;
 				debug("[ 8253: counter %i set to %i (%i Hz) "

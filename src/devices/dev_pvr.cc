@@ -629,7 +629,7 @@ static void pvr_ta_command(struct cpu *cpu, struct pvr_data *d, int list_ofs)
 		struct ieee_float_value fx, fy;
 		ieee_interpret_float_value(ta[1], &fx, IEEE_FMT_S);
 		ieee_interpret_float_value(ta[2], &fy, IEEE_FMT_S);
-		x = fx.f; y = fy.f;
+		x = (int16_t) fx.f; y = (int16_t) fy.f;
 	}
 
 	ob_ofs = REG(PVRREG_TA_OB_POS);
