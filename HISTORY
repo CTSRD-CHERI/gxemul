@@ -3867,3 +3867,6 @@ Changelog for GXemul:
 		documentation stuff from the C++ branch.
 		Applying a patch from Izumi Tsutsui which makes NetBSD/hpcmips
 		work well with the clock again.
+20090711	Applying another patch from Izumi Tsutsui, for setting the
+		ARCBIOS OSLOADPARTITION environment variable in a more correct
+		way. (Also updating the guest OS page for NetBSD/arc 5.0.)

@@ -2363,20 +2363,19 @@ static void arc_environment_setup(struct machine *machine, int is64bit,
 		add_environment_string(cpu, "kernname=unix", &addr);
 	} else {
 		char *tmp;
-		size_t mlen = strlen(machine->bootarg) +
-		    strlen("OSLOADOPTIONS=") + 2;
+		size_t mlen = ARC_BOOTSTR_BUFLEN;
 		CHECK_ALLOCATION(tmp = (char *) malloc(mlen));
 		snprintf(tmp, mlen, "OSLOADOPTIONS=%s", machine->bootarg);
+
 		store_pointer_and_advance(cpu, &addr2, addr, is64bit);
 		add_environment_string(cpu, tmp, &addr);
 
 		store_pointer_and_advance(cpu, &addr2, addr, is64bit);
-		add_environment_string(cpu, "OSLOADPARTITION=scsi(0)cdrom(6)"
-		    "fdisk(0);scsi(0)disk(0)rdisk(0)partition(1)", &addr);
-
-		store_pointer_and_advance(cpu, &addr2, addr, is64bit);
-		add_environment_string(cpu, "SYSTEMPARTITION=scsi(0)cdrom(6)"
-		    "fdisk(0);scsi(0)disk(0)rdisk(0)partition(1)", &addr);
+		snprintf(tmp, mlen,
+		    "OSLOADPARTITION=scsi(0)disk(%d)rdisk(0)partition(1)",
+		    machine->bootdev_id);
+		add_environment_string(cpu, tmp, &addr);
+		free(tmp);
 	}
 
 	/*  End the environment strings with an empty zero-terminated

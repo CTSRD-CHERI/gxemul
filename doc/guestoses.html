@@ -48,7 +48,7 @@ SUCH DAMAGE.
   <li><a href="#generalnotes">General notes on running "guest OSes"</a>
   <li><a href="#legacy">Legacy emulation modes</a>
   <li><a href="#netbsdpmaxinstall">NetBSD/pmax 5.0</a>
-  <li><a href="#netbsdarcinstall">NetBSD/arc 4.0.1</a>
+  <li><a href="#netbsdarcinstall">NetBSD/arc 5.0</a>
   <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 4.0.1</a>
   <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0</a>
   <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0</a>
@@ -230,48 +230,30 @@ harddisk image, follow these instructions:
 	<b>dd if=/dev/zero of=nbsd_arc.img bs=1024 count=1 seek=1000000</b>
 
 </pre>
-  <li>Download a NetBSD/arc 4.0 CDROM image, and the generic + ramdisk
-	NetBSD/arc kernels:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/arccd-4.0.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/4.0.1/arccd-4.0.1.iso</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/arc/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/arc/binary/kernel/netbsd-GENERIC.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/arc/binary/kernel/netbsd-RAMDISK.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/arc/binary/kernel/netbsd-RAMDISK.gz</a>
+  <li>Download a NetBSD/arc CDROM image, and the generic + ramdisk NetBSD/arc kernels:<pre>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0/arccd-5.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0/arccd-5.0.iso</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/arc/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/arc/binary/kernel/netbsd-GENERIC.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/arc/binary/kernel/netbsd-RAMDISK.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/arc/binary/kernel/netbsd-RAMDISK.gz</a>
 
 </pre>
   <li>Start the emulator using this command line:<pre>
-	<b>gxemul -e pica -x -d nbsd_arc.img -d b:arccd-4.0.1.iso netbsd-RAMDISK.gz</b>
+	<b>gxemul -x -e pica -d nbsd_arc.img -d b:arccd-5.0.iso netbsd-RAMDISK.gz</b>
 
 </pre>
-	(Try removing <tt>-x</tt> if you have problems with the xterm.)
+	and proceed like you would do if you were installing NetBSD on a real
+	PICA-61. (Choose "Use entire disk" when doing the MBR partitioning,
+	and choose to install from CD-ROM.)
+	<p>
+	(Use <tt>-X</tt> if you feel more comfortable with a "graphical" text
+	display.)
     <p>
-  <li>From now on, you have to use your imagination, as there is no
-	automatic installation program for NetBSD/arc 4.0.1. Here are
-	some tips and hints on how you can proceed with the install:
-<p><table border="0"><tr><td><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td><pre>
-<b>mount /dev/cd0a /mnt2
-disklabel -i -I sd0</b>    (for example 'a', '4.2BSD', '1c',
-    '700M', 'b', 'swap', '701M', '$', 'P', 'W', 'y', and 'Q')
-<b>newfs /dev/sd0a
-mount /dev/sd0a /mnt
-cd /mnt
-for a in /mnt2/arc/binary/sets/*.tgz; do echo $a; tar xzpf $a; done
-cd dev; sh MAKEDEV all
-cd ../etc; echo "rc_configured=YES" &gt;&gt; rc.conf
-cat > /mnt/etc/fstab
-/dev/sd0a / ffs rw 1 1
-/dev/sd0b none swap sw 0 0
-</b>(press ctrl-d)
-<b>cd /; umount /mnt; umount /mnt2
-halt</b>
-</pre></td></tr></table>
 </ol>
 
 <p>You can now use the generic NetBSD/arc kernel to boot from the harddisk 
 image, using the following command:<pre>
-	<b>gxemul -e pica -x -d nbsd_arc.img netbsd-GENERIC.gz</b>
+	<b>gxemul -x -e pica -d nbsd_arc.img netbsd-GENERIC.gz</b>
 
 </pre>
-
-<p>When asked for "<tt>root device: </tt>", enter <b><tt>sd0</tt></b>.
 
 
 
