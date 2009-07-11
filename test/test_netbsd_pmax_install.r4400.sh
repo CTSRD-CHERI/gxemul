@@ -1,12 +1,9 @@
 #!/bin/sh
 #
-#  $Id: test_netbsd_pmax_install.r4400.sh,v 1.1 2006-07-22 12:19:58 debug Exp $
+#  Regression test: Automated install of NetBSD/pmax using R4400 cpu.
+#  Start using:
 #
-#  Litet enkelt test för att mäta hur lång tid det tar att installera
-#  en full NetBSD/pmax 3.0 för R4400, utan interaktion.
-#  Starta med:
-#
-#	experiments/test_netbsd_pmax_install.r4400.sh
+#	test/test_netbsd_pmax_install.r4400.sh
 #
 
 rm -f nbsd_pmax.img
@@ -14,7 +11,7 @@ dd if=/dev/zero of=nbsd_pmax.img bs=1024 count=1 seek=1900000
 sync
 sleep 2
 
-time experiments/test_netbsd_pmax_install.r4400.expect 2> /tmp/gxemul_result
+time test/test_netbsd_pmax_install.r4400.expect 2> /tmp/gxemul_result
 
 echo
 echo

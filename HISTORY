@@ -3873,3 +3873,4 @@ Changelog for GXemul:
 		Updating the NetBSD/pmax regression test expect scripts from
 		3.1 to 5.0 (for both R3000 and R4400).
 		Moving regression test expect scripts to the test/ directory.
+		Creating a regression test expect script for NetBSD/arc 5.0.
