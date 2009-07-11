@@ -3870,3 +3870,5 @@ Changelog for GXemul:
 20090711	Applying another patch from Izumi Tsutsui, for setting the
 		ARCBIOS OSLOADPARTITION environment variable in a more correct
 		way. (Also updating the guest OS page for NetBSD/arc 5.0.)
+		Updating the NetBSD/pmax regression test expect scripts from
+		3.1 to 5.0 (for both R3000 and R4400).

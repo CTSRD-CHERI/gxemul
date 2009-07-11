@@ -1,13 +1,13 @@
 #!/usr/local/bin/expect
 
 set timeout 4000
-spawn ./gxemul -e3max -C R4400 -q -d nbsd_pmax.img -d bc:../../emul/mips/pmaxcd-3.1.iso
+spawn ./gxemul -e3max -C R4400 -q -d nbsd_pmax.img -d bc:../../emul/mips/pmaxcd-5.0.iso
 
 expect "Terminal type"
 send "vt100\r"
 expect " in English"
 send "\r"
-expect "a: Install NetBSD to "
+expect "a: Install NetBSD to"
 send "\r"
 expect "b: Yes"
 send "b\r"
@@ -17,22 +17,20 @@ expect "a: Full installation"
 send "\r"
 expect "a: Set sizes of NetBSD partitions"
 send "\r"
-expect "Accept partition sizes."
+expect "Accept partition sizes"
 send " \r"
 expect "x: Partition sizes ok"
 send "\r"
-expect "Please enter a name for your"
+expect "Please enter a name for"
 send "\r"
 expect "b: Yes"
 send "b\r"
-expect "Hit enter to continue"
-send "\r"
 expect "a: Progress bar"
 send "\r"
 expect "a: CD-ROM"
 send "\r"
-expect "c: Continue"
-send "c\r"
+expect "x: Continue"
+send "x\r"
 expect "Hit enter to continue"
 send "\r"
 
