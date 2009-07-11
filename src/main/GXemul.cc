@@ -575,6 +575,9 @@ int GXemul::Run()
 		return 1;
 	}
 
+	// Release the UI:
+	m_ui = NULL;
+
 	return 0;
 }
 
