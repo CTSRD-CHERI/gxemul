@@ -412,6 +412,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 			break;
 		case 'H':
 			GXemul::ListTemplates();
+			printf("--------------------------------------------------------------------------\n\n");
 			printf("The following applies to the LEGACY modes:\n\n");
 			machine_list_available_types_and_cpus();
 			exit(1);
