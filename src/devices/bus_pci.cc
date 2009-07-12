@@ -974,7 +974,11 @@ PCIINIT(vt82c586_isa)
 	 *  netbsd/usr/src/sys/arch/cobalt/cobalt/machdep.c read_board_id()
 	 *  for details.
 	 */
-	PCI_SET_DATA(0x94, 4 << 4);
+	if (machine->machine_type == MACHINE_COBALT) {
+#define	COBALT_PCIB_BOARD_ID_REG	0x94
+#define	COBALT_QUBE2_ID			5
+		PCI_SET_DATA(COBALT_PCIB_BOARD_ID_REG, COBALT_QUBE2_ID << 4);
+	}
 }
 
 struct vt82c586_ide_extra {
