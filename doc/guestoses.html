@@ -337,29 +337,21 @@ is available. This makes it a bit akward to use X.
 
 <p>[Note: This is a <a href="#legacy"><font color="#dd2222"><b>LEGACY MODE</b></font></a>.]
 
-<p><a href="http://www.netbsd.org/ports/cobalt/">NetBSD/cobalt</a> is tricky
-to install, because the Cobalt machines were designed for Linux, and not
-very flexible. There is no traditional INSTALL kernel for NetBSD/cobalt.
-One way to install the NetBSD/cobalt distribution onto a disk image is to
-do it from another (emulated) machine.
+<p><a href="http://www.netbsd.org/ports/cobalt/">NetBSD/cobalt</a> is possible
+to install on an emulated Cobalt Cube.
 
 <p>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="20060812-netbsd-cobalt-3.0.1.png"><img src="20060812-netbsd-cobalt-3.0.1_small.png"></a>
 
-<p>
-The following instructions will let you install NetBSD/cobalt onto a disk 
-image, from an emulated DECstation 3MAX machine:
+<p>The following instructions will let you install NetBSD/cobalt onto a disk 
+image:
 
 <p>
 <ol>
-  <li>Download a NetBSD/pmax (DECstation) install RAMDISK kernel:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/pmax/binary/kernel/netbsd-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/pmax/binary/kernel/netbsd-INSTALL.gz</a>
-</pre>
-  <p>
   <li>Create an empty harddisk image, which will be the disk image
 	that you will install NetBSD/cobalt onto:<pre>
-	<b>dd if=/dev/zero of=nbsd_cobalt.img bs=1024 count=1 seek=700000</b>
+	<b>dd if=/dev/zero of=nbsd_cobalt.img bs=1024 count=1 seek=2700000</b>
 
 </pre>
   <li>Download the generic kernel for Cobalt and the ISO image:<pre>
@@ -367,39 +359,18 @@ image, from an emulated DECstation 3MAX machine:
 	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0/cobaltcd-5.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0/cobaltcd-5.0.iso</a>
 
 </pre>
-  <li>Start the emulated DECstation machine like this:<pre>
-	<b>gxemul -e 3max -d nbsd_cobalt.img -d cobaltcd-5.0.iso netbsd-INSTALL.gz</b>
+  <li>Start the installation like this:<pre>
+  	<b>gxemul -x -E cobalt -d nbsd_cobalt.img -d bd:cobaltcd-5.0.iso -j cobalt/binary/kernel/netbsd-RAMDISK</b>
 
 </pre>
-  <li>At the <tt>Terminal type? [rcons]</tt> prompt, type <b>CTRL-B</b>
-to simulate a CTRL-C sent to NetBSD/pmax. Then execute the following commands:
-<p><table border="0"><tr><td><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td><pre>
-<b>newfs /dev/sd0c
-mount /dev/cd0c /mnt
-mkdir /mnt2; mount /dev/sd0c /mnt2
-cd /mnt2; sh
-for a in /mnt/*/binary/sets/[bcekmt]*.tgz; do echo $a; tar zxfp $a; done
-exit
-cd dev; sh ./MAKEDEV all; cd ../etc
-echo rc_configured=YES >> rc.conf
-echo "/dev/wd0d / ffs rw 1 1" > fstab
-cd /; umount /mnt; umount /mnt2; halt</b>
-</pre></td></tr></table>
+	and proceed like you would do if you were installing NetBSD on a real
+	Cobalt. (Install onto <tt>wd0</tt>, choose "Use entire disk" when
+	doing the MBR partitioning, and choose to install from CD-ROM device "<tt>wd1d</tt>".)
 </ol>
 
 <p>
 You should now be able to boot NetBSD/cobalt like this:<pre>
 	<b>gxemul -x -E cobalt -d nbsd_cobalt.img netbsd-GENERIC.gz</b>
-</pre>
-
-Note that the installation instructions above create a filesystem
-<i>without</i> a disklabel, so there is only one ffs partition and no
-swap. You will need to enter the following things when booting with the
-generic kernel:<pre>
-	root device (default wd0a): <b>wd0d</b>
-	dump device (default wd0b): <b>none</b>
-	file system (default generic): <b>ffs</b>
-	init path (default /sbin/init):     <i>(just press enter here)</i>
 </pre>
 
 
