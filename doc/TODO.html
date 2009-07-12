@@ -23,14 +23,7 @@ Some things, in no specific order, that I'd like to fix:
 
 Goals for 0.6.0 (hopefully some time during Summer 2009):
 
-  [X]	Switch from C to C++ compilation. Note: This doesn't mean that the
-	bulk of the framework will be written in C++, only that it will be
-	compiled using a C++ compiler.
-	
-	NOTE: GXemul consists of a <b>LOT</b> of legacy code. Rewriting all of this
-	within a reasonable short time is out of the question. Slowly converting
-	one subsystem after another into something more modern is feasible,
-	however, and that's my goal.
+  [X]	Switch from C to C++ compilation.
 
   [X]	Unit tests (again) for the new C++ code.
 
@@ -40,25 +33,16 @@ Goals for 0.6.0 (hopefully some time during Summer 2009):
 
   [X]	Move ALL thirdparty includes (again) to src/include/thirdparty
 
-  [ ]	Rewrite the device framework (as planned in the other C++ branches):
-
-	[ ]  Component tree
-		components.h
-
-	[ ]  Break out address/memory busses! This would (in the best case)
-	     allow a correct implementation of e.g. PCI, and cache emulation!
-
-	[ ]  Convert DEVINIT _AND_ the non-DEVINIT crap to something
-	     more C++ like. (Reasonable destructors, serialization, etc.)
-
-	Ideal solution would be if all devices
-  	were runtime attachable/removable, and if there was a fast path for
-  	device access (virtual memory page => immediate device function call).
-
-
 (The name "0.5.x" will be skipped. This was the C++ version that was supposed
 to be a complete rewrite from scratch. There was not enough spare time.)
 
+  [ ]	Make testmips and/or mvme187 work!
+  
+  	[ ]  testmips:
+  		[ ]  MIPS CPU
+  			[ ]  Disassembly
+			[ ]  Dyntrans execution
+		[ ]  RAM
 
 -------------------------------------------------------------------------------
 
