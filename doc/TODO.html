@@ -20,21 +20,18 @@ Some things, in no specific order, that I'd like to fix:
 
 -------------------------------------------------------------------------------
 
+MAIN GOAL for 0.6.0:
 
-Goals for 0.6.0 (hopefully some time during Summer 2009):
+	Release 0.6.0 (hopefully some time during Summer 2009) when
+	_something_ in the new framework works well enough to be released.
+	It could be "testmips", "testm88k", or "mvme187".
 
-  [X]	Switch from C to C++ compilation.
+	(The name "0.5.x" will be skipped. This was the C++ version that was
+	supposed to be a complete rewrite from scratch. There was not enough
+	spare time.)
 
-  [X]	Unit tests (again) for the new C++ code.
+-------------------------------------------------------------------------------
 
-	[X]  make test
-
-  [X]	Removing unfinished archs (Alpha, SPARC, M32R) and "userland emulation".
-
-  [X]	Move ALL thirdparty includes (again) to src/include/thirdparty
-
-(The name "0.5.x" will be skipped. This was the C++ version that was supposed
-to be a complete rewrite from scratch. There was not enough spare time.)
 
   [ ]	Make testmips and/or mvme187 work!
   
@@ -43,6 +40,13 @@ to be a complete rewrite from scratch. There was not enough spare time.)
   			[ ]  Disassembly
 			[ ]  Dyntrans execution
 		[ ]  RAM
+
+  [ ]	load binaries at startup (from command line)
+
+  [ ]	load a.out m88k binaries
+
+  [ ]	"load" command should also load executables! into address busses/cpus!
+
 
 -------------------------------------------------------------------------------
 
