@@ -564,11 +564,18 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 	extra_argv = argv;
 
 	if (type == NULL && subtype == NULL && single_step == ENTER_SINGLE_STEPPING) {
-		GXemul gxemul;
-		gxemul.SetRunState(GXemul::Paused);
-		if (quiet_mode)
-			gxemul.SetQuietMode(true);
-		exit(gxemul.Run());
+		int res;
+		{
+			GXemul gxemul;
+
+			gxemul.SetRunState(GXemul::Paused);
+			if (quiet_mode)
+				gxemul.SetQuietMode(true);
+
+			res =  gxemul.Run();
+		}
+
+		exit(res);
 	}
 
 	if (type != NULL || subtype != NULL) {
@@ -579,18 +586,27 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 		/*  Is it a new machine mode?  */
 		if (subtype[0] != '\0') {
-			GXemul gxemul;
-			if (single_step == ENTER_SINGLE_STEPPING)
-				gxemul.SetRunState(GXemul::Paused);
-			if (quiet_mode)
-				gxemul.SetQuietMode(true);
+			int res;
+			bool doExit = false;
+			
+			{
+				GXemul gxemul;
+				if (single_step == ENTER_SINGLE_STEPPING)
+					gxemul.SetRunState(GXemul::Paused);
+				if (quiet_mode)
+					gxemul.SetQuietMode(true);
 
-			if (gxemul.IsTemplateMachine(subtype)) {
-				if (!gxemul.ParseFilenames(subtype, argc, argv))
-					exit(0);
+				if (gxemul.IsTemplateMachine(subtype)) {
+					if (!gxemul.ParseFilenames(subtype, argc, argv))
+						exit(0);
 
-				exit(gxemul.Run());
+					res = gxemul.Run();
+					doExit = true;
+				}
 			}
+			
+			if (doExit)
+				exit(res);
 		}
 
 		/*  Legacy mode?  */
