@@ -48,10 +48,13 @@
  * See GXemul's home page for more information about %GXemul in general:
  * <a href="http://gxemul.sourceforge.net/">http://gxemul.sourceforge.net/</a>
  *
- * Some people perhaps get a nice warm fuzzy feeling by knowing how a program
- * starts up. In %GXemul's case, the %main() function creates a GXemul instance,
- * and after letting it parse command line options (which may create an
- * initial emulation configuration), calls GXemul::Run().
+ * The main program creates a GXemul instance, and does one of two things:
+ * <ul>
+ *	<li>Starts without any template %machine. (<tt>-V</tt>)
+ *	<li>Starts with a template %machine, and a list of filenames to load
+ *		(usually a kernel binary to boot the emulated %machine).
+ * </ul>
+ * After letting the %GXemul instance load the files, GXemul::Run() is called.
  * This is the main loop. It doesn't really do much, it simply calls the UI's
  * main loop, i.e. ConsoleUI::MainLoop().
  *
@@ -152,13 +155,6 @@
 
 #include <fstream>
 #include <iostream>
-
-
-/// For command line parsing using getopt().
-extern char *optarg;
-
-/// For command line parsing using getopt().
-extern int optind;
 
 
 GXemul::GXemul()
@@ -571,7 +567,12 @@ int GXemul::Run()
 		    "the author, to the gxemul-devel mailing list, or"
 		    " ask in #GXemul on the\n"
 		    "FreeNode IRC network.\n";
+
 		m_ui->FatalError(ss.str());
+
+		// Release the UI:
+		m_ui = NULL;
+
 		return 1;
 	}
 
