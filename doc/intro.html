@@ -61,7 +61,6 @@ SUCH DAMAGE.
 
 
 
-
 <p><br>
 <a name="overview"></a>
 <h3>Overview:</h3>
@@ -124,41 +123,34 @@ with feedback.
 
 
 
-
-
 <p><br>
 <a name="free"></a>
 <h3>Is GXemul Free software?</h3>
 
-Yes. I have released GXemul under a Free license. The code in GXemul is
-Copyrighted software, it is <i>not</i> public domain. (If this is
+Yes. the GXemul source code is released under a Free license. The code in GXemul
+is Copyrighted software, it is <i>not</i> public domain. (If this is
 confusing to you, you might want to read up on the definitions of the
 four freedoms associated with Free software, <a
 href="http://www.gnu.org/philosophy/free-sw.html">http://www.gnu.org/philosophy/free-sw.html</a>.)
 
-<p>The code I have written is released under a 3-clause BSD-style license
+<p>The main part of the code is released under a 3-clause BSD-style license
 (or "revised BSD-style" if one wants to use <a
 href="http://www.gnu.org/philosophy/bsd.html">GNU jargon</a>). Apart from
-the code I have written, some files are copied from other sources such as
+the main code, some files are copied from other sources such as
 NetBSD, for example header files containing symbolic names of bitfields in
 device registers. They are also covered by similar licenses, but with some
 additional clauses. The main point, however, is that the licenses require
-that the original Copyright and license terms are included when you make a
-copy or modification.
+that the original Copyright and license terms are included when you distribute
+a copy, modified or not, <i>even if it is in binary form</i>.
 
 <p>If you plan to redistribute GXemul <i>without</i> supplying the source
 code, then you need to comply with each individual source file some other
-way, for example by writing additional documentation containing copyright
-notes. I have not done this, since I do not plan on making distributions
-without source code. You need to check all individual files for details.
-The "easiest way out" if you plan to redistribute code from GXemul is, of
-course, to let it remain Free Software and simply include the source code.
-
-<p>In case you want to reuse parts of GXemul, but you need to do that 
-under a different license (e.g. the
-<a href="http://www.gnu.org/licenses/gpl.html">GPL</a>), then contact me and 
-I can probably re-license/dual-license files on a case-by-case basis.
-
+way, for example by writing additional documentation containing Copyright
+notes. This has not been done in the official GXemul distribution, since it
+is in source code form and already includes the Copyright messages. You need
+to check all individual files for details. The "easiest way out" if you plan
+to redistribute code from GXemul is, of course, to let it remain Free Software
+and simply include the source code.
 
 
 
@@ -179,10 +171,12 @@ not have X11 libraries installed, some functionality will be lost.
 
 <p>The emulator's performance is highly dependent on both runtime settings 
 and on compiler settings, so you might want to experiment with using 
-different <tt>CC</tt> and <tt>CFLAGS</tt> environment variable values when 
+different <tt>CXX</tt> and <tt>CXXFLAGS</tt> environment variable values when 
 running the <tt>configure</tt> script.
 
-
+<p>(During development of the emulator, <tt><b>configure --debug</b></tt> may be used
+to enable some debugging aids and turn off optimizations. <tt><b>make test</b></tt>
+can be used to run unit tests.)
 
 
 
@@ -253,20 +247,19 @@ architectures.)
 
 
 
-
-
 <p><br>
 <a name="hosts"></a>
 <h3>Which host architectures/platforms are supported?</h3>
 
-GXemul should compile and run on any modern host architecture (64-bit or 
-32-bit word-length). I generally test it on
-<a href="http://www.freebsd.org/platforms/amd64.html">FreeBSD/amd64</a> 7.0, 
-<a href="http://www.freebsd.org/platforms/alpha.html">FreeBSD/alpha</a> 4.9,
-sometimes also on Linux (various platforms), and every
-now and then also on <a href="http://www.netbsd.org/">NetBSD</a> or
-<a href="http://www.openbsd.org/">OpenBSD</a> inside the emulator itself
-(various platforms).
+GXemul should hopefully compile and run on most modern host architectures
+(64-bit or 32-bit word-length) on most Unix-like operating systems, as long as
+there is a modern C++ compiler available.
+
+<p>If it does not build or run, then it can be considered a bug. Please
+report it to the development mailing list.
+
+<p>It is generally tested on FreeBSD/amd64, FreeBSD/alpha, Linux, and also
+NetBSD and OpenBSD inside GXemul itself.
 
 <p>Note 1: The <a href="translation.html">dynamic translation</a> engine 
 does <i>not</i> require backends for native code generation to be written 
@@ -276,10 +269,6 @@ that the dyntrans system uses can be executed on any host architecture.
 <p>Note 2: Although GXemul may build and run on non-Unix-like platforms,
 such as <a href="http://www.cygwin.com/">Cygwin</a>, Unix-like systems are
 the primary platform. Some functionality may be lost when running on Cygwin.
-
-
-
-
 
 
 
@@ -308,8 +297,6 @@ each of these 100 Hz cycles.
 
 <p>If the host is very slow, the emulated clocks might even lag behind
 the real-world clock.
-
-
 
 
 
@@ -411,9 +398,6 @@ educational purposes.
 
 <p>You can read more about these experimental devices <a
 href="experiments.html#expdevices">here</a>.
-
-
-
 
 
 
