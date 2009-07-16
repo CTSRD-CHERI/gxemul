@@ -1,8 +1,8 @@
-#ifndef FILELOADER_ELF_H
-#define	FILELOADER_ELF_H
+#ifndef FILELOADER_AOUT_H
+#define	FILELOADER_AOUT_H
 
 /*
- *  Copyright (C) 2008-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -36,18 +36,18 @@
 
 
 /**
- * \brief ELF binary loader.
+ * \brief a.out binary loader.
  *
  * TODO: Longer comment.
  */
-class FileLoader_ELF
+class FileLoader_aout
 	: public UnitTestable
 	, public FileLoaderImpl
 {
 public:
-	FileLoader_ELF(const string& filename);
+	FileLoader_aout(const string& filename);
 
-	~FileLoader_ELF()
+	~FileLoader_aout()
 	{
 	}
 
@@ -62,4 +62,4 @@ public:
 };
 
 
-#endif	// FILELOADER_ELF_H
+#endif	// FILELOADER_AOUT_H

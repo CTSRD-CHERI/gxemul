@@ -1,8 +1,8 @@
-#ifndef FILELOADER_ELF_H
-#define	FILELOADER_ELF_H
+#ifndef FILELOADERIMPL_H
+#define	FILELOADERIMPL_H
 
 /*
- *  Copyright (C) 2008-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -31,35 +31,59 @@
 #include "misc.h"
 
 #include "Component.h"
-#include "FileLoaderImpl.h"
 #include "UnitTest.h"
 
 
 /**
- * \brief ELF binary loader.
- *
- * TODO: Longer comment.
+ * \brief A file loader.
  */
-class FileLoader_ELF
-	: public UnitTestable
-	, public FileLoaderImpl
+class FileLoaderImpl
+	: public ReferenceCountable
 {
 public:
-	FileLoader_ELF(const string& filename);
-
-	~FileLoader_ELF()
+	/**
+	 * \brief Constructs a file loader.
+	 *
+	 * @param filename The filename to load.
+	 */
+	FileLoaderImpl(const string& filename)
+		: m_filename(filename)
 	{
 	}
 
-	string DetectFileType(unsigned char *buf, size_t buflen, float& matchness) const;
+	virtual ~FileLoaderImpl()
+	{
+	}
 
-	bool LoadIntoComponent(refcount_ptr<Component> component) const;
+	/**
+	 * \brief Attempt to detect file type.
+	 *
+	 * @param buf A buffer containing the header of the file.
+	 * @param buflen The length of the buffer.
+	 * @param matchness Set to a value between 0.0 and 1.0, indicating the
+	 *	match certainty.
+	 * @return A file type description, if there was a match; otherwise
+	 * an empty string.
+	 */
+	virtual string DetectFileType(unsigned char *buf, size_t buflen, float& matchness) const = 0;
 
+	/**
+	 * \brief Loads the file into a Component.
+	 *
+	 * @param component The AddressDataBus component to load the file
+	 *	into. (This is usually a CPUComponent.)
+	 * @return True if loading succeeded, false otherwise.
+	 */
+	virtual bool LoadIntoComponent(refcount_ptr<Component> component) const = 0;
 
-	/********************************************************************/
+protected:
+	const string& Filename() const
+	{
+		return m_filename;
+	}
 
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
+private:
+	const string	m_filename;
 };
 
-
-#endif	// FILELOADER_ELF_H
+#endif	// FILELOADERIMPL_H

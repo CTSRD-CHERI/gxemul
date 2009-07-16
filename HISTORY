@@ -3875,3 +3875,9 @@ Changelog for GXemul:
 		Moving regression test expect scripts to the test/ directory.
 		Creating a regression test expect script for NetBSD/arc 5.0.
 20090712	Adding a dummy "testm88k" machine for the new framework.
+		Updating the install instructions for NetBSD/cobalt to use the
+		RAMDISK installer (thanks to Izumi Tsutsui for noticing).
+20090713	Beginning on an a.out FileLoader for the new framework.
+20090714	Continuing on the a.out FileLoader.
+20090716	a.out (big-endian only so far) can now be loaded into
+		AddressDataBus objects.

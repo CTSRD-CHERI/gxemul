@@ -31,25 +31,55 @@
 
 using std::ifstream;
 
-
 #include "AddressDataBus.h"
 #include "FileLoader_ELF.h"
 #include "thirdparty/exec_elf.h"
 
 
 FileLoader_ELF::FileLoader_ELF(const string& filename)
-	: m_filename(filename)
+	: FileLoaderImpl(filename)
 {
 }
 
 
-bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component)
+string FileLoader_ELF::DetectFileType(unsigned char *buf, size_t buflen, float& matchness) const
+{
+	if (buflen < sizeof(Elf32_Ehdr))
+		return "";
+
+	// Note: The e_ident part of the 32-bit and the 64-bit variants have
+	// the same layout, so it is safe to only check the 32-bit variant here.
+	Elf32_Ehdr* elf32_ehdr = (Elf32_Ehdr*) buf;
+	if (elf32_ehdr->e_ident[EI_MAG0] == ELFMAG0 &&
+	    elf32_ehdr->e_ident[EI_MAG1] == ELFMAG1 &&
+	    elf32_ehdr->e_ident[EI_MAG2] == ELFMAG2 &&
+	    elf32_ehdr->e_ident[EI_MAG3] == ELFMAG3) {
+		// We are here if this is either an ELF32 or ELF64.
+		int elfClass = elf32_ehdr->e_ident[EI_CLASS];
+
+		matchness = 1.0;
+		if (elfClass == ELFCLASS32)
+			return "ELF32";
+		if (elfClass == ELFCLASS64)
+			return "ELF64";
+
+		matchness = 0.0;
+		stringstream ss;
+		ss << "ELF Unknown class " << elfClass;
+		return ss.str();
+	}
+
+	return "";
+}
+
+
+bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component) const
 {
 	AddressDataBus* bus = component->AsAddressDataBus();
 	if (bus == NULL)
 		return false;
 
-	ifstream file(m_filename.c_str());
+	ifstream file(Filename().c_str());
 	if (!file.is_open())
 		return false;
 
@@ -174,6 +204,8 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component)
 		}
 	}
 
+	// TODO: Symbols
+
 	// Set the CPU's entry point.
 	// Special handling for some architectures: 32-bit MIPS uses
 	// sign-extension.
@@ -198,7 +230,7 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component)
 
 static void Test_FileLoader_ELF_Constructor()
 {
-//	FileLoader_ELF elfLoader("test/FileLoader_ELF_MIPS");
+	FileLoader_ELF elfLoader("test/FileLoader_ELF_MIPS");
 }
 
 UNITTESTS(FileLoader_ELF)

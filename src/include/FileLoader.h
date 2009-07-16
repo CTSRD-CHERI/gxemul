@@ -31,6 +31,7 @@
 #include "misc.h"
 
 #include "Component.h"
+#include "FileLoaderImpl.h"
 #include "UnitTest.h"
 
 
@@ -70,9 +71,12 @@ public:
 	/**
 	 * \brief Attempt to detect the file format of the file.
 	 *
+	 * \param loader On return from the function, if the file format has
+	 *	been detected, this is set to a pointer to a FileLoaderImpl.
+	 *	Otherwise (if no format was detected), it is NULL.
 	 * \return A string representing the file format.
 	 */
-	string DetectFileFormat() const;
+	string DetectFileFormat(refcount_ptr<const FileLoaderImpl>& loader) const;
 
 	/**
 	 * \brief Loads the file into a CPU or an AddressDataBus.
@@ -98,7 +102,9 @@ private:
 	FileLoader();
 
 private:
+	typedef vector< refcount_ptr<const FileLoaderImpl> > FileLoaderImplVector;
 	const string		m_filename;
+	FileLoaderImplVector	m_fileLoaders;
 };
 
 

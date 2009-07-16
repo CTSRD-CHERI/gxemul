@@ -31,17 +31,18 @@
 
 using std::ifstream;
 
-
 #include "AddressDataBus.h"
 #include "Component.h"
 #include "FileLoader.h"
+#include "FileLoader_aout.h"
 #include "FileLoader_ELF.h"
-#include "thirdparty/exec_elf.h"
 
 
 FileLoader::FileLoader(const string& filename)
 	: m_filename(filename)
 {
+	m_fileLoaders.push_back(new FileLoader_aout(filename));
+	m_fileLoaders.push_back(new FileLoader_ELF(filename));
 }
 
 
@@ -51,48 +52,43 @@ const string& FileLoader::GetFilename() const
 }
 
 
-string FileLoader::DetectFileFormat() const
+string FileLoader::DetectFileFormat(refcount_ptr<const FileLoaderImpl>& loader) const
 {
+	loader = NULL;
+
 	ifstream file(m_filename.c_str());
+
+	// TODO: Disk images?
+	// TODO: Raw binaries?
+	// Should these be detected by prefixes, as in GXemul 0.4 and below?
+	// Like   loadaddr:skiplen:initialpc:filename
+	// but how about disk images?
+
 	if (!file.is_open())
 		return "Not accessible";
 
-	char buf[256];
-
-	// buf must be large enough for the largest possible header we wish
-	// to examine to fit.
-	assert(sizeof(buf) >= sizeof(Elf32_Ehdr));
-	assert(sizeof(buf) >= sizeof(Elf64_Ehdr));
+	unsigned char buf[512];
 
 	memset(buf, 0, sizeof(buf));
-	file.read(buf, sizeof(buf));
+	file.read((char *)buf, sizeof(buf));
+	size_t amountRead = file.gcount();
 
-	// Try ELF first.
-	// Note: The e_ident part of the 32-bit and the 64-bit variants have
-	// the same layout, so it is safe to only check the 32-bit variant here.
-	Elf32_Ehdr* elf32_ehdr = (Elf32_Ehdr*) buf;
-	if (elf32_ehdr->e_ident[EI_MAG0] == ELFMAG0 &&
-	    elf32_ehdr->e_ident[EI_MAG1] == ELFMAG1 &&
-	    elf32_ehdr->e_ident[EI_MAG2] == ELFMAG2 &&
-	    elf32_ehdr->e_ident[EI_MAG3] == ELFMAG3) {
-		// We are here if this is either an ELF32 or ELF64.
-		int elfClass = elf32_ehdr->e_ident[EI_CLASS];
-
-		if (elfClass == ELFCLASS32)
-			return "ELF32";
-		if (elfClass == ELFCLASS64)
-			return "ELF64";
-
-		stringstream ss;
-		ss << "ELF Unknown class " << elfClass;
-		return ss.str();
+	// Ask all file loaders about how well they handle the format. Return
+	// the format string from the loader that had the highest score.
+	float bestMatch = 0.0;
+	string bestFormat = "Unknown";
+	FileLoaderImplVector::const_iterator it = m_fileLoaders.begin();
+	for (; it != m_fileLoaders.end(); ++it) {
+		float match;
+		string format = (*it)->DetectFileType(buf, amountRead, match);
+		if (match > bestMatch) {
+			bestMatch = match;
+			bestFormat = format;
+			loader = *it;
+		}
 	}
 
-	// TODO: Various a.out formats. Compare with GXemul 0.4.x.
-	
-	// TODO: Raw binaries?
-
-	return "Unknown";
+	return bestFormat;
 }
 
 
@@ -110,14 +106,11 @@ bool FileLoader::Load(refcount_ptr<Component> component) const
 		return false;
 	}
 
-	string fileFormat = DetectFileFormat();
+	refcount_ptr<const FileLoaderImpl> loaderImpl;
+	string fileFormat = DetectFileFormat(loaderImpl);
 
-	if (fileFormat == "ELF32" || fileFormat == "ELF64") {
-		FileLoader_ELF elfLoader(m_filename);
-		return elfLoader.LoadIntoComponent(component);
-	}
-
-	// TODO: Other formats!
+	if (!loaderImpl.IsNULL())
+		return loaderImpl->LoadIntoComponent(component);
 
 #ifndef NDEBUG
 	std::cerr << "\n*** FileLoader::Load: File format '" <<
@@ -152,36 +145,49 @@ static void Test_FileLoader_Constructor_NonExistingFile()
 static void Test_FileLoader_DetectFileFormat_NonexistingFile()
 {
 	FileLoader fileLoader("test/Nonexisting");
+	refcount_ptr<const FileLoaderImpl> loaderImpl;
 	UnitTest::Assert("file format detection failure?",
-	    fileLoader.DetectFileFormat(), "Not accessible");
+	    fileLoader.DetectFileFormat(loaderImpl), "Not accessible");
 }
 
 static void Test_FileLoader_DetectFileFormat_NonsenseFile()
 {
 	FileLoader fileLoader("test/FileLoader_NonsenseFile");
+	refcount_ptr<const FileLoaderImpl> loaderImpl;
 	UnitTest::Assert("file format detection failure?",
-	    fileLoader.DetectFileFormat(), "Unknown");
+	    fileLoader.DetectFileFormat(loaderImpl), "Unknown");
 }
 
 static void Test_FileLoader_DetectFileFormat_ELF32()
 {
 	FileLoader fileLoader("test/FileLoader_ELF_MIPS");
+	refcount_ptr<const FileLoaderImpl> loaderImpl;
 	UnitTest::Assert("file format detection failure?",
-	    fileLoader.DetectFileFormat(), "ELF32");
+	    fileLoader.DetectFileFormat(loaderImpl), "ELF32");
 }
 
 static void Test_FileLoader_DetectFileFormat_ELF64()
 {
 	FileLoader fileLoader("test/FileLoader_ELF_SH5");
+	refcount_ptr<const FileLoaderImpl> loaderImpl;
 	UnitTest::Assert("file format detection failure?",
-	    fileLoader.DetectFileFormat(), "ELF64");
+	    fileLoader.DetectFileFormat(loaderImpl), "ELF64");
 }
 
-static void Test_FileLoader_Load_ELF32()
+static void Test_FileLoader_DetectFileFormat_aout_88K()
 {
-	FileLoader fileLoader("test/FileLoader_ELF_MIPS");
+	FileLoader fileLoader("test/FileLoader_A.OUT_M88K");
+	refcount_ptr<const FileLoaderImpl> loaderImpl;
+	UnitTest::Assert("file format detection failure?",
+	    fileLoader.DetectFileFormat(loaderImpl), "a.out_M88K_fromBeginning");
+}
+
+static refcount_ptr<Component> SetupTestMachineAndLoad(
+	string machineName, string fileName)
+{
+	FileLoader fileLoader(fileName);
 	refcount_ptr<Component> machine =
-	    ComponentFactory::CreateComponent("testmips");
+	    ComponentFactory::CreateComponent(machineName);
 
 	machine->SetVariableValue("name", "\"machine\"");
 	refcount_ptr<Component> component =
@@ -189,11 +195,21 @@ static void Test_FileLoader_Load_ELF32()
 	UnitTest::Assert("could not look up CPU to load into?",
 	    !component.IsNULL());
 
-	UnitTest::Assert("could not load the file?",
-	    fileLoader.Load(component));
+	UnitTest::Assert("could not load the file " + fileName + " for"
+	    " machine " + machineName, fileLoader.Load(component));
+
+	return machine;
+}
+
+static void Test_FileLoader_Load_ELF32()
+{
+	refcount_ptr<Component> machine =
+	    SetupTestMachineAndLoad("testmips", "test/FileLoader_ELF_MIPS");
 
 	// Read from CPU, to make sure the file was loaded:
-	AddressDataBus * bus = component->AsAddressDataBus();
+	refcount_ptr<Component> cpu =
+	    machine->LookupPath("machine.mainbus0.cpu0");
+	AddressDataBus * bus = cpu->AsAddressDataBus();
 	bus->AddressSelect((int32_t)0x80010000);
 	uint32_t word = 0x12345678;
 	bus->ReadData(word, BigEndian);
@@ -203,12 +219,38 @@ static void Test_FileLoader_Load_ELF32()
 	// Read directly from RAM too, to make sure the file was loaded:
 	refcount_ptr<Component> ram =
 	    machine->LookupPath("machine.mainbus0.ram0");
-	AddressDataBus * ramBus = component->AsAddressDataBus();
+	AddressDataBus * ramBus = ram->AsAddressDataBus();
 	ramBus->AddressSelect(0x1000c);
 	uint32_t word2 = 0x12345678;
 	ramBus->ReadData(word2, BigEndian);
 	UnitTest::Assert("memory (RAM) wasn't filled with data from the file?",
 	    word2, 0x006b7021);
+}
+
+static void Test_FileLoader_Load_aout()
+{
+	refcount_ptr<Component> machine =
+	    SetupTestMachineAndLoad("testm88k", "test/FileLoader_A.OUT_M88K");
+
+	// Read from CPU, to make sure the file was loaded:
+	refcount_ptr<Component> cpu =
+	    machine->LookupPath("machine.mainbus0.cpu0");
+	AddressDataBus * bus = cpu->AsAddressDataBus();
+	bus->AddressSelect((int32_t)0x12b8);
+	uint32_t word = 0x12345678;
+	bus->ReadData(word, BigEndian);
+	UnitTest::Assert("memory (CPU) wasn't filled with data from the file?",
+	    word, 0x67ff0020);
+
+	// Read directly from RAM too, to make sure the file was loaded:
+	refcount_ptr<Component> ram =
+	    machine->LookupPath("machine.mainbus0.ram0");
+	AddressDataBus * ramBus = ram->AsAddressDataBus();
+	ramBus->AddressSelect(0x12e0);
+	uint32_t word2 = 0xfdecba98;
+	ramBus->ReadData(word2, BigEndian);
+	UnitTest::Assert("memory (RAM) wasn't filled with data from the file?",
+	    word2, 0xf6c05802);
 }
 
 UNITTESTS(FileLoader)
@@ -220,8 +262,10 @@ UNITTESTS(FileLoader)
 	UNITTEST(Test_FileLoader_DetectFileFormat_NonsenseFile);
 	UNITTEST(Test_FileLoader_DetectFileFormat_ELF32);
 	UNITTEST(Test_FileLoader_DetectFileFormat_ELF64);
+	UNITTEST(Test_FileLoader_DetectFileFormat_aout_88K);
 
 	UNITTEST(Test_FileLoader_Load_ELF32);
+	UNITTEST(Test_FileLoader_Load_aout);
 }
 
 #endif
