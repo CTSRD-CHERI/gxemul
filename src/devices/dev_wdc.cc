@@ -152,7 +152,7 @@ static uint64_t wdc_get_inbuf(struct wdc_data *d)
 	if (d->inbuf_head == d->inbuf_tail) {
 		fatal("[ wdc: WARNING! someone is reading too much from the "
 		    "wdc inbuf! ]\n");
-		return -1;
+		return (uint64_t) -1;
 	}
 
 	d->inbuf_tail = (d->inbuf_tail + 1) % WDC_INBUF_SIZE;

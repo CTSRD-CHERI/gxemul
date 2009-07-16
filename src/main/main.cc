@@ -586,7 +586,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 		/*  Is it a new machine mode?  */
 		if (subtype[0] != '\0') {
-			int res;
+			int res = 0;
 			bool doExit = false;
 			
 			{

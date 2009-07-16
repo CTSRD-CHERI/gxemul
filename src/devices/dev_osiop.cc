@@ -254,7 +254,8 @@ static void write_byte(struct osiop_data *d, struct cpu *cpu, uint32_t addr, uin
  */
 uint32_t osiop_get_next_scripts_word(struct cpu *cpu, struct osiop_data *d)
 {
-	uint32_t dsp = *(uint32_t*) &d->reg[OSIOP_DSP];
+	uint32_t *dspp = (uint32_t*) &d->reg[OSIOP_DSP];
+	uint32_t dsp = *dspp;
 	uint32_t instr;
 
 	if (dsp & 3) {
@@ -266,7 +267,7 @@ uint32_t osiop_get_next_scripts_word(struct cpu *cpu, struct osiop_data *d)
 	instr = read_word(d, cpu, dsp);
 
 	dsp += sizeof(instr);
-	*(uint32_t*) &d->reg[OSIOP_DSP] = dsp;
+	*dspp = dsp;
 
 	return instr;
 }
@@ -283,7 +284,14 @@ uint32_t osiop_get_next_scripts_word(struct cpu *cpu, struct osiop_data *d)
  */
 int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 {
-	uint32_t dspOrig = *(uint32_t*) &d->reg[OSIOP_DSP];
+	uint32_t *dsap = (uint32_t*) &d->reg[OSIOP_DSA];
+	uint32_t *dnadp = (uint32_t*) &d->reg[OSIOP_DNAD];
+	uint32_t *dbcp = (uint32_t*) &d->reg[OSIOP_DBC];
+	uint32_t *dspsp = (uint32_t*) &d->reg[OSIOP_DSPS];
+	uint32_t *dspp = (uint32_t*) &d->reg[OSIOP_DSP];
+	uint32_t *tempp = (uint32_t*) &d->reg[OSIOP_TEMP];
+
+	uint32_t dspOrig = *dspp;
 	uint32_t instr1 = osiop_get_next_scripts_word(cpu, d);
 	uint32_t instr2 = osiop_get_next_scripts_word(cpu, d);
 	uint32_t dbc, target_addr = 0;
@@ -303,8 +311,8 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 	 */
 
 	dcmd = d->reg[OSIOP_DCMD] = instr1 >> 24;
-	dbc = *(uint32_t*) &d->reg[OSIOP_DBC] = instr1 & 0x00ffffff;
-	*(uint32_t*) &d->reg[OSIOP_DSPS] = instr2;
+	dbc = *dbcp = instr1 & 0x00ffffff;
+	*dspsp = instr2;
 
 	reladdr = (instr2 << 8);
 	reladdr >>= 8;
@@ -324,7 +332,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 			int ofs2 = instr2 & 0x00ffffff;
 			int indirect_addressing = dcmd & 0x20;
 			int table_indirect_addressing = dcmd & 0x10;
-			uint32_t dsa = *(uint32_t*) &d->reg[OSIOP_DSA];
+			uint32_t dsa = *dsap;
 			uint32_t addr, xfer_byte_count, xfer_addr;
 			int32_t tmp = ofs2 << 8;
 			int res;
@@ -503,8 +511,8 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 			}
 
 			/*  Transfer complete.  */
-			*(uint32_t*) &d->reg[OSIOP_DNAD] = xfer_addr;
-			*(uint32_t*) &d->reg[OSIOP_DBC] = xfer_byte_count;
+			*dnadp = xfer_addr;
+			*dbcp = xfer_byte_count;
 			
 			d->reg[OSIOP_DFIFO] = 0;	/*  TODO  */
 		}
@@ -527,7 +535,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 			}
 
 			if (table_indirect_addressing) {
-				uint32_t dsa = *(uint32_t*) &d->reg[OSIOP_DSA];
+				uint32_t dsa = *dsap;
 				uint32_t addr, word;
 				int32_t tmp = dbc << 8;
 				tmp >>= 8;
@@ -564,8 +572,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				/*  Note: Relative to _current_ DSP value, not
 				    what the DSP was when the current
 				    instruction was read!  */
-				target_addr = reladdr +
-				    *(uint32_t*) &d->reg[OSIOP_DSP];
+				target_addr = reladdr + *dspp;
 				if (osiop_debug)
 					debug(" REL(%i)", reladdr);
 			} else {
@@ -686,8 +693,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				/*  Note: Relative to _current_ DSP value,
 				    not what it was when the current instruction
 				    was read!  */
-				target_addr = reladdr +
-				    *(uint32_t*) &d->reg[OSIOP_DSP];
+				target_addr = reladdr + *dspp;
 				if (osiop_debug)
 					debug(" REL(%i)", reladdr);
 			} else {
@@ -698,7 +704,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 		} else {
 			if (opcode == 2) {
 				/*  Return:  */
-				target_addr = *(uint32_t*) &d->reg[OSIOP_TEMP];
+				target_addr = *tempp;
 			} else {
 				/*  Interrupt:  */
 				interrupt_instead_of_branch = 1;
@@ -747,7 +753,7 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 				d->scripts_running = 0;
 				d->reg[OSIOP_DSTAT] |= OSIOP_DSTAT_SIR;
 			} else {
-				*(uint32_t*) &d->reg[OSIOP_DSP] = target_addr;
+				*dspp = target_addr;
 			}
 		}
 
@@ -838,11 +844,13 @@ DEVICE_ACCESS(osiop)
 			relative_addr = origofs;
 			non1lenOk = 1;
 
-			if (writeflag == MEM_WRITE)
-				*(uint32_t*) &d->reg[origofs] = idata;
-			else
-				odata = *(uint32_t*) &d->reg[origofs];
+			uint32_t *p = (uint32_t*) &d->reg[origofs];
 
+			if (writeflag == MEM_WRITE)
+				*p = idata;
+			else
+				odata = *p;
+			
 			break;
 		}
 	} else {

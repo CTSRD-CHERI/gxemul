@@ -130,7 +130,7 @@ int dec_jumptable_func(struct cpu *cpu, int vector)
 		cpu->cd.mips.gpr[MIPS_GPR_V0] = 1;
 		break;
 	case 0x38:	/*  read(handle, ptr, length)  */
-		cpu->cd.mips.gpr[MIPS_GPR_V0] = -1;
+		cpu->cd.mips.gpr[MIPS_GPR_V0] = (uint64_t) -1;
 		if ((int32_t)cpu->cd.mips.gpr[MIPS_GPR_A2] > 0) {
 			int disk_id = diskimage_bootdev(cpu->machine, NULL);
 			int res;
@@ -258,7 +258,7 @@ int decstation_prom_emul(struct cpu *cpu)
 		if ((signed char)ch1 > (signed char)ch2)
 			cpu->cd.mips.gpr[MIPS_GPR_V0] = 1;
 		if ((signed char)ch1 < (signed char)ch2)
-			cpu->cd.mips.gpr[MIPS_GPR_V0] = -1;
+			cpu->cd.mips.gpr[MIPS_GPR_V0] = (uint64_t) -1;
 		break;
 	case 0x14:		/*  strlen():  */
 		i = 0;

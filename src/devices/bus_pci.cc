@@ -115,7 +115,7 @@ void bus_pci_data_access(struct cpu *cpu, struct pci_data *pci_data,
 	if (dev == NULL) {
 		if (writeflag == MEM_READ) {
 			if (pci_data->cur_reg == 0)
-				*data = -1;
+				*data = (uint64_t) -1;
 			else
 				*data = 0;
 		} else {

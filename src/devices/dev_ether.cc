@@ -121,7 +121,7 @@ DEVICE_ACCESS(ether)
 			if ((int64_t)idata < 0) {
 				fatal("[ ether: ERROR: packet len too"
 				    " short (%i bytes) ]\n", (int)idata);
-				idata = -1;
+				idata = (uint64_t) -1;
 			}
 			if (idata > DEV_ETHER_BUFFER_SIZE) {
 				fatal("[ ether: ERROR: packet len too"
