@@ -3883,3 +3883,5 @@ Changelog for GXemul:
 		AddressDataBus objects.
 		Modifying the "load" command so that it can load both component
 		trees _and_ other binaries (ELFs etc) into components.
+		Merging in a lot of TODO entries from the old C++ branch's TODO
+		file.

@@ -18,13 +18,20 @@
 Some things, in no specific order, that I'd like to fix:
 (Some items in this list are perhaps already fixed.)
 
+<i>Legend:
+
+[ ] = not started yet, or just planning/thinking about it
+[/] = started, either "on paper" or actual implementation
+[X] = done  (but usually these entries are removed from the TODO list)
+</i>
+
 -------------------------------------------------------------------------------
 
 MAIN GOAL for 0.6.0:
 
 	Release 0.6.0 (hopefully some time during Summer 2009) when
 	_something_ in the new framework works well enough to be released.
-	It could be "testmips", "testm88k", or "mvme187".
+	It could be "testmips", "testm88k", and/or "mvme187".
 
 	(The name "0.5.x" will be skipped. This was the C++ version that was
 	supposed to be a complete rewrite from scratch. There was not enough
@@ -32,30 +39,354 @@ MAIN GOAL for 0.6.0:
 
 -------------------------------------------------------------------------------
 
-  [ ]	Make testmips and/or mvme187 work!
-  
-  	[ ]  testmips:
+   [ ]	Make testmips and/or mvme187 work!
+
+  	[ ]  testmips/testm88k:
+		[ ]  CPU endianness serialization/deserialization!
   		[ ]  MIPS CPU
+			[ ]  Dyntrans execution
+				[ ]  Extend address data bus concepts for
+				     dyntrans!
+			[ ]  Interrupts
+  		[ ]  M88K CPU
   			[ ]  Disassembly
 			[ ]  Dyntrans execution
+			[ ]  Interrupts
 		[ ]  RAM
+			[ ]  Serialization/deserialization
+		[ ]  Other devices: serial, RTC, framebuffer, ...
+		[ ]  Updated documentation.
 
-  [X]	Good load behavior at startup (from command line)
-		[X] ./gxemul
-		[X] ./gxemul apa.gxemul
-		[X] ./gxemul -e testm88k
-		[X] ./gxemul -e testm88k test/FileLoader_A.OUT_M88K
-		[X] ./gxemul -V
-		[X] ./gxemul -V apa.gxemul
-		[X] ./gxemul -V -e testm88k
-		[X] ./gxemul -V -e testm88k test/FileLoader_A.OUT_M88K
+   [ ]  Main execution loop should probably be looked over, so
+	that it is general enough to support lots of variants of
+	execution.
 
-  [X]	load a.out m88k binaries
+	A "step" should be the core concept. A step on a single-cpu
+	machine is one instruction for that cpu. For a multi-
+	cpu machine, or where multiple devices run at different
+	speeds, a step may run things from more than one component.
 
-  [X]	"load" command should also load executables! into address busses/cpus!
+	In other words, I plan for GXemul 0.6.x to support Cycle
+	Accurate component implementations. But obviously, this
+	does not mean automatically that all shipped/implemented
+	components will be Cycle Accurate. There will still be no
+	superscalar CPU models, or pipelines CPU models,
+	as shipped by me. Each instruction will execute in
+	one cycle, by default. (Simple CPUs like AVR could
+	perhaps be implemented as fully cycle accurate models,
+	for fun.)
+
+	Stepping should probably print the shortest possible part of the
+	component name, followed by the component's single-step printout.
+	E.g.:
+
+		step 42:
+		cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+	
+	if there is only one machine, or
+
+		step 43:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+	
+	if cpu0 was not unique (i.e. multiple machines exist).
+	If multiple components are affected in the step, then all should
+	print out what they do:
+
+		step 44:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+		machine0.mainbus0.intc: timer 2 tick, asserting interrupt T2
+		machine1.mainbus0.cpu0: 0x01234564  5e 9a 39 01  jmp 0x1234
+
+	Optionally print emulated time after the step:
+	
+		step 45, t = 0.418:
+		...
+
+	Running in reverse should show the step (and time), but does it need
+	to show the instruction being executed? No. I don't think so. But it
+	could show the change in state:
+
+		step 43:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+		machine0.mainbus0.cpu0: r1: 0x9512 -> 0x3456
+		GXemul> b			(to step backwards)
+		step 43 -> 42:
+		machine0.mainbus0.cpu0: r1: 0x3456 -> 0x9512
+
+	As in the example above, it might be good to show exactly what the
+	state change is also in the forward direction. For e.g. a load from
+	a zero-on-read register in a device, that would be e.g.:
+
+		machine0.mainbus0.cpu0: 0x12345678  ab cd 01 00  ld r12,[r13+0x100]
+		machine0.mainbus0.isabus0.somedevice0: status: 0x0014 -> 0x0000
+		machine0.mainbus0.cpu0: r12: 0x2828 -> 0x0014
+
+	This would be especially good on CISC machines, where instructions have
+	multiple side-effects (flags etc), or when an exception occurs.
+
+	In a GUI (or curses-based UI), a disassembly view should probably be
+	available, where the current pc is highlighted (for CPU components).
+	Registers/state changing between steps could be printed/displayed in bold.
+
+   [ ]  Unit tests for main loop/execution.
+
+   [ ]  Interrupt subsystem
+   	[ ]  Components exposing an InterruptPin interface? Think about this...
+
+   [ ]  Timers
+	[ ]  Host speed approaching timers:  a device that wishes
+	     to cause interrupts 100 times per emulated second
+	     will interrupt (approximately) 100 times per host
+	     second. This is most useful for running full guest
+	     operating systems at full speed, "virtual machine"
+	     mode.
+	[ ]  Exact emulation:  a device wishing to cause 100
+	     interrupts per emulated second may take much more
+	     or much less than one host second to execute.
+	     ("Cycle accurate" mode.)
+
+   [ ]  State/model:
+        [ ]  Read-only state variables, or special handlers! Even better.
+	     I.e. warn about (or refuse) to write to unimplemented bits
+	     of control registers.
+	[ ]  Loaded files should be part of state/model! But not part
+	     of the component tree. I.e. state = components +
+	     other configuration!
+	[ ]  Disk images: reverse execution should reverse disk contents
+
+   [ ]  Reverse execution:
+	[ ]  Regular saving of state, and limiting the number of such
+	     saves by logarithmic removal.
+	[ ]  In addition to saving state, all modifications done to the
+	     component tree, and e.g. breakpoints, need to be stored
+	     together with their time stamp ("step"). I.e. if a USB
+	     storage device is connected as step 1000, and we're
+	     running in reverse to step 800 to check something, and
+	     then continue again, the default behaviour should be that
+	     at step 1000 the USB device is connected again.
+   	[/]  [Re]read these:
+		<a href="http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html">http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html</a>
+		<a href="http://www.codesourcery.com/publications/reversible_debugging.pdf">http://www.codesourcery.com/publications/reversible_debugging.pdf</a>
+		<a href="http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf">http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf</a>
+	     They resemble to a large degree what I have in mind.
+	[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
+	[ ]  "c" = "continue", "backward-continue" commands
+	[ ]  Simulation across multiple hosts?
+
+   [ ]  File loaders:
+	[ ]  How about "reset"? The list of files must be
+	     stored somewhere.
+	[ ]  symbol handling, line number info, data types?
+	[ ]  argument handling! (arg count, at least)
+	[ ]  all the others (macho, ecoff, srec, raw, ...)
+	[ ]  Disk images.
+
+   [ ]  Breakpoints
+	[ ]  For all breakpoints, it should be possible to break
+	     both _before_ and _after_ a change has occurred!
+	     
+	[ ]  General for all components:
+	     Checked on device cycle execution, if necessary.
+	     
+	[ ]  Per memory-mapped/addressable device
+	     Checked on load/store device access.
+
+	[ ]  Per instruction (for CPU components)
+	     It may be easiest to simply turn off native code
+	     generation, except for stuff like "check if pc = xyz"-
+	     style breakpoints. Those can be embedded.
+
+   [ ]  Function call trace
+
+   [ ]  Stack dump (of the emulated machine)
+
+   [ ]	Components (general):
+
+	[ ]  "help" about components could show a file:/// link to
+	     the installed documentation about that component or
+	     machine! (If it exists.)
+
+	[ ]  Limit where components can be added. Like "drop targets"?
+		E.g. a machine can be added at the root, but a machine can not
+		be added on a pcibus. Similarly, a pcibus can not be added
+		at the root. It has to be in a machine of some kind.
+		Think about this. Perhaps as simple as a "if parent class is
+		not blah blah then disallow adding".
+			A machine can be added into a dummy component.
+			A dummy component can be added into a dummy component.
+			A pcibus can be added into a mainbus (in a machine.)
+			etc.
+		bool IsItOkToAddItToThisProposedParentComponent(propsedParent) const;
+
+  [ ]	Command interpreter:
+
+	[/]  State variable assignments:
+		[ ]  Expression evaluator, +-*/, string concatenation, etc.
+		[ ]  Execution of _expressions_, not just variables. e.g.:
+			cpu.pc		prints the pc value
+			cpu.pc+4	should print the _expression_ pc+4
+			cpu.pc=expr	assignment
+
+	[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
+
+	[ ]  The "quit" command should ask about saving, if the emulation
+	     is marked dirty.
+
+	[/]  Tab completion for everything:
+		[ ]  syntax based completion? e.g.:
+			help [cmd]   tab completes the first argument as a
+				     command
+			add component-name
+			load [filename [component-path]]
+
+		     This will require a uniform way of describing arguments,
+		     and whether or not they should be optional. The tab
+		     completer must then parse the command line, including
+		     figuring out which arguments were optional, etc.
+
+		     Also, when such syntax is taken into account, the
+		     CommandInterpreter can check syntax _before_ running
+		     Command::Execute. That means that individual Commands
+		     do not have to do manual checking on entry that the
+		     number of arguments is correct etc.
+
+			[ ]  filename
+			[ ]  command name
+			[ ]  component path
+			[ ]  optional vs mandatory args...?
+			[ ]  scan all commands' args at startup, and have an
+				assert() in place, so that unknown arg types
+				are caught during development!
+
+	[ ]	move  		Move a component from one path to another.
+
+	[ ]	copy		copy a component (and its children) from
+				one place to another
+
+	[ ]	step		single-step (Paused)
+
+  [/]	Mainbus component:
+
+	[ ]  Maybe this should simply be a "Bus" base class? That way,
+	     it could be reused by PCI Busses, VME busses, and others.
+
+	[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
+
+	[ ]  AddressDataBus should be extended to allow for direct
+	     page mapping.
+
+	[ ]  Unit tests for the above!
+
+  [/]	RAM component:
+
+	[ ]  save/load state!
+
+	[ ]  methods for searching for values (strings, words, etc?)
+
+  [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
+	first thing to implement, without breaking other architectures.
+
+	[ ]  Separate 88100 from 88110!
+
+	[ ]  Separate 88200 CMMUs? So that the two are really two
+	     separate devices.
+
+	[X]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
+	     I.e. implement an a.out file loader.
+
+	[ ]  Implement 88K instruction disassembly.
+
+	[ ]  Implement 88K instruction execution (via slow interpretation).
+
+	[ ]  Implement 88K virtual to physical memory translation.
+
+   [ ]  Method for e.g. CPU components:
+
+	[ ]  Physical to virtual address translation.
+	     Hm. In a way, a cache is also address translation, translating
+	     from a physical address on the CPU side to a physical
+	     address in RAM _or_ a physical address in a cache. Think
+	     more about this.
+
+   [ ]  Cache components.
+
+	[ ]  Implement the addressable data bus interface, but if data is contained
+	     in the cache (a small memory area), do not call the main memory.
+	     Rather straight-forward idea, but will take time to implement
+	     all common variants: associativity, statistics gathering (i.e.
+	     "who evicted who from the cache"), ...
+
+	[ ]  Unit tests.
+
+   [ ]	Floating point helper.
+	Make this more complete/accurate than the old one, i.e. support
+	inf/nan, exceptions, signaling stuff, denormalized/normalized?
+
+	[ ]  Unit tests
+
+   [ ]	Userland emulation
+
+   	[ ]  Begin with e.g. FreeBSD/amd64, or FreeBSD/alpha, or Linux/something.
+
+   [ ]  Dyntrans: Portable (C++) _AND_ native code generation?
+
+	[ ] Target amd64 and Alpha hosts first, if native generation is to be
+	    attempted, since those are the only realistic ones I have for testing.
+
+	[ ] Try to make the generated code as linear and branch
+	    free as possible. Experiment with making e.g. all
+	    "exceptional" branches go away to some place outside
+	    the basic block? If it is worth it.
+
+	[ ] Instruction cache emulation:  For each emulated
+	    instruction, call a stub handler with the current pc.
+	    It is responsible for updating statistics etc.
+	    Should not be enabled by default.
+
+	[ ] More generic bus access:
+		o) Pointers to host memory pages, for fast
+		   loads and stores:
+		   +) host_load and host_store (as before)
+		   +) host_load_user and host_store_user (as before,
+			for those archs that need it, e.g.
+			ARM and M88K?)
+		o) Pointers to handler functions, for:
+		   +) device access
+		   +) data cache emulation
+
+	[ ] Exceptions from device access, or from load/store to
+	    unmapped pages/devices/handlers should break the
+	    native code execution.
+
+	[ ] Conditional breakpoints before or after device accesses!
+
+	[ ] Conditional breakpoints before or after CPU instruction
+	    execution (somewhat different from generic device access).
+
+	[ ] Keep nr-of-instructions-executed up to date!
+
+	[ ] Ability to show disassembly of generated host
+	    instruction sequence!
+
+	[ ] Calls/branches within host pages should be
+	    reasonably simple (but check nr-of-instructions-executed
+	    to break out every now and then).
+
+	[ ] Calls/branches to _different_ host pages could be
+	    allowed as well; then many more pages would need to
+	    be invalidated on context switches... hm.
+
+	[ ] Unit tests! When executed on a host which has native code generation,
+	    there can be unit tests not only to test that code gets generated,
+	    but that the result after executing that code is also correct.
 
 
 -------------------------------------------------------------------------------
+
+NOTE: MOST of the stuff below are from pre-0.6.0, so the comments may be
+      a bit out of date, or more likely, only correspond to the LEGACY parts
+      of the code.
+
 
 To be translated prefetch:
 	o)  ONLY do this when able to read directly from memory
@@ -256,8 +587,8 @@ SGI O2:
 
 	20051112: Ok with graphics
 	20051127: Ok
-	20051201: Ok			<-- Somewhere between 20051201 and 20051203
-	20051203: Not work.		    I apparently lost the graphical boot
+	20051201: Ok			-- Somewhere between 20051201 and 20051203
+	20051203: Not work.		   I apparently lost the graphical boot
 	20051211: Does NOT work.
 
 	0.3.8: Boots but switches to serial console ("could not open console") (also with
