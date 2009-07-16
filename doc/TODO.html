@@ -32,7 +32,6 @@ MAIN GOAL for 0.6.0:
 
 -------------------------------------------------------------------------------
 
-
   [ ]	Make testmips and/or mvme187 work!
   
   	[ ]  testmips:
@@ -41,11 +40,19 @@ MAIN GOAL for 0.6.0:
 			[ ]  Dyntrans execution
 		[ ]  RAM
 
-  [ ]	load binaries at startup (from command line)
+  [X]	Good load behavior at startup (from command line)
+		[X] ./gxemul
+		[X] ./gxemul apa.gxemul
+		[X] ./gxemul -e testm88k
+		[X] ./gxemul -e testm88k test/FileLoader_A.OUT_M88K
+		[X] ./gxemul -V
+		[X] ./gxemul -V apa.gxemul
+		[X] ./gxemul -V -e testm88k
+		[X] ./gxemul -V -e testm88k test/FileLoader_A.OUT_M88K
 
-  [ ]	load a.out m88k binaries
+  [X]	load a.out m88k binaries
 
-  [ ]	"load" command should also load executables! into address busses/cpus!
+  [X]	"load" command should also load executables! into address busses/cpus!
 
 
 -------------------------------------------------------------------------------

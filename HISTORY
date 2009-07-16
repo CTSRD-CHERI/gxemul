@@ -3881,3 +3881,5 @@ Changelog for GXemul:
 20090714	Continuing on the a.out FileLoader.
 20090716	a.out (big-endian only so far) can now be loaded into
 		AddressDataBus objects.
+		Modifying the "load" command so that it can load both component
+		trees _and_ other binaries (ELFs etc) into components.

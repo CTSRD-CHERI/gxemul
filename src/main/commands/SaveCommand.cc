@@ -134,12 +134,13 @@ string SaveCommand::GetShortDescription() const
 
 string SaveCommand::GetLongDescription() const
 {
-	return "Saves the entire emulation setup, or a part of it, to a "
-	    "file in the filesystem.\n"
-	    "The filename may be omitted, if it is known from an"
-	    " earlier save or load\n"
-	    "command. If the component path is omitted, the entire emulation"
-	    " setup is saved.\n"
+	return
+	    "Saves the entire emulation setup, or a part of it, to a file in the filesystem.\n"
+	    "The filename may be omitted, if it is known from an earlier save or load\n"
+	    "command. If the component path is omitted, the entire emulation setup, starting\n"
+	    "from the 'root' component, is saved.\n"
+	    "\n"
+	    "The filename extension should usually be .gxemul.\n"
 	    "\n"
 	    "See also:  load    (to load an emulation setup)\n";
 }

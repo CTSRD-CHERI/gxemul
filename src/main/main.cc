@@ -563,16 +563,22 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 	extra_argc = argc;
 	extra_argv = argv;
 
-	if (type == NULL && subtype == NULL && single_step == ENTER_SINGLE_STEPPING) {
-		int res;
+	if (type == NULL && subtype == NULL &&
+	    (single_step == ENTER_SINGLE_STEPPING || argc > 0)) {
+		int res = 0;
 		{
 			GXemul gxemul;
 
-			gxemul.SetRunState(GXemul::Paused);
+			if (single_step == ENTER_SINGLE_STEPPING)
+				gxemul.SetRunState(GXemul::Paused);
 			if (quiet_mode)
 				gxemul.SetQuietMode(true);
 
-			res =  gxemul.Run();
+			if (argc > 0 && !gxemul.ParseFilenames("", argc, argv))
+				res = 1;
+
+			if (res == 0)
+				res = gxemul.Run();
 		}
 
 		exit(res);
@@ -598,9 +604,11 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 				if (gxemul.IsTemplateMachine(subtype)) {
 					if (!gxemul.ParseFilenames(subtype, argc, argv))
-						exit(0);
+						res = 1;
 
-					res = gxemul.Run();
+					if (res == 0)
+						res = gxemul.Run();
+
 					doExit = true;
 				}
 			}

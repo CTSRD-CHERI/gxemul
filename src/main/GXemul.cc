@@ -170,7 +170,9 @@ GXemul::GXemul()
 
 void GXemul::ClearEmulation()
 {
-	SetRunState(NotRunning);
+	if (GetRunState() == Running)
+		SetRunState(NotRunning);
+
 	m_step = 0;
 	m_globalTime = 0.0;
 	m_rootComponent = new DummyComponent;
@@ -420,14 +422,8 @@ bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *fil
 				string configfileName = filenames[0];
 				optionsEnoughToStartRunning = true;
 
-std::cerr << "TODO: loadaction\n";
-throw std::exception();
-
-//				refcount_ptr<Action> loadAction =
-//				    new LoadEmulationAction(*this,
-//				    configfileName, "");
-//				GetActionStack().PushActionAndExecute(
-//				    loadAction);
+				string cmd = "load " + configfileName;
+				GetCommandInterpreter().RunCommand(cmd);
 
 				if (GetRootComponent()->GetChildren().size()
 				    == 0) {
@@ -457,9 +453,18 @@ throw std::exception();
 		return true;
 	} else {
 		if (templateMachine != "") {
-			std::cerr << "No binary specified. Aborting.\n";
-			std::cerr << "(Run  gxemul -h  for help "
-			    "on command line options.)\n";
+			if (GetRunState() == Paused)
+				return true;
+
+			std::cerr << 
+			    "No binary specified. Usually when starting up an emulation based on a template\n"
+			    "machine, you need to supply one or more binaries. This could be an operating\n"
+			    "system kernel, a ROM image, or something similar.\n"
+			    "\n"
+			    "You can also use the -V option to start in paused mode, and load binaries\n"
+			    "interactively.\n"
+			    "\n"
+			    "(Run  gxemul -h  for more help on command line options.)\n";
 			return false;
 		}
 		

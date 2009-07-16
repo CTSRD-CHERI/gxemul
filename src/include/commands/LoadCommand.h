@@ -31,6 +31,7 @@
 #include "misc.h"
 
 #include "Command.h"
+#include "Component.h"
 #include "UnitTest.h"
 
 
@@ -60,6 +61,11 @@ public:
 	virtual string GetShortDescription() const;
 
 	virtual string GetLongDescription() const;
+
+private:
+	bool IsComponentTree(GXemul& gxemul, const string& filename) const;
+	void LoadComponentTree(GXemul& gxemul, const string&filename,
+		refcount_ptr<Component> specifiedComponent) const;
 };
 
 

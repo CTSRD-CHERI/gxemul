@@ -28,7 +28,9 @@
 #include <fstream>
 #include <stdlib.h>
 #include <string.h>
+
 #include "commands/LoadCommand.h"
+#include "FileLoader.h"
 #include "GXemul.h"
 
 
@@ -49,69 +51,37 @@ static void ShowMsg(GXemul& gxemul, const string& msg)
 }
 
 
-void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool LoadCommand::IsComponentTree(GXemul& gxemul, const string& filename) const
 {
-	string filename = gxemul.GetEmulationFilename();
-	string path = "";
+	std::ifstream file(filename.c_str());
+	if (file.fail())
+		return false;
 
-	if (arguments.size() > 2) {
-		ShowMsg(gxemul, "Too many arguments.\n");
-		return;
-	}
+	char buf[256];
+	file.read(buf, sizeof(buf));
+	if (file.gcount() < 10)
+		return false;
 
-	if (arguments.size() > 0)
-		filename = arguments[0];
-
-	if (filename == "") {
-		ShowMsg(gxemul, "No filename given.\n");
-		return;
-	}
-
-	if (arguments.size() > 1)
-		path = arguments[1];
+	// Saved component trees start with the string "component ".
+	return (strncmp(buf, "component ", 10) == 0);
+}
 
 
+void LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
+	refcount_ptr<Component> specifiedComponent) const
+{
 	const string extension = ".gxemul";
 	if (filename.length() < extension.length() || filename.substr(
 	    filename.length() - extension.length()) != extension)
 		ShowMsg(gxemul, "Warning: the name " + filename +
 		    " does not have a .gxemul extension. Continuing anyway.\n");
 
-	refcount_ptr<Component> whereToAddIt;
-	if (path != "") {
-		vector<string> matches = gxemul.GetRootComponent()->
-		    FindPathByPartialMatch(path);
-		if (matches.size() == 0) {
-			ShowMsg(gxemul, path +
-			    " is not a path to a known component.\n");
-			return;
-		}
-		if (matches.size() > 1) {
-			ShowMsg(gxemul, path +
-			    " matches multiple components:\n");
-			for (size_t i=0; i<matches.size(); i++)
-				ShowMsg(gxemul, "  " + matches[i] + "\n");
-			return;
-		}
-
-		whereToAddIt =
-		    gxemul.GetRootComponent()->LookupPath(matches[0]);
-		if (whereToAddIt.IsNULL()) {
-			ShowMsg(gxemul, "Lookup of " + path + " failed.\n");
-			return;
-		}
-	}
-	
-	if (whereToAddIt.IsNULL())
-		gxemul.ClearEmulation();
-
 	refcount_ptr<Component> component;
 
 	// Load from the file
 	std::ifstream file(filename.c_str());
 	if (file.fail()) {
-		ShowMsg(gxemul, "Unable to open " + filename +
-		    " for reading.\n");
+		ShowMsg(gxemul, "Unable to open " + filename + " for reading.\n");
 		return;
 	}
 
@@ -143,7 +113,7 @@ void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		return;
 	}
 
-	if (whereToAddIt.IsNULL()) {
+	if (specifiedComponent.IsNULL()) {
 		const StateVariable* name = component->GetVariable("name");
 		if (name == NULL || name->ToString() != "root")
 			gxemul.GetRootComponent()->AddChild(component);
@@ -152,29 +122,135 @@ void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 		gxemul.SetEmulationFilename(filename);
 		gxemul.SetDirtyFlag(false);
+
+		ShowMsg(gxemul, filename + " loaded\n");
 	} else {
-		whereToAddIt->AddChild(component);
+		specifiedComponent->AddChild(component);
 		gxemul.SetDirtyFlag(true);
+
+		ShowMsg(gxemul, filename + " loaded into " +
+		    specifiedComponent->GeneratePath() + "\n");
 	}
+}
+
+void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+{
+	string filename = gxemul.GetEmulationFilename();
+	string path = "";
+
+	if (arguments.size() > 2) {
+		ShowMsg(gxemul, "Too many arguments.\n");
+		return;
+	}
+
+	if (arguments.size() > 0)
+		filename = arguments[0];
+
+	if (filename == "") {
+		ShowMsg(gxemul, "No filename given.\n");
+		return;
+	}
+
+	if (arguments.size() > 1)
+		path = arguments[1];
+
+	// Is the file accessible at all?
+	{
+		std::ifstream file(filename.c_str());
+		if (file.fail()) {
+			ShowMsg(gxemul, "Unable to open " + filename +
+			    " for reading.\n");
+			return;
+		}
+	}
+
+	// Figure out the component path, if it was specified.
+	refcount_ptr<Component> specifiedComponent;
+	if (path != "") {
+		vector<string> matches = gxemul.GetRootComponent()->
+		    FindPathByPartialMatch(path);
+		if (matches.size() == 0) {
+			ShowMsg(gxemul, path +
+			    " is not a path to a known component.\n");
+			return;
+		}
+		if (matches.size() > 1) {
+			ShowMsg(gxemul, path +
+			    " matches multiple components:\n");
+			for (size_t i=0; i<matches.size(); i++)
+				ShowMsg(gxemul, "  " + matches[i] + "\n");
+			return;
+		}
+
+		specifiedComponent =
+		    gxemul.GetRootComponent()->LookupPath(matches[0]);
+		if (specifiedComponent.IsNULL()) {
+			ShowMsg(gxemul, "Lookup of " + path + " failed.\n");
+			return;
+		}
+	}
+
+	// 1. Is it a component tree?
+	if (IsComponentTree(gxemul, filename)) {
+		if (specifiedComponent.IsNULL())
+			gxemul.ClearEmulation();
+
+		return LoadComponentTree(gxemul, filename, specifiedComponent);
+	}
+
+	if (specifiedComponent.IsNULL()) {
+		ShowMsg(gxemul, "The specified file to load (" + filename +
+		    ") is not a configuration tree. If it is a binary to load,"
+		    " you need to specify a component path where to load the"
+		    " binary.\n");
+		return;
+	}
+
+	// 2. Is it a binary (ELF, a.out, ...)?
+	FileLoader fileLoader(filename);
+	if (fileLoader.Load(specifiedComponent))
+		ShowMsg(gxemul, filename + " loaded into " +
+		    specifiedComponent->GeneratePath() + "\n");
+	else
+		ShowMsg(gxemul, "Failed to load " + filename + " into " + path + "\n");
 }
 
 
 string LoadCommand::GetShortDescription() const
 {
-	return "Loads an emulation from a file.";
+	return "Loads a file.";
 }
 
 
 string LoadCommand::GetLongDescription() const
 {
-	return "Loads an entire emulation setup, or a part of it, from a "
-	    "file in the filesystem.\n"
-	    "The filename may be omitted, if it is known from an"
-	    " earlier save or load\n"
-	    "command. If the component path is omitted, the loaded "
-	    "emulation replaces any\n"
-	    "currently loaded emulation. If a component path is specified, "
-	    "the new\ncomponent is added as a child to that path.\n"
+	return 
+	    "Loads a file into a location in the component tree. There are two different\n"
+	    "uses, which all share the same general syntax but differ in meaning.\n"
+	    "\n"
+	    "1. Loads an emulation setup (.gxemul) which was previously saved with the\n"
+	    "   'save' command. For example, if a machine was previously saved into\n"
+	    "   myMachine.gxemul, then\n"
+	    "\n"
+	    "       load myMachine.gxemul root\n"
+	    "\n"
+	    "   will add the machine to the current emulation tree, next to any other\n"
+	    "   machines.\n"
+	    "\n"
+	    "       load myMachine.gxemul\n"
+	    "\n"
+	    "   will instead replace the whole configuration tree with what's in\n"
+	    "   myMachine.gxemul. The filename may be omitted, if it is known from an\n"
+	    "   earlier save or load command.\n"
+	    "\n"
+	    "2. Loads a binary (ELF, a.out, ...) into a CPU or data bus. E.g.:\n"
+	    "\n"
+	    "       load netbsd-RAMDISK cpu0\n"
+	    "\n"
+	    "   will load a NetBSD kernel into cpu0 (assuming that cpu0 is not ambiguous).\n"
+	    "   The reason why files should be loaded into CPUs and not into RAM components\n"
+	    "   is that binaries are often linked to virtual addresses, and the CPU does\n"
+	    "   virtual to physical address translation.\n"
 	    "\n"
 	    "See also:  save    (to save an emulation to a file)\n";
 }
