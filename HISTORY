@@ -3892,3 +3892,4 @@ Changelog for GXemul:
 		Adding a similar .dump method to the CPUComponent, for dumping
 		the virtual memory space. (Note that this can have side
 		effects, when reading from devices...)
+		Implementing the 'copy' command, for cloning components.

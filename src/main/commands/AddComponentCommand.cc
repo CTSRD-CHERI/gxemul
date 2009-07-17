@@ -107,12 +107,13 @@ string AddComponentCommand::GetShortDescription() const
 
 string AddComponentCommand::GetLongDescription() const
 {
-	return "Adds a component (given by the component-name) to the "
-	    "current emulation setup.\n"
-	    "If path is omitted, the component is added at the root of"
-	    " the component tree.\n"
+	return
+	    "Adds a component (given by the component-name) to the current emulation\n"
+	    "setup. If path is omitted, the component is added at the root of the\n"
+	    "component tree.\n"
 	    "\n"
-	    "See also:  remove  (to remove a component from the emulation)\n"
-	    "           root    (to inspect the current emulation setup)\n";
+	    "See also:  copy      (to copy/clone a component in the tree)\n"
+	    "           remove    (to remove a component from the emulation)\n"
+	    "           root      (to inspect the current emulation setup)\n";
 }
 

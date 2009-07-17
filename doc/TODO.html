@@ -301,10 +301,10 @@ MAIN GOAL for 0.6.0:
 
 	[X]	move  		Move a component from one path to another.
 
-	[ ]	copy		copy a component (and its children) from
+	[X]	copy		copy a component (and its children) from
 				one place to another
 
-	[ ]	reset		Resets the emulation. (Reloads files, clears RAM, etc.)
+	[/]	reset		Resets the emulation. (Reloads files, clears RAM, etc.)
 				step = 0.
 
 	[ ]	step		single-step (Paused)
@@ -315,6 +315,7 @@ MAIN GOAL for 0.6.0:
 	     it could be reused by PCI Busses, VME busses, and others.
 
 	[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
+		[ ]  Refuse to run if there are overlapping components?
 
 	[ ]  AddressDataBus should be extended to allow for direct
 	     page mapping.
@@ -328,6 +329,11 @@ MAIN GOAL for 0.6.0:
 	     Rather straight-forward idea, but will take time to implement
 	     all common variants: associativity, statistics gathering (i.e.
 	     "who evicted who from the cache"), ...
+
+		[ ]  Caches should be added _onto_ a cpu. The cpu first looks
+		     for a cache as an address data bus, THEN for a parent. Hm.
+		     The cache must then go downwards TWO steps (../..) to get
+		     past the owning cpu, when trying to reach the mainbus/ram.
 
 	[ ]  Unit tests.
 
