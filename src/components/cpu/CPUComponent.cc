@@ -26,6 +26,8 @@
  */
 
 #include <assert.h>
+#include <iomanip>
+
 #include "AddressDataBus.h"
 #include "components/CPUComponent.h"
 #include "GXemul.h"
@@ -39,6 +41,7 @@ CPUComponent::CPUComponent(const string& className, const string& cpuKind)
 	, m_cpuKind(cpuKind)
 	, m_pageSize(0)
 	, m_pc(0)
+	, m_lastDumpAddr(0)
 	, m_lastUnassembleVaddr(0)
 	, m_hasUsedUnassemble(false)
 	, m_endianness(BigEndian)
@@ -47,6 +50,7 @@ CPUComponent::CPUComponent(const string& className, const string& cpuKind)
 {
 	AddVariable("kind", &m_cpuKind);
 	AddVariable("pc", &m_pc);
+	AddVariable("lastDumpAddr", &m_lastDumpAddr);
 	AddVariable("lastUnassembleVaddr", &m_lastUnassembleVaddr);
 	AddVariable("hasUsedUnassemble", &m_hasUsedUnassemble);
 	AddVariable("frequency", &m_frequency);
@@ -76,6 +80,7 @@ CPUComponent * CPUComponent::AsCPUComponent()
 void CPUComponent::GetMethodNames(vector<string>& names) const
 {
 	// Add our method names...
+	names.push_back("dump");
 	names.push_back("unassemble");
 
 	// ... and make sure to call the base class implementation:
@@ -86,10 +91,103 @@ void CPUComponent::GetMethodNames(vector<string>& names) const
 void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 	const vector<string>& arguments)
 {
+	if (methodName == "dump") {
+		uint64_t vaddr = m_lastDumpAddr;
+
+		if (arguments.size() > 1) {
+			gxemul->GetUI()->ShowDebugMessage("syntax: .dump [addr]\n");
+			return;
+		}
+
+		if (arguments.size() == 1) {
+			gxemul->GetUI()->ShowDebugMessage("TODO: parse address expression\n");
+			gxemul->GetUI()->ShowDebugMessage("(for now, only hex immediate values are supported!)\n");
+
+			stringstream ss;
+			ss << arguments[0];
+			ss.flags(std::ios::hex);
+			ss >> vaddr;
+		}
+
+		const int nRows = 16;
+		for (int i=0; i<nRows; i++) {
+			const size_t len = 16;
+			unsigned char data[len];
+			bool readable[len];
+
+			stringstream ss;
+			ss.flags(std::ios::hex);
+
+			if (vaddr > 0xffffffff)
+				ss << std::setw(16);
+			else
+				ss << std::setw(8);
+
+			ss << std::setfill('0') << vaddr;
+
+			size_t k;
+			for (k=0; k<len; ++k) {
+				AddressSelect(vaddr + k);
+				readable[k] = ReadData(data[k]);
+			}
+			
+			ss << " ";
+			
+			for (k=0; k<len; ++k) {
+				if ((k&3) == 0)
+					ss << " ";
+
+				ss << std::setw(2) << std::setfill('0');
+				if (readable[k])
+					ss << (int)data[k];
+				else
+					ss << "--";
+			}
+
+			ss << "  ";
+
+			for (k=0; k<len; ++k) {
+				char s[2];
+				s[0] = data[k] >= 32 && data[k] < 127? data[k] : '.';
+				s[1] = '\0';
+				
+				if (readable[k])
+					ss << s;
+				else
+					ss << "-";
+			}
+			
+			ss << "\n";
+
+			gxemul->GetUI()->ShowDebugMessage(ss.str());
+
+			vaddr += len;
+		}
+
+		m_lastDumpAddr = vaddr;
+
+		return;
+	}
+
 	if (methodName == "unassemble") {
 		uint64_t vaddr = m_lastUnassembleVaddr;
 		if (!m_hasUsedUnassemble)
 			vaddr = m_pc;
+
+		if (arguments.size() > 1) {
+			gxemul->GetUI()->ShowDebugMessage("syntax: .unassemble [addr]\n");
+			return;
+		}
+
+		if (arguments.size() == 1) {
+			gxemul->GetUI()->ShowDebugMessage("TODO: parse address expression\n");
+			gxemul->GetUI()->ShowDebugMessage("(for now, only hex immediate values are supported!)\n");
+
+			stringstream ss;
+			ss << arguments[0];
+			ss.flags(std::ios::hex);
+			ss >> vaddr;
+		}
 
 		for (int i=0; i<20; i++) {
 			// TODO: GENERALIZE! Some archs will have longer

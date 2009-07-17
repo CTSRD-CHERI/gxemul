@@ -3887,3 +3887,8 @@ Changelog for GXemul:
 		file.
 20090717	Implementing the 'move' command for moving components.
 		Removing the 'dirty flag' concept (it wasn't really used).
+		Adding a .dump method to the RAMComponent, for dumping raw
+		(physical) memory contents.
+		Adding a similar .dump method to the CPUComponent, for dumping
+		the virtual memory space. (Note that this can have side
+		effects, when reading from devices...)

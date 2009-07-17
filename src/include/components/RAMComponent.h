@@ -97,6 +97,12 @@ public:
 	 */
 	static string GetAttribute(const string& attributeName);
 
+        virtual void GetMethodNames(vector<string>& names) const;
+
+	virtual void ExecuteMethod(GXemul* gxemul,
+		const string& methodName,
+		const vector<string>& arguments);
+
 	/**
 	 * \brief Returns the component's AddressDataBus interface.
 	 *
@@ -131,6 +137,7 @@ private:
 	typedef vector<void *> BlockNrToMemoryBlockVector;
 	BlockNrToMemoryBlockVector	m_memoryBlocks;
 	bool				m_writeProtected;
+	uint64_t			m_lastDumpAddr;
 
 	// Cached/runtime state:
 	uint64_t	m_addressSelect;  // For AddressDataBus read/write

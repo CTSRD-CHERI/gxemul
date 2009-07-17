@@ -26,7 +26,9 @@
  */
 
 #include "components/RAMComponent.h"
+#include "GXemul.h"
 
+#include <iomanip>
 #include <assert.h>
 #include <sys/mman.h>
 
@@ -36,11 +38,13 @@ RAMComponent::RAMComponent(const string& visibleClassName)
 	, m_blockSizeShift(22)		// 22 = 4 MB per block
 	, m_blockSize(1 << m_blockSizeShift)
 	, m_writeProtected(false)
+	, m_lastDumpAddr(0)
 	, m_addressSelect(0)
 	, m_selectedHostMemoryBlock(NULL)
 	, m_selectedOffsetWithinBlock(0)
 {
 	AddVariable("writeProtect", &m_writeProtected);
+	AddVariable("lastDumpAddr", &m_lastDumpAddr);
 }
 
 
@@ -68,6 +72,102 @@ string RAMComponent::GetAttribute(const string& attributeName)
 		return "A generic RAM component.";
 
 	return MemoryMappedComponent::GetAttribute(attributeName);
+}
+
+
+void RAMComponent::GetMethodNames(vector<string>& names) const
+{
+	// Add our method names...
+	names.push_back("dump");
+
+	// ... and make sure to call the base class implementation:
+	Component::GetMethodNames(names);
+}
+
+
+void RAMComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
+	const vector<string>& arguments)
+{
+	if (methodName == "dump") {
+		uint64_t vaddr = m_lastDumpAddr;
+
+		if (arguments.size() > 1) {
+			gxemul->GetUI()->ShowDebugMessage("syntax: .dump [addr]\n");
+			return;
+		}
+
+		if (arguments.size() == 1) {
+			gxemul->GetUI()->ShowDebugMessage("TODO: parse address expression\n");
+			gxemul->GetUI()->ShowDebugMessage("(for now, only hex immediate values are supported!)\n");
+
+			stringstream ss;
+			ss << arguments[0];
+			ss.flags(std::ios::hex);
+			ss >> vaddr;
+		}
+
+		const int nRows = 16;
+		for (int i=0; i<nRows; i++) {
+			const size_t len = 16;
+			unsigned char data[len];
+			bool readable[len];
+
+			stringstream ss;
+			ss.flags(std::ios::hex);
+
+			if (vaddr > 0xffffffff)
+				ss << std::setw(16);
+			else
+				ss << std::setw(8);
+
+			ss << std::setfill('0') << vaddr;
+
+			size_t k;
+			for (k=0; k<len; ++k) {
+				AddressSelect(vaddr + k);
+				readable[k] = ReadData(data[k]);
+			}
+			
+			ss << " ";
+			
+			for (k=0; k<len; ++k) {
+				if ((k&3) == 0)
+					ss << " ";
+
+				ss << std::setw(2) << std::setfill('0');
+				if (readable[k])
+					ss << (int)data[k];
+				else
+					ss << "--";
+			}
+
+			ss << "  ";
+
+			for (k=0; k<len; ++k) {
+				char s[2];
+				s[0] = data[k] >= 32 && data[k] < 127? data[k] : '.';
+				s[1] = '\0';
+				
+				if (readable[k])
+					ss << s;
+				else
+					ss << "-";
+			}
+			
+			ss << "\n";
+
+			gxemul->GetUI()->ShowDebugMessage(ss.str());
+
+			vaddr += len;
+		}
+
+		m_lastDumpAddr = vaddr;
+
+		return;
+	}
+	
+	// Huh? Unimplemented method. Shouldn't be here.
+	throw std::exception();
 }
 
 
