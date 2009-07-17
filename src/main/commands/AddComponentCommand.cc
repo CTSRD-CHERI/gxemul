@@ -113,6 +113,6 @@ string AddComponentCommand::GetLongDescription() const
 	    " the component tree.\n"
 	    "\n"
 	    "See also:  remove  (to remove a component from the emulation)\n"
-	    "           tree    (to inspect the current emulation setup)\n";
+	    "           root    (to inspect the current emulation setup)\n";
 }
 

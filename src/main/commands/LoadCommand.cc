@@ -121,12 +121,10 @@ void LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
 			gxemul.SetRootComponent(component);
 
 		gxemul.SetEmulationFilename(filename);
-		gxemul.SetDirtyFlag(false);
 
 		ShowMsg(gxemul, filename + " loaded\n");
 	} else {
 		specifiedComponent->AddChild(component);
-		gxemul.SetDirtyFlag(true);
 
 		ShowMsg(gxemul, filename + " loaded into " +
 		    specifiedComponent->GeneratePath() + "\n");

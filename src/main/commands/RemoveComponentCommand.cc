@@ -88,7 +88,6 @@ void RemoveComponentCommand::Execute(GXemul& gxemul,
 	}
 
 	parent->RemoveChild(whatToRemove);
-	gxemul.SetDirtyFlag(true);
 }
 
 
@@ -100,10 +99,28 @@ string RemoveComponentCommand::GetShortDescription() const
 
 string RemoveComponentCommand::GetLongDescription() const
 {
-	return "Removes a component (given a path) from the current "
-	    "emulation setup.\n"
+	return
+	    "Removes a component (given a path) from the current emulation setup.\n"
+	    "The following example shows how to remove cpu1 from a particular machine:\n"
 	    "\n"
+	    "> root\n"
+	"  root\n"
+	"  \\-- machine0  [testmips]\n"
+	"      \\-- mainbus0\n"
+	"          |-- ram0  (32 MB at offset 0)\n"
+	"          |-- rom0  (16 MB at offset 0x1fc00000)\n"
+	"          |-- cpu0  (MIPS, 100 MHz)\n"
+	"          \\-- cpu1  (MIPS, 100 MHz)\n"
+	"> remove cpu1 \n"
+	"> root\n" 
+	"  root\n"
+	"  \\-- machine0  [testmips]\n"
+	"      \\-- mainbus0\n"
+	"          |-- ram0  (32 MB at offset 0)\n"
+	"          |-- rom0  (16 MB at offset 0x1fc00000)\n"
+	"          \\-- cpu0  (MIPS, 100 MHz)\n"
+	"\n"
 	    "See also:  add     (to add new components)\n"
-	    "           tree    (to inspect the current emulation setup)\n";
+	    "           root    (to inspect the current emulation setup)\n";
 }
 

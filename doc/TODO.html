@@ -57,9 +57,30 @@ MAIN GOAL for 0.6.0:
 		[ ]  Other devices: serial, RTC, framebuffer, ...
 		[ ]  Updated documentation.
 
+  [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
+	first thing to implement, without breaking other architectures.
+
+	[ ]  Separate 88100 from 88110!
+
+	[ ]  Separate 88200 CMMUs? So that the two are really two
+	     separate devices.
+
+	[X]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
+	     I.e. implement an a.out file loader.
+
+	[ ]  Implement 88K instruction disassembly.
+
+	[ ]  Implement 88K instruction execution.
+
+	[ ]  Implement 88K virtual to physical memory translation.
+
    [ ]  Main execution loop should probably be looked over, so
 	that it is general enough to support lots of variants of
 	execution.
+
+	[ ]  Think about Verboseness.
+	
+	[ ]  Think about error reporting / exceptions.
 
 	A "step" should be the core concept. A step on a single-cpu
 	machine is one instruction for that cpu. For a multi-
@@ -152,9 +173,13 @@ MAIN GOAL for 0.6.0:
 	[ ]  Loaded files should be part of state/model! But not part
 	     of the component tree. I.e. state = components +
 	     other configuration!
-	[ ]  Disk images: reverse execution should reverse disk contents
+	[ ]  Disk images: reverse execution should reverse disk contents,
+	     i.e. overlays must be used if reverse execution support is
+	     enabled.
 
    [ ]  Reverse execution:
+        [ ]  Must be explicitly enabled, since it will slow down the emulator,
+             use more memory, and require disk images to have overlays!
 	[ ]  Regular saving of state, and limiting the number of such
 	     saves by logarithmic removal.
 	[ ]  In addition to saving state, all modifications done to the
@@ -182,9 +207,17 @@ MAIN GOAL for 0.6.0:
 	[ ]  Disk images.
 
    [ ]  Breakpoints
+
+	Breakpoint = some form of expression
+
+	"Any" state change in any component? (This includes physical memory
+	    reads and writes, registers in CPUs, etc.)
+
+	All Load/stores to virtual addresses?
+
 	[ ]  For all breakpoints, it should be possible to break
 	     both _before_ and _after_ a change has occurred!
-	     
+
 	[ ]  General for all components:
 	     Checked on device cycle execution, if necessary.
 	     
@@ -199,6 +232,7 @@ MAIN GOAL for 0.6.0:
    [ ]  Function call trace
 
    [ ]  Stack dump (of the emulated machine)
+   	[ ]  A method on CPU components?
 
    [ ]	Components (general):
 
@@ -229,8 +263,10 @@ MAIN GOAL for 0.6.0:
 
 	[ ]  Help on Method arguments? E.g. cpu.unassemble [addr]
 
-	[ ]  The "quit" command should ask about saving, if the emulation
-	     is marked dirty.
+	[ ]  help for the "root" command.
+
+	[ ]  Right now, entering a command such as "c" says "unknown command".
+	     It should say "ambigous command"!
 
 	[/]  Tab completion for everything:
 		[ ]  syntax based completion? e.g.:
@@ -258,10 +294,13 @@ MAIN GOAL for 0.6.0:
 				assert() in place, so that unknown arg types
 				are caught during development!
 
-	[ ]	move  		Move a component from one path to another.
+	[X]	move  		Move a component from one path to another.
 
 	[ ]	copy		copy a component (and its children) from
 				one place to another
+
+	[ ]	reset		Resets the emulation. (Reloads files, clears RAM, etc.)
+				step = 0.
 
 	[ ]	step		single-step (Paused)
 
@@ -282,31 +321,6 @@ MAIN GOAL for 0.6.0:
 	[ ]  save/load state!
 
 	[ ]  methods for searching for values (strings, words, etc?)
-
-  [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
-	first thing to implement, without breaking other architectures.
-
-	[ ]  Separate 88100 from 88110!
-
-	[ ]  Separate 88200 CMMUs? So that the two are really two
-	     separate devices.
-
-	[X]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
-	     I.e. implement an a.out file loader.
-
-	[ ]  Implement 88K instruction disassembly.
-
-	[ ]  Implement 88K instruction execution (via slow interpretation).
-
-	[ ]  Implement 88K virtual to physical memory translation.
-
-   [ ]  Method for e.g. CPU components:
-
-	[ ]  Physical to virtual address translation.
-	     Hm. In a way, a cache is also address translation, translating
-	     from a physical address on the CPU side to a physical
-	     address in RAM _or_ a physical address in a cache. Think
-	     more about this.
 
    [ ]  Cache components.
 
@@ -330,8 +344,15 @@ MAIN GOAL for 0.6.0:
 
    [ ]  Dyntrans: Portable (C++) _AND_ native code generation?
 
-	[ ] Target amd64 and Alpha hosts first, if native generation is to be
-	    attempted, since those are the only realistic ones I have for testing.
+	[ ] Basically the same as dyntrans in GXemul pre-0.6.0!
+
+	[ ] Native code generation? (Not at first...)
+
+		[ ] Target amd64 and Alpha hosts first, if native generation is to be
+	    	attempted, since those are the only realistic ones I have for testing.
+
+		[ ] Ability to show disassembly of generated host
+		    instruction sequence!
 
 	[ ] Try to make the generated code as linear and branch
 	    free as possible. Experiment with making e.g. all
@@ -343,42 +364,35 @@ MAIN GOAL for 0.6.0:
 	    It is responsible for updating statistics etc.
 	    Should not be enabled by default.
 
-	[ ] More generic bus access:
-		o) Pointers to host memory pages, for fast
-		   loads and stores:
-		   +) host_load and host_store (as before)
-		   +) host_load_user and host_store_user (as before,
-			for those archs that need it, e.g.
-			ARM and M88K?)
-		o) Pointers to handler functions, for:
-		   +) device access
-		   +) data cache emulation
+	[ ] Generic bus load/store access:
+		[ ] Pointers to host memory pages, for fast loads and stores:
+			[ ]  host_load and host_store (as before)
+			[ ]  host_load_user and host_store_user (as before,
+			     for those archs that need it, e.g. ARM and M88K?)
+			[ ]  Pointers to handler functions, for:
+				[ ]  device access
+				[ ]  data cache emulation
+				[ ]  breakpoints
+				[ ]  Investigate: http://vm-kernel.org/blog/2009/07/10/qemu-internal-part-2-softmmu/
+				     indicates that QEMU uses similar lookup mechanisms as GXemul, but
+				     uses an additional bit in the looked up page address to indicate
+				     I/O space. Investigate whether this is faster than having a pure
+				     pointer, and a separate lookup when the pointer is NULL!
 
 	[ ] Exceptions from device access, or from load/store to
 	    unmapped pages/devices/handlers should break the
 	    native code execution.
 
-	[ ] Conditional breakpoints before or after device accesses!
+	[ ] Conditional breakpoints before AND after device accesses!
 
-	[ ] Conditional breakpoints before or after CPU instruction
+	[ ] Conditional breakpoints before AND after CPU instruction
 	    execution (somewhat different from generic device access).
 
-	[ ] Keep nr-of-instructions-executed up to date!
-
-	[ ] Ability to show disassembly of generated host
-	    instruction sequence!
-
-	[ ] Calls/branches within host pages should be
-	    reasonably simple (but check nr-of-instructions-executed
-	    to break out every now and then).
-
-	[ ] Calls/branches to _different_ host pages could be
-	    allowed as well; then many more pages would need to
-	    be invalidated on context switches... hm.
+	[ ] Keep nr-of-instructions-executed up to date! NOTE: Not same as nr of steps.
 
 	[ ] Unit tests! When executed on a host which has native code generation,
-	    there can be unit tests not only to test that code gets generated,
-	    but that the result after executing that code is also correct.
+	    try both with and without native code generation, and with and without
+	    other instruction combinations.
 
 
 -------------------------------------------------------------------------------

@@ -122,7 +122,6 @@ void SaveCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 	ShowMsg(gxemul, "Emulation setup saved to " + filename + "\n");
 	gxemul.SetEmulationFilename(filename);
-	gxemul.SetDirtyFlag(false);
 }
 
 

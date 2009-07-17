@@ -42,7 +42,6 @@ ContinueCommand::~ContinueCommand()
 
 void ContinueCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
-	gxemul.SetDirtyFlag(true);
 	gxemul.SetRunState(GXemul::Running);
 }
 
@@ -86,26 +85,9 @@ static void Test_ContinueCommand_Affect_RunState()
 	    gxemul.GetRunState() == GXemul::Running);
 }
 
-static void Test_ContinueCommand_Affect_DirtyFlag()
-{
-	refcount_ptr<Command> cmd = new ContinueCommand;
-	vector<string> dummyArguments;
-
-	GXemul gxemul;
-
-	UnitTest::Assert("the model should not be dirty initially",
-	    gxemul.GetDirtyFlag() == false);
-
-	cmd->Execute(gxemul, dummyArguments);
-
-	UnitTest::Assert("the model should be dirty when running",
-	    gxemul.GetDirtyFlag() == true);
-}
-
 UNITTESTS(ContinueCommand)
 {
 	UNITTEST(Test_ContinueCommand_Affect_RunState);
-	UNITTEST(Test_ContinueCommand_Affect_DirtyFlag);
 }
 
 #endif

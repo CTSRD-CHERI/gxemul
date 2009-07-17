@@ -178,7 +178,6 @@ void GXemul::ClearEmulation()
 	m_rootComponent = new DummyComponent;
 	m_rootComponent->SetVariableValue("name", "\"root\"");
 	m_emulationFileName = "";
-	m_modelIsDirty = false;
 
 	m_ui->UpdateUI();
 }
@@ -585,19 +584,6 @@ int GXemul::Run()
 	m_ui = NULL;
 
 	return 0;
-}
-
-
-bool GXemul::GetDirtyFlag() const
-{
-	return m_modelIsDirty;
-}
-
-
-void GXemul::SetDirtyFlag(bool dirtyFlag)
-{
-	m_modelIsDirty = dirtyFlag;
-	m_ui->UpdateUI();
 }
 
 

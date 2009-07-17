@@ -96,22 +96,6 @@ public:
 	int Run();
 
 	/**
-	 * \brief Returns whether the emulation is dirty/modified or not.
-	 *
-	 * @return True if the emulation model has been modified in any way
-	 *	since it was last loaded or saved, false if it is untouched.
-	 */
-	bool GetDirtyFlag() const;
-
-	/**
-	 * \brief Sets whether the emulation is dirty/modified or not.
-	 *
-	 * @param dirtyFlag True if the emulation model has been modified in
-	 * any way since it was last loaded or saved, false if it is untouched.
-	 */
-	void SetDirtyFlag(bool dirtyFlag);
-
-	/**
 	 * \brief Gets the current emulation setup's filename.
 	 *
 	 * @return The name of the file that is used for the current emulation
@@ -288,7 +272,6 @@ private:
 	uint64_t		m_step;
 	double			m_globalTime;
 	string			m_emulationFileName;
-	bool			m_modelIsDirty;
 	refcount_ptr<Component>	m_rootComponent;
 };
 

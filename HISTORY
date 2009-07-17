@@ -3885,3 +3885,5 @@ Changelog for GXemul:
 		trees _and_ other binaries (ELFs etc) into components.
 		Merging in a lot of TODO entries from the old C++ branch's TODO
 		file.
+20090717	Implementing the 'move' command for moving components.
+		Removing the 'dirty flag' concept (it wasn't really used).

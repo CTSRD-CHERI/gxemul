@@ -1,5 +1,8 @@
+#ifndef MOVECOMPONENTCOMMAND_H
+#define	MOVECOMPONENTCOMMAND_H
+
 /*
- *  Copyright (C) 2008-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,72 +28,38 @@
  *  SUCH DAMAGE.
  */
 
-#include "commands/ResetCommand.h"
-#include "GXemul.h"
+#include "misc.h"
+
+#include "Command.h"
+#include "UnitTest.h"
 
 
-ResetCommand::ResetCommand()
-	: Command("reset", "")
+/**
+ * \brief A Command which moves a Component from one location to another in
+ *	the component tree.
+ */
+class MoveComponentCommand
+	: public Command
 {
-}
+public:
+	/**
+	 * \brief Constructs a %MoveComponentCommand.
+	 */
+	MoveComponentCommand();
+
+	virtual ~MoveComponentCommand();
+
+	virtual void Execute(GXemul& gxemul, const vector<string>& arguments);
+
+	virtual string GetShortDescription() const;
+
+	virtual string GetLongDescription() const;
 
 
-ResetCommand::~ResetCommand()
-{
-}
+	/********************************************************************/
+
+	static void RunUnitTests(int& nSucceeded, int& nFailures);
+};
 
 
-void ResetCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
-{
-	gxemul.SetRunState(GXemul::NotRunning);
-
-	refcount_ptr<Component> root = gxemul.GetRootComponent();
-	root->Reset();
-}
-
-
-string ResetCommand::GetShortDescription() const
-{
-	return "Resets the current emulation.";
-}
-
-
-string ResetCommand::GetLongDescription() const
-{
-	return "Resets the emulation, by clearing the state of all\n"
-	    "components, and setting the current RunState to NotRunning.";
-}
-
-
-/*****************************************************************************/
-
-
-#ifdef WITHUNITTESTS
-
-static void Test_ResetCommand_Affect_RunState()
-{
-	refcount_ptr<Command> cmd = new ResetCommand;
-	vector<string> dummyArguments;
-	
-	GXemul gxemul;
-
-	UnitTest::Assert("the default GXemul instance should be NotRunning",
-	    gxemul.GetRunState() == GXemul::NotRunning);
-
-	gxemul.SetRunState(GXemul::Paused);
-
-	UnitTest::Assert("the runstate should now be Paused",
-	    gxemul.GetRunState() == GXemul::Paused);
-
-	cmd->Execute(gxemul, dummyArguments);
-
-	UnitTest::Assert("runstate should have been changed to NotRunning",
-	    gxemul.GetRunState() == GXemul::NotRunning);
-}
-
-UNITTESTS(ResetCommand)
-{
-	UNITTEST(Test_ResetCommand_Affect_RunState);
-}
-
-#endif
+#endif	// MOVECOMPONENTCOMMAND_H
