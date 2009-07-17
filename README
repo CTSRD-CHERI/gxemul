@@ -25,7 +25,8 @@ controllers.
 
 GXemul, including the dynamic translation system, is implemented in portable
 C++, which means that the emulator will run on practically any modern host
-architecture for which a C++ compiler is available.
+architecture and unix-like operating system, for which a C++ compiler is
+available.
 
 The documentation lists the machines and guest operating systems that can
 be regarded as "working" in GXemul. The best working guest operating
@@ -61,6 +62,9 @@ Only very few emulation modes have been rewritten to use the 0.6 (C++)
 framework; the bulk of GXemul is still made up of legacy emulation modes,
 written in C.
 
+The long-term plan is to rewrite all of the emulation modes to use the
+new framework, but this will take quite some time.
+
 
 
 GXemul's limitations
@@ -86,11 +90,6 @@ Quick start
 
 To compile, type './configure' and then 'make'. This should work on most
 Unix-like systems. If it does not, then please mail me a bug report.
-
-You might want to experiment with various CC and CFLAGS environment
-variable settings, to get optimum performance. The dynamic translation core
-in GXemul is written in C, not assembly language, and its performance
-therefore depends on the compiler used to compile GXemul.
 
 If you are impatient, and want to try out running a guest operating system 
 inside GXemul, read this:  doc/guestoses.html#netbsdpmaxinstall
