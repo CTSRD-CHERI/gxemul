@@ -394,6 +394,46 @@ static void Test_RAMComponent_WriteThenRead_ReverseEndianness()
 	UnitTest::Assert("8-bit read", data8_b, 0x89);
 }
 
+static void Test_RAMComponent_WriteProtect()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+	AddressDataBus* bus = ram->AsAddressDataBus();
+
+	uint32_t data32 = 0x89abcdef;
+	bus->AddressSelect(256);
+	UnitTest::Assert("non-writeprotected write should succeed",
+	    bus->WriteData(data32, BigEndian));
+
+	uint16_t data16_a = 0;
+	bus->AddressSelect(256 + 2);
+	bus->ReadData(data16_a, BigEndian);
+	UnitTest::Assert("16-bit read", data16_a, 0xcdef);
+
+	ram->SetVariableValue("writeProtect", "true");
+
+	data32 = 0x11223344;
+	bus->AddressSelect(256);
+	UnitTest::Assert("writeprotected write should fail",
+	    bus->WriteData(data32, BigEndian) == false);
+
+	data16_a = 0;
+	bus->AddressSelect(256 + 2);
+	bus->ReadData(data16_a, BigEndian);
+	UnitTest::Assert("16-bit read", data16_a, 0xcdef);
+
+	ram->SetVariableValue("writeProtect", "false");
+
+	data32 = 0x12345678;
+	bus->AddressSelect(256);
+	UnitTest::Assert("write should succeed again",
+	    bus->WriteData(data32, BigEndian));
+
+	data16_a = 0;
+	bus->AddressSelect(256 + 2);
+	bus->ReadData(data16_a, BigEndian);
+	UnitTest::Assert("16-bit read", data16_a, 0x5678);
+}
+
 UNITTESTS(RAMComponent)
 {
 	UNITTEST(Test_RAMComponent_IsStable);
@@ -401,8 +441,7 @@ UNITTESTS(RAMComponent)
 	UNITTEST(Test_RAMComponent_InitiallyZero);
 	UNITTEST(Test_RAMComponent_WriteThenRead);
 	UNITTEST(Test_RAMComponent_WriteThenRead_ReverseEndianness);
-
-	// TODO: Write protect test
+	UNITTEST(Test_RAMComponent_WriteProtect);
 
 	// TODO: Serialization, deserialization
 }
