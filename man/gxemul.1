@@ -29,13 +29,24 @@
 .\"
 .\"     groff -man -Tascii gxemul.1    or    nroff -man gxemul.1
 .\"
-.Dd JUNE 2009
+.Dd JULY 2009
 .Dt GXEMUL 1
 .Os
 .Sh NAME
 .Nm gxemul
 .Nd an experimental framework for full-system machine emulation
 .Sh SYNOPSIS
+.Nm
+.Fl e
+.Ar name
+.Op options
+.Op file Ar ...
+.Nm
+.Op options
+.Ar configfile
+.Nm
+.Fl V
+.Sh SYNOPSIS (LEGACY)
 .Nm
 .Op machine, other, and general options
 .Op file Ar ...
@@ -56,6 +67,33 @@ surrounding hardware components such as framebuffers, busses, interrupt
 controllers, ethernet controllers, disk controllers, and serial port
 controllers.
 .Pp
+Note: Only a few emulated machine modes have been rewritten to use the new
+emulation framework introduced in version 0.6.0, so there are two different
+ways to use the emulator. The options available for the new framework are:
+.Pp
+.Bl -tag -width Ds
+.It Fl H
+Display a list of available machine templates.
+.It Fl e Ar name
+Start with a machine based on template 'name'.
+.It Fl q
+Quiet mode (suppress debug messages).
+.It Fl V
+Start up in interactive mode, paused.
+.El
+.Pp
+Any files supplied on the command line when using the
+.Fl e
+option will be loaded into root.machine0.mainbus0.cpu0 (which is assumed
+to be the main CPU in the machine created by the template configuration).
+.Pp
+Starting the emulator with the
+.Fl V
+switch will bring you to the interactive debugger environment.
+.Sh RUNNING GUEST OPERATING SYSTEMS
+Please read the HTML documentation for more details on how to run complete
+guest operating systems in the emulator.
+.Sh DESCRIPTION (LEGACY)
 The emulator can be invoked in the following ways:
 .Pp
 1. When emulating a complete machine, configuration options can be
@@ -379,7 +417,7 @@ or if user interaction is taking place (e.g. keyboard input at irregular
 intervals), then this option is meaningless.
 .It Fl H
 Display a list of available CPU types and machine types.
-(Most of these don't work. Please read the documentation included in the
+(Most of these don't work. Please read the HTML documentation included in the
 .Nm
 distribution for details on which modes that actually work.)
 .It Fl h
@@ -406,7 +444,7 @@ Start an emulation based on the contents of
 .Ar "configfile".
 .El
 .Pp
-For more information, please read the documentation in the doc/
+For more information, please read the HTML documentation in the doc/
 subdirectory of the
 .Nm
 distribution.
@@ -450,12 +488,17 @@ another emulation mode.
 In general, however, real ROM images require much more emulation detail 
 than GXemul provides, so they can usually not run.
 .Pp
-Please read the documentation for more details.
+Please read the HTML documentation for more details.
 .Sh BUGS
 There are many bugs. Some of the known bugs are mentioned in the TODO 
 file in the
 .Nm
 source distribution, some are marked as TODO in the source code itself.
+.Pp
+Most emulation modes are LEGACY modes, which have not yet been rewritten
+to use the new framework. The documentation is most likely buggy, in the
+sense that it describes things from the old framework when the new one
+applies, and/or vice versa.
 .Pp
 .Nm
 is in general not cycle-accurate; it does not simulate individual

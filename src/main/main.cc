@@ -215,15 +215,27 @@ static void usage(int longusage)
 	printf("Read the source code and/or documentation for "
 	    "other Copyright messages.\n");
 
-	printf("\nusage: %s [machine, other, and general options] [file "
+	printf("\nUsage: %s -e name [options] [file [...]]\n", progname);
+	printf("   or  %s [options] configfile\n", progname);
+	printf("   or  %s -V\n", progname);
+
+	printf("\nLegacy usage: %s [machine, other, and general options] [file "
 	    "[...]]\n", progname);
-	printf("   or  %s [general options] @configfile\n", progname);
+	printf("          or  %s [general options] @configfile\n", progname);
 
 	if (!longusage) {
 		printf("\nRun  %s -h  for help on command line options.\n",
 		    progname);
 		return;
 	}
+
+	printf("\n");
+	printf("  -H           Display a list of available machine templates.\n");
+	printf("  -e name      Start with a machine based on template 'name'.\n");
+	printf("  -q           Quiet mode (suppress debug messages).\n");
+	printf("  -V           Start up in interactive mode, paused.\n");
+
+	printf("\n--------------------- The following are LEGACY options: ---------------------\n");
 
 	printf("\nMachine selection options:\n");
 	printf("  -E t      try to emulate machine type t. (Use -H to get "
@@ -413,7 +425,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 		case 'H':
 			GXemul::ListTemplates();
 			printf("--------------------------------------------------------------------------\n\n");
-			printf("The following applies to the LEGACY modes:\n\n");
+			printf("The following applies to the LEGACY modes only:\n\n");
 			machine_list_available_types_and_cpus();
 			exit(1);
 		case 'h':
