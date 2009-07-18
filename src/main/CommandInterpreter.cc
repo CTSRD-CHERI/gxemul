@@ -697,6 +697,24 @@ static void SplitIntoWords(const string& commandOrig,
 }
 
 
+void CommandInterpreter::VariableAssignment(const string& componentPath,
+	const string& variableName, const string& expression)
+{
+	refcount_ptr<Component> component = m_GXemul->GetRootComponent()->
+	    LookupPath(componentPath);
+
+	StateVariable* var = component->GetVariable(variableName);
+	if (var == NULL) {
+		m_GXemul->GetUI()->ShowDebugMessage("Unknown variable '" +
+		    variableName + "'? (Internal error.)\n");
+		throw std::exception();
+	}
+
+	if (!var->SetValue(expression))
+		m_GXemul->GetUI()->ShowDebugMessage("Assignment failed. (Wrong type?)\n");
+}
+
+
 bool CommandInterpreter::RunComponentMethod(
 	const string& componentPathAndMethod, const vector<string>& arguments)
 {
@@ -860,13 +878,7 @@ bool CommandInterpreter::RunComponentMethod(
 			for (size_t i=1; i<arguments.size(); ++i)
 				assignment += arguments[i] + " ";
 
-cerr << "TODO: variable assignment action\n";
-throw std::exception();
-//			refcount_ptr<Action> variableAssignmentAction =
-//			    new VariableAssignmentAction(*m_GXemul,
-//			    component->GeneratePath(), fullMatch, assignment);
-//			m_GXemul->GetActionStack().PushActionAndExecute(
-//			    variableAssignmentAction);
+			VariableAssignment(component->GeneratePath(), fullMatch, assignment);
 
 			return true;
 		}

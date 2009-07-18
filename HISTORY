@@ -3897,3 +3897,4 @@ Changelog for GXemul:
 		legacy options.
 		Adding a .registers method to the CPUComponent for dumping CPU
 		registers; implementing specifics for MIPS and M88K.
+		Enabling simple variable assignment [again].

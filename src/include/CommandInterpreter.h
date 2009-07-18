@@ -221,6 +221,9 @@ private:
 	 */
 	void ShowAvailableWords(const vector<string>& words);
 
+	void VariableAssignment(const string& componentPath,
+	    const string& variableName, const string& expression);
+
 
 	/********************************************************************/
 public:
