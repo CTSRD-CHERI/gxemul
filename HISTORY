@@ -3895,3 +3895,5 @@ Changelog for GXemul:
 		Implementing the 'copy' command, for cloning components.
 20090718	Updating the man page to reflect new command line options vs
 		legacy options.
+		Adding a .registers method to the CPUComponent for dumping CPU
+		registers; implementing specifics for MIPS and M88K.

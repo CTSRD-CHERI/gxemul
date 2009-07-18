@@ -33,12 +33,12 @@
 #include "GXemul.h"
 
 
-CPUComponent::CPUComponent(const string& className, const string& cpuKind)
+CPUComponent::CPUComponent(const string& className, const string& cpuArchitecture)
 	: Component(className, "cpu")	// all cpus have "cpu" as their
 					// visible class name, regardless of
 					// their actual class name
 	, m_frequency(33.0e6)
-	, m_cpuKind(cpuKind)
+	, m_cpuArchitecture(cpuArchitecture)
 	, m_pageSize(0)
 	, m_pc(0)
 	, m_lastDumpAddr(0)
@@ -48,7 +48,7 @@ CPUComponent::CPUComponent(const string& className, const string& cpuKind)
 	, m_addressDataBus(NULL)
 	, m_currentCodePage(NULL)
 {
-	AddVariable("kind", &m_cpuKind);
+	AddVariable("architecture", &m_cpuArchitecture);
 	AddVariable("pc", &m_pc);
 	AddVariable("lastDumpAddr", &m_lastDumpAddr);
 	AddVariable("lastUnassembleVaddr", &m_lastUnassembleVaddr);
@@ -81,6 +81,7 @@ void CPUComponent::GetMethodNames(vector<string>& names) const
 {
 	// Add our method names...
 	names.push_back("dump");
+	names.push_back("registers");
 	names.push_back("unassemble");
 
 	// ... and make sure to call the base class implementation:
@@ -166,6 +167,11 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 
 		m_lastDumpAddr = vaddr;
 
+		return;
+	}
+
+	if (methodName == "registers") {
+		ShowRegisters(gxemul, arguments);
 		return;
 	}
 
@@ -292,6 +298,13 @@ void CPUComponent::LookupAddressDataBus()
 		    "No AddressDataBus to read from?\n";
 		throw std::exception();
 	}
+}
+
+
+void CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const
+{
+	gxemul->GetUI()->ShowDebugMessage("The registers method has not yet "
+	    "been implemented for this CPU type. TODO.\n");
 }
 
 

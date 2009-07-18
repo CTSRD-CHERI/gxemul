@@ -291,12 +291,12 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 
 	stringstream ss;
 
-	// If this component has a Kind, then show that.
-	const StateVariable* kind = GetVariable("kind");
-	if (kind != NULL && !kind->ToString().empty()) {
+	// If this component has a "model", then show that.
+	const StateVariable* model = GetVariable("model");
+	if (model != NULL && !model->ToString().empty()) {
 		if (!ss.str().empty())
 			ss << ", ";
-		ss << kind->ToString();
+		ss << model->ToString();
 	}
 
 	// If this component has a frequency (i.e. it is runnable), then

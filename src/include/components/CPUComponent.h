@@ -144,6 +144,8 @@ public:
 protected:
 	virtual void FlushCachedStateForComponent();
 
+	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
+
 	// Used by all (or most) CPU implementations:
 	bool ReadInstructionWord(uint16_t& iword, uint64_t vaddr);
 	bool ReadInstructionWord(uint32_t& iword, uint64_t vaddr);
@@ -172,7 +174,7 @@ private:
 protected:
 	// Variables common to all (or most) kinds of CPUs:
 	double			m_frequency;
-	string			m_cpuKind;
+	string			m_cpuArchitecture;
 	int			m_pageSize;
 	uint64_t		m_pc;
 	uint64_t		m_lastDumpAddr;

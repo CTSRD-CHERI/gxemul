@@ -28,8 +28,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "components/MIPS_CPUComponent.h"
+#include <iomanip>
 
+#include "GXemul.h"
+#include "components/MIPS_CPUComponent.h"
 #include "mips_cpu_types.h"
 #include "opcodes_mips.h"
 
@@ -45,23 +47,6 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 	: CPUComponent("mips_cpu", "MIPS")
 	, m_mips_type("5KE")	// defaults to a MIPS64 rev 2 cpu
 {
-	ResetState();
-
-	AddVariable("mips_type", &m_mips_type);
-
-	AddVariable("hi", &m_hi);
-	AddVariable("lo", &m_lo);
-
-	// TODO: GPR 0 (ZERO) is NOT writable!
-	for (size_t i=0; i<N_MIPS_GPRS; i++)
-		AddVariable(regnames[i], &m_gpr[i]);
-
-	// Most MIPS CPUs use 4 KB native page size.
-	// TODO: A few use 1 KB pages; this should be supported as well.
-	m_pageSize = 4096;
-
-	m_frequency = 100e6;
-
 	// Find (and cache) the cpu type in m_type:
 	memset((void*) &m_type, 0, sizeof(m_type));
 	for (size_t j=0; cpu_type_defs[j].name != NULL; j++) {
@@ -70,6 +55,17 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 			break;
 		}
 	}
+
+	ResetState();
+
+	AddVariable("model", &m_mips_type);
+
+	AddVariable("hi", &m_hi);
+	AddVariable("lo", &m_lo);
+
+	// TODO: GPR 0 (ZERO) is NOT writable!
+	for (size_t i=0; i<N_MIPS_GPRS; i++)
+		AddVariable(regnames[i], &m_gpr[i]);
 
 	if (m_type.name == NULL) {
 		std::cerr << "Internal error: Unimplemented MIPS type?\n";
@@ -86,6 +82,12 @@ refcount_ptr<Component> MIPS_CPUComponent::Create()
 
 void MIPS_CPUComponent::ResetState()
 {
+	// Most MIPS CPUs use 4 KB native page size.
+	// TODO: A few use 1 KB pages; this should be supported as well.
+	m_pageSize = 4096;
+
+	m_frequency = 100e6;
+
 	m_hi = 0;
 	m_lo = 0;
 
@@ -99,6 +101,66 @@ void MIPS_CPUComponent::ResetState()
 	m_gpr[MIPS_GPR_SP] = MIPS_INITIAL_STACK_POINTER;
 
 	CPUComponent::ResetState();
+}
+
+
+bool MIPS_CPUComponent::Is32Bit() const
+{
+	return m_type.isa_level == 32 || m_type.isa_level <= 2;
+}
+
+
+static uint64_t Trunc3264(uint64_t x, bool is32bit)
+{
+	return is32bit? (uint32_t)x : x;
+}
+
+
+void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const
+{
+	bool is32bit = Is32Bit();
+	stringstream ss;
+
+	ss.flags(std::ios::hex);
+	ss << std::setfill('0');
+
+	// Yuck, this is horrible. Is there some portable way to put e.g.
+	// std::setw(16) into an object, and just pass that same object several
+	// times?
+
+	ss << "pc=";
+	if (is32bit)
+		ss << std::setw(8);
+	else
+		ss << std::setw(16);
+	ss << Trunc3264(m_pc, is32bit) << " \n";	// TODO: Symbol lookup
+
+	ss << "hi=";
+	if (is32bit)
+		ss << std::setw(8);
+	else
+		ss << std::setw(16);
+	ss << Trunc3264(m_hi, is32bit) << " lo=";
+	if (is32bit)
+		ss << std::setw(8);
+	else
+		ss << std::setw(16);
+	ss << Trunc3264(m_lo, is32bit) << "\n";
+	
+	for (size_t i=0; i<N_MIPS_GPRS; i++) {
+		ss << regnames[i] << "=";
+		if (is32bit)
+			ss << std::setw(8);
+		else
+			ss << std::setw(16);
+		ss << Trunc3264(m_gpr[i], is32bit);
+		if ((i&3) == 3)
+			ss << "\n";
+		else
+			ss << " ";
+	}
+
+	gxemul->GetUI()->ShowDebugMessage(ss.str());
 }
 
 

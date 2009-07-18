@@ -28,6 +28,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <iomanip>
+
+#include "GXemul.h"
 #include "components/M88K_CPUComponent.h"
 
 
@@ -38,16 +41,14 @@ M88K_CPUComponent::M88K_CPUComponent()
 {
 	ResetState();
 
+	AddVariable("model", &m_m88k_type);
+
 	// TODO: r0 is NOT writable!
 	for (size_t i=0; i<N_M88K_REGS; i++) {
 		stringstream ss;
 		ss << "r" << i;
 		AddVariable(ss.str(), &m_r[i]);
 	}
-	
-	m_pageSize = 4096;
-
-	m_frequency = 50e6;	// 50 MHz
 }
 
 
@@ -59,12 +60,39 @@ refcount_ptr<Component> M88K_CPUComponent::Create()
 
 void M88K_CPUComponent::ResetState()
 {
+	m_pageSize = 4096;
+	m_frequency = 50e6;	// 50 MHz
+
 	for (size_t i=0; i<N_M88K_REGS; i++)
 		m_r[i] = 0;
 
 	m_pc = 0;
 
 	CPUComponent::ResetState();
+}
+
+
+void M88K_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const
+{
+	stringstream ss;
+	ss.flags(std::ios::hex);
+	ss << " pc = 0x" << std::setfill('0') << std::setw(8) << m_pc << "\n";
+	// TODO: Symbol lookup
+
+	for (size_t i=0; i<N_M88K_REGS; i++) {
+		stringstream regname;
+		regname << "r" << i;
+		
+		ss << std::setfill(' ');
+		ss << std::setw(3) << regname.str() << " = 0x";
+		ss << std::setfill('0') << std::setw(8) << m_r[i];
+		if ((i&3) == 3)
+			ss << "\n";
+		else
+			ss << "  ";
+	}
+
+	gxemul->GetUI()->ShowDebugMessage(ss.str());
 }
 
 

@@ -57,6 +57,17 @@ MAIN GOAL for 0.6.0:
 		[ ]  Other devices: serial, RTC, framebuffer, ...
 		[ ]  Updated documentation.
 
+  [ ]	cpu.model = "R4000"   <==  assigning to the "model" variable should:
+  	[ ]  handle writes specifically
+  	[ ]  lookup if R4000 is a valid model for the cpu architecture
+  	[ ]  change internal state, and then call ResetState().
+
+  [ ]	Ability to send arguments during component creation, such as:
+  		add mips_cpu("R3000")
+  	instead of
+  		add mips_cpu
+  		cpu.model = "R3000"
+
   [/]	RAM component:
 	[X]  unit tests for the write protect bit
 	[ ]  save/load state!

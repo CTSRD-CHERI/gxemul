@@ -175,12 +175,16 @@ protected:
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	    bool& writable);
 
+	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
+
 private:
 	void ExecuteMIPS16Instruction(uint16_t iword);
 	void ExecuteInstruction(uint32_t iword);
 
 	size_t DisassembleInstructionMIPS16(uint64_t vaddr,
 		unsigned char *instruction, vector<string>& result);
+
+	bool Is32Bit() const;
 
 private:
 	// State:
