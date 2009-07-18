@@ -25,18 +25,19 @@
  *  SUCH DAMAGE.
  */
 
-#include "components/RAMComponent.h"
-#include "GXemul.h"
-
 #include <iomanip>
 #include <assert.h>
 #include <sys/mman.h>
+
+#include "components/RAMComponent.h"
+#include "GXemul.h"
 
 
 RAMComponent::RAMComponent(const string& visibleClassName)
 	: MemoryMappedComponent("ram", visibleClassName)
 	, m_blockSizeShift(22)		// 22 = 4 MB per block
 	, m_blockSize(1 << m_blockSizeShift)
+	, m_dataHandler(*this)
 	, m_writeProtected(false)
 	, m_lastDumpAddr(0)
 	, m_addressSelect(0)
@@ -45,14 +46,23 @@ RAMComponent::RAMComponent(const string& visibleClassName)
 {
 	AddVariable("writeProtect", &m_writeProtected);
 	AddVariable("lastDumpAddr", &m_lastDumpAddr);
+	AddCustomVariable("data", &m_dataHandler);
 }
 
 
 RAMComponent::~RAMComponent()
 {
+	ReleaseAllBlocks();
+}
+
+
+void RAMComponent::ReleaseAllBlocks()
+{
 	for (size_t i=0; i<m_memoryBlocks.size(); ++i) {
-		if (m_memoryBlocks[i] != NULL)
+		if (m_memoryBlocks[i] != NULL) {
 			munmap(m_memoryBlocks[i], m_blockSize);
+			m_memoryBlocks[i] = NULL;
+		}
 	}
 }
 
@@ -194,7 +204,7 @@ void RAMComponent::AddressSelect(uint64_t address)
 
 void* RAMComponent::AllocateBlock()
 {
-	void * p = mmap(NULL, m_blockSize, PROT_WRITE | PROT_READ | PROT_EXEC,
+	void * p = mmap(NULL, m_blockSize, PROT_WRITE | PROT_READ,
 	    MAP_ANON | MAP_PRIVATE, -1, 0);
 
 	if (p == MAP_FAILED || p == NULL) {
@@ -534,6 +544,68 @@ static void Test_RAMComponent_WriteProtect()
 	UnitTest::Assert("16-bit read", data16_a, 0x5678);
 }
 
+static void Test_RAMComponent_Clone()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+	AddressDataBus* bus = ram->AsAddressDataBus();
+
+	uint32_t data32 = 0x89abcdef;
+	bus->AddressSelect(4);
+	bus->WriteData(data32, BigEndian);
+
+	uint16_t data16_a = 0x1234;
+	bus->AddressSelect(10);
+	bus->WriteData(data16_a, LittleEndian);
+
+	UnitTest::Assert("serialization/deserialization failed?", ram->CheckConsistency());
+
+	refcount_ptr<Component> clone = ram->Clone();
+	bus = clone->AsAddressDataBus();
+
+	data32 = 0x22222222;
+	bus->AddressSelect(4);
+	bus->ReadData(data32, LittleEndian);
+	UnitTest::Assert("32-bit read", data32, 0xefcdab89);
+
+	data16_a = 0xffff;
+	bus->AddressSelect(10);
+	bus->ReadData(data16_a, BigEndian);
+	UnitTest::Assert("16-bit read", data16_a, 0x3412);
+}
+
+static void Test_RAMComponent_ManualSerialization()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+	AddressDataBus* bus = ram->AsAddressDataBus();
+
+	uint32_t data32 = 0x89abcde5;
+	bus->AddressSelect(4);
+	bus->WriteData(data32, BigEndian);
+
+	uint16_t data16_a = 0x1235;
+	bus->AddressSelect(10);
+	bus->WriteData(data16_a, LittleEndian);
+
+	SerializationContext context;
+	stringstream ss;
+	ram->Serialize(ss, context);
+
+	string result = ss.str();
+	size_t pos = 0;
+	refcount_ptr<Component> ram2 = Component::Deserialize(result, pos);
+	bus = ram2->AsAddressDataBus();
+
+	data32 = 0x22222222;
+	bus->AddressSelect(4);
+	bus->ReadData(data32, LittleEndian);
+	UnitTest::Assert("32-bit read", data32, 0xe5cdab89);
+
+	data16_a = 0xffff;
+	bus->AddressSelect(10);
+	bus->ReadData(data16_a, BigEndian);
+	UnitTest::Assert("16-bit read", data16_a, 0x3512);
+}
+
 UNITTESTS(RAMComponent)
 {
 	UNITTEST(Test_RAMComponent_IsStable);
@@ -542,8 +614,8 @@ UNITTESTS(RAMComponent)
 	UNITTEST(Test_RAMComponent_WriteThenRead);
 	UNITTEST(Test_RAMComponent_WriteThenRead_ReverseEndianness);
 	UNITTEST(Test_RAMComponent_WriteProtect);
-
-	// TODO: Serialization, deserialization
+	UNITTEST(Test_RAMComponent_Clone);
+	UNITTEST(Test_RAMComponent_ManualSerialization);
 }
 
 #endif

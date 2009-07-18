@@ -42,6 +42,23 @@ class StateVariable;
 typedef map<string,StateVariable> StateVariableMap;
 
 
+class CustomStateVariableHandler
+{
+public:
+	CustomStateVariableHandler()
+	{
+	}
+
+	virtual ~CustomStateVariableHandler()
+	{
+	}
+
+	virtual void Serialize(ostream& ss) const = 0;
+	virtual bool Deserialize(const string& value) = 0;
+	virtual void CopyValueFrom(CustomStateVariableHandler* other) = 0;
+};
+
+
 /**
  * \brief StateVariables make up the persistent state of Component objects.
  *
@@ -65,7 +82,8 @@ public:
 		SInt8,
 		SInt16,
 		SInt32,
-		SInt64
+		SInt64,
+		Custom
 	};
 
 public:
@@ -162,6 +180,14 @@ public:
 	 * @param ptrToVar A pointer to the variable.
 	 */
 	StateVariable(const string& name, int64_t* ptrToVar);
+
+	/**
+	 * \brief Constructor for a custom StateVariable.
+	 *
+	 * @param name The variable's name.
+	 * @param ptrToHandler A pointer to the custom handler.
+	 */
+	StateVariable(const string& name, CustomStateVariableHandler* ptrToHandler);
 
 	/**
 	 * \brief Gets the name of the variable.
@@ -271,6 +297,7 @@ private:
 		int16_t*	psint16;
 		int32_t*	psint32;
 		int64_t*	psint64;
+		CustomStateVariableHandler *phandler;
 	} m_value;
 };
 

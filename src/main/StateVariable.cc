@@ -180,6 +180,14 @@ StateVariable::StateVariable(const string& name, int64_t* ptrToVar)
 }
 
 
+StateVariable::StateVariable(const string& name, CustomStateVariableHandler* ptrToHandler)
+	: m_name(name)
+	, m_type(Custom)
+{
+	m_value.phandler = ptrToHandler;
+}
+
+
 enum StateVariable::Type StateVariable::GetType() const
 {
 	return m_type;
@@ -217,6 +225,8 @@ string StateVariable::GetTypeString() const
 		return "sint32";
 	case SInt64:
 		return "sint64";
+	case Custom:
+		return "custom";
 	default:
 		return "unknown";
 	}
@@ -261,6 +271,9 @@ bool StateVariable::CopyValueFrom(const StateVariable& otherVariable)
 		break;
 	case SInt64:
 		*m_value.psint64 = *otherVariable.m_value.psint64;
+		break;
+	case Custom:
+		m_value.phandler->CopyValueFrom(otherVariable.m_value.phandler);
 		break;
 	default:
 		// Unknown type?
@@ -312,9 +325,14 @@ string StateVariable::ToString() const
 	case SInt64:
 		sstr << *m_value.psint64;
 		return sstr.str();
-	default:
-		return "unknown";
+	case Custom:
+		return "(custom)";
 	}
+
+	// Unimplemented type?
+	assert(false);
+
+	return "";
 }
 
 
@@ -344,6 +362,8 @@ uint64_t StateVariable::ToInteger() const
 		return *m_value.psint32;
 	case SInt64:
 		return *m_value.psint64;
+	case Custom:
+		return 0;
 	}
 
 	// Unimplemented type?
@@ -358,14 +378,24 @@ string StateVariable::Serialize(SerializationContext& context) const
 	stringstream ss;
 	ss << context.Tabs() << GetTypeString() << " " << m_name + " ";
 
-	string value = ToString();
-	if (m_type == String) {
-		EscapedString escaped(value);
-		value = escaped.Generate();
+	switch (m_type) {
+
+	case String:
+		{
+			EscapedString escaped(ToString());
+			ss << escaped.Generate();
+		}
+		break;
+
+	case Custom:
+		m_value.phandler->Serialize(ss);
+		break;
+
+	default:
+		ss << ToString();
 	}
 
-	ss << value << "\n";
-
+	ss << "\n";
 	return ss.str();
 }
 
@@ -532,6 +562,9 @@ bool StateVariable::SetValue(const string& expression)
 				return false;
 		}
 		return true;
+
+	case Custom:
+		return m_value.phandler->Deserialize(value);
 
 	default:
 		// Unimplemented variable type?
@@ -865,6 +898,8 @@ UNITTESTS(StateVariable)
 	//UNITTEST(Test_StateVariable_Numeric_Serialize);
 
 	// TODO: ToInteger tests.
+
+	// TODO: Custom tests.
 }
 
 #endif

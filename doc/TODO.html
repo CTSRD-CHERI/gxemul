@@ -39,48 +39,27 @@ MAIN GOAL for 0.6.0:
 
 -------------------------------------------------------------------------------
 
-   [ ]	Make testmips and/or mvme187 work!
-
-  	[ ]  testmips/testm88k:
-		[ ]  CPU endianness serialization/deserialization!
-  		[ ]  MIPS CPU
-			[ ]  Dyntrans execution
-				[ ]  Extend address data bus concepts for
-				     dyntrans!
-			[ ]  Interrupts
-  		[ ]  M88K CPU
-  			[ ]  Disassembly
-			[ ]  Dyntrans execution
-			[ ]  Interrupts
-		[ ]  RAM
-			[ ]  Serialization/deserialization
-		[ ]  Other devices: serial, RTC, framebuffer, ...
-		[ ]  Updated documentation.
+  [ ]	CPU endianness serialization/deserialization!
 
   [ ]	cpu.model = "R4000"   <==  assigning to the "model" variable should:
   	[ ]  handle writes specifically
   	[ ]  lookup if R4000 is a valid model for the cpu architecture
   	[ ]  change internal state, and then call ResetState().
 
-  [ ]	Ability to send arguments during component creation, such as:
+  [ ]	Ability to send arguments during component creation? E.g.:
   		add mips_cpu("R3000")
   	instead of
   		add mips_cpu
   		cpu.model = "R3000"
-
-  [/]	RAM component:
-	[X]  unit tests for the write protect bit
-	[ ]  save/load state!
-	[X]  method for dumping contents ("dump") in hex and ascii (7-bit only to be safe).
-	[ ]  methods for searching for values (strings, words, etc?)
 
   [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
 	first thing to implement, without breaking other architectures.
 
 	[X]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
 	     I.e. implement an a.out file loader.
-	[ ]  Separate 88100 from 88110! I.e. separate CPU "architecture" from "model".
+	[/]  Separate 88100 from 88110! I.e. separate CPU "architecture" from "model".
 	     Architecture = motorola 88000, but model is e.g. 88100.
+	     	[ ]  Similar list of types as MIPS.
 	[ ]  Separate 88200 CMMUs? So that the two are really two
 	     separate devices.
 	[ ]  Implement 88K instruction disassembly.
@@ -161,7 +140,15 @@ MAIN GOAL for 0.6.0:
 	This would be especially good on CISC machines, where instructions have
 	multiple side-effects (flags etc), or when an exception occurs.
 
-   [ ]  Unit tests for main loop/execution.
+  [/]	Mainbus component:
+	[ ]  Maybe this should simply be a "Bus" base class? That way,
+	     it could be reused by PCI Busses, VME busses, and others.
+	[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
+		[ ]  Refuse to run if there are overlapping components?
+		     A "Pre Run Check" of some kind should be implemented.
+	[ ]  AddressDataBus should be extended to allow for direct
+	     page mapping.
+	[ ]  Unit tests for the above!
 
    [ ]  Interrupt subsystem
    	[ ]  Components exposing an InterruptPin interface? Think about this...
@@ -251,11 +238,9 @@ MAIN GOAL for 0.6.0:
    	[ ]  A method on CPU components?
 
    [ ]	Components (general):
-
 	[ ]  "help" about components could show a file:/// link to
 	     the installed documentation about that component or
 	     machine! (If it exists.)
-
 	[ ]  Limit where components can be added. Like "drop targets"?
 		E.g. a machine can be added at the root, but a machine can not
 		be added on a pcibus. Similarly, a pcibus can not be added
@@ -272,6 +257,7 @@ MAIN GOAL for 0.6.0:
 
 	[/]  State variable assignments:
 		[ ]  Expression evaluator, +-*/, string concatenation, etc.
+			(StateVariable::EvaluateExpression)
 		[ ]  Execution of _expressions_, not just variables. e.g.:
 			cpu.pc		prints the pc value
 			cpu.pc+4	should print the _expression_ pc+4
@@ -315,18 +301,12 @@ MAIN GOAL for 0.6.0:
 
 	[ ]	step		single-step (Paused)
 
-  [/]	Mainbus component:
-
-	[ ]  Maybe this should simply be a "Bus" base class? That way,
-	     it could be reused by PCI Busses, VME busses, and others.
-
-	[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
-		[ ]  Refuse to run if there are overlapping components?
-
-	[ ]  AddressDataBus should be extended to allow for direct
-	     page mapping.
-
-	[ ]  Unit tests for the above!
+  [/]	RAM component:
+	[X]  unit tests for the write protect bit
+	[X]  save/load state!
+		[ ]  Make this more efficient. Right now, it's a hex dump! Yuck.
+	[X]  method for dumping contents ("dump") in hex and ascii (7-bit only to be safe).
+	[ ]  methods for searching for values (strings, words, etc?)
 
    [ ]  Cache components.
 

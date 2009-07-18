@@ -36,6 +36,9 @@
 
 #include "UnitTest.h"
 
+#include <string.h>
+#include <iomanip>
+
 
 /**
  * \brief A Random Access Memory Component.
@@ -127,12 +130,169 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
+	void ReleaseAllBlocks();
+
 	void* AllocateBlock();
+
+	class RAMDataHandler : public CustomStateVariableHandler
+	{
+	public:
+		RAMDataHandler(RAMComponent& ram)
+			: m_ram(ram)
+		{
+		}
+		
+		virtual ~RAMDataHandler()
+		{
+		}
+	
+		virtual void Serialize(ostream& ss) const
+		{
+			for (size_t i=0; i<m_ram.m_memoryBlocks.size(); ++i)
+				if (m_ram.m_memoryBlocks[i] != NULL)
+					SerializeMemoryBlock(ss, i, m_ram.m_memoryBlocks[i]);
+
+			// End of data.
+			ss << ".";
+		}
+		
+		virtual bool Deserialize(const string& value)
+		{
+			m_ram.ReleaseAllBlocks();
+			
+			size_t p = 0;
+			size_t len = value.length();
+			const char *cstr = value.c_str();
+			
+			while (p < len) {
+				if (cstr[p] == '.') {
+					p++;
+					continue;
+				}
+
+				// xxxxxxxxxxxxxxxx:yyyyyyyy:data.
+				// where x = address in the RAM component,
+				// y = length of data in bytes.
+				// data = hex dump.
+
+				// Some margin... :)  Yuck. This is ugly.
+				if (p + 40 > len) {
+					std::cerr << "deserialize ram: internal error\n";
+					throw std::exception();
+				}
+
+				char s1[17];
+				char s2[9];
+				memcpy(s1, cstr + p, 16);
+				p += 17;
+				memcpy(s2, cstr + p, 8);
+				p += 9;
+				s1[16] = 0;
+				s2[8] = 0;
+				stringstream ss1;
+				ss1.flags(std::ios::hex);
+				ss1 << s1;
+				uint64_t addr;
+				ss1 >> addr;
+				stringstream ss2;
+				ss2.flags(std::ios::hex);
+				ss2 << s2;
+				uint32_t datalen;
+				ss2 >> datalen;
+				// p points to data.
+				if (p + 2*datalen < len) {
+					for (size_t i=0; i<datalen; i++) {
+						char c1 = cstr[p++];
+						char c2 = cstr[p++];
+						
+						if (c1 >= 'a' && c1 <= 'f')
+							c1 = (c1-'a') + 10;
+						else
+							c1 -= '0';
+
+						if (c2 >= 'a' && c2 <= 'f')
+							c2 = (c2-'a') + 10;
+						else
+							c2 -= '0';
+						
+						uint8_t b = c1*16 + c2;
+						
+						m_ram.AddressSelect(i + addr);
+						m_ram.WriteData(b);
+					}
+				} else {
+					std::cerr << "deserialize ram: internal error\n";
+					throw std::exception();
+				}
+				
+				if (cstr[p] != '.') {
+					std::cerr << "deserialize ram: internal error: no dot\n";
+					throw std::exception();
+				}
+			}
+			
+			return true;
+		}
+		
+		virtual void CopyValueFrom(CustomStateVariableHandler* other)
+		{
+			// NOTE/TODO: Not space efficient, but works for now.
+
+			stringstream ss;
+			other->Serialize(ss);
+			Deserialize(ss.str());
+		}
+
+	private:
+		void SerializeMemoryBlock(ostream& ss, size_t blockNr, void *block) const
+		{
+			const size_t rowSize = 1024;
+			uint64_t addr = blockNr << m_ram.m_blockSizeShift;
+			uint64_t addrWithinBlock = 0;
+
+			while (addrWithinBlock < m_ram.m_blockSize) {
+				uint8_t *data = (uint8_t*)block + addrWithinBlock;
+
+				bool allZeroes = true;
+				for (size_t i=0; i<rowSize; i++)
+					if (data[i] != 0x00) {
+						allZeroes = false;
+						break;
+					}
+
+				// Only output the row if it contains something
+				// which is non-zero.
+				if (!allZeroes)
+					SerializeRow(ss, addr, data, rowSize);
+
+				addrWithinBlock += rowSize;
+				addr += rowSize;
+			}
+		}
+
+		// NOTE/TODO: Not space efficient, but works for now.
+		void SerializeRow(ostream& ss, uint64_t addr, uint8_t* data, size_t rowSize) const
+		{
+			ss.flags(std::ios::hex);
+			ss << std::setw(16) << std::setfill('0') << addr << ":";
+			ss << std::setw(8) << std::setfill('0') << rowSize << ":";
+
+			for (size_t i=0; i<rowSize; i++)
+				ss << std::setw(2) << std::setfill('0') << (int)data[i];
+
+			ss << ".";
+		}
+
+	private:
+		RAMComponent& m_ram;
+	};
 
 private:
 	const size_t	m_blockSizeShift;// Host block size, in bit shift steps
 	const size_t	m_blockSize;	 // Host block size, in bytes
 
+	RAMDataHandler m_dataHandler;
+	
 	// State:
 	typedef vector<void *> BlockNrToMemoryBlockVector;
 	BlockNrToMemoryBlockVector	m_memoryBlocks;

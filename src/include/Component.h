@@ -449,6 +449,28 @@ protected:
 	}
 
 	/**
+	 * \brief Adds a custom state variable to the %Component.
+	 *
+	 * This function is only meant to be called from the component's
+	 * constructor.
+	 *
+	 * @param name The variable name.
+	 * @param variableHandler A pointer to the handler that knows how
+	 *	to serialize/deserialize the variable.
+	 * @return True if the state variable was added, false if the name
+	 *	was already in use.
+	 */
+	bool AddCustomVariable(const string& name, CustomStateVariableHandler* variableHandler)
+	{
+		StateVariableMap::iterator it = m_stateVariables.find(name);
+		if (it != m_stateVariables.end())
+			return false;
+
+		m_stateVariables[name] = StateVariable(name, variableHandler);
+		return true;
+	}
+
+	/**
 	 * \brief Resets the state variables of this component.
 	 *
 	 * Note 1: This function is not recursive, so children should not be

@@ -3898,3 +3898,5 @@ Changelog for GXemul:
 		Adding a .registers method to the CPUComponent for dumping CPU
 		registers; implementing specifics for MIPS and M88K.
 		Enabling simple variable assignment [again].
+		Implementing (in a ugly hack-ish way) serialization support
+		for the RAM component, using a "custom" StateVariable type.
