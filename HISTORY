@@ -3904,3 +3904,4 @@ Changelog for GXemul:
 20090720	Implementing PreRunCheck for CPU components (they need to have
 		an address/data bus, either as a child or as a parent, to run).
 20090721	Implementing PreRunCheck for MainBusComponent.
+		At startup, a suitable part of the component tree is now shown.

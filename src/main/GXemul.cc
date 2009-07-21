@@ -558,8 +558,23 @@ int GXemul::Run()
 
 	m_ui->Initialize();
 	
-	if (!GetQuietMode())
+	if (!GetQuietMode()) {
 		m_ui->ShowStartupBanner();
+
+		// Dump (a suitable part of) the configuration tree at startup.
+		Component* component = GetRootComponent();
+		if (component->GetChildren().size() > 0) {
+			while (true) {
+				int nChildren = component->GetChildren().size();
+				if (nChildren == 0 || nChildren > 1)
+					break;
+
+				component = component->GetChildren()[0];
+			}
+
+			m_ui->ShowDebugMessage(component->GenerateTreeDump("") + "\n");
+		}
+	}
 
 	try {
 		m_ui->MainLoop();
