@@ -211,7 +211,7 @@ int ConsoleUI::MainLoop()
 
 				if (!m_gxemul->GetRootComponent()->
 				    PreRunCheck(m_gxemul)) {
-					FatalError("PreRunCheck failed.\n");
+					FatalError("Pre-run check failed.\n");
 					m_gxemul->SetRunState(GXemul::NotRunning);
 					runState = m_gxemul->GetRunState();
 					break;

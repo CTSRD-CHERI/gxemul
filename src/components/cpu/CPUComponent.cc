@@ -264,7 +264,8 @@ bool CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 	if (!LookupAddressDataBus(gxemul)) {
 		gxemul->GetUI()->ShowDebugMessage("Error: " + GeneratePath() +
 		    " has neither any child components nor any parent component"
-		    " that can act as address/data bus.\n");
+		    " that can act as address/data bus. The CPU needs some"
+		    " place to read its instructions from.\n");
 		return false;
 	}
 

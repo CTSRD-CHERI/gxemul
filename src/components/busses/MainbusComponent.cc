@@ -26,6 +26,7 @@
  */
 
 #include "components/MainbusComponent.h"
+#include "GXemul.h"
 
 
 MainbusComponent::MainbusComponent()
@@ -74,10 +75,22 @@ void MainbusComponent::FlushCachedStateForComponent()
 }
 
 
-void MainbusComponent::MakeSureMemoryMapExists()
+bool MainbusComponent::PreRunCheckForComponent(GXemul* gxemul)
+{
+	FlushCachedStateForComponent();
+	if (!MakeSureMemoryMapExists(gxemul)) {
+		gxemul->GetUI()->ShowDebugMessage(GenerateTreeDump(""));
+		return false;
+	}
+
+	return true;
+}
+
+
+bool MainbusComponent::MakeSureMemoryMapExists(GXemul* gxemul)
 {
 	if (m_memoryMap != NULL)
-		return;
+		return true;
 
 	m_memoryMap = new MemoryMap;
 
@@ -133,14 +146,23 @@ void MainbusComponent::MakeSureMemoryMapExists()
 			    (*m_memoryMap)[j].size)
 				continue;
 		
-			// TODO: Overlap. How to handle this?
-			std::cerr << "Overlap in mainbus. TODO\n";
-			throw std::exception();
+			// There is overlap!
+			if (gxemul != NULL)
+				gxemul->GetUI()->ShowDebugMessage(
+				    "Error: " + children[i]->GeneratePath() +
+				    " conflicts with another memory mapped "
+				    "component on the same bus.\n");
+
+			delete m_memoryMap;
+			m_memoryMap = NULL;
+			return false;
 		}
 
 		// Finally add the new mapping entry.
 		m_memoryMap->push_back(mmEntry);
 	}
+
+	return true;
 }
 
 
@@ -155,6 +177,9 @@ void MainbusComponent::AddressSelect(uint64_t address)
 	MakeSureMemoryMapExists();
 
 	m_currentAddressDataBus = NULL;
+
+	if (m_memoryMap == NULL)
+		return;
 
 	// Note: This is a linear O(n) scan of the list of memory-mapped
 	// components. For small n, this should be ok.
@@ -183,7 +208,8 @@ void MainbusComponent::AddressSelect(uint64_t address)
 
 bool MainbusComponent::ReadData(uint8_t& data)
 {
-	MakeSureMemoryMapExists();
+	if (!MakeSureMemoryMapExists())
+		return false;
 
 	if (m_currentAddressDataBus != NULL)
 		return m_currentAddressDataBus->ReadData(data);
@@ -194,7 +220,8 @@ bool MainbusComponent::ReadData(uint8_t& data)
 
 bool MainbusComponent::ReadData(uint16_t& data, Endianness endianness)
 {
-	MakeSureMemoryMapExists();
+	if (!MakeSureMemoryMapExists())
+		return false;
 
 	if (m_currentAddressDataBus != NULL)
 		return m_currentAddressDataBus->ReadData(data, endianness);
@@ -205,7 +232,8 @@ bool MainbusComponent::ReadData(uint16_t& data, Endianness endianness)
 
 bool MainbusComponent::ReadData(uint32_t& data, Endianness endianness)
 {
-	MakeSureMemoryMapExists();
+	if (!MakeSureMemoryMapExists())
+		return false;
 
 	if (m_currentAddressDataBus != NULL)
 		return m_currentAddressDataBus->ReadData(data, endianness);
@@ -216,7 +244,8 @@ bool MainbusComponent::ReadData(uint32_t& data, Endianness endianness)
 
 bool MainbusComponent::ReadData(uint64_t& data, Endianness endianness)
 {
-	MakeSureMemoryMapExists();
+	if (!MakeSureMemoryMapExists())
+		return false;
 
 	if (m_currentAddressDataBus != NULL)
 		return m_currentAddressDataBus->ReadData(data, endianness);
@@ -227,7 +256,8 @@ bool MainbusComponent::ReadData(uint64_t& data, Endianness endianness)
 
 bool MainbusComponent::WriteData(const uint8_t& data)
 {
-	MakeSureMemoryMapExists();
+	if (!MakeSureMemoryMapExists())
+		return false;
 
 	if (m_currentAddressDataBus != NULL)
 		return m_currentAddressDataBus->WriteData(data);
@@ -238,7 +268,8 @@ bool MainbusComponent::WriteData(const uint8_t& data)
 
 bool MainbusComponent::WriteData(const uint16_t& data, Endianness endianness)
 {
-	MakeSureMemoryMapExists();
+	if (!MakeSureMemoryMapExists())
+		return false;
 
 	if (m_currentAddressDataBus != NULL)
 		return m_currentAddressDataBus->WriteData(data, endianness);
@@ -249,7 +280,8 @@ bool MainbusComponent::WriteData(const uint16_t& data, Endianness endianness)
 
 bool MainbusComponent::WriteData(const uint32_t& data, Endianness endianness)
 {
-	MakeSureMemoryMapExists();
+	if (!MakeSureMemoryMapExists())
+		return false;
 
 	if (m_currentAddressDataBus != NULL)
 		return m_currentAddressDataBus->WriteData(data, endianness);
@@ -260,7 +292,8 @@ bool MainbusComponent::WriteData(const uint32_t& data, Endianness endianness)
 
 bool MainbusComponent::WriteData(const uint64_t& data, Endianness endianness)
 {
-	MakeSureMemoryMapExists();
+	if (!MakeSureMemoryMapExists())
+		return false;
 
 	if (m_currentAddressDataBus != NULL)
 		return m_currentAddressDataBus->WriteData(data, endianness);
@@ -479,6 +512,28 @@ static void Test_MainbusComponent_Simple_With_AddrMul()
 	    "written to it yet! [3]", dataByte, 0);
 }
 
+static void Test_MainbusComponent_PreRunCheck()
+{
+	GXemul gxemul;
+
+	gxemul.GetCommandInterpreter().RunCommand("add testmips");
+
+	UnitTest::Assert("preruncheck should initially succeed for testmips",
+	    gxemul.GetRootComponent()->PreRunCheck(&gxemul) == true);
+
+	// Adding a second RAM component should succeed, since the initial size
+	// is 0, and does not (yet) conflict.
+	gxemul.GetCommandInterpreter().RunCommand("add ram mainbus0");
+	UnitTest::Assert("preruncheck should still succeed",
+	    gxemul.GetRootComponent()->PreRunCheck(&gxemul) == true);
+
+	// By changing the size to 42, the new ram1 component will overlap
+	// the ram0 component (at least partially).
+	gxemul.GetCommandInterpreter().RunCommand("ram1.memoryMappedSize = 42");
+	UnitTest::Assert("preruncheck should now fail",
+	    gxemul.GetRootComponent()->PreRunCheck(&gxemul) == false);
+}
+
 UNITTESTS(MainbusComponent)
 {
 	// Construction, etc.:
@@ -495,7 +550,8 @@ UNITTESTS(MainbusComponent)
 	// TODO: Write outside of mapped space
 	// TODO: Write PARTIALLY outside of mapped space!!! e.g. 64-bit
 	//	into a 3-byte memory area???
-	// TODO: Overlapping mappings
+
+	UNITTEST(Test_MainbusComponent_PreRunCheck);
 }
 
 #endif

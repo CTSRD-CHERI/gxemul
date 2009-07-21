@@ -95,9 +95,10 @@ public:
 
 protected:
 	virtual void FlushCachedStateForComponent();
+	virtual bool PreRunCheckForComponent(GXemul* gxemul);
 
 private:
-	void MakeSureMemoryMapExists();
+	bool MakeSureMemoryMapExists(GXemul* gxemul = NULL);
 
 private:
 	struct MemoryMapEntry {

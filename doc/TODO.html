@@ -149,9 +149,11 @@ MAIN GOAL for 0.6.0:
 
   [/]	Mainbus component:
 	[ ]  Maybe this should simply be a "Bus" base class? That way,
-	     it could be reused by PCI Busses, VME busses, and others.
-	[ ]  Handle overlaps in MakeSureMemoryMapExists some nice way.
-		[ ]  Refuse to run if there are overlapping components?
+	     it could be reused by PCI Busses, VME busses, and others. HOWEVER,
+	     the concept of address range and overlap may differ between
+	     bus types, or maybe not even exist in some busses.
+	[X]  Handle overlaps in MakeSureMemoryMapExists some nice way.
+		[X]  Refuse to run if there are overlapping components?
 		     A "Pre Run Check" of some kind should be implemented.
 	[ ]  AddressDataBus should be extended to allow for direct
 	     page mapping.
