@@ -262,7 +262,7 @@ bool CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 {
 	// If AddressDataBus lookup fails, then the CPU fails.
 	if (!LookupAddressDataBus(gxemul)) {
-		gxemul->GetUI()->ShowDebugMessage("Error: " + GeneratePath() +
+		gxemul->GetUI()->ShowDebugMessage("Error: " + GenerateShortestPossiblePath() +
 		    " has neither any child components nor any parent component"
 		    " that can act as address/data bus. The CPU needs some"
 		    " place to read its instructions from.\n");
@@ -312,9 +312,9 @@ bool CPUComponent::LookupAddressDataBus(GXemul* gxemul)
 	}
 
 	if (multipleChildBussesFound && gxemul != NULL)
-		gxemul->GetUI()->ShowDebugMessage("warning: " + GeneratePath() +
+		gxemul->GetUI()->ShowDebugMessage("warning: " + GenerateShortestPossiblePath() +
 		    " has multiple child components that can act as address/data busses; "
-		    "using " + choosenChild->GeneratePath() + "\n");
+		    "using " + choosenChild->GenerateShortestPossiblePath() + "\n");
 
 	// 2) If no cache exists, go to a parent bus (usually a mainbus).
 	if (bus == NULL) {

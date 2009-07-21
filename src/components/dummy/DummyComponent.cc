@@ -243,6 +243,34 @@ static void Test_DummyComponent_GeneratePath()
 	    dummyA->GeneratePath(), "dummy0.dummy0");
 }
 
+static void Test_DummyComponent_GenerateShortestPossiblePath()
+{
+	refcount_ptr<Component> dummyA = new DummyComponent;
+	refcount_ptr<Component> dummyB = new DummyComponent;
+	refcount_ptr<Component> dummyC = new DummyComponent;
+
+	dummyA->SetVariableValue("name", "\"machine0\"");
+	dummyB->SetVariableValue("name", "\"mainbus0\"");
+	dummyC->SetVariableValue("name", "\"ram0\"");
+	dummyA->AddChild(dummyB);
+	dummyB->AddChild(dummyC);
+
+	UnitTest::Assert("shortest path first",
+	    dummyC->GenerateShortestPossiblePath(), "ram0");
+
+	refcount_ptr<Component> dummyB2 = new DummyComponent;
+	refcount_ptr<Component> dummyC2 = new DummyComponent;
+	dummyB2->SetVariableValue("name", "\"mainbus1\"");
+	dummyC2->SetVariableValue("name", "\"ram0\"");
+	dummyA->AddChild(dummyB2);
+	dummyB2->AddChild(dummyC2);
+
+	UnitTest::Assert("shortest path C",
+	    dummyC->GenerateShortestPossiblePath(), "mainbus0.ram0");
+	UnitTest::Assert("shortest path C2",
+	    dummyC2->GenerateShortestPossiblePath(), "mainbus1.ram0");
+}
+
 static void Test_DummyComponent_LookupPath()
 {
 	refcount_ptr<Component> dummyA = new DummyComponent;
@@ -550,6 +578,7 @@ UNITTESTS(DummyComponent)
 
 	// Path tests
 	UNITTEST(Test_DummyComponent_GeneratePath);
+	UNITTEST(Test_DummyComponent_GenerateShortestPossiblePath);
 	UNITTEST(Test_DummyComponent_LookupPath);
 	UNITTEST(Test_DummyComponent_FindPathByPartialMatch);
 

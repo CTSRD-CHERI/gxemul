@@ -227,6 +227,12 @@ Component* Component::GetParent()
 }
 
 
+const Component* Component::GetParent() const
+{
+	return m_parentComponent;
+}
+
+
 void Component::GetMethodNames(vector<string>& names) const
 {
 	// The default component has no implemented methods.
@@ -510,6 +516,63 @@ static vector<string> SplitPathStringIntoVector(const string &path)
 	pathStrings.push_back(word);
 
 	return pathStrings;
+}
+
+
+string Component::GenerateShortestPossiblePath() const
+{
+	string myPath = GeneratePath();
+	vector<string> allComponentPaths;
+
+	const Component* root = this;
+	while (root->GetParent() != NULL)
+		root = root->GetParent();
+
+	root->AddAllComponentPaths(allComponentPaths);
+
+	// Include as few as possible sub-parts of myPath (starting from the
+	// end), to uniqely identify the component.
+	vector<string> myPathParts = SplitPathStringIntoVector(myPath);
+
+	for (size_t n=1; n<=myPathParts.size(); ++n) {
+		string attempt = "";
+		for (size_t i=myPathParts.size()-n; i<myPathParts.size(); i++) {
+			if (attempt.length() > 0)
+				attempt += ".";
+			attempt += myPathParts[i];
+		}
+
+		// std::cerr << "attempt = " << attempt << "\n";
+		// attempt = ram0
+		// attempt = mainbus0.ram0
+		// attempt = machine0.mainbus0.ram0
+		// etc.
+
+		// See if this substring is unique in allComponentPaths.
+		int nHits = 0;
+		string dotAttempt = "." + attempt;
+		size_t dotAttemptLength = dotAttempt.length();
+		for (size_t j=0; j<allComponentPaths.size(); ++j) {
+			const string& s = allComponentPaths[j];
+			if (s.length() < attempt.length())
+				continue;
+				
+			if (s == attempt)
+				nHits ++;
+			else if (s.length() > dotAttemptLength &&
+			    s.substr(s.length() - dotAttemptLength, dotAttemptLength) == dotAttempt)
+				nHits ++;
+		}
+
+		// Unique? Then we found a good short path.
+		if (nHits == 1)
+			return attempt;
+			
+		// Otherwise continue.
+	}
+
+	// Worst case: return full path.
+	return myPath;
 }
 
 

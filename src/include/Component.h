@@ -216,6 +216,7 @@ public:
 	 * @return the pointer to the parent component, or NULL
 	 */
 	Component* GetParent();
+	const Component* GetParent() const;
 
 	/**
 	 * \brief Retrieves a component's implemented method names.
@@ -261,6 +262,24 @@ public:
 	 * @return A path to the component, as a string.
 	 */
 	string GeneratePath() const;
+
+	/**
+	 * \brief Generates a short string representation of the path to the
+	 *	%Component.
+	 *
+	 * This function generates a string which is the shortest possible
+	 * sub-path required to uniqely identify a component in the tree.
+	 * (Actually, not really the shortest. For example if a component is
+	 * called root.machine0.mainbus0.ram0, then the shortest string may
+	 * be "ra". This function will return "ram0".)
+	 *
+	 * If there are components a.b.x, a.b.y, and a.c.x, then the shortest
+	 * possible paths for the three components are "b.x", "y", and "c.x"
+	 * respectively.
+	 *
+	 * @return A string which is part of the path of the component.
+	 */
+	string GenerateShortestPossiblePath() const;
 
 	/**
 	 * \brief Looks up a path from this %Component,

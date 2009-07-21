@@ -3905,3 +3905,4 @@ Changelog for GXemul:
 		an address/data bus, either as a child or as a parent, to run).
 20090721	Implementing PreRunCheck for MainBusComponent.
 		At startup, a suitable part of the component tree is now shown.
+		Adding a GenerateShortestPossiblePath method on Component.

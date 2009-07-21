@@ -41,6 +41,15 @@ MAIN GOAL for 0.6.0:
 
   [ ]   Make sure that BOTH old and new configuration files work!
 
+  [ ]	I think the "method" overloading stuff is broken:
+
+	 * Note 2: The base class' member function should <i>not</i>
+	 *	be called. The default Component base class does
+	 *	not have any methods.
+
+	Most likely it SHOULD call the base class' member function. Think
+	e.g. mips_cpu vs cpu.
+
   [ ]	Call m_gxemul->GetRootComponent()->FlushCachedState(); when a component
   	is e.g. moved or copied! Example: cpu0 in machine0 is moved to machine1,
   	and then cpu.dump is executed. It should then use the mainbus of machine1,
@@ -101,6 +110,9 @@ MAIN GOAL for 0.6.0:
 
 	Stepping should probably print the shortest possible part of the
 	component name, followed by the component's single-step printout.
+	
+	[X]  Implement Component::GenerateShortestPossiblePath(). 
+	
 	E.g.:
 
 		step 42:
