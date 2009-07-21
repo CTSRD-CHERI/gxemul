@@ -34,6 +34,7 @@
 #include "Component.h"
 #include "ComponentFactory.h"
 #include "EscapedString.h"
+#include "GXemul.h"
 
 
 Component::Component(const string& className, const string& visibleClassName)

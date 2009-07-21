@@ -3906,3 +3906,5 @@ Changelog for GXemul:
 20090721	Implementing PreRunCheck for MainBusComponent.
 		At startup, a suitable part of the component tree is now shown.
 		Adding a GenerateShortestPossiblePath method on Component.
+		Adding a helper for outputting pre-0.6.0 style debug messages
+		from components ("[ componentname: message ]").

@@ -30,6 +30,7 @@
 
 #include "misc.h"
 
+class Component;
 class GXemul;
 
 
@@ -82,6 +83,24 @@ public:
 	 * @param msg The message to show.
 	 */
 	virtual void ShowDebugMessage(const string& msg) = 0;
+
+	/**
+	 * \brief Shows a debug message for a Component.
+	 *
+	 * Usually, this involves formatting the debug message using
+	 * Component::GenerateShortestPossiblePath().
+	 *
+	 * If the gxemul pointer is non-NULL, it is used to sense whether
+	 * the runstate is GXemul::Running. In that case, the debug message
+	 * is encapsulated by "[ ]" brackets, making the debug message very
+	 * similar to pre-0.6.0 debug output style.
+	 *
+	 * @param component A pointer to the Component.
+	 * @param msg The message to show.
+	 * @param gxemul A pointer to the GXemul instance.
+	 */
+	virtual void ShowDebugMessage(Component* component, const string& msg,
+		GXemul* gxemul) = 0;
 
 	/**
 	 * \brief Shows a command being executed.

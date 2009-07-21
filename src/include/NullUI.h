@@ -72,6 +72,16 @@ public:
 	/**
 	 * \brief Does nothing, for the dummy UI.
 	 *
+	 * @param component A pointer to the Component. (Ignored.)
+	 * @param msg The message to show. (Ignored.)
+	 * @param gxemul A pointer to the GXemul instance. (Ignored.)
+	 */
+	virtual void ShowDebugMessage(Component* component, const string& msg,
+		GXemul* gxemul);
+
+	/**
+	 * \brief Does nothing, for the dummy UI.
+	 *
 	 * @param command The command to show. (Ignored.)
 	 */
 	virtual void ShowCommandMessage(const string& command);

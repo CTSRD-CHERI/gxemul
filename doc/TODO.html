@@ -292,11 +292,17 @@ MAIN GOAL for 0.6.0:
 	     It should say "ambigous command"!
 
 	[/]  Tab completion for everything:
+
+		[ ]  tab completion should use the Shortest Path, not the
+		     full path. E.g.:  cpu + TAB should expand to cpu0 only
+		     in a default testmips machine, NOT root.machine0.mainbus0.cpu0!
+		     This will most likely require a change in unit tests etc.
+
 		[ ]  syntax based completion? e.g.:
 			help [cmd]   tab completes the first argument as a
 				     command
-			add component-name
-			load [filename [component-path]]
+			add component-name		-- component name
+			load [filename [component-path]]  -- filename etc.
 
 		     This will require a uniform way of describing arguments,
 		     and whether or not they should be optional. The tab
@@ -339,7 +345,7 @@ MAIN GOAL for 0.6.0:
 
 		[ ]  Caches should be added _onto_ a cpu. The cpu first looks
 		     for a cache as an address data bus, THEN for a parent. Hm.
-		     The cache must then go downwards TWO steps (../..) to get
+		[ ]  The cache must then go downwards TWO steps (../..) to get
 		     past the owning cpu, when trying to reach the mainbus/ram.
 
 	[ ]  Unit tests.

@@ -135,6 +135,26 @@ void ConsoleUI::ShowDebugMessage(const string& msg)
 }
 
 
+void ConsoleUI::ShowDebugMessage(Component* component, const string& msg, GXemul* gxemul)
+{
+	string newmsg = component->GenerateShortestPossiblePath() + ": " + msg;
+
+	// Remove any trailing newline:
+	while (newmsg.length() != 0 && newmsg[newmsg.length() - 1] == '\n')
+		newmsg = newmsg.substr(0, newmsg.length() - 1);
+
+	// If runstate is Running, then show pre-0.6.0 style [ ] output.
+	if (gxemul != NULL && gxemul->GetRunState() == GXemul::Running)
+		newmsg = "[ " + newmsg + " ]";
+
+	// Always terminate with a newline.
+	if (newmsg.length() == 0 || newmsg[newmsg.length()-1] != '\n')
+		newmsg += "\n";
+
+	ShowDebugMessage(newmsg);
+}
+
+
 void ConsoleUI::ShowCommandMessage(const string& command)
 {
 	// Not for ConsoleUI; commands entered by the user are

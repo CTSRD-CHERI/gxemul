@@ -148,10 +148,11 @@ bool MainbusComponent::MakeSureMemoryMapExists(GXemul* gxemul)
 		
 			// There is overlap!
 			if (gxemul != NULL)
-				gxemul->GetUI()->ShowDebugMessage(
-				    "Error: " + children[i]->GenerateShortestPossiblePath() +
+				gxemul->GetUI()->ShowDebugMessage(this,
+				    "Error: the base and/or size of " +
+				    children[i]->GenerateShortestPossiblePath() +
 				    " conflicts with another memory mapped "
-				    "component on the same bus.\n");
+				    "component on this bus.\n", gxemul);
 
 			delete m_memoryMap;
 			m_memoryMap = NULL;
