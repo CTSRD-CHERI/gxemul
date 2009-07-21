@@ -195,10 +195,11 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 			ss >> vaddr;
 		}
 
-		for (int i=0; i<20; i++) {
+		const int nRows = 20;
+		for (int i=0; i<nRows; i++) {
 			// TODO: GENERALIZE! Some archs will have longer
 			// instructions, or unaligned, or over page boundaries!
-			const size_t maxLen = 4;
+			const size_t maxLen = sizeof(uint32_t);
 			unsigned char instruction[maxLen];
 			vector<string> result;
 
@@ -213,7 +214,10 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 			ss << vaddr;
 
 			if (!readOk) {
-				ss << "\tmemory could not be read\n";
+				ss << "\tmemory could not be read";
+				if (m_addressDataBus == NULL)
+					ss << "; no address/data bus connected to the CPU?";
+				ss << "\n";
 				gxemul->GetUI()->ShowDebugMessage(ss.str());
 				break;
 			} else {
@@ -221,6 +225,9 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 				    maxLen, instruction, result);
 				vaddr += len;
 
+				// TODO: Rewrite this to gather all nRows of
+				// output, and then output with equal-width
+				// columns!
 				for (size_t j=0; j<result.size(); ++j)
 					ss << "\t" << result[j];
 				ss << "\n";
@@ -251,6 +258,20 @@ void CPUComponent::FlushCachedStateForComponent()
 }
 
 
+bool CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
+{
+	// If AddressDataBus lookup fails, then the CPU fails.
+	if (!LookupAddressDataBus(gxemul)) {
+		gxemul->GetUI()->ShowDebugMessage("Error: " + GeneratePath() +
+		    " has neither any child components nor any parent component"
+		    " that can act as address/data bus.\n");
+		return false;
+	}
+
+	return true;
+}
+
+
 string CPUComponent::GetAttribute(const string& attributeName)
 {
 	if (attributeName == "stable")
@@ -263,22 +284,36 @@ string CPUComponent::GetAttribute(const string& attributeName)
 }
 
 
-void CPUComponent::LookupAddressDataBus()
+bool CPUComponent::LookupAddressDataBus(GXemul* gxemul)
 {
 	if (m_addressDataBus != NULL)
-		return;
+		return true;
 
 	// Find a suitable address data bus.
 	AddressDataBus *bus = NULL;
 
 	// 1) A direct first-level decendant of the CPU is probably a
 	//    cache. Use this if it exists.
+	//    If there are multiple AddressDataBus capable children,
+	//    print a debug warning, and just choose any of the children
+	//    (the last one).
 	Components& children = GetChildren();
+	Component* choosenChild = NULL;
+	bool multipleChildBussesFound = false;
 	for (size_t i=0; i<children.size(); ++i) {
-		bus = children[i]->AsAddressDataBus();
-		if (bus != NULL)
-			break;
+		AddressDataBus *childBus = children[i]->AsAddressDataBus();
+		if (childBus != NULL) {
+			if (bus != NULL)
+				multipleChildBussesFound = true;
+			bus = childBus;
+			choosenChild = children[i];
+		}
 	}
+
+	if (multipleChildBussesFound && gxemul != NULL)
+		gxemul->GetUI()->ShowDebugMessage("warning: " + GeneratePath() +
+		    " has multiple child components that can act as address/data busses; "
+		    "using " + choosenChild->GeneratePath() + "\n");
 
 	// 2) If no cache exists, go to a parent bus (usually a mainbus).
 	if (bus == NULL) {
@@ -293,11 +328,7 @@ void CPUComponent::LookupAddressDataBus()
 
 	m_addressDataBus = bus;
 
-	if (m_addressDataBus == NULL) {
-		std::cerr << "CPUComponent::LookupAddressDataBus: "
-		    "No AddressDataBus to read from?\n";
-		throw std::exception();
-	}
+	return m_addressDataBus != NULL;
 }
 
 
@@ -310,7 +341,8 @@ void CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& arguments
 
 bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t vaddr)
 {
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -360,7 +392,8 @@ bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t vaddr)
 
 bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t vaddr)
 {
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -426,7 +459,8 @@ void CPUComponent::AddressSelect(uint64_t address)
 
 bool CPUComponent::ReadData(uint8_t& data)
 {
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -441,7 +475,8 @@ bool CPUComponent::ReadData(uint16_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 1) == 0);
 
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -456,7 +491,8 @@ bool CPUComponent::ReadData(uint32_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 3) == 0);
 
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -471,7 +507,8 @@ bool CPUComponent::ReadData(uint64_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 7) == 0);
 
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -484,7 +521,8 @@ bool CPUComponent::ReadData(uint64_t& data, Endianness endianness)
 
 bool CPUComponent::WriteData(const uint8_t& data)
 {
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -499,7 +537,8 @@ bool CPUComponent::WriteData(const uint16_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 1) == 0);
 
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -514,7 +553,8 @@ bool CPUComponent::WriteData(const uint32_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 3) == 0);
 
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -529,7 +569,8 @@ bool CPUComponent::WriteData(const uint64_t& data, Endianness endianness)
 {
 	assert((m_addressSelect & 7) == 0);
 
-	LookupAddressDataBus();
+	if (!LookupAddressDataBus())
+		return false;
 
 	uint64_t paddr;
 	bool writable;
@@ -560,10 +601,26 @@ static void Test_CPUComponent_Create()
 	UnitTest::Assert("component was created?", cpu.IsNULL());
 }
 
+static void Test_CPUComponent_PreRunCheck()
+{
+	GXemul gxemul;
+
+	// Attempting to run a cpu with nothing connected to it should FAIL!
+	gxemul.GetCommandInterpreter().RunCommand("add mips_cpu");
+	UnitTest::Assert("preruncheck should fail",
+	    gxemul.GetRootComponent()->PreRunCheck(&gxemul) == false);
+
+	// Running a CPU with RAM should however succeed:
+	gxemul.GetCommandInterpreter().RunCommand("add ram cpu0");
+	UnitTest::Assert("preruncheck should succeed",
+	    gxemul.GetRootComponent()->PreRunCheck(&gxemul) == true);
+}
+
 UNITTESTS(CPUComponent)
 {
 	UNITTEST(Test_CPUComponent_IsStable);
 	UNITTEST(Test_CPUComponent_Create);
+	UNITTEST(Test_CPUComponent_PreRunCheck);
 }
 
 #endif

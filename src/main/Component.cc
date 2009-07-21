@@ -143,6 +143,25 @@ void Component::ResetState()
 }
 
 
+bool Component::PreRunCheck(GXemul* gxemul)
+{
+	bool everythingOk = PreRunCheckForComponent(gxemul);
+
+	// Recurse:
+	for (size_t i = 0; i < m_childComponents.size(); ++ i)
+		everythingOk &= m_childComponents[i]->PreRunCheck(gxemul);
+
+	return everythingOk;
+}
+
+
+bool Component::PreRunCheckForComponent(GXemul* gxemul)
+{
+	// Base implementation: Do nothing. Everything is Ok.
+	return true;
+}
+
+
 void Component::FlushCachedState()
 {
 	FlushCachedStateForComponent();

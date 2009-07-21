@@ -3900,3 +3900,6 @@ Changelog for GXemul:
 		Enabling simple variable assignment [again].
 		Implementing (in a ugly hack-ish way) serialization support
 		for the RAM component, using a "custom" StateVariable type.
+		Beginning to implement a "pre run check" mechanism.
+20090720	Implementing PreRunCheck for CPU components (they need to have
+		an address/data bus, either as a child or as a parent, to run).

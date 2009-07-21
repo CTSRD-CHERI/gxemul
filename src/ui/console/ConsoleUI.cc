@@ -197,10 +197,10 @@ void ConsoleUI::Shutdown()
 
 int ConsoleUI::MainLoop()
 {
-	enum GXemul::RunState oldRunState = m_gxemul->GetRunState();
+	GXemul::RunState oldRunState = m_gxemul->GetRunState();
 
 	while (m_gxemul->GetRunState() != GXemul::Quitting) {
-		enum GXemul::RunState runState = m_gxemul->GetRunState();
+		GXemul::RunState runState = m_gxemul->GetRunState();
 
 		switch (runState) {
 
@@ -208,11 +208,19 @@ int ConsoleUI::MainLoop()
 			if (oldRunState != GXemul::Running) {
 				m_gxemul->GetRootComponent()->
 				    FlushCachedState();
+
+				if (!m_gxemul->GetRootComponent()->
+				    PreRunCheck(m_gxemul)) {
+					FatalError("PreRunCheck failed.\n");
+					m_gxemul->SetRunState(GXemul::NotRunning);
+					runState = m_gxemul->GetRunState();
+					break;
+				}
 			}
 
 			m_gxemul->ExecuteSteps(1000);
 			break;
-			
+
 		case GXemul::Quitting:
 			break;
 

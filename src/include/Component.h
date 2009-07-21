@@ -145,6 +145,15 @@ public:
 	void Reset();
 
 	/**
+	 * \brief Checks the state of this component and all its children,
+	 *	before starting execution.
+	 *
+	 * @return true if the component and all its children are ready to run,
+	 *	false otherwise.
+	 */
+	bool PreRunCheck(GXemul* gxemul);
+
+	/**
 	 * \brief Resets the cached state of this component and all its
 	 * children.
 	 *
@@ -484,6 +493,30 @@ protected:
 	 * the call to the base class' ResetState() function.
 	 */
 	virtual void ResetState();
+
+	/**
+	 * \brief Checks the state of this component, before starting execution.
+	 *
+	 * Note 1: This function is not recursive, so children should not be
+	 * traversed.
+	 *
+	 * Note 2: After a component's state variables have been checked, the
+	 * base class' PreRunCheckForComponent(GXemul*) function should also be
+	 * called.
+	 *
+	 * The implementation of this function may choose to print warning
+	 * messages but still return true, or it can print error messages and
+	 * return false.
+	 *
+	 * Typical examples of pre-run-check failures are:
+	 * <ul>
+	 *	<li>collision of MemoryMappedComponent on an AddressDataBus
+	 *	<li>a CPUComponent that can not reach any kind of AddressDataBus
+	 * </ul>
+	 *
+	 * @return true if the component is ready to run, false otherwise.
+	 */
+	virtual bool PreRunCheckForComponent(GXemul* gxemul);
 
 	/**
 	 * \brief Resets the cached state of this component.

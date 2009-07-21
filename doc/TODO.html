@@ -39,6 +39,13 @@ MAIN GOAL for 0.6.0:
 
 -------------------------------------------------------------------------------
 
+  [ ]   Make sure that BOTH old and new configuration files work!
+
+  [ ]	Call m_gxemul->GetRootComponent()->FlushCachedState(); when a component
+  	is e.g. moved or copied! Example: cpu0 in machine0 is moved to machine1,
+  	and then cpu.dump is executed. It should then use the mainbus of machine1,
+  	not machine0!
+
   [ ]	CPU endianness serialization/deserialization!
 
   [ ]	cpu.model = "R4000"   <==  assigning to the "model" variable should:

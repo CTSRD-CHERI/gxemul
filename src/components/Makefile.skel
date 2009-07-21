@@ -24,7 +24,7 @@ clean:
 	cd cpu; $(MAKE) clean
 	cd dummy; $(MAKE) clean
 	cd machines; $(MAKE) clean
-	#cd memory; $(MAKE) clean
+	cd memory; $(MAKE) clean
 
 clean_all: clean
 	cd busses; $(MAKE) clean_all

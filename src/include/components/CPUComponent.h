@@ -143,6 +143,7 @@ public:
 
 protected:
 	virtual void FlushCachedStateForComponent();
+	virtual bool PreRunCheckForComponent(GXemul* gxemul);
 
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
 
@@ -169,7 +170,7 @@ protected:
 					bool& writable);
 
 private:
-	void LookupAddressDataBus();
+	bool LookupAddressDataBus(GXemul* gxemul = NULL);
 
 protected:
 	// Variables common to all (or most) kinds of CPUs:
