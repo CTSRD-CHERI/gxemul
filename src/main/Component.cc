@@ -577,9 +577,44 @@ string Component::GenerateShortestPossiblePath() const
 }
 
 
-refcount_ptr<Component> Component::LookupPath(const string& path)
+refcount_ptr<Component> Component::LookupPath(string path)
 {
-	return LookupPath(SplitPathStringIntoVector(path), 0);
+	// Trim whitespace
+	while (path.length() > 0 && path[path.length() - 1] == ' ')
+		path = path.substr(0, path.length() - 1);
+
+	refcount_ptr<Component> component = LookupPath(SplitPathStringIntoVector(path), 0);
+	
+	if (component.IsNULL()) {
+		// Maybe it was a path starting from somewhere other than the
+		// root. That is, if we find "." + path in the list of all
+		// components' full names exactly 1 time, then we return that.
+		vector<string> allComponentPaths;
+		AddAllComponentPaths(allComponentPaths);
+
+		// TODO: const correctness.
+		Component* root = this;
+		while (root->GetParent() != NULL)
+			root = root->GetParent();
+
+		int nMatches = 0;
+		string strToFind = "." + path;
+		for (size_t i=0, n=allComponentPaths.size(); i<n; i++) {
+			if (allComponentPaths[i].length() > strToFind.length()) {
+				string subs = allComponentPaths[i].substr(
+				    allComponentPaths[i].length() - strToFind.length());
+				if (strToFind == subs) {
+					nMatches ++;
+					component = root->LookupPath(allComponentPaths[i]);
+				}
+			}
+		}
+
+		if (nMatches != 1)
+			return NULL;
+	}
+	
+	return component;
 }
 
 
@@ -678,7 +713,7 @@ static bool PartialMatch(const string& partialPath, const string& path)
 
 
 vector<string> Component::FindPathByPartialMatch(
-	const string& partialPath) const
+	const string& partialPath, bool shortestPossible) const
 {
 	vector<string> allComponentPaths;
 	vector<string> matches;
@@ -686,8 +721,21 @@ vector<string> Component::FindPathByPartialMatch(
 	AddAllComponentPaths(allComponentPaths);
 
 	for (size_t i=0, n=allComponentPaths.size(); i<n; i++)
-		if (PartialMatch(partialPath, allComponentPaths[i]))
-			matches.push_back(allComponentPaths[i]);
+		if (PartialMatch(partialPath, allComponentPaths[i])) {
+			string match = allComponentPaths[i];
+
+			if (shortestPossible) {
+				// TODO: Fix this.
+				Component* root = const_cast<Component*>(this);
+				while (root->GetParent() != NULL)
+					root = root->GetParent();
+				refcount_ptr<Component> component =
+				    root->LookupPath(match);
+				match = component->GenerateShortestPossiblePath();
+			}
+
+			matches.push_back(match);
+		}
 
 	return matches;
 }

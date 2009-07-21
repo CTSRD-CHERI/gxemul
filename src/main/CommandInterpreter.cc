@@ -146,7 +146,7 @@ bool CommandInterpreter::TabComplete(string& commandString,
 	vector<string> matches;
 
 	matches = m_GXemul->GetRootComponent()->
-	    FindPathByPartialMatch(wordToComplete);
+	    FindPathByPartialMatch(wordToComplete, true);
 
 	if (completeCommands) {
 		Commands::const_iterator it = m_commands.begin();
@@ -204,16 +204,22 @@ bool CommandInterpreter::TabComplete(string& commandString,
 	// behaviour feels better, and this is how other tab completors seems
 	// to work.
 	//
-	// HOWEVER: Don't add a space after component paths. Usually the user
+	// NOTE: Don't add a space after component paths. Usually the user
 	// will want to type e.g. "cpu" + TAB, and get
 	// "root.machine0.mainbus0.cpu0" with no space, and then be able to
 	// add ".unassemble" or so manually.
 	if (matches.size() == 1 && cursorPosition == commandString.length()) {
-		// Ugly hack: Instead of checking if this is a command, we
-		// can probably assume that anything without a period (.) in
-		// it is a command name. (Except for "root".)
-		if (matches[0].find(".") == string::npos &&
-		    matches[0] != "root") {
+		bool isCommand = false;
+		Commands::const_iterator it = m_commands.begin();
+		for (; it != m_commands.end(); ++it) {
+			const string& commandName = it->first;
+			if (commandName == matches[0]) {
+				isCommand = true;
+				break;
+			}
+		}
+
+		if (isCommand) {
 			commandString += " ";
 			cursorPosition ++;
 		}
@@ -1498,7 +1504,65 @@ static void Test_CommandInterpreter_TabCompletion_ComponentName()
 	ci.AddKey('\t');
 	UnitTest::Assert("tab completion should have completed the "
 		"component name",
-	    ci.GetCurrentCommandBuffer(), "root.machine0.mainbus0.cpu0");
+	    ci.GetCurrentCommandBuffer(), "cpu0");
+
+	// Note: No space after component tab completion.
+}
+
+static void Test_CommandInterpreter_TabCompletion_ComponentNameAlreadyComplete()
+{
+	GXemul gxemul;
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+	UnitTest::Assert("initial buffer should be empty",
+	    ci.GetCurrentCommandBuffer(), "");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('u');
+	ci.AddKey('0');
+	ci.AddKey('\t');
+	UnitTest::Assert("tab completion should not have changed anything",
+	    ci.GetCurrentCommandBuffer(), "cpu0");
+
+	// Note: No space after component tab completion.
+}
+
+static void Test_CommandInterpreter_TabCompletion_ComponentNameMultiple()
+{
+	GXemul gxemul;
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");
+	ci.RunCommand("add mips_cpu mainbus0");
+	UnitTest::Assert("initial buffer should be empty",
+	    ci.GetCurrentCommandBuffer(), "");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('\t');
+	UnitTest::Assert("there are both cpu0 and cpu1, so don't expand all the way",
+	    ci.GetCurrentCommandBuffer(), "cpu");
+
+	// Note: No space after component tab completion.
+}
+
+static void Test_CommandInterpreter_TabCompletion_ComponentNameMultipleParents()
+{
+	GXemul gxemul;
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	ci.RunCommand("add testmips");	// root.machine0
+	ci.RunCommand("add testmips");	// root.machine1
+	UnitTest::Assert("initial buffer should be empty",
+	    ci.GetCurrentCommandBuffer(), "");
+
+	ci.AddKey('c');
+	ci.AddKey('p');
+	ci.AddKey('\t');
+	UnitTest::Assert("there are cpu0 in both root.machine0 and root.machine1",
+	    ci.GetCurrentCommandBuffer(), "machine");
 
 	// Note: No space after component tab completion.
 }
@@ -1550,7 +1614,7 @@ static void Test_CommandInterpreter_TabCompletion_ComponentNameAsArgument()
 	ci.AddKey('\t');
 	UnitTest::Assert("tab completion should have completed the "
 		"component name",
-	    ci.GetCurrentCommandBuffer(), "add dummy root.dummy0");
+	    ci.GetCurrentCommandBuffer(), "add dummy dummy0");
 
 	// Note: No space after component tab completion.
 }
@@ -1584,6 +1648,12 @@ static void Test_CommandInterpreter_TabCompletion_roWithComponents()
 	ci.AddKey('r');
 	ci.AddKey('o');
 	ci.AddKey('\t');
+	// there are both "rom0" and "root".
+	UnitTest::Assert("tab completion should not have expanded",
+	    ci.GetCurrentCommandBuffer(), "ro");
+
+	ci.AddKey('o');
+	ci.AddKey('\t');
 	UnitTest::Assert("tab completion should have expanded to 'root'",
 	    ci.GetCurrentCommandBuffer(), "root");
 }
@@ -1601,8 +1671,7 @@ static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Empty()
 	ci.AddKey('.');
 	ci.AddKey('\t');
 	UnitTest::Assert("tab completion should have caused expansion",
-	    ci.GetCurrentCommandBuffer(),
-	    "root.machine0.mainbus0.cpu0.");
+	    ci.GetCurrentCommandBuffer(), "cpu0.");
 }
 
 static void Test_CommandInterpreter_TabCompletion_ComponentMethods()
@@ -1619,8 +1688,7 @@ static void Test_CommandInterpreter_TabCompletion_ComponentMethods()
 	ci.AddKey('u');
 	ci.AddKey('\t');
 	UnitTest::Assert("tab completion should have caused expansion",
-	    ci.GetCurrentCommandBuffer(),
-	    "root.machine0.mainbus0.cpu0.unassemble");
+	    ci.GetCurrentCommandBuffer(), "cpu0.unassemble");
 }
 
 static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Middle()
@@ -1645,8 +1713,7 @@ static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Middle()
 	ci.AddKey('\2');	// cursor placed after "una"
 	ci.AddKey('\t');
 	UnitTest::Assert("tab completion should have caused expansion",
-	    ci.GetCurrentCommandBuffer(),
-	    "root.machine0.mainbus0.cpu0.unassemblebcd");
+	    ci.GetCurrentCommandBuffer(), "cpu0.unassemblebcd");
 }
 
 static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Arg()
@@ -1673,8 +1740,7 @@ static void Test_CommandInterpreter_TabCompletion_ComponentMethods_Arg()
 	ci.AddKey('\2');	// cursor placed after "u"
 	ci.AddKey('\t');
 	UnitTest::Assert("tab completion should have caused expansion",
-	    ci.GetCurrentCommandBuffer(),
-	    "root.machine0.mainbus0.cpu0.unassemble addr");
+	    ci.GetCurrentCommandBuffer(), "cpu0.unassemble addr");
 }
 
 static void Test_CommandInterpreter_TabCompletion_ComponentVariables()
@@ -1690,9 +1756,8 @@ static void Test_CommandInterpreter_TabCompletion_ComponentVariables()
 	ci.AddKey('.');
 	ci.AddKey('g');
 	ci.AddKey('\t');
-	UnitTest::Assert("tab completion should have caused expansion",
-	    ci.GetCurrentCommandBuffer(),
-	    "root.machine0.mainbus0.cpu0.gp");
+	UnitTest::Assert("tab completion should have caused expansion cpu -> cpu0",
+	    ci.GetCurrentCommandBuffer(), "cpu0.gp");
 }
 
 static void Test_CommandInterpreter_TabCompletion_ComponentVariables_Max()
@@ -1711,9 +1776,8 @@ static void Test_CommandInterpreter_TabCompletion_ComponentVariables_Max()
 	ci.AddKey('m');
 	ci.AddKey('o');
 	ci.AddKey('\t');
-	UnitTest::Assert("tab completion should have caused expansion",
-	    ci.GetCurrentCommandBuffer(),
-	    "root.ram0.memoryMapped");
+	UnitTest::Assert("tab completion should have caused expansion ram -> ram0",
+	    ci.GetCurrentCommandBuffer(), "ram0.memoryMapped");
 }
 
 static void Test_CommandInterpreter_TabCompletion_ComponentVariables_Max2()
@@ -1736,14 +1800,12 @@ static void Test_CommandInterpreter_TabCompletion_ComponentVariables_Max2()
 	ci.AddKey('\2');
 	ci.AddKey('\2');
 	ci.AddKey('\t');
-	UnitTest::Assert("tab completion should have caused expansion",
-	    ci.GetCurrentCommandBuffer(),
-	    "root.ram0.memoryMapped 2");
+	UnitTest::Assert("tab completion should have caused expansion ram -> ram0",
+	    ci.GetCurrentCommandBuffer(), "ram0.memoryMapped 2");
 
 	ci.AddKey('X');
 	UnitTest::Assert("cursor position after tab completion was wrong?",
-	    ci.GetCurrentCommandBuffer(),
-	    "root.ram0.memoryMappedX 2");
+	    ci.GetCurrentCommandBuffer(), "ram0.memoryMappedX 2");
 }
 
 static void Test_CommandInterpreter_NonExistingCommand()
@@ -1845,6 +1907,9 @@ UNITTESTS(CommandInterpreter)
 	UNITTEST(Test_CommandInterpreter_TabCompletion_C);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_OnlyCommandAsFirstWord);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentName);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameAlreadyComplete);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameMultiple);
+	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameMultipleParents);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameNonexist);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_ComponentNameAsArgument);
 	UNITTEST(Test_CommandInterpreter_TabCompletion_CWithComponents);

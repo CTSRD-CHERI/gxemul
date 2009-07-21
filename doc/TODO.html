@@ -50,6 +50,13 @@ MAIN GOAL for 0.6.0:
 	Most likely it SHOULD call the base class' member function. Think
 	e.g. mips_cpu vs cpu.
 
+  [ ]	Niceness fixes:
+  	[ ]  make refcount_ptr<T> support const T as well, so that e.g.
+  	     Component::LookupPath can be made const! (As it should be.)
+  	     and Component::FindPathByPartialMatch also (it's broken right now)
+  	[ ]  avoid const_cast
+  	[ ]  avoid exceptions (better to return failure some other way)
+
   [ ]	Call m_gxemul->GetRootComponent()->FlushCachedState(); when a component
   	is e.g. moved or copied! Example: cpu0 in machine0 is moved to machine1,
   	and then cpu.dump is executed. It should then use the mainbus of machine1,

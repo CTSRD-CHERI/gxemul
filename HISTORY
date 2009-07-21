@@ -3908,3 +3908,5 @@ Changelog for GXemul:
 		Adding a GenerateShortestPossiblePath method on Component.
 		Adding a helper for outputting pre-0.6.0 style debug messages
 		from components ("[ componentname: message ]").
+		Tab completion (in the CommandInterpreter) now uses shortest
+		path, whenever possible, instead of full paths.

@@ -289,12 +289,14 @@ public:
 	 * If so, this function moves on to the next part of the path (if there
 	 * are more parts) and looks up a child with that name, and so on.
 	 *
+	 * Alternatively, the path may be a partial match.
+	 *
 	 * @param path The path to the component, consisting of names with
 	 *	"." (period) between names.
 	 * @return A reference counted pointer to the looked up component,
 	 *	which is set to NULL if the path was not found.
 	 */
-	refcount_ptr<Component> LookupPath(const string& path);
+	refcount_ptr<Component> LookupPath(string path);
 
 	/**
 	 * \brief Finds complete component paths, given a partial path.
@@ -326,9 +328,12 @@ public:
 	 * component paths.
 	 *
 	 * @param partialPath The partial path to complete.
+	 * @param shortestPossible Return shortest possible paths, instead of
+	 *	full paths.
 	 * @return A vector of possible complete paths.
 	 */
-	vector<string> FindPathByPartialMatch(const string& partialPath) const;
+	vector<string> FindPathByPartialMatch(const string& partialPath,
+		bool shortestPossible = false) const;
 
 	/**
 	 * \brief Adds a reference to a child component.
