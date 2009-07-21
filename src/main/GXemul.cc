@@ -574,6 +574,12 @@ int GXemul::Run()
 
 			m_ui->ShowDebugMessage(component->GenerateTreeDump("") + "\n");
 		}
+
+		// A separator line, if we start emulating directly without dropping
+		// into the interactive debugger. (To mimic pre-0.6.0 appearance.)
+		if (GetRunState() == Running)
+			m_ui->ShowDebugMessage("--------------------------------"
+			    "-----------------------------------------------\n\n");
 	}
 
 	try {
