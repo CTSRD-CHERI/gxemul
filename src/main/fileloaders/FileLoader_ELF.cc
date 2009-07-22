@@ -448,7 +448,11 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 
 			// Special case for MIPS: _gp symbol initiates the GP register.
 			if (e_machine == EM_MIPS && symbol == "_gp") {
-				messages << "found _gp address: 0x" << st_value << "\n";
+				messages << "found _gp address: 0x";
+				if (elf32)
+					messages << setw(8) << setfill('0') << (uint32_t) st_value << "\n";
+				else
+					messages << setw(16) << setfill('0') << (uint64_t) st_value << "\n";
 
 				stringstream ss;
 				ss << st_value;
