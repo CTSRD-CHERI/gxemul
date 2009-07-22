@@ -41,15 +41,6 @@ MAIN GOAL for 0.6.0:
 
   [ ]   Make sure that BOTH old and new configuration files work!
 
-  [ ]	I think the "method" overloading stuff is broken:
-
-	 * Note 2: The base class' member function should <i>not</i>
-	 *	be called. The default Component base class does
-	 *	not have any methods.
-
-	Most likely it SHOULD call the base class' member function. Think
-	e.g. mips_cpu vs cpu.
-
   [ ]	Niceness fixes:
   	[/]  make refcount_ptr<T> support const T as well, so that e.g. code in
   	     Component::LookupPath can be made to work without a const_cast!

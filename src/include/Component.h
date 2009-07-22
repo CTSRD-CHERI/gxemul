@@ -222,7 +222,9 @@ public:
 	 * \brief Retrieves a component's implemented method names.
 	 *
 	 * Note that a component's implementation should call its
-	 * base class' GetMethodNames(vector<string>&) too.
+	 * base class' GetMethodNames(vector<string>&) too. However, when
+	 * methods are executed, the most specific implementation (i.e.
+	 * not the base class) will get a chance first to execute the method.
 	 *
 	 * @param names A vector of strings, where method names
 	 *	should be added.
@@ -233,11 +235,11 @@ public:
 	 * \brief Executes a method on the component.
 	 *
 	 * Note 1: The method name must be one of those returned
-	 *	by GetMethodNames(vector<string>&).
+	 *	by GetMethodNames(vector<string>&), either in the class itself
+	 *	or by one of the base implementations.
 	 *
-	 * Note 2: The base class' member function should <i>not</i>
-	 *	be called. The default Component base class does
-	 *	not have any methods.
+	 * Note 2: The base class' member function should <i>only</i> be called
+	 *	if this class does not handle the method.
 	 *
 	 * @param gxemul A reference to the GXemul instance.
 	 * @param methodName The name of the method.

@@ -239,9 +239,9 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 		m_lastUnassembleVaddr = vaddr;
 		return;
 	}
-	
-	// Huh? Unimplemented method. Shouldn't be here.
-	throw std::exception();
+
+	// Call base...
+	Component::ExecuteMethod(gxemul, methodName, arguments);
 }
 
 

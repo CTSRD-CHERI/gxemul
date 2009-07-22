@@ -175,9 +175,9 @@ void RAMComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 
 		return;
 	}
-	
-	// Huh? Unimplemented method. Shouldn't be here.
-	throw std::exception();
+
+	// Call base...
+	Component::ExecuteMethod(gxemul, methodName, arguments);
 }
 
 
