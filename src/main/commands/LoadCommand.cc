@@ -95,8 +95,10 @@ void LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
 	// size of the file, since the string constructor generates a _copy_.
 	// But string takes care of unicode and such (if compiled as ustring).
 	char* buf = (char*) malloc(fileSize);
-	if (buf == NULL)
+	if (buf == NULL) {
+		std::cerr << "LoadCommand::LoadComponentTree: out of memory\n";
 		throw std::exception();
+	}
 
 	memset(buf, 0, fileSize);
 	file.read(buf, fileSize);
@@ -127,7 +129,7 @@ void LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
 		specifiedComponent->AddChild(component);
 
 		ShowMsg(gxemul, filename + " loaded into " +
-		    specifiedComponent->GeneratePath() + "\n");
+		    specifiedComponent->GenerateShortestPossiblePath() + "\n");
 	}
 }
 
@@ -208,7 +210,7 @@ void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 	FileLoader fileLoader(filename);
 	if (fileLoader.Load(specifiedComponent))
 		ShowMsg(gxemul, filename + " loaded into " +
-		    specifiedComponent->GeneratePath() + "\n");
+		    specifiedComponent->GenerateShortestPossiblePath() + "\n");
 	else
 		ShowMsg(gxemul, "Failed to load " + filename + " into " + path + "\n");
 }
