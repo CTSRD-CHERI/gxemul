@@ -245,7 +245,7 @@ size_t MIPS_CPUComponent::DisassembleInstructionMIPS16(uint64_t vaddr,
 	result.push_back(tmp);
 
 	// TODO
-	result.push_back("unimplemented instruction");
+	result.push_back("unimplemented MIPS16 instruction");
 
 	return sizeof(uint16_t);
 }
