@@ -51,10 +51,8 @@ MAIN GOAL for 0.6.0:
 	e.g. mips_cpu vs cpu.
 
   [ ]	Niceness fixes:
-  	[ ]  make refcount_ptr<T> support const T as well, so that e.g.
-  	     Component::LookupPath can be made const! (As it should be.)
-  	     and Component::FindPathByPartialMatch also (it's broken right now)
-  	[ ]  avoid const_cast
+  	[/]  make refcount_ptr<T> support const T as well, so that e.g. code in
+  	     Component::LookupPath can be made to work without a const_cast!
   	[ ]  avoid exceptions (better to return failure some other way)
 
   [ ]	Call m_gxemul->GetRootComponent()->FlushCachedState(); when a component

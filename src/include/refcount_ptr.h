@@ -193,6 +193,11 @@ public:
 		return m_p;
 	}
 
+	operator const T* () const
+	{
+		return m_p;
+	}
+
 	const T& operator *() const
 	{
 		return *m_p;

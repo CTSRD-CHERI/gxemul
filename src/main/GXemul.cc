@@ -562,7 +562,7 @@ int GXemul::Run()
 		m_ui->ShowStartupBanner();
 
 		// Dump (a suitable part of) the configuration tree at startup.
-		Component* component = GetRootComponent();
+		const Component* component = GetRootComponent();
 		if (component->GetChildren().size() > 0) {
 			while (true) {
 				int nChildren = component->GetChildren().size();

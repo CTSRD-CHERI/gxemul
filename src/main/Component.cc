@@ -577,7 +577,7 @@ string Component::GenerateShortestPossiblePath() const
 }
 
 
-refcount_ptr<Component> Component::LookupPath(string path)
+const refcount_ptr<Component> Component::LookupPath(string path) const
 {
 	// Trim whitespace
 	while (path.length() > 0 && path[path.length() - 1] == ' ')
@@ -592,8 +592,7 @@ refcount_ptr<Component> Component::LookupPath(string path)
 		vector<string> allComponentPaths;
 		AddAllComponentPaths(allComponentPaths);
 
-		// TODO: const correctness.
-		Component* root = this;
+		const Component* root = this;
 		while (root->GetParent() != NULL)
 			root = root->GetParent();
 
@@ -618,8 +617,8 @@ refcount_ptr<Component> Component::LookupPath(string path)
 }
 
 
-refcount_ptr<Component> Component::LookupPath(const vector<string>& path,
-	size_t index)
+const refcount_ptr<Component> Component::LookupPath(const vector<string>& path,
+	size_t index) const
 {
 	refcount_ptr<Component> component;
 
@@ -642,7 +641,7 @@ refcount_ptr<Component> Component::LookupPath(const vector<string>& path,
 	if (!match || index == path.size() - 1) {
 		// (Successfully, if there was a match.)
 		if (match)
-			component = this;
+			return const_cast<Component*>(this);
 		return component;
 	}
 
@@ -725,10 +724,10 @@ vector<string> Component::FindPathByPartialMatch(
 			string match = allComponentPaths[i];
 
 			if (shortestPossible) {
-				// TODO: Fix this.
-				Component* root = const_cast<Component*>(this);
+				const Component* root = this;
 				while (root->GetParent() != NULL)
 					root = root->GetParent();
+
 				refcount_ptr<Component> component =
 				    root->LookupPath(match);
 				match = component->GenerateShortestPossiblePath();

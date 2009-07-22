@@ -296,7 +296,7 @@ public:
 	 * @return A reference counted pointer to the looked up component,
 	 *	which is set to NULL if the path was not found.
 	 */
-	refcount_ptr<Component> LookupPath(string path);
+	const refcount_ptr<Component> LookupPath(string path) const;
 
 	/**
 	 * \brief Finds complete component paths, given a partial path.
@@ -574,8 +574,8 @@ private:
 	 * @return A reference counted pointer to the looked up component,
 	 *	which is set to NULL if the path was not found.
 	 */
-	refcount_ptr<Component> LookupPath(const vector<string>& path,
-		size_t index);
+	const refcount_ptr<Component> LookupPath(const vector<string>& path,
+		size_t index) const;
 
 	/**
 	 * \brief Internal helper, which gathers a list of all component paths.
