@@ -61,6 +61,7 @@ refcount_ptr<Component> TestM88KMachine::Create()
 	rom->SetVariableValue("name", "\"rom0\"");
 	rom->SetVariableValue("memoryMappedBase", "0xff800000");
 	rom->SetVariableValue("memoryMappedSize",   "0x400000");
+	rom->SetVariableValue("writeProtect", "true");
 	mainbus->AddChild(rom);
 
 	refcount_ptr<Component> cpu =

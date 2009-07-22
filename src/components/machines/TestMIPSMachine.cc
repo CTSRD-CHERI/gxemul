@@ -63,6 +63,7 @@ refcount_ptr<Component> TestMIPSMachine::Create()
 	rom->SetVariableValue("name", "\"rom0\"");
 	rom->SetVariableValue("memoryMappedBase", "0x1fc00000");
 	rom->SetVariableValue("memoryMappedSize", tmpss2.str());
+	rom->SetVariableValue("writeProtect", "true");
 	mainbus->AddChild(rom);
 
 	refcount_ptr<Component> cpu =
