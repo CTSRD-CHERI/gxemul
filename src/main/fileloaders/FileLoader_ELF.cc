@@ -107,12 +107,16 @@ string FileLoader_ELF::DetectFileType(unsigned char *buf, size_t buflen, float& 
 bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostream& messages) const
 {
 	AddressDataBus* bus = component->AsAddressDataBus();
-	if (bus == NULL)
+	if (bus == NULL) {
+		messages << "Target is not an AddressDataBus.\n";
 		return false;
+	}
 
 	ifstream file(Filename().c_str());
-	if (!file.is_open())
+	if (!file.is_open()) {
+		messages << "Unable to read file.\n";
 		return false;
+	}
 
 	char buf[64];
 
@@ -132,7 +136,7 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 	    ehdr32->e_ident[EI_MAG1] != ELFMAG1 ||
 	    ehdr32->e_ident[EI_MAG2] != ELFMAG2 ||
 	    ehdr32->e_ident[EI_MAG3] != ELFMAG3) {
-		// Not an ELF.
+		messages << "Not an ELF.\n";
 		return false;
 	}
 
@@ -141,15 +145,15 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 	int elfVersion = ehdr32->e_ident[EI_VERSION];
 
 	if (elfClass != ELFCLASS32 && elfClass != ELFCLASS64) {
-		// Unknown ELF class.
+		messages << "Unknown ELF class.\n";
 		return false;
 	}
 	if (elfDataEncoding != ELFDATA2LSB && elfDataEncoding != ELFDATA2MSB) {
-		// Unknown ELF data encoding.
+		messages << "Unknown ELF data encoding.\n";
 		return false;
 	}
 	if (elfVersion != EV_CURRENT) {
-		// Unknown ELF version.
+		messages << "Unknown ELF version.\n";
 		return false;
 	}
 
@@ -176,7 +180,7 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_type);
 
 	if (e_type != ET_EXEC) {
-		// Only Executables are of interest to us here.
+		messages << "ELF file is not an Executable.\n";
 		return false;
 	}
 
@@ -215,7 +219,7 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 		messages << "machine type '" << e_machine << "'";
 	messages << " ELF" << (elf32? 32 : 64) << " ";
 
-	messages << (elfDataEncoding == ELFDATA2LSB? "LSB (LE)" : "MSB (BE)") << ", ";
+	messages << (elfDataEncoding == ELFDATA2LSB? "LSB (LE)" : "MSB (BE)") << ": ";
 
 	if (!elf32 && (e_machine == EM_PPC || e_machine == EM_PPC64))
 		messages << "PPC function descriptor at";
@@ -225,23 +229,33 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 	messages << " 0x";
 	messages.flags(std::ios::hex);
 
-	if (elf32)
-		messages << setw(8) << setfill('0') << (uint32_t) e_entry << "\n";
-	else
-		messages << setw(16) << setfill('0') << (uint64_t) e_entry << "\n";
 /*
+	// MIPS16 encoding (16-bit words) is indicated by the lowest bit of the PC.
+	if (e_machine == EM_MIPS && (eentry & 1)) {
+		TODO
+	}
 
-	// SH64: 32-bit instruction encoding?
-	if (arch == ARCH_SH && (eentry & 1)) {
+	// SH64 32-bit encoding is indicated by the lowest bit of the PC.
+	if (e_machine == EM_SH && (eentry & 1)) {
 		fatal("SH64: 32-bit instruction encoding: TODO\n");
 		//  m->cpus[0]->cd.sh.compact = 0;
 		m->cpus[0]->cd.sh.cpu_type.bits = 64;
 		exit(1);
 	}
-
 */
 
-	for (size_t i=0; i<e_phnum; ++i) {
+	// Special case for MIPS: 32-bit addresses are sign-extended.
+	if (e_machine == EM_MIPS && elf32)
+		e_entry = (int32_t) e_entry;
+
+	if (elf32)
+		messages << setw(8) << setfill('0') << (uint32_t) e_entry << "\n";
+	else
+		messages << setw(16) << setfill('0') << (uint64_t) e_entry << "\n";
+
+	// PROGRAM HEADERS
+	size_t i;
+	for (i=0; i<e_phnum; ++i) {
 		// Load Phdr number i:
 		file.seekg(e_phoff + i * e_phentsize, std::ios::beg);
 
@@ -253,6 +267,10 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 
 		memset(phdr_buf, 0, sizeof(phdr_buf));
 		file.read(phdr_buf, sizeof(phdr_buf));
+		if (file.gcount() != sizeof(phdr_buf)) {
+			messages << "Unable to read Phdr.\n";
+			return false;
+		}
 		
 		ELF_HEADER_VAR(phdr32, phdr64, uint64_t, p_type);
 		ELF_HEADER_VAR(phdr32, phdr64, uint64_t, p_offset);
@@ -271,10 +289,26 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 			return false;
 		}
 
+		// Special case for MIPS: 32-bit addresses are sign-extended.
+		if (e_machine == EM_MIPS && elf32)
+			p_vaddr = (int32_t) p_vaddr;
+
+		messages.flags(std::ios::hex);
+		messages << "loadable chunk: vaddr 0x";
+
+		if (elf32)
+			messages << setw(8) << setfill('0') << (uint32_t) p_vaddr;
+		else
+			messages << setw(16) << setfill('0') << (uint64_t) p_vaddr;
+
+		messages.flags(std::ios::dec);
+		messages << ", " << p_filesz << " bytes\n";
+
 		file.seekg(p_offset, std::ios::beg);
 		char databuf[65536];
 		uint64_t bytesRead = 0;
 		uint64_t vaddrToWriteTo = p_vaddr;
+
 		while (bytesRead < p_filesz) {
 			int sizeToRead = sizeof(databuf);
 			if (sizeToRead + bytesRead > p_filesz)
@@ -289,22 +323,196 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 
 			// Write to the bus, one byte at a time.
 			for (int k=0; k<bytesReadThisTime; ++k) {
-				bus->AddressSelect(vaddrToWriteTo ++);
+				bus->AddressSelect(vaddrToWriteTo);
 				if (!bus->WriteData(databuf[k])) {
-					// Failed to write data.
+					messages.flags(std::ios::hex);
+					messages << "Failed to write data to "
+					    "virtual address 0x"
+					    << vaddrToWriteTo << "\n";
 					return false;
 				}
+
+				++ vaddrToWriteTo;
 			}
 		}
 	}
 
-	// TODO: Symbols
+	// SECTION HEADERS
+	vector<char> symtab;
+	vector<char> symstrings;
+	for (i=0; i<e_shnum; ++i) {
+		// Load Shdr number i:
+		file.seekg(e_shoff + i * e_shentsize, std::ios::beg);
+
+		char shdr_buf[64];
+		assert(sizeof(shdr_buf) >= sizeof(Elf32_Shdr));
+		assert(sizeof(shdr_buf) >= sizeof(Elf64_Shdr));
+		Elf32_Shdr* shdr32 = (Elf32_Shdr*) shdr_buf;
+		Elf64_Shdr* shdr64 = (Elf64_Shdr*) shdr_buf;
+
+		memset(shdr_buf, 0, sizeof(shdr_buf));
+		file.read(shdr_buf, sizeof(shdr_buf));
+		if (file.gcount() != sizeof(shdr_buf)) {
+			messages << "Unable to read Phdr.\n";
+			return false;
+		}
+
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_name);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_type);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_flags);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_addr);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_offset);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_size);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_link);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_info);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_addralign);
+		ELF_HEADER_VAR(shdr32, shdr64, uint64_t, sh_entsize);
+
+		if (sh_type == SHT_SYMTAB) {
+			if (symtab.size() > 0) {
+				messages << "symtab: another symtab already loaded? TODO\n";
+				return false;
+			}
+			
+			int entrySize = elf32? sizeof(Elf32_Sym) : sizeof(Elf64_Sym);
+			int nEntries = sh_size / entrySize;
+			
+			messages.flags(std::ios::dec);
+			messages << "symtab: " << nEntries << " symbols at 0x";
+			messages.flags(std::ios::hex);
+			messages << sh_offset << "\n";
+			
+			symtab.resize(sh_size);
+			file.seekg(sh_offset, std::ios::beg);
+			file.read(&symtab[0], sh_size);
+			if ((uint64_t) file.gcount() != sh_size) {
+				messages << "Failed to read all " << sh_size << " symbol bytes.\n";
+				return false;
+			}
+		}
+		
+		if (sh_type == SHT_STRTAB) {
+			messages.flags(std::ios::dec);
+			messages << "strtab: " << sh_size << " bytes at 0x";
+			messages.flags(std::ios::hex);
+			messages << sh_offset << "\n";
+
+			symstrings.resize(sh_size);
+			file.seekg(sh_offset, std::ios::beg);
+			file.read(&symstrings[0], sh_size);
+			if ((uint64_t) file.gcount() != sh_size) {
+				messages << "Failed to read all " << sh_size << " symbol string bytes.\n";
+				return false;
+			}
+		}
+	}
+
+	// Symbols
+	if (symtab.size() > 0 && symstrings.size() > 0) {
+		int entrySize = elf32? sizeof(Elf32_Sym) : sizeof(Elf64_Sym);
+		int nEntries = symtab.size() / entrySize;
+
+		// For safety:
+		symstrings.resize(symstrings.size() + 1);
+		symstrings[symstrings.size() - 1] = '\0';
+
+		messages.flags(std::ios::hex);
+
+		for (int j=0; j<nEntries; j++) {
+			size_t p = j * entrySize;
+			Elf32_Sym* sym32 = (Elf32_Sym*) &symtab[p];
+			Elf64_Sym* sym64 = (Elf64_Sym*) &symtab[p];
+
+			ELF_HEADER_VAR(sym32, sym64, uint64_t, st_name);
+			ELF_HEADER_VAR(sym32, sym64, uint64_t, st_info);
+			ELF_HEADER_VAR(sym32, sym64, uint64_t, st_value);
+			ELF_HEADER_VAR(sym32, sym64, uint64_t, st_size);
+
+			int bind = elf32? ELF32_ST_BIND(st_info) : ELF64_ST_BIND(st_info);
+			if (bind == STB_LOCAL)
+				continue;
+
+			if (st_size == 0)
+				st_size ++;
+
+			if (st_name >= symstrings.size() - 1) {
+				messages << "symbol pointer mismatch?\n";
+				continue;
+			}
+
+			string symbol = &symstrings[st_name];
+
+			// Special case for MIPS: 32-bit addresses are sign-extended.
+			if (e_machine == EM_MIPS && elf32)
+				st_value = (int32_t) st_value;
+
+			// Special case for MIPS: _gp symbol initiates the GP register.
+			if (e_machine == EM_MIPS && symbol == "_gp") {
+				messages << "found _gp address: 0x" << st_value << "\n";
+
+				stringstream ss;
+				ss << st_value;
+				component->SetVariableValue("gp", ss.str());
+			}
+
+			// FOR DEBUGGING ONLY:
+			// messages << "symbol name '" << symbol << "', addr 0x" <<
+			//    st_value << ", size 0x" << st_size << "\n";
+
+			// Add this symbol to the symbol registry:
+			// TODO
+		}
+	}
 
 	// Set the CPU's entry point.
-	// Special handling for some architectures: 32-bit MIPS uses
-	// sign-extension.
-	if (e_machine == EM_MIPS && elf32)
-		e_entry = (int32_t) e_entry;
+
+#if 0
+	if (elf64 && arch == ARCH_PPC) {
+		/*
+		 *  Special case for 64-bit PPC ELFs:
+		 *
+		 *  The ELF starting symbol points to a ".opd" section
+		 *  which contains a function descriptor:
+		 *
+		 *      uint64_t  start;
+		 *      uint64_t  toc_base;
+		 *      uint64_t  something_else;       (?)
+		 */
+		int res;
+		unsigned char b[sizeof(uint64_t)];
+		uint64_t toc_base;
+
+		debug("PPC64: ");
+
+		res = m->cpus[0]->memory_rw(m->cpus[0], mem, eentry, b,
+		    sizeof(b), MEM_READ, NO_EXCEPTIONS);
+		if (!res)
+			debug(" [WARNING: could not read memory?] ");
+
+		/*  PPC are always big-endian:  */
+		*entrypointp = ((uint64_t)b[0] << 56) +
+		    ((uint64_t)b[1] << 48) + ((uint64_t)b[2] << 40) +
+		    ((uint64_t)b[3] << 32) + ((uint64_t)b[4] << 24) +
+		    ((uint64_t)b[5] << 16) + ((uint64_t)b[6] << 8) +
+		    (uint64_t)b[7];
+
+		res = m->cpus[0]->memory_rw(m->cpus[0], mem, eentry + 8,
+		    b, sizeof(b), MEM_READ, NO_EXCEPTIONS);
+		if (!res)
+			fatal(" [WARNING: could not read memory?] ");
+
+		toc_base = ((uint64_t)b[0] << 56) +
+		    ((uint64_t)b[1] << 48) + ((uint64_t)b[2] << 40) +
+		    ((uint64_t)b[3] << 32) + ((uint64_t)b[4] << 24) +
+		    ((uint64_t)b[5] << 16) + ((uint64_t)b[6] << 8) +
+		    (uint64_t)b[7];
+
+		debug("entrypoint 0x%016"PRIx64", toc_base 0x%016"PRIx64"\n",
+		    (uint64_t) *entrypointp, (uint64_t) toc_base);
+		if (tocp != NULL)
+			*tocp = toc_base;
+	}
+#endif
 
 	stringstream ss;
 	ss << e_entry;

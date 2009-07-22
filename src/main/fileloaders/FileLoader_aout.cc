@@ -28,7 +28,10 @@
 #include <assert.h>
 #include <string.h>
 #include <fstream>
+#include <iomanip>
 
+using std::setw;
+using std::setfill;
 using std::ifstream;
 
 #include "AddressDataBus.h"
@@ -98,12 +101,16 @@ static uint32_t unencode32(unsigned char *p, Endianness endianness)
 bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostream& messages) const
 {
 	AddressDataBus* bus = component->AsAddressDataBus();
-	if (bus == NULL)
+	if (bus == NULL) {
+		messages << "Target is not an AddressDataBus.\n";
 		return false;
+	}
 
 	ifstream file(Filename().c_str());
-	if (!file.is_open())
+	if (!file.is_open()) {
+		messages << "Unable to read file.\n";
 		return false;
+	}
 
 	unsigned char buf[65536];
 
@@ -117,8 +124,10 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 	float matchness;
 	string format = DetectFileType(buf, amountRead, matchness);
 
-	if (format == "")
+	if (format == "") {
+		messages << "Unknown a.out format.\n";
 		return false;
+	}
 
 	file.seekg(0, std::ios_base::beg);
 
@@ -136,13 +145,10 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 	int32_t symbsize = 0;
 	uint32_t vaddr, total_len;
 
-	// TODO: Better error reporting than just spewing out crap to std::cerr.
-
 	if (format.substr(format.length()-5, 5) == "_osf1") {
 		file.read((char *)buf, 32);
 		if (file.gcount() != 32) {
-			std::cerr << "FileLoader_aout::LoadIntoComponent: "
-			    << Filename() << " is too small to be an OSF1 a.out.\n";
+			messages << "The file is too small to be an OSF1 a.out.\n";
 			return false;
 		}
 
@@ -164,9 +170,7 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 	} else {
 		file.read((char *)&aout_header, sizeof(aout_header));
 		if (file.gcount() != sizeof(aout_header)) {
-			std::cerr << "FileLoader_aout::LoadIntoComponent: "
-			    << Filename() << " is too small to be an a.out.\n";
-
+			messages << "The file is too small to be an a.out.\n";
 			return false;
 		}
 
@@ -187,6 +191,13 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 		vaddr &= ~0xfff;
 	}
 
+	messages.flags(std::ios::hex);
+	messages << "a.out: entry point 0x";
+	messages << setw(8) << setfill('0') << (uint32_t) entry << "\n";
+
+	messages.flags(std::ios::dec);
+	messages << "text + data = " << textsize << " + " << datasize << " bytes\n";
+
 	/*  Load text and data:  */
 	total_len = textsize + datasize;
 	while (total_len != 0) {
@@ -196,21 +207,28 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 
 		// Write to the bus, one byte at a time.
 		for (int k=0; k<len; ++k) {
-			bus->AddressSelect(vaddr ++);
+			bus->AddressSelect(vaddr);
 			if (!bus->WriteData(buf[k])) {
-				// Failed to write data.
+				messages.flags(std::ios::hex);
+				messages << "Failed to write data to virtual "
+				    "address 0x" << vaddr << "\n";
 				return false;
 			}
+			
+			++ vaddr;
 		}
 
 		total_len -= len;
 	}
 	
 	// TODO: Symbols
+	if (symbsize > 0) {
+		messages << "symbols = " << symbsize << " bytes: TODO\n";
+	}
 
 	// Set the CPU's entry point.
 	stringstream ss;
-	ss << entry;
+	ss << (int64_t)(int32_t)entry;
 	component->SetVariableValue("pc", ss.str());
 	// TODO: Error handling if there was no "pc"?
 

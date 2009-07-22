@@ -216,8 +216,8 @@ bool LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		    filename + " loaded\n" + messages.str());
 		return true;
 	} else {
-		ShowMsg(gxemul, "Failed to load " + filename + " into " + path +
-		    ":\n" + messages.str());
+		gxemul.GetUI()->ShowDebugMessage(specifiedComponent,
+		    "FAILED to load " + filename + "\n" + messages.str());
 		return false;
 	}
 }

@@ -46,6 +46,10 @@ MAIN GOAL for 0.6.0:
  
  	[X]  If not all binaries can be loaded, then abort?
 
+  [ ]	Symbol registry.
+  	[ ]  Add ELF symbols (see end of FileLoader_ELF.cc).
+  	[ ]  Load a.out symbols.
+
   [ ]   Make sure that BOTH old and new configuration files work!
 
   [ ]	Niceness fixes:
@@ -57,6 +61,8 @@ MAIN GOAL for 0.6.0:
   	is e.g. moved or copied! Example: cpu0 in machine0 is moved to machine1,
   	and then cpu.dump is executed. It should then use the mainbus of machine1,
   	not machine0!
+
+  [ ]	Cache short path names if evaluation/generation of them becomes too heavy.
 
   [ ]	CPU endianness serialization/deserialization!
 
