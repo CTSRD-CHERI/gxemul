@@ -40,14 +40,14 @@ HelpCommand::~HelpCommand()
 }
 
 
-void HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	const Commands& commands = gxemul.GetCommandInterpreter().GetCommands();
 	Commands::const_iterator it;
 
 	if (arguments.size() > 1) {
 		gxemul.GetUI()->ShowDebugMessage("usage: help [cmd]\n");
-		return;
+		return false;
 	}
 
 	if (arguments.size() == 1) {
@@ -55,7 +55,7 @@ void HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		if (it == commands.end()) {
 			gxemul.GetUI()->ShowDebugMessage(
 			    "Command \"" + arguments[0] + "\" unknown.\n");
-			return;
+			return false;
 		}
 		
 		// command name + " " + argument format
@@ -79,7 +79,7 @@ void HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		
 		gxemul.GetUI()->ShowDebugMessage("\n" + longhelp + "\n");
 
-		return;
+		return true;
 	}
 
 	// Find the longest name + argument:
@@ -127,6 +127,8 @@ void HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 	    "Prints the value of a variable of a named component.\n");
 	gxemul.GetUI()->ShowDebugMessage("  <name>.<var> = <value>  "
 	    "Assigns a value to a variable of a named component.\n");
+
+	return true;
 }
 
 

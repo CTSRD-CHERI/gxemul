@@ -135,23 +135,66 @@ void ConsoleUI::ShowDebugMessage(const string& msg)
 }
 
 
-void ConsoleUI::ShowDebugMessage(Component* component, const string& msg, GXemul* gxemul)
+static vector<string> SplitIntoRows(const string &msg)
 {
-	string newmsg = component->GenerateShortestPossiblePath() + ": " + msg;
+	// This is slow and hackish, but works.
+	vector<string> result;
+	string line;
 
-	// Remove any trailing newline:
-	while (newmsg.length() != 0 && newmsg[newmsg.length() - 1] == '\n')
-		newmsg = newmsg.substr(0, newmsg.length() - 1);
+	for (size_t i=0, n=msg.length(); i<n; i++) {
+		stringchar ch = msg[i];
+		if (ch == '\n') {
+			if (line.length() > 0)
+				result.push_back(line);
+			line = "";
+		} else {
+			line += ch;
+		}
+	}
 
-	// If runstate is Running, then show pre-0.6.0 style [ ] output.
-	if (gxemul != NULL && gxemul->GetRunState() == GXemul::Running)
-		newmsg = "[ " + newmsg + " ]";
+	if (line.length() > 0)
+		result.push_back(line);
 
-	// Always terminate with a newline.
-	if (newmsg.length() == 0 || newmsg[newmsg.length()-1] != '\n')
-		newmsg += "\n";
+	return result;
+}
 
-	ShowDebugMessage(newmsg);
+
+void ConsoleUI::ShowDebugMessage(Component* component, const string& msg)
+{
+	if (m_gxemul->GetQuietMode())
+		return;
+
+	stringstream ss;
+	string componentName = component->GenerateShortestPossiblePath();
+
+	vector<string> lines = SplitIntoRows(msg);
+
+	// Let's say the input msg is "blahlonger\nblahshort".
+
+	if (m_gxemul->GetRunState() == GXemul::Running) {
+		// If runstate is Running, then show pre-0.6.0 style [ ] output.
+		//
+		// [ cpu0: blahlonger ]
+		// [ cpu0: blahshort ]
+		for (size_t i=0; i<lines.size(); ++i)
+			ss << "[ " << componentName << ": " << lines[i] << " ]\n";
+	} else {
+		// ... otherwise show new style output:
+		//
+		// cpu0: blahlonger
+		//       blahshort
+		size_t i;
+		string spaces = "";
+		for (i=0; i<componentName.length() + 2; i++)
+			spaces += " ";
+		
+		ss << componentName << ": " << lines[0] << "\n";
+
+		for (i=1; i<lines.size(); ++i)
+			ss << spaces << lines[i] << "\n";
+	}
+
+	ShowDebugMessage(ss.str());
 }
 
 

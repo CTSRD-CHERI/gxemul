@@ -40,9 +40,10 @@ PauseCommand::~PauseCommand()
 }
 
 
-void PauseCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool PauseCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	gxemul.SetRunState(GXemul::Paused);
+	return true;
 }
 
 

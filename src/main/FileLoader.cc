@@ -92,17 +92,13 @@ string FileLoader::DetectFileFormat(refcount_ptr<const FileLoaderImpl>& loader) 
 }
 
 
-bool FileLoader::Load(refcount_ptr<Component> component) const
+bool FileLoader::Load(refcount_ptr<Component> component, ostream& messages) const
 {
 	AddressDataBus * bus = component->AsAddressDataBus();
 	if (bus == NULL) {
 		// We cannot load into something that isn't an AddressDataBus.
-		// TODO: Better error reporting!
-#ifndef NDEBUG
-		std::cerr << "\n*** FileLoader::Load: " <<
-		    component->GeneratePath() << " is not an "
-		    "AddressDataBus. TODO: Better error reporting.\n";
-#endif
+		messages << "Error: " << component->GenerateShortestPossiblePath()
+		    << " is not an AddressDataBus.\n";
 		return false;
 	}
 
@@ -110,12 +106,10 @@ bool FileLoader::Load(refcount_ptr<Component> component) const
 	string fileFormat = DetectFileFormat(loaderImpl);
 
 	if (!loaderImpl.IsNULL())
-		return loaderImpl->LoadIntoComponent(component);
+		return loaderImpl->LoadIntoComponent(component, messages);
 
-#ifndef NDEBUG
-	std::cerr << "\n*** FileLoader::Load: File format '" <<
+	messages << "Error: File format '" <<
 	    fileFormat << "' not yet implemented. TODO\n";
-#endif
 
 	return false;
 }
@@ -195,8 +189,9 @@ static refcount_ptr<Component> SetupTestMachineAndLoad(
 	UnitTest::Assert("could not look up CPU to load into?",
 	    !component.IsNULL());
 
+	stringstream messages;
 	UnitTest::Assert("could not load the file " + fileName + " for"
-	    " machine " + machineName, fileLoader.Load(component));
+	    " machine " + machineName, fileLoader.Load(component, messages));
 
 	return machine;
 }

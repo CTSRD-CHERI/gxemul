@@ -28,12 +28,43 @@
 #include <assert.h>
 #include <string.h>
 #include <fstream>
+#include <iomanip>
 
+using std::setw;
+using std::setfill;
 using std::ifstream;
 
 #include "AddressDataBus.h"
 #include "FileLoader_ELF.h"
 #include "thirdparty/exec_elf.h"
+
+/*  ELF machine types as strings: (same as exec_elf.h)  */
+#define N_ELF_MACHINE_TYPES     89
+static const char *elf_machine_type[N_ELF_MACHINE_TYPES] = {
+        "NONE", "M32", "SPARC", "386",				/*  0..3  */
+        "68K", "88K", "486", "860",				/*  4..7  */  
+        "MIPS", "S370", "MIPS_RS3_LE", "RS6000",		/*  8..11  */
+        "unknown12", "unknown13", "unknown14", "PARISC",	/*  12..15  */
+        "NCUBE", "VPP500", "SPARC32PLUS", "960",		/*  16..19  */
+        "PPC", "PPC64", "unknown22", "unknown23",		/*  20..23  */
+        "unknown24", "unknown25", "unknown26", "unknown27",	/*  24..27  */
+        "unknown28", "unknown29", "unknown30", "unknown31",	/*  28..31  */
+        "unknown32", "unknown33", "unknown34", "unknown35",	/*  32..35  */
+        "V800", "FR20", "RH32", "RCE",				/*  36..39  */
+        "ARM", "ALPHA", "SH", "SPARCV9",			/*  40..43  */
+        "TRICORE", "ARC", "H8_300", "H8_300H",			/*  44..47  */
+        "H8S", "H8_500", "IA_64", "MIPS_X",			/*  48..51  */
+        "COLDFIRE", "68HC12", "unknown54", "unknown55",		/*  52..55  */
+        "unknown56", "unknown57", "unknown58", "unknown59",	/*  56..59  */
+        "unknown60", "unknown61", "AMD64", "unknown63",		/*  60..63  */
+        "unknown64", "unknown65", "unknown66", "unknown67",	/*  64..67  */
+        "unknown68", "unknown69", "unknown70", "unknown71",	/*  68..71  */
+        "unknown72", "unknown73", "unknown74", "unknown75",	/*  72..75  */
+        "unknown76", "unknown77", "unknown78", "unknown79",	/*  76..79  */
+        "unknown80", "unknown81", "unknown82", "AVR",		/*  80..83  */
+        "unknown84", "unknown85", "unknown86", "unknown87",	/*  84..87  */
+        "M32R"							/*  88      */
+};
 
 
 FileLoader_ELF::FileLoader_ELF(const string& filename)
@@ -73,7 +104,7 @@ string FileLoader_ELF::DetectFileType(unsigned char *buf, size_t buflen, float& 
 }
 
 
-bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component) const
+bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostream& messages) const
 {
 	AddressDataBus* bus = component->AsAddressDataBus();
 	if (bus == NULL)
@@ -151,9 +182,64 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component) const
 
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_entry);
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_machine);
+
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_phoff);
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_phentsize);
 	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_phnum);
+
+	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_shoff);
+	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_shentsize);
+	ELF_HEADER_VAR(ehdr32, ehdr64, uint64_t, e_shnum);
+
+	size_t expectedPhentSize = (elf32? sizeof(Elf32_Phdr) : sizeof(Elf64_Phdr));
+	if (e_phentsize != expectedPhentSize) {
+		messages << "Incorrect ELF phentsize? " << e_phentsize << ", should "
+		    "be " << expectedPhentSize << "\n"
+		    "Perhaps this is a dynamically linked "
+		    "binary (which isn't supported yet).\n";
+		return false;
+	}
+
+	size_t expectedShentSize = (elf32? sizeof(Elf32_Shdr) : sizeof(Elf64_Shdr));
+	if (e_shentsize != expectedShentSize) {
+		messages << "Incorrect ELF shentsize? " << e_shentsize << ", should "
+		    "be " << expectedShentSize << "\n"
+		    "Perhaps this is a dynamically linked "
+		    "binary (which isn't supported yet).\n";
+		return false;
+	}
+
+	if (e_machine >= 0 && e_machine < N_ELF_MACHINE_TYPES)
+		messages << elf_machine_type[e_machine];
+	else
+		messages << "machine type '" << e_machine << "'";
+	messages << " ELF" << (elf32? 32 : 64) << " ";
+
+	messages << (elfDataEncoding == ELFDATA2LSB? "LSB (LE)" : "MSB (BE)") << ", ";
+
+	if (!elf32 && (e_machine == EM_PPC || e_machine == EM_PPC64))
+		messages << "PPC function descriptor at";
+	else
+		messages << "entry point";
+
+	messages << " 0x";
+	messages.flags(std::ios::hex);
+
+	if (elf32)
+		messages << setw(8) << setfill('0') << (uint32_t) e_entry << "\n";
+	else
+		messages << setw(16) << setfill('0') << (uint64_t) e_entry << "\n";
+/*
+
+	// SH64: 32-bit instruction encoding?
+	if (arch == ARCH_SH && (eentry & 1)) {
+		fatal("SH64: 32-bit instruction encoding: TODO\n");
+		//  m->cpus[0]->cd.sh.compact = 0;
+		m->cpus[0]->cd.sh.cpu_type.bits = 64;
+		exit(1);
+	}
+
+*/
 
 	for (size_t i=0; i<e_phnum; ++i) {
 		// Load Phdr number i:
@@ -178,6 +264,13 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component) const
 		if (p_type != PT_LOAD)
 			continue;
 
+		if (p_memsz < p_filesz) {
+			messages << "memsz < filesz. TODO: how"
+			    " to handle this? memsz = " << p_memsz <<
+			    ", filesz = " << p_filesz << "\n";
+			return false;
+		}
+
 		file.seekg(p_offset, std::ios::beg);
 		char databuf[65536];
 		uint64_t bytesRead = 0;
@@ -191,10 +284,11 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component) const
 			memset(databuf, 0, sizeToRead);
 
 			file.read(databuf, sizeToRead);
-			bytesRead += sizeToRead;
+			int bytesReadThisTime = file.gcount();
+			bytesRead += bytesReadThisTime;
 
 			// Write to the bus, one byte at a time.
-			for (int k=0; k<sizeToRead; ++k) {
+			for (int k=0; k<bytesReadThisTime; ++k) {
 				bus->AddressSelect(vaddrToWriteTo ++);
 				if (!bus->WriteData(databuf[k])) {
 					// Failed to write data.

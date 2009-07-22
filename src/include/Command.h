@@ -87,8 +87,9 @@ public:
 	 *
 	 * @param gxemul A reference to the GXemul instance.
 	 * @param arguments A vector of zero or more string arguments.
+	 * @return true if the command succeeded, false if it failed.
 	 */
-	virtual void Execute(GXemul& gxemul,
+	virtual bool Execute(GXemul& gxemul,
 		const vector<string>& arguments) = 0;
 
 	/**

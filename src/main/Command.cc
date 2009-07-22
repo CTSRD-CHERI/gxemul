@@ -63,9 +63,10 @@ public:
 	{
 	}
 
-	void Execute(GXemul& gxemul, const vector<string>& arguments)
+	bool Execute(GXemul& gxemul, const vector<string>& arguments)
 	{
 		m_value ++;
+		return true;
 	}
 
 	string GetShortDescription() const
@@ -94,7 +95,8 @@ static void Test_Command_DummyCommand()
 
 	UnitTest::Assert("dummyInt should initially be 42", dummyInt == 42);
 
-	cmd->Execute(gxemulDummy, dummyArgs);
+	UnitTest::Assert("command should have succeeded",
+	    cmd->Execute(gxemulDummy, dummyArgs));
 	
 	UnitTest::Assert("dummyInt should now be 43", dummyInt == 43);
 

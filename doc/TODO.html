@@ -39,6 +39,13 @@ MAIN GOAL for 0.6.0:
 
 -------------------------------------------------------------------------------
 
+  [X]	OnReset commands, usually Load commands. Filenames listed on the command
+ 	line should not be loaded initially, but added to the onreset command
+ 	list. Just before running, when an UI has been created, do a Reset.
+ 	This will load the initial binaries.
+ 
+ 	[X]  If not all binaries can be loaded, then abort?
+
   [ ]   Make sure that BOTH old and new configuration files work!
 
   [ ]	Niceness fixes:

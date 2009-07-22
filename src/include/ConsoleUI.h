@@ -75,15 +75,13 @@ public:
 	 * \brief Shows a debug message for a Component, by printing it to
 	 * stdout.
 	 *
-	 * See UI::ShowDebugMessage(Component*,const string&,GXemul*) for
+	 * See UI::ShowDebugMessage(Component*,const string&) for
 	 * a longer comment.
 	 *
 	 * @param component A pointer to the Component.
 	 * @param msg The message to show.
-	 * @param gxemul A pointer to the GXemul instance.
 	 */
-	virtual void ShowDebugMessage(Component* component, const string& msg,
-		GXemul* gxemul);
+	virtual void ShowDebugMessage(Component* component, const string& msg);
 
 	/**
 	 * \brief Does nothing for the %ConsoleUI.

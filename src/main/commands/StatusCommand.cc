@@ -40,13 +40,15 @@ StatusCommand::~StatusCommand()
 }
 
 
-void StatusCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool StatusCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	stringstream ss;
 	ss << "Runstate: " << gxemul.GetRunStateAsString() <<
 	    "   Step = " << gxemul.GetStep() <<
 	    "   Global time = " << gxemul.GetGlobalTime() << "\n";
 	gxemul.GetUI()->ShowDebugMessage(ss.str());
+
+	return true;
 }
 
 

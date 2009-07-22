@@ -40,9 +40,10 @@ ContinueCommand::~ContinueCommand()
 }
 
 
-void ContinueCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool ContinueCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	gxemul.SetRunState(GXemul::Running);
+	return true;
 }
 
 

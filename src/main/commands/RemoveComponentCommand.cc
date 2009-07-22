@@ -46,17 +46,16 @@ static void ShowMsg(GXemul& gxemul, const string& msg)
 }
 
 
-void RemoveComponentCommand::Execute(GXemul& gxemul,
-    const vector<string>& arguments)
+bool RemoveComponentCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	if (arguments.size() < 1) {
 		ShowMsg(gxemul, "No path given.\n");
-		return;
+		return false;
 	}
 
 	if (arguments.size() > 1) {
 		ShowMsg(gxemul, "Too many arguments.\n");
-		return;
+		return false;
 	}
 
 	string path = arguments[0];
@@ -65,29 +64,31 @@ void RemoveComponentCommand::Execute(GXemul& gxemul,
 	    FindPathByPartialMatch(path);
 	if (matches.size() == 0) {
 		ShowMsg(gxemul, path+" is not a path to a known component.\n");
-		return;
+		return false;
 	}
 	if (matches.size() > 1) {
 		ShowMsg(gxemul, path+" matches multiple components:\n");
 		for (size_t i=0; i<matches.size(); i++)
 			ShowMsg(gxemul, "  " + matches[i] + "\n");
-		return;
+		return false;
 	}
 
 	refcount_ptr<Component> whatToRemove =
 	    gxemul.GetRootComponent()->LookupPath(matches[0]);
 	if (whatToRemove.IsNULL()) {
 		ShowMsg(gxemul, "Lookup of " + path + " failed.\n");
-		return;
+		return false;
 	}
 
 	refcount_ptr<Component> parent = whatToRemove->GetParent();
 	if (parent.IsNULL()) {
 		ShowMsg(gxemul, "Cannot remove the root component.\n");
-		return;
+		return false;
 	}
 
 	parent->RemoveChild(whatToRemove);
+
+	return true;
 }
 
 

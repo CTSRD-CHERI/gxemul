@@ -265,7 +265,7 @@ bool CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 		gxemul->GetUI()->ShowDebugMessage(this, "this CPU"
 		    " has neither any child components nor any parent component"
 		    " that can act as address/data bus, so there is no place"
-		    " to read instructions from\n", gxemul);
+		    " to read instructions from\n");
 		return false;
 	}
 
@@ -314,7 +314,7 @@ bool CPUComponent::LookupAddressDataBus(GXemul* gxemul)
 	if (multipleChildBussesFound && gxemul != NULL)
 		gxemul->GetUI()->ShowDebugMessage(this, "warning: this CPU has "
 		    "multiple child components that can act as address/data busses; "
-		    "using " + choosenChild->GenerateShortestPossiblePath() + "\n", gxemul);
+		    "using " + choosenChild->GenerateShortestPossiblePath() + "\n");
 
 	// 2) If no cache exists, go to a parent bus (usually a mainbus).
 	if (bus == NULL) {

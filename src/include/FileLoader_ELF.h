@@ -53,7 +53,7 @@ public:
 
 	string DetectFileType(unsigned char *buf, size_t buflen, float& matchness) const;
 
-	bool LoadIntoComponent(refcount_ptr<Component> component) const;
+	bool LoadIntoComponent(refcount_ptr<Component> component, ostream& messages) const;
 
 
 	/********************************************************************/

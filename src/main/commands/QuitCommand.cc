@@ -40,10 +40,11 @@ QuitCommand::~QuitCommand()
 }
 
 
-void QuitCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool QuitCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	gxemul.SetRunState(GXemul::Quitting);
 	gxemul.GetUI()->Shutdown();
+	return true;
 }
 
 

@@ -148,6 +148,17 @@ public:
 	void SetRootComponent(refcount_ptr<Component> newRootComponent);
 
 	/**
+	 * \brief Resets the emulation.
+	 *
+	 * This function recursively resets all components in the tree, and
+	 * then executes the "on reset" commands (usually commands to load
+	 * files into CPUs).
+	 *
+	 * @return false if any of the reset commands failed.
+	 */
+	bool Reset();
+
+	/**
 	 * \brief Sets the RunState.
 	 *
 	 * @param newState The new RunState.
@@ -264,6 +275,7 @@ private:
 	bool			m_quietMode;
 	refcount_ptr<UI>	m_ui;
 	CommandInterpreter	m_commandInterpreter;
+	vector<string>		m_onResetCommands;
 
 	// Runtime:
 	RunState		m_runState;

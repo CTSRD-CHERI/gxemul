@@ -40,12 +40,12 @@ ResetCommand::~ResetCommand()
 }
 
 
-void ResetCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool ResetCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	gxemul.SetRunState(GXemul::NotRunning);
+	gxemul.Reset();
 
-	refcount_ptr<Component> root = gxemul.GetRootComponent();
-	root->Reset();
+	return true;
 }
 
 

@@ -94,11 +94,17 @@ public:
 	/**
 	 * \brief Runs a command, given as a string.
 	 *
+	 * The return value from the function is true if the command was run.
+	 * However, the command may run and fail, and that's what pSuccess is
+	 * for.
+	 *
 	 * @param command the command to run
+	 * @param pSuccess a pointer to a bool, which (if pSuccess is non-NULL)
+	 *	will be set to whether the command succeeded or not.
 	 * @return true if the command was run, false if the command was
 	 *	not known
 	 */
-	bool RunCommand(const string& command);
+	bool RunCommand(const string& command, bool* pSuccess = NULL);
 
 	/**
 	 * \brief Retrieves the current command buffer.

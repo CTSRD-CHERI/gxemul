@@ -67,7 +67,7 @@ bool LoadCommand::IsComponentTree(GXemul& gxemul, const string& filename) const
 }
 
 
-void LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
+bool LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
 	refcount_ptr<Component> specifiedComponent) const
 {
 	const string extension = ".gxemul";
@@ -82,7 +82,7 @@ void LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
 	std::ifstream file(filename.c_str());
 	if (file.fail()) {
 		ShowMsg(gxemul, "Unable to open " + filename + " for reading.\n");
-		return;
+		return false;
 	}
 
 	// Figure out the file's size:
@@ -112,7 +112,7 @@ void LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
 	if (component.IsNULL()) {
 		ShowMsg(gxemul, "Loading from " + filename + " failed; "
 		    "no component found?\n");
-		return;
+		return false;
 	}
 
 	if (specifiedComponent.IsNULL()) {
@@ -131,16 +131,18 @@ void LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
 		ShowMsg(gxemul, filename + " loaded into " +
 		    specifiedComponent->GenerateShortestPossiblePath() + "\n");
 	}
+
+	return true;
 }
 
-void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	string filename = gxemul.GetEmulationFilename();
 	string path = "";
 
 	if (arguments.size() > 2) {
 		ShowMsg(gxemul, "Too many arguments.\n");
-		return;
+		return false;
 	}
 
 	if (arguments.size() > 0)
@@ -148,7 +150,7 @@ void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 	if (filename == "") {
 		ShowMsg(gxemul, "No filename given.\n");
-		return;
+		return false;
 	}
 
 	if (arguments.size() > 1)
@@ -160,7 +162,7 @@ void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		if (file.fail()) {
 			ShowMsg(gxemul, "Unable to open " + filename +
 			    " for reading.\n");
-			return;
+			return false;
 		}
 	}
 
@@ -172,21 +174,21 @@ void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		if (matches.size() == 0) {
 			ShowMsg(gxemul, path +
 			    " is not a path to a known component.\n");
-			return;
+			return false;
 		}
 		if (matches.size() > 1) {
 			ShowMsg(gxemul, path +
 			    " matches multiple components:\n");
 			for (size_t i=0; i<matches.size(); i++)
 				ShowMsg(gxemul, "  " + matches[i] + "\n");
-			return;
+			return false;
 		}
 
 		specifiedComponent =
 		    gxemul.GetRootComponent()->LookupPath(matches[0]);
 		if (specifiedComponent.IsNULL()) {
 			ShowMsg(gxemul, "Lookup of " + path + " failed.\n");
-			return;
+			return false;
 		}
 	}
 
@@ -203,16 +205,21 @@ void LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		    ") is not a configuration tree. If it is a binary to load,"
 		    " you need to specify a component path where to load the"
 		    " binary.\n");
-		return;
+		return false;
 	}
 
 	// 2. Is it a binary (ELF, a.out, ...)?
 	FileLoader fileLoader(filename);
-	if (fileLoader.Load(specifiedComponent))
-		ShowMsg(gxemul, filename + " loaded into " +
-		    specifiedComponent->GenerateShortestPossiblePath() + "\n");
-	else
-		ShowMsg(gxemul, "Failed to load " + filename + " into " + path + "\n");
+	stringstream messages;
+	if (fileLoader.Load(specifiedComponent, messages)) {
+		gxemul.GetUI()->ShowDebugMessage(specifiedComponent,
+		    filename + " loaded\n" + messages.str());
+		return true;
+	} else {
+		ShowMsg(gxemul, "Failed to load " + filename + " into " + path +
+		    ":\n" + messages.str());
+		return false;
+	}
 }
 
 

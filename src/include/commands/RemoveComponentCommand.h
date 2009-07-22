@@ -49,14 +49,7 @@ public:
 
 	virtual ~RemoveComponentCommand();
 
-	/**
-	 * \brief Executes the remove command.
-	 *
-	 * @param gxemul A reference to the GXemul instance.
-	 * @param arguments A vector of zero or more string arguments.
-	 */
-	virtual void Execute(GXemul& gxemul,
-		const vector<string>& arguments);
+	virtual bool Execute(GXemul& gxemul, const vector<string>& arguments);
 
 	virtual string GetShortDescription() const;
 

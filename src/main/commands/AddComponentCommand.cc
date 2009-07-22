@@ -47,17 +47,16 @@ static void ShowMsg(GXemul& gxemul, const string& msg)
 }
 
 
-void AddComponentCommand::Execute(GXemul& gxemul,
-    const vector<string>& arguments)
+bool AddComponentCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	if (arguments.size() < 1) {
 		ShowMsg(gxemul, "No component-name given.\n");
-		return;
+		return false;
 	}
 
 	if (arguments.size() > 2) {
 		ShowMsg(gxemul, "Too many arguments.\n");
-		return;
+		return false;
 	}
 
 	string componentName = arguments[0];
@@ -67,7 +66,7 @@ void AddComponentCommand::Execute(GXemul& gxemul,
 
 	if (componentToAdd.IsNULL()) {
 		ShowMsg(gxemul, componentName + ": unknown component.\n");
-		return;
+		return false;
 	}
 
 	string path = "root";
@@ -79,23 +78,25 @@ void AddComponentCommand::Execute(GXemul& gxemul,
 	if (matches.size() == 0) {
 		ShowMsg(gxemul, path +
 		    ": not a path to a known component.\n");
-		return;
+		return false;
 	}
 	if (matches.size() > 1) {
 		ShowMsg(gxemul, path + " matches multiple components:\n");
 		for (size_t i=0; i<matches.size(); i++)
 			ShowMsg(gxemul, "  " + matches[i] + "\n");
-		return;
+		return false;
 	}
 
 	refcount_ptr<Component> whereToAddIt =
 	    gxemul.GetRootComponent()->LookupPath(matches[0]);
 	if (whereToAddIt.IsNULL()) {
 		ShowMsg(gxemul, path + ": lookup of path failed.\n");
-		return;
+		return false;
 	}
 
 	whereToAddIt->AddChild(componentToAdd);
+
+	return true;
 }
 
 

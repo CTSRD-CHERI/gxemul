@@ -95,7 +95,7 @@ static uint32_t unencode32(unsigned char *p, Endianness endianness)
 }
 
 
-bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component) const
+bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostream& messages) const
 {
 	AddressDataBus* bus = component->AsAddressDataBus();
 	if (bus == NULL)

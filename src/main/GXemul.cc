@@ -388,27 +388,24 @@ bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *fil
 	//  1. If a machine template has been selected, then treat the following
 	//     arguments as files to load. (Legacy compatibility with previous
 	//     versions of GXemul.)
+	//
 	//  2. Otherwise, treat the argument as a configuration file.
 
 	if (filenameCount > 0) {
 		if (templateMachine != "") {
 			// Machine template.
-
-			// Load binaries into the main cpu.
-			refcount_ptr<Component> main_cpu =
-			    GetRootComponent()->
-			    LookupPath("root.machine0.mainbus0.cpu0");
-			// TODO: Don't hardcode the CPU path!
-
 			while (filenameCount > 0) {
-				FileLoader loader(filenames[0]);
-				if (!loader.Load(main_cpu)) {
-					std::cerr << "Failed to load "
-					    "binary: " <<
-					    filenames[0] << "\n" <<
-					    "Aborting." << "\n";
-					return false;
-				}
+				// Hm. Why the full path to cpu0 here? Well,
+				// a typical use case I imagine is that people
+				// start with a machine template and one or more
+				// files on the command line, and then add
+				// another machine afterwards. Then the load/
+				// reset commands will still work, if the path
+				// is full-length instead of short.
+				stringstream cmd;
+				cmd << "load " << filenames[0]
+				    << " root.machine0.mainbus0.cpu0";
+				m_onResetCommands.push_back(cmd.str());
 
 				filenameCount --;
 				filenames ++;
@@ -574,7 +571,22 @@ int GXemul::Run()
 
 			m_ui->ShowDebugMessage(component->GenerateTreeDump("") + "\n");
 		}
+	}
 
+	{
+		// Not really running yet:
+		RunState savedRunState = GetRunState();
+		SetRunState(NotRunning);
+
+		if (!Reset()) {
+			m_ui->ShowDebugMessage("Aborting.\n");
+			return 1;
+		}
+
+		SetRunState(savedRunState);
+	}
+
+	if (!GetQuietMode()) {
 		// A separator line, if we start emulating directly without dropping
 		// into the interactive debugger. (To mimic pre-0.6.0 appearance.)
 		if (GetRunState() == Running)
@@ -595,14 +607,8 @@ int GXemul::Run()
 
 		m_ui->FatalError(ss.str());
 
-		// Release the UI:
-		m_ui = NULL;
-
 		return 1;
 	}
-
-	// Release the UI:
-	m_ui = NULL;
 
 	return 0;
 }
@@ -664,6 +670,31 @@ void GXemul::SetRootComponent(refcount_ptr<Component> newRootComponent)
 	m_rootComponent = newRootComponent;
 
 	m_ui->UpdateUI();
+}
+
+
+bool GXemul::Reset()
+{
+	GetRootComponent()->Reset();
+
+	vector<string>::const_iterator it = m_onResetCommands.begin();
+	for (; it != m_onResetCommands.end(); ++it) {
+		string cmd = *it;
+		bool success = false;
+
+		GetCommandInterpreter().RunCommand(cmd, &success);
+
+		if (!GetQuietMode())
+			m_ui->ShowDebugMessage("\n");
+
+		if (!success) {
+			m_ui->ShowDebugMessage("Failing on-reset command:\n"
+			    "    " + cmd + "\n");
+			return false;
+		}
+	}
+
+	return true;
 }
 
 

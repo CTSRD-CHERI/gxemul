@@ -913,7 +913,7 @@ bool CommandInterpreter::RunComponentMethod(
 }
 
 
-bool CommandInterpreter::RunCommand(const string& command)
+bool CommandInterpreter::RunCommand(const string& command, bool* pSuccess)
 {
 	string commandName;
 	vector<string> arguments;
@@ -956,8 +956,10 @@ bool CommandInterpreter::RunCommand(const string& command)
 	}
 
 	// ... and execute it:
-	(it->second)->Execute(*m_GXemul, arguments);
-	
+	bool success = (it->second)->Execute(*m_GXemul, arguments);
+	if (pSuccess != NULL)
+		*pSuccess = success;
+
 	return true;
 }
 
@@ -1285,9 +1287,10 @@ public:
 	{
 	}
 
-	void Execute(GXemul& gxemul, const vector<string>& arguments)
+	bool Execute(GXemul& gxemul, const vector<string>& arguments)
 	{
 		m_value ++;
+		return true;
 	}
 
 	string GetShortDescription() const
@@ -1321,9 +1324,10 @@ public:
 	{
 	}
 
-	void Execute(GXemul& gxemul, const vector<string>& arguments)
+	bool Execute(GXemul& gxemul, const vector<string>& arguments)
 	{
 		m_value ++;
+		return true;
 	}
 
 	string GetShortDescription() const

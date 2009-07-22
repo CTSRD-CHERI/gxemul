@@ -41,8 +41,7 @@ ListComponentsCommand::~ListComponentsCommand()
 }
 
 
-void ListComponentsCommand::Execute(GXemul& gxemul,
-	const vector<string>& arguments)
+bool ListComponentsCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	vector<string> allComponents =
 	    ComponentFactory::GetAllComponentNames(false);
@@ -69,6 +68,8 @@ void ListComponentsCommand::Execute(GXemul& gxemul,
 
 		gxemul.GetUI()->ShowDebugMessage(msg.str());
 	}
+
+	return true;
 }
 
 

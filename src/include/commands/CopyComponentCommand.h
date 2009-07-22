@@ -49,7 +49,7 @@ public:
 
 	virtual ~CopyComponentCommand();
 
-	virtual void Execute(GXemul& gxemul, const vector<string>& arguments);
+	virtual bool Execute(GXemul& gxemul, const vector<string>& arguments);
 
 	virtual string GetShortDescription() const;
 

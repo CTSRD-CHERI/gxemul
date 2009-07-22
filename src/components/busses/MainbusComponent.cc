@@ -152,7 +152,7 @@ bool MainbusComponent::MakeSureMemoryMapExists(GXemul* gxemul)
 				    "Error: the base and/or size of " +
 				    children[i]->GenerateShortestPossiblePath() +
 				    " conflicts with another memory mapped "
-				    "component on this bus.\n", gxemul);
+				    "component on this bus.\n");
 
 			delete m_memoryMap;
 			m_memoryMap = NULL;

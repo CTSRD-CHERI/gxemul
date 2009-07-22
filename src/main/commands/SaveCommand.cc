@@ -48,14 +48,14 @@ static void ShowMsg(GXemul& gxemul, const string& msg)
 }
 
 
-void SaveCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool SaveCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	string filename = gxemul.GetEmulationFilename();
 	string path = "root";
 
 	if (arguments.size() > 2) {
 		ShowMsg(gxemul, "Too many arguments.\n");
-		return;
+		return false;
 	}
 
 	if (arguments.size() > 0)
@@ -63,7 +63,7 @@ void SaveCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 
 	if (filename == "") {
 		ShowMsg(gxemul, "No filename given.\n");
-		return;
+		return false;
 	}
 
 	if (arguments.size() > 1)
@@ -73,20 +73,20 @@ void SaveCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 	    FindPathByPartialMatch(path);
 	if (matches.size() == 0) {
 		ShowMsg(gxemul, path+" is not a path to a known component.\n");
-		return;
+		return false;
 	}
 	if (matches.size() > 1) {
 		ShowMsg(gxemul, path+" matches multiple components:\n");
 		for (size_t i=0; i<matches.size(); i++)
 			ShowMsg(gxemul, "  " + matches[i] + "\n");
-		return;
+		return false;
 	}
 
 	refcount_ptr<Component> component =
 	    gxemul.GetRootComponent()->LookupPath(matches[0]);
 	if (component.IsNULL()) {
 		ShowMsg(gxemul, "Lookup of " + path + " failed.\n");
-		return;
+		return false;
 	}
 
 	const string extension = ".gxemul";
@@ -102,7 +102,7 @@ void SaveCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		if (outputstream.fail()) {
 			ShowMsg(gxemul, "Error: Could not open " + filename +
 			    " for writing.\n");
-			return;
+			return false;
 		}
 
 		SerializationContext context;
@@ -116,12 +116,14 @@ void SaveCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 			ShowMsg(gxemul, "Error: Could not open " + filename +
 			    " for reading after writing to it; saving "
 			    " the emulation setup failed!\n");
-			return;
+			return false;
 		}
 	}
 
 	ShowMsg(gxemul, "Emulation setup saved to " + filename + "\n");
 	gxemul.SetEmulationFilename(filename);
+
+	return true;
 }
 
 

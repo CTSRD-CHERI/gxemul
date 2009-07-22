@@ -85,12 +85,13 @@ public:
 	 * It is therefore necessary to load it into a CPU, and not directly
 	 * into RAM.
 	 *
-	 * \param component A CPUComponent (or any other
+	 * @param component A CPUComponent (or any other
 	 *	component which implements the AddressDataBus interface),
 	 *	into which the file will be loaded.
-	 * \return True if loading succeeded, false otherwise.
+	 * @param messages An output stream where debug messages can be put.
+	 * @return True if loading succeeded, false otherwise.
 	 */
-	bool Load(refcount_ptr<Component> component) const;
+	bool Load(refcount_ptr<Component> component, ostream& messages) const;
 
 
 	/********************************************************************/

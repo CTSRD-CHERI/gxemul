@@ -40,9 +40,10 @@ VersionCommand::~VersionCommand()
 }
 
 
-void VersionCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool VersionCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	gxemul.GetUI()->ShowDebugMessage(gxemul.Version() + "\n");
+	return true;
 }
 
 

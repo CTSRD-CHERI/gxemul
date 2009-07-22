@@ -3910,3 +3910,5 @@ Changelog for GXemul:
 		from components ("[ componentname: message ]").
 		Tab completion (in the CommandInterpreter) now uses shortest
 		path, whenever possible, instead of full paths.
+20090722	Implementing a new concept of "on reset commands"; beginning on
+		extending the ELF loader for symbol loading support.

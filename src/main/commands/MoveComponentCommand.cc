@@ -46,11 +46,11 @@ static void ShowMsg(GXemul& gxemul, const string& msg)
 }
 
 
-void MoveComponentCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool MoveComponentCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	if (arguments.size() != 2) {
 		ShowMsg(gxemul, "syntax: move path-from path-to\n");
-		return;
+		return false;
 	}
 
 	string pathFrom = arguments[0];
@@ -60,26 +60,26 @@ void MoveComponentCommand::Execute(GXemul& gxemul, const vector<string>& argumen
 	    FindPathByPartialMatch(pathFrom);
 	if (matchesFrom.size() == 0) {
 		ShowMsg(gxemul, pathFrom + " is not a path to a known component.\n");
-		return;
+		return false;
 	}
 	if (matchesFrom.size() > 1) {
 		ShowMsg(gxemul, pathFrom + " matches multiple components:\n");
 		for (size_t i=0; i<matchesFrom.size(); i++)
 			ShowMsg(gxemul, "  " + matchesFrom[i] + "\n");
-		return;
+		return false;
 	}
 
 	vector<string> matchesTo = gxemul.GetRootComponent()->
 	    FindPathByPartialMatch(pathTo);
 	if (matchesTo.size() == 0) {
 		ShowMsg(gxemul, pathTo + " is not a path to a known component.\n");
-		return;
+		return false;
 	}
 	if (matchesTo.size() > 1) {
 		ShowMsg(gxemul, pathTo + " matches multiple components:\n");
 		for (size_t i=0; i<matchesTo.size(); i++)
 			ShowMsg(gxemul, "  " + matchesTo[i] + "\n");
-		return;
+		return false;
 	}
 
 
@@ -87,24 +87,26 @@ void MoveComponentCommand::Execute(GXemul& gxemul, const vector<string>& argumen
 	    gxemul.GetRootComponent()->LookupPath(matchesFrom[0]);
 	if (whatToMove.IsNULL()) {
 		ShowMsg(gxemul, "Lookup of origin path " + pathFrom + " failed.\n");
-		return;
+		return false;
 	}
 
 	refcount_ptr<Component> parent = whatToMove->GetParent();
 	if (parent.IsNULL()) {
 		ShowMsg(gxemul, "Cannot find the component's parent.\n");
-		return;
+		return false;
 	}
 
 	refcount_ptr<Component> whereToAddIt =
 	    gxemul.GetRootComponent()->LookupPath(matchesTo[0]);
 	if (whereToAddIt.IsNULL()) {
 		ShowMsg(gxemul, "Lookup of destination path " + pathTo + " failed.\n");
-		return;
+		return false;
 	}
 
 	parent->RemoveChild(whatToMove);
 	whereToAddIt->AddChild(whatToMove);
+
+	return true;
 }
 
 

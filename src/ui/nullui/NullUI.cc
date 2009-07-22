@@ -60,7 +60,7 @@ void NullUI::ShowDebugMessage(const string& msg)
 }
 
 
-void NullUI::ShowDebugMessage(Component* component, const string& msg, GXemul* gxemul)
+void NullUI::ShowDebugMessage(Component* component, const string& msg)
 {
 }
 

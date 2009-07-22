@@ -40,11 +40,10 @@ CloseCommand::~CloseCommand()
 }
 
 
-void CloseCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
+bool CloseCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
-	// TODO: Confirmation? ("Are you sure you wish to close...")
-
 	gxemul.ClearEmulation();
+	return true;
 }
 
 

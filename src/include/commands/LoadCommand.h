@@ -49,14 +49,7 @@ public:
 
 	virtual ~LoadCommand();
 
-	/**
-	 * \brief Executes the load command.
-	 *
-	 * @param gxemul A reference to the GXemul instance.
-	 * @param arguments A vector of zero or more string arguments.
-	 */
-	virtual void Execute(GXemul& gxemul,
-		const vector<string>& arguments);
+	virtual bool Execute(GXemul& gxemul, const vector<string>& arguments);
 
 	virtual string GetShortDescription() const;
 
@@ -64,7 +57,7 @@ public:
 
 private:
 	bool IsComponentTree(GXemul& gxemul, const string& filename) const;
-	void LoadComponentTree(GXemul& gxemul, const string&filename,
+	bool LoadComponentTree(GXemul& gxemul, const string&filename,
 		refcount_ptr<Component> specifiedComponent) const;
 };
 

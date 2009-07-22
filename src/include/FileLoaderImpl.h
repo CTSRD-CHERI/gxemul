@@ -72,9 +72,10 @@ public:
 	 *
 	 * @param component The AddressDataBus component to load the file
 	 *	into. (This is usually a CPUComponent.)
+	 * @param messages An output stream where debug messages can be put.
 	 * @return True if loading succeeded, false otherwise.
 	 */
-	virtual bool LoadIntoComponent(refcount_ptr<Component> component) const = 0;
+	virtual bool LoadIntoComponent(refcount_ptr<Component> component, ostream& messages) const = 0;
 
 protected:
 	const string& Filename() const
