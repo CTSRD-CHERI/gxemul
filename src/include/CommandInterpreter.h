@@ -254,6 +254,10 @@ private:
 	vector<string>		m_commandHistory;
 	size_t			m_commandHistoryInsertPosition;
 	size_t			m_commandHistoryMaxSize;
+
+	// If non-empty, a command which may be reexecuted if an empty
+	// command line is given:
+	string			m_mayBeReexecuted;
 };
 
 

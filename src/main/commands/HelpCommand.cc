@@ -79,6 +79,12 @@ bool HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		
 		gxemul.GetUI()->ShowDebugMessage("\n" + longhelp + "\n");
 
+		if (it->second->MayBeReexecutedWithoutArgs())
+			gxemul.GetUI()->ShowDebugMessage(
+			    "This command will be re-executed (without "
+			    "arguments), if an empty command\n"
+			    "line is issued.\n\n");
+
 		return true;
 	}
 
@@ -109,7 +115,7 @@ bool HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 		while (str.length() < longest + nLeadingSpaces)
 			str += " ";
 		
-		str += "   " + command.GetShortDescription();
+		str += "  " + command.GetShortDescription();
 
 		gxemul.GetUI()->ShowDebugMessage(str + "\n");
 	}

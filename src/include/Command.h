@@ -93,6 +93,21 @@ public:
 		const vector<string>& arguments) = 0;
 
 	/**
+	 * \brief Returns whether the command can be quickly re-executed using
+	 * an empty command line.
+	 *
+	 * Typical examples are: step, cpu disassembly, and memory dump,
+	 * where re-executing the command without arguments is very natural.
+	 *
+	 * @return true if the command may be re-executed without arguments,
+	 * false otherwise.
+	 */
+	virtual bool MayBeReexecutedWithoutArgs() const
+	{
+		return false;
+	}
+
+	/**
 	 * \brief Returns a short (one-line) description of the command.
 	 *
 	 * @return A short description of the command.

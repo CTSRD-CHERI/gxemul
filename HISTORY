@@ -3918,3 +3918,5 @@ Changelog for GXemul:
 		Removing the "NotRunning" run state.
 		Adding dummy "step", "backward-step", and "continue-backwards"
 		commands.
+		Implementing support for re-executing commands without args
+		("step" and "backward-step" so far).

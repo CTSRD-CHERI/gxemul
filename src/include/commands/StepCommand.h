@@ -50,6 +50,11 @@ public:
 
 	virtual bool Execute(GXemul& gxemul, const vector<string>& arguments);
 
+	virtual bool MayBeReexecutedWithoutArgs() const
+	{
+		return true;
+	}
+
 	virtual string GetShortDescription() const;
 
 	virtual string GetLongDescription() const;

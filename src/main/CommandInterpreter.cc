@@ -569,6 +569,8 @@ bool CommandInterpreter::AddKey(stringchar key)
 			AddLineToCommandHistory(m_currentCommandString);
 			RunCommand(m_currentCommandString);
 			ClearCurrentCommandBuffer();
+		} else if (m_mayBeReexecuted != "") {
+			RunCommand(m_mayBeReexecuted);
 		}
 		break;
 
@@ -959,6 +961,12 @@ bool CommandInterpreter::RunCommand(const string& command, bool* pSuccess)
 	bool success = (it->second)->Execute(*m_GXemul, arguments);
 	if (pSuccess != NULL)
 		*pSuccess = success;
+
+	if ((it->second)->MayBeReexecutedWithoutArgs()) {
+		m_mayBeReexecuted = it->first;
+	} else {
+		m_mayBeReexecuted = "";
+	}
 
 	return true;
 }
