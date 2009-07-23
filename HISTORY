@@ -3915,3 +3915,4 @@ Changelog for GXemul:
 20090723	Moving 'step' and 'time' concepts from the GXemul class to a
 		new component, the RootComponent.
 		Minor configure script fixes (allow --without-unittests etc.).
+		Removing the "NotRunning" run state.

@@ -42,7 +42,7 @@ ResetCommand::~ResetCommand()
 
 bool ResetCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
-	gxemul.SetRunState(GXemul::NotRunning);
+	gxemul.SetRunState(GXemul::Paused);
 	gxemul.Reset();
 
 	return true;
@@ -67,30 +67,27 @@ string ResetCommand::GetLongDescription() const
 
 #ifdef WITHUNITTESTS
 
-static void Test_ResetCommand_Affect_RunState()
+static void Test_ResetCommand_RunState()
 {
 	refcount_ptr<Command> cmd = new ResetCommand;
 	vector<string> dummyArguments;
 	
 	GXemul gxemul;
 
-	UnitTest::Assert("the default GXemul instance should be NotRunning",
-	    gxemul.GetRunState() == GXemul::NotRunning);
-
-	gxemul.SetRunState(GXemul::Paused);
-
-	UnitTest::Assert("the runstate should now be Paused",
+	UnitTest::Assert("the default GXemul instance should be Paused",
 	    gxemul.GetRunState() == GXemul::Paused);
+
+	gxemul.SetRunState(GXemul::Running);
 
 	cmd->Execute(gxemul, dummyArguments);
 
-	UnitTest::Assert("runstate should have been changed to NotRunning",
-	    gxemul.GetRunState() == GXemul::NotRunning);
+	UnitTest::Assert("runstate should now be Paused",
+	    gxemul.GetRunState() == GXemul::Paused);
 }
 
 UNITTESTS(ResetCommand)
 {
-	UNITTEST(Test_ResetCommand_Affect_RunState);
+	UNITTEST(Test_ResetCommand_RunState);
 }
 
 #endif

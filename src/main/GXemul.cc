@@ -161,7 +161,7 @@ GXemul::GXemul()
 	: m_quietMode(false)
 	, m_ui(new NullUI(this))
 	, m_commandInterpreter(this)
-	, m_runState(NotRunning)
+	, m_runState(Paused)
 	, m_rootComponent(new RootComponent)
 {
 	ClearEmulation();
@@ -171,7 +171,7 @@ GXemul::GXemul()
 void GXemul::ClearEmulation()
 {
 	if (GetRunState() == Running)
-		SetRunState(NotRunning);
+		SetRunState(Paused);
 
 	m_rootComponent = new RootComponent;
 	m_emulationFileName = "";
@@ -436,13 +436,6 @@ bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *fil
 	}
 
 	if (optionsEnoughToStartRunning) {
-		// Automatically start running, if the -V option was not
-		// supplied. In the future, if a GUI is implemented, starting
-		// the GUI without any configuration should work like the
-		// -V option.
-		if (GetRunState() == NotRunning)
-			SetRunState(Running);
-
 		return true;
 	} else {
 		if (templateMachine != "") {
@@ -573,7 +566,7 @@ int GXemul::Run()
 	{
 		// Not really running yet:
 		RunState savedRunState = GetRunState();
-		SetRunState(NotRunning);
+		SetRunState(Paused);
 
 		if (!Reset()) {
 			m_ui->ShowDebugMessage("Aborting.\n");
@@ -684,8 +677,11 @@ void GXemul::SetRootComponent(refcount_ptr<Component> newRootComponent)
 
 bool GXemul::Reset()
 {
+	// 1. Reset all components in the tree.
 	GetRootComponent()->Reset();
 
+	// 2. Run "on reset" commands. (These are usually commands to load
+	//    binaries into CPUs.)
 	vector<string>::const_iterator it = m_onResetCommands.begin();
 	for (; it != m_onResetCommands.end(); ++it) {
 		string cmd = *it;
@@ -724,8 +720,6 @@ GXemul::RunState GXemul::GetRunState() const
 string GXemul::GetRunStateAsString() const
 {
 	switch (m_runState) {
-	case NotRunning:
-		return "Not running";
 	case Paused:
 		return "Paused";
 	case Running:

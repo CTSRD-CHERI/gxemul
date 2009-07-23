@@ -54,7 +54,6 @@ class GXemul
 public:
 	enum RunState
 	{
-		NotRunning,
 		Paused,
 		Running,
 		Quitting
@@ -116,7 +115,8 @@ public:
 	/**
 	 * \brief Gets a pointer to the %GXemul instance' active UI.
 	 *
-	 * Note: May return NULL if no UI has been initialized.
+	 * Note: Never NULL. The UI may be the NullUI, or another UI (such
+	 * as the ConsoleUI).
 	 *
 	 * @return A pointer to the UI in use.
 	 */
