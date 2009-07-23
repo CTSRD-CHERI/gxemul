@@ -38,21 +38,16 @@
 /**
  * \brief The main emulator class.
  *
- * Its main purpose is to run the UI main loop.
- *
  * A %GXemul instance basically has the following member variables:
  *
  * <ol>
  *	<li>a tree of components, which make up the full
  *		state of the current emulation setup
- *	<li>a UI
+ *	<li>a UI, which runs the main [interactive] loop
  *	<li>a CommandInterpreter
  *	<li>a RunState
+ *	<li>a list of "on reset commands", which are executed on Reset().
  * </ol>
- *
- * The implementation file, GXemul.cc, contains both the class implementation
- * and the main() function of the application. The %GXemul class is also
- * responsible for starting execution of unit tests.
  */
 class GXemul
 {
@@ -135,6 +130,7 @@ public:
 	 *	(The return value is never NULL.)
 	 */
 	refcount_ptr<Component> GetRootComponent();
+	const refcount_ptr<Component> GetRootComponent() const;
 
 	/**
 	 * \brief Sets the root component, discarding the previous one.
@@ -197,15 +193,6 @@ public:
 	double GetGlobalTime() const;
 
 	/**
-	 * \brief Sets the current global time of the emulation.
-	 *
-	 * Note: This is not necessarily equal to real-world time.
-	 *
-	 * @param globalTime The time, in seconds.
-	 */
-	void SetGlobalTime(double globalTime);
-
-	/**
 	 * \brief Gets the current quiet mode setting.
 	 *
 	 * @return True if running in quiet mode, false for normal operation.
@@ -236,15 +223,7 @@ public:
 	 */
 	static string Version();
 
-	/**
-	 * \brief Returns whether a component name is a template machine.
-	 *
-	 * @param templateName The name of the component/machine.
-	 * @return True if the name is an existing template machine, false
-	 *	otherwise.
-	 */
-	bool IsTemplateMachine(const string& templateName);
-
+	bool IsTemplateMachine(const string& templateName) const;
 	static void DumpMachineAsHTML(const string& machineName);
 	static void GenerateHTMLListOfComponents(bool machines);
 
@@ -281,8 +260,6 @@ private:
 	RunState		m_runState;
 
 	// Model:
-	uint64_t		m_step;
-	double			m_globalTime;
 	string			m_emulationFileName;
 	refcount_ptr<Component>	m_rootComponent;
 };

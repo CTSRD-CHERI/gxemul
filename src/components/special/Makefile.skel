@@ -1,11 +1,11 @@
 #
-#  Makefile for GXemul src/components/dummy
+#  Makefile for GXemul src/components/special
 #
 
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(INCLUDE2)
 LIBS=$(OTHERLIBS)
 
-OBJS=DummyComponent.o
+OBJS=DummyComponent.o RootComponent.o
 
 all: $(OBJS)
 

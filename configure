@@ -54,8 +54,37 @@
 #
 ###############################################################################
 
-# Default prefix for "make install"
+#
+# Figure out the default prefix for "make install":
+#
+# Fallback is always:  /usr/local
+#
+# Overridden by setting the PREFIX environment variable before running
+# configure.
+#
 DEFAULTPREFIX=/usr/local
+TRY=/usr/pkg
+if [ -d $TRY ]; then
+	DEFAULTPREFIX=$TRY
+else
+	TRY=/usr/local
+	if [ -d $TRY ]; then
+		DEFAULTPREFIX=$TRY
+	else
+		TRY=/opt
+		if [ -d $TRY ]; then
+			DEFAULTPREFIX=$TRY
+		else
+			TRY=/usr
+			if [ -d $TRY ]; then
+				DEFAULTPREFIX=$TRY
+			fi
+		fi
+	fi
+fi
+
+
+UNITTESTS=YES
 
 #  Figure out if this is a stable version (0.x.x).
 X=`basename \`pwd\`|cut -d \- -f 2-|cut -c1-2`
@@ -72,20 +101,21 @@ if [ z"$*" != z ]; then
 	for a in $*; do
 		if [ z$a = z--disable-x ]; then
 			NOX11=YES
+		else if [ z$a = z--without-unittests ]; then
+			UNITTESTS=NO
 		else if [ z$a = z--debug ]; then
 			DEBUG=YES
 		else if [ z$a = z--help ]; then
 			printf "usage: $0 [options]\n\n"
-			echo "  --disable-x         don't include X11 support,"\
+			echo "  --disable-x           don't include X11 support,"\
 			    "even if the host supports it"
-			if [ z"$UNSTABLE" = zYES ]; then
-				echo "  --debug             configure for a" \
-					"debug build (turn off optimizations)"
-			fi
+			echo "  --without-unittests   don't include unit tests"
+			echo "  --debug               configure for a" \
+				"debug build (turn off optimizations)"
 			echo
 			echo "If the PREFIX environment variable is set," \
 			    "it will override the default"
-			echo "value, which is: $DEFAULTPREFIX"
+			echo "value, which on this platform is: $DEFAULTPREFIX"
 			echo
 			exit
 		else
@@ -93,7 +123,7 @@ if [ z"$*" != z ]; then
 			echo "Run  $0 --help  to get a list of" \
 			    "available options."
 			exit
-		fi; fi; fi
+		fi; fi; fi; fi
 	done
 fi
 
@@ -125,6 +155,9 @@ fi
 
 if [ z"$UNSTABLE" = zYES ]; then
 	printf "#define UNSTABLE_DEVEL\n" >> config.h
+fi
+
+if [ z"$UNITTESTS" = zYES ]; then
 	printf "#define WITHUNITTESTS\n" >> config.h
 fi
 
@@ -1009,8 +1042,8 @@ cd ../../..
 rm -f _components.tmp
 
 #  Create the Makefiles:
-D=". src src/components src/components/dummy src/components/busses src/components/cpu"
-D="$D src/components/machines src/components/memory"
+D=". src src/components src/components/busses src/components/cpu"
+D="$D src/components/machines src/components/memory src/components/special"
 D="$D src/console src/cpus src/debugger src/devices"
 D="$D src/devices/fonts src/disk src/file src/include src/machines src/main"
 D="$D src/main/commands src/main/fileloaders src/net src/promemul src/symbol"

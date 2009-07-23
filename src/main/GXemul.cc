@@ -73,8 +73,9 @@
  *
  * Each component has a parent, so the full set of components in an emulation
  * are in fact a tree. A GXemul instance has one such tree. The root
- * component is a dummy container, which contains zero or more sub-components,
- * but it doesn't actually do anything else.
+ * component is a special RootComponent, which holds some basic state about
+ * the emulation, such as the number of steps executed.
+ * It also contains zero or more sub-components.
  *
  * <center><img src="../../model.png"></center>
  *
@@ -143,9 +144,8 @@
 #include "ConsoleUI.h"
 #include "NullUI.h"
 
-#include "FileLoader.h"
 #include "GXemul.h"
-#include "components/DummyComponent.h"
+#include "components/RootComponent.h"
 #include "ComponentFactory.h"
 #include "UnitTest.h"
 
@@ -162,7 +162,7 @@ GXemul::GXemul()
 	, m_ui(new NullUI(this))
 	, m_commandInterpreter(this)
 	, m_runState(NotRunning)
-	, m_rootComponent(new DummyComponent)
+	, m_rootComponent(new RootComponent)
 {
 	ClearEmulation();
 }
@@ -173,17 +173,14 @@ void GXemul::ClearEmulation()
 	if (GetRunState() == Running)
 		SetRunState(NotRunning);
 
-	m_step = 0;
-	m_globalTime = 0.0;
-	m_rootComponent = new DummyComponent;
-	m_rootComponent->SetVariableValue("name", "\"root\"");
+	m_rootComponent = new RootComponent;
 	m_emulationFileName = "";
 
 	m_ui->UpdateUI();
 }
 
 
-bool GXemul::IsTemplateMachine(const string& templateName)
+bool GXemul::IsTemplateMachine(const string& templateName) const
 {
 	if (!ComponentFactory::HasAttribute(templateName, "template"))
 		return false;
@@ -636,19 +633,25 @@ CommandInterpreter& GXemul::GetCommandInterpreter()
 
 double GXemul::GetGlobalTime() const
 {
-	return m_globalTime;
+	const StateVariable* time = GetRootComponent()->GetVariable("time");
+	if (time == NULL) {
+		std::cerr << "root component has no 'time' variable? aborting.\n";
+		throw std::exception();
+	}
+
+	return time->ToDouble();
 }
 
 
 uint64_t GXemul::GetStep() const
 {
-	return m_step;
-}
+	const StateVariable* step = GetRootComponent()->GetVariable("step");
+	if (step == NULL) {
+		std::cerr << "root component has no 'step' variable? aborting.\n";
+		throw std::exception();
+	}
 
-
-void GXemul::SetGlobalTime(double globalTime)
-{
-	m_globalTime = globalTime;
+	return step->ToInteger();
 }
 
 
@@ -659,6 +662,12 @@ UI* GXemul::GetUI()
 
 
 refcount_ptr<Component> GXemul::GetRootComponent()
+{
+	return m_rootComponent;
+}
+
+
+const refcount_ptr<Component> GXemul::GetRootComponent() const
 {
 	return m_rootComponent;
 }

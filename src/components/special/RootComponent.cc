@@ -1,8 +1,5 @@
-#ifndef DUMMYCOMPONENT_H
-#define	DUMMYCOMPONENT_H
-
 /*
- *  Copyright (C) 2007-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,45 +25,63 @@
  *  SUCH DAMAGE.
  */
 
-// COMPONENT(dummy)
+#include "components/RootComponent.h"
+#include "ComponentFactory.h"
 
 
-#include "Component.h"
-
-#include "UnitTest.h"
-
-
-/**
- * \brief A dummy Component, for unit testing purposes.
- */
-class DummyComponent
-	: public Component
-	, public UnitTestable
+RootComponent::RootComponent()
+	: Component("root", "root")
+	, m_step(0)
+	, m_time(0.0)
 {
-public:
-	/**
-	 * \brief Constructs a DummyComponent.
-	 */
-	DummyComponent(string className = "dummy");
+	SetVariableValue("name", "\"root\"");
 
-	/**
-	 * \brief Creates a DummyComponent.
-	 */
-	static refcount_ptr<Component> Create();
+	ResetState();
 
-	/**
-	 * \brief Get attribute information about the DummyComponent class.
-	 *
-	 * @param attributeName The attribute name.
-	 * @return A string representing the attribute value.
-	 */
-	static string GetAttribute(const string& attributeName);
+	AddVariable("step", &m_step);
+	AddVariable("time", &m_time);
+}
 
 
-	/********************************************************************/
-public:
-	static void RunUnitTests(int& nSucceeded, int& nFailures);
-};
+void RootComponent::ResetState()
+{
+	m_step = 0;
+	m_time = 0.0;
+
+	Component::ResetState();
+}
 
 
-#endif	// DUMMYCOMPONENT_H
+/*****************************************************************************/
+
+
+#ifdef WITHUNITTESTS
+
+static void Test_RootComponent_CreateComponent()
+{
+	refcount_ptr<Component> component;
+
+	component = ComponentFactory::CreateComponent("root");
+	UnitTest::Assert("creating a root component with CreateComponent "
+	    "should NOT be possible", component.IsNULL() == true);
+}
+
+static void Test_RootComponent_InitialStepAndTime()
+{
+	refcount_ptr<Component> component = new RootComponent;
+
+	StateVariable* time = component->GetVariable("time");
+	StateVariable* step = component->GetVariable("step");
+
+	UnitTest::Assert("time should be 0.0", time->ToDouble(), 0.0);
+	UnitTest::Assert("step should be 0", step->ToInteger(), 0);
+}
+
+UNITTESTS(RootComponent)
+{
+	UNITTEST(Test_RootComponent_CreateComponent);
+	UNITTEST(Test_RootComponent_InitialStepAndTime);
+}
+
+#endif
+

@@ -43,9 +43,11 @@ StatusCommand::~StatusCommand()
 bool StatusCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	stringstream ss;
-	ss << "Runstate: " << gxemul.GetRunStateAsString() <<
-	    "   Step = " << gxemul.GetStep() <<
-	    "   Global time = " << gxemul.GetGlobalTime() << "\n";
+	ss <<
+	    "step " << gxemul.GetStep() << ": " <<
+	    "time = " << gxemul.GetGlobalTime() << "  " <<
+	    gxemul.GetRunStateAsString() << "\n";
+
 	gxemul.GetUI()->ShowDebugMessage(ss.str());
 
 	return true;
@@ -60,9 +62,12 @@ string StatusCommand::GetShortDescription() const
 
 string StatusCommand::GetLongDescription() const
 {
-	return "Shows the current status. This currently includes:\n"
-	    "  o)  Runstate (Running or Paused)\n"
-	    "  o)  Number of emulated step\n"
-	    "  o)  Emulated time\n";
+	return
+	    "Shows the current status, which includes:\n\n"
+	    "  *  Number of emulated step\n"
+	    "  *  Emulated time\n"
+	    "  *  Runstate (Running or Paused)\n"
+	    "\n"
+	    "Typing CTRL-T at the command prompt also executes the 'status' command.\n";
 }
 

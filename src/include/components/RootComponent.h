@@ -1,8 +1,8 @@
-#ifndef DUMMYCOMPONENT_H
-#define	DUMMYCOMPONENT_H
+#ifndef ROOTCOMPONENT_H
+#define	ROOTCOMPONENT_H
 
 /*
- *  Copyright (C) 2007-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2009  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -28,8 +28,10 @@
  *  SUCH DAMAGE.
  */
 
-// COMPONENT(dummy)
-
+/*
+ * Note: This is a special component, which cannot be created interactively
+ * by the user.
+ */
 
 #include "Component.h"
 
@@ -37,36 +39,43 @@
 
 
 /**
- * \brief A dummy Component, for unit testing purposes.
+ * \brief A Component which is the default root node in the configuration.
+ *
+ * This Component is mostly a dummy component, but it holds some global state
+ * which is used for the entire emulation step:
+ *
+ * <ul>
+ *	<li>step: The number of executed steps since the start of the emulation.
+ *	<li>time: The time, in seconds, that the emulation has been running.
+ * </ul>
+ *
+ * Other than the members listed above, the root component is mostly a dummy
+ * component, and the interesting stuff is stored as child components.
+ *
+ * NOTE: A RootComponent is not registered in the component registry, and
+ * can thus not be created interactively by the user at runtime.
  */
-class DummyComponent
+class RootComponent
 	: public Component
 	, public UnitTestable
 {
 public:
 	/**
-	 * \brief Constructs a DummyComponent.
+	 * \brief Constructs a RootComponent.
 	 */
-	DummyComponent(string className = "dummy");
+	RootComponent();
 
-	/**
-	 * \brief Creates a DummyComponent.
-	 */
-	static refcount_ptr<Component> Create();
-
-	/**
-	 * \brief Get attribute information about the DummyComponent class.
-	 *
-	 * @param attributeName The attribute name.
-	 * @return A string representing the attribute value.
-	 */
-	static string GetAttribute(const string& attributeName);
+	virtual void ResetState();
 
 
 	/********************************************************************/
 public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
+private:
+	uint64_t	m_step;
+	double		m_time;
 };
 
 
-#endif	// DUMMYCOMPONENT_H
+#endif	// ROOTCOMPONENT_H

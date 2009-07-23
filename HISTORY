@@ -3912,3 +3912,6 @@ Changelog for GXemul:
 		path, whenever possible, instead of full paths.
 20090722	Implementing a new concept of "on reset commands"; beginning on
 		extending the ELF loader for symbol loading support.
+20090723	Moving 'step' and 'time' concepts from the GXemul class to a
+		new component, the RootComponent.
+		Minor configure script fixes (allow --without-unittests etc.).

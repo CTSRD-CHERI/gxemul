@@ -338,10 +338,15 @@ string StateVariable::ToString() const
 
 uint64_t StateVariable::ToInteger() const
 {
-	stringstream sstr;
 	switch (m_type) {
 	case String:
-		return 0;
+		{
+			uint64_t tmp;
+			stringstream ss;
+			ss << *m_value.pstr;
+			ss >> tmp;
+			return tmp;
+		}
 	case Bool:
 		return (*m_value.pbool)? 1 : 0;
 	case Double:
@@ -366,10 +371,50 @@ uint64_t StateVariable::ToInteger() const
 		return 0;
 	}
 
-	// Unimplemented type?
-	assert(false);
+	// Unimplemented type. Let's abort.
+	std::cerr << "StateVariable::ToDouble(): Unimplemented type.\n";
+	throw std::exception();
+}
 
-	return 0;
+
+double StateVariable::ToDouble() const
+{
+	switch (m_type) {
+	case String:
+		{
+			double tmp;
+			stringstream ss;
+			ss << *m_value.pstr;
+			ss >> tmp;
+			return tmp;
+		}
+	case Bool:
+		return (*m_value.pbool)? 1.0 : 0.0;
+	case Double:
+		return *m_value.pdouble;
+	case UInt8:
+		return *m_value.puint8;
+	case UInt16:
+		return *m_value.puint16;
+	case UInt32:
+		return *m_value.puint32;
+	case UInt64:
+		return *m_value.puint64;
+	case SInt8:
+		return *m_value.psint8;
+	case SInt16:
+		return *m_value.psint16;
+	case SInt32:
+		return *m_value.psint32;
+	case SInt64:
+		return *m_value.psint64;
+	case Custom:
+		return 0.0;
+	}
+
+	// Unimplemented type. Let's abort.
+	std::cerr << "StateVariable::ToDouble(): Unimplemented type.\n";
+	throw std::exception();
 }
 
 

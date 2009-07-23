@@ -234,6 +234,13 @@ public:
 	uint64_t ToInteger() const;
 
 	/**
+	 * \brief Returns the variable as a double value.
+	 *
+	 * @return A double, representing the variable's value.
+	 */
+	double ToDouble() const;
+
+	/**
 	 * \brief Set the variable's value.
 	 *
 	 * Note that the expression may be a single value (e.g. <tt>42</tt>),
