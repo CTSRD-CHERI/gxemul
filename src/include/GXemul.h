@@ -55,7 +55,10 @@ public:
 	enum RunState
 	{
 		Paused,
-		Running,
+		SingleStepping,			// Single-step execution
+		Running,			// Continuous execution
+		BackwardsSingleStepping,	// Single-step execution reverse
+		BackwardsRunning,		// Continuous execution reverse
 		Quitting
 	};
 
@@ -207,9 +210,21 @@ public:
 	void SetQuietMode(bool quietMode);
 
 	/**
-	 * \brief Run the emulation for a specific number of steps.
+	 * \brief Run the emulation for "a while".
+	 *
+	 * When single-stepping, this function will:
+	 * <ul>
+	 *	<li>execute one step,
+	 *	<li>set the run state to Paused,
+	 *	<li>and then return.
+	 * </ul>
+	 *
+	 * When not single-stepping, components will execute multiple steps at
+	 * once, if possible. In the most common case (no breakpoints or other
+	 * special cases), when this function returns, the run state will not
+	 * have been affected.
 	 */
-	void ExecuteSteps(int nrOfSteps);
+	void Execute();
 
 	/**
 	 * \brief Dump a list to stdout with all available machine templates.
@@ -243,6 +258,13 @@ private:
 	 *		false to only print a short message.
 	 */
 	void PrintUsage(bool longUsage) const;
+
+	/**
+	 * \brief Sets the current step of the emulation.
+	 *
+	 * @param step The number of steps.
+	 */
+	void SetStep(uint64_t step);
 
 
 	/********************************************************************/

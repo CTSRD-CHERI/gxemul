@@ -612,10 +612,76 @@ bool StateVariable::SetValue(const string& expression)
 		return m_value.phandler->Deserialize(value);
 
 	default:
-		// Unimplemented variable type?
-		assert(false);
+		// Unimplemented type. Let's abort.
+		std::cerr << "StateVariable::SetValue: Unimplemented type.\n";
+		throw std::exception();
+	}
+}
 
+
+bool StateVariable::SetValue(uint64_t value)
+{
+	// Nothing to assign to?
+	if (m_value.pstr == NULL)
 		return false;
+
+	switch (m_type) {
+
+	case String:
+		{
+			stringstream ss;
+			ss << value;
+			*m_value.pstr = ss.str();
+		}
+		return true;
+
+	case Bool:
+		*m_value.pbool = value != 0;
+		return true;
+
+	case Double:
+		*m_value.pdouble = value;
+		return true;
+
+	case UInt8:
+		*m_value.puint8 = value;
+		return true;
+
+	case UInt16:
+		*m_value.puint16 = value;
+		return true;
+		
+	case UInt32:
+		*m_value.puint32 = value;
+		return true;
+
+	case UInt64:
+		*m_value.puint64 = value;
+		return true;
+
+	case SInt8:
+		*m_value.psint8 = value;
+		return true;
+
+	case SInt16:
+		*m_value.psint16 = value;
+		return true;
+		
+	case SInt32:
+		*m_value.psint32 = value;
+		return true;
+
+	case SInt64:
+		*m_value.psint64 = value;
+		return true;
+
+	case Custom:
+		return false;
+
+	default:
+		// Unimplemented type. Let's abort.
+		std::cerr << "StateVariable::SetValue: Unimplemented type.\n";
+		throw std::exception();
 	}
 }
 

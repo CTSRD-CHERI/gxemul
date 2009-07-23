@@ -241,7 +241,7 @@ public:
 	double ToDouble() const;
 
 	/**
-	 * \brief Set the variable's value.
+	 * \brief Set the variable's value, using a string expression.
 	 *
 	 * Note that the expression may be a single value (e.g. <tt>42</tt>),
 	 * or something more complex (e.g. <tt>123 + cpu0.pc * 4</tt>).
@@ -255,6 +255,15 @@ public:
 	 *	parse error.
 	 */
 	bool SetValue(const string& expression);
+
+	/**
+	 * \brief Set the variable's value to an integer.
+	 *
+	 * @param value The new value.
+	 * @return True if the value was set, false if e.g. there was a
+	 *	type error.
+	 */
+	bool SetValue(uint64_t value);
 
 
 	/********************************************************************/

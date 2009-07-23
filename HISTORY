@@ -3916,3 +3916,5 @@ Changelog for GXemul:
 		new component, the RootComponent.
 		Minor configure script fixes (allow --without-unittests etc.).
 		Removing the "NotRunning" run state.
+		Adding dummy "step", "backward-step", and "continue-backwards"
+		commands.

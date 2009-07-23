@@ -5,12 +5,13 @@
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(INCLUDE2)
 LIBS=$(OTHERLIBS)
 
-OBJS=AddComponentCommand.o CloseCommand.o ContinueCommand.o \
-	CopyComponentCommand.o HelpCommand.o \
+OBJS=AddComponentCommand.o BackwardStepCommand.o CloseCommand.o \
+	ContinueBackwardsCommand.o ContinueCommand.o CopyComponentCommand.o \
+	HelpCommand.o \
 	LoadCommand.o ListComponentsCommand.o MoveComponentCommand.o \
 	PauseCommand.o \
 	QuitCommand.o RemoveComponentCommand.o ResetCommand.o \
-	SaveCommand.o StatusCommand.o VersionCommand.o
+	SaveCommand.o StatusCommand.o StepCommand.o VersionCommand.o
 
 all: $(OBJS)
 

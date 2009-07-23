@@ -176,7 +176,7 @@ void GXemul::ClearEmulation()
 	m_rootComponent = new RootComponent;
 	m_emulationFileName = "";
 
-	m_ui->UpdateUI();
+	GetUI()->UpdateUI();
 }
 
 
@@ -543,10 +543,10 @@ int GXemul::Run()
 	// Once a GUI has been implemented, this is the
 	// place to call its constructor. TODO
 
-	m_ui->Initialize();
+	GetUI()->Initialize();
 	
 	if (!GetQuietMode()) {
-		m_ui->ShowStartupBanner();
+		GetUI()->ShowStartupBanner();
 
 		// Dump (a suitable part of) the configuration tree at startup.
 		const Component* component = GetRootComponent();
@@ -559,7 +559,7 @@ int GXemul::Run()
 				component = component->GetChildren()[0];
 			}
 
-			m_ui->ShowDebugMessage(component->GenerateTreeDump("") + "\n");
+			GetUI()->ShowDebugMessage(component->GenerateTreeDump("") + "\n");
 		}
 	}
 
@@ -569,7 +569,7 @@ int GXemul::Run()
 		SetRunState(Paused);
 
 		if (!Reset()) {
-			m_ui->ShowDebugMessage("Aborting.\n");
+			GetUI()->ShowDebugMessage("Aborting.\n");
 			return 1;
 		}
 
@@ -580,12 +580,12 @@ int GXemul::Run()
 		// A separator line, if we start emulating directly without dropping
 		// into the interactive debugger. (To mimic pre-0.6.0 appearance.)
 		if (GetRunState() == Running)
-			m_ui->ShowDebugMessage("--------------------------------"
+			GetUI()->ShowDebugMessage("--------------------------------"
 			    "-----------------------------------------------\n\n");
 	}
 
 	try {
-		m_ui->MainLoop();
+		GetUI()->MainLoop();
 	} catch (std::exception& ex) {
 		stringstream ss;
 		ss << "\n### FATAL ERROR ###\n\n" << ex.what() << "\n\n" <<
@@ -595,7 +595,7 @@ int GXemul::Run()
 		    " ask in #GXemul on the\n"
 		    "FreeNode IRC network.\n";
 
-		m_ui->FatalError(ss.str());
+		GetUI()->FatalError(ss.str());
 
 		return 1;
 	}
@@ -614,7 +614,7 @@ void GXemul::SetEmulationFilename(const string& filename)
 {
 	m_emulationFileName = filename;
 
-	m_ui->UpdateUI();
+	GetUI()->UpdateUI();
 }
 
 
@@ -648,6 +648,18 @@ uint64_t GXemul::GetStep() const
 }
 
 
+void GXemul::SetStep(uint64_t step)
+{
+	StateVariable* stepVariable = GetRootComponent()->GetVariable("step");
+	if (stepVariable == NULL) {
+		std::cerr << "root component has no 'step' variable? aborting.\n";
+		throw std::exception();
+	}
+
+	stepVariable->SetValue(step);
+}
+
+
 UI* GXemul::GetUI()
 {
 	return m_ui;
@@ -671,7 +683,7 @@ void GXemul::SetRootComponent(refcount_ptr<Component> newRootComponent)
 	assert(!newRootComponent.IsNULL());
 	m_rootComponent = newRootComponent;
 
-	m_ui->UpdateUI();
+	GetUI()->UpdateUI();
 }
 
 
@@ -690,10 +702,10 @@ bool GXemul::Reset()
 		GetCommandInterpreter().RunCommand(cmd, &success);
 
 		if (!GetQuietMode())
-			m_ui->ShowDebugMessage("\n");
+			GetUI()->ShowDebugMessage("\n");
 
 		if (!success) {
-			m_ui->ShowDebugMessage("Failing on-reset command:\n"
+			GetUI()->ShowDebugMessage("Failing on-reset command:\n"
 			    "    " + cmd + "\n");
 			return false;
 		}
@@ -707,7 +719,7 @@ void GXemul::SetRunState(RunState newState)
 {
 	m_runState = newState;
 
-	m_ui->UpdateUI();
+	GetUI()->UpdateUI();
 }
 
 
@@ -722,8 +734,14 @@ string GXemul::GetRunStateAsString() const
 	switch (m_runState) {
 	case Paused:
 		return "Paused";
+	case SingleStepping:
+		return "Single-stepping";
 	case Running:
 		return "Running";
+	case BackwardsSingleStepping:
+		return "Single-stepping backwards";
+	case BackwardsRunning:
+		return "Running backwards";
 	case Quitting:
 		return "Quitting";
 	}
@@ -744,9 +762,48 @@ void GXemul::SetQuietMode(bool quietMode)
 }
 
 
-void GXemul::ExecuteSteps(int nrOfSteps)
+void GXemul::Execute()
 {
-	// TODO
+	switch (GetRunState()) {
+	
+	case SingleStepping:
+		{
+			uint64_t step = GetStep();
+
+			stringstream ss;
+			ss << "step " << step << ": time = " << GetGlobalTime() << "\n";
+			GetUI()->ShowDebugMessage(ss.str());
+
+			// TODO
+
+			SetStep(++ step);
+			SetRunState(Paused);
+		}
+		break;
+
+	case BackwardsSingleStepping:
+		std::cerr << "GXemul::Execute(): TODO: BackwardsSingleStepping\n";
+		throw std::exception();
+		// TODO
+		break;
+	
+	case Running:
+		std::cerr << "GXemul::Execute(): TODO: Running\n";
+		throw std::exception();
+		// TODO
+		break;
+	
+	case BackwardsRunning:
+		std::cerr << "GXemul::Execute(): TODO: BackwardsRunning\n";
+		throw std::exception();
+		// TODO
+		break;
+	
+	default:
+		std::cerr << "GXemul::Execute() called without being in the"
+		    " Running state. Internal error?\n";
+		throw std::exception();
+	}
 }
 
 

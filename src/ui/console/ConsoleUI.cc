@@ -267,13 +267,18 @@ int ConsoleUI::MainLoop()
 
 		switch (runState) {
 
+		case GXemul::BackwardsSingleStepping:
+		case GXemul::BackwardsRunning:
+		case GXemul::SingleStepping:
 		case GXemul::Running:
-			if (oldRunState != GXemul::Running) {
-				m_gxemul->GetRootComponent()->
-				    FlushCachedState();
+			// Switching from Paused state to running? Then
+			// we need to:
+			// 1) flush old cached state
+			// 2) perform pre-run checks.
+			if (oldRunState == GXemul::Paused) {
+				m_gxemul->GetRootComponent()->FlushCachedState();
 
-				if (!m_gxemul->GetRootComponent()->
-				    PreRunCheck(m_gxemul)) {
+				if (!m_gxemul->GetRootComponent()->PreRunCheck(m_gxemul)) {
 					FatalError("Pre-run check failed.\n");
 					m_gxemul->SetRunState(GXemul::Paused);
 					runState = m_gxemul->GetRunState();
@@ -281,13 +286,18 @@ int ConsoleUI::MainLoop()
 				}
 			}
 
-			m_gxemul->ExecuteSteps(1000);
+			m_gxemul->Execute();
 			break;
 
 		case GXemul::Quitting:
 			break;
 
 		case GXemul::Paused:
+			// When issuing interactive commands, "anything" can
+			// happen to the component tree, and thus any cached
+			// state quickly becomes untrustworthy. Let's flush it.
+			m_gxemul->GetRootComponent()->FlushCachedState();
+
 			ReadAndExecuteCommand();
 			break;
 		}
