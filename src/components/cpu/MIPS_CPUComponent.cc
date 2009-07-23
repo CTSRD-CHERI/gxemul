@@ -275,7 +275,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 
 	// ... and add it to the result:
 	char tmp[9];
-	snprintf(tmp, sizeof(tmp), "%08x", iword);
+	snprintf(tmp, sizeof(tmp), "%08x", (int) iword);
 	result.push_back(tmp);
 
 	int hi6 = iword >> 26;
