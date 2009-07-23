@@ -39,6 +39,90 @@ MAIN GOAL for 0.6.0:
 
 -------------------------------------------------------------------------------
 
+   [ ]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
+
+	[ ]  The root component should be a specific component type, which has
+	     emulation-wide settings, such as "step"!
+	[ ]  Remove the step/time concepts from the GXemul class.
+	[ ]  Change the status command to show the root component's step.
+
+	Single-stepping should probably print the shortest possible part of the
+	component name, followed by the component's single-step printout
+	(verbose single-step debug messages).
+	
+	E.g.:
+		step 42:
+		cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+	
+	if there is only one machine, or
+
+		step 43:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+	
+	if cpu0 was not unique (i.e. multiple machines exist).
+	If multiple components are affected in the step, then all should
+	print out what they do:
+
+		step 44:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+		machine0.mainbus0.intc: timer 2 tick, asserting interrupt T2
+		machine1.mainbus0.cpu0: 0x01234564  5e 9a 39 01  jmp 0x1234
+
+	Optionally print emulated time after the step:
+	
+		step 45 (time = 0.418s):
+		...
+
+	   [ ]  Reverse execution:
+		[ ]  Must be explicitly enabled, since it will slow down the emulator,
+		     use more memory, and require disk images to have overlays!
+		[ ]  Regular saving of state, and limiting the number of such
+		     saves by logarithmic removal.
+		[ ]  In addition to saving state, all modifications done to the
+		     component tree, and e.g. breakpoints, need to be stored
+		     together with their time stamp ("step"). I.e. if a USB
+		     storage device is connected as step 1000, and we're
+		     running in reverse to step 800 to check something, and
+		     then continue again, the default behaviour should be that
+		     at step 1000 the USB device is connected again.
+	   	[/]  [Re]read these:
+			<a href="http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html">http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html</a>
+			<a href="http://www.codesourcery.com/publications/reversible_debugging.pdf">http://www.codesourcery.com/publications/reversible_debugging.pdf</a> (QEMU)
+			<a href="http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf">http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf</a>
+		     They resemble to a large degree what I have in mind.
+		[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
+		[ ]  "c" = "continue", "backward-continue" commands
+		[ ]  Simulation across multiple hosts?
+
+	Running in reverse should show the step (and time), but does it need
+	to show the instruction being executed? No. I don't think so. But it
+	could show the change in state:
+
+		step 43:
+		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
+		machine0.mainbus0.cpu0: r1: 0x9512 -> 0x3456
+		GXemul> b			(to step backwards)
+		step 43 -> 42:
+		machine0.mainbus0.cpu0: r1: 0x3456 -> 0x9512
+
+	As in the example above, it might be good to show exactly what the
+	state change is also in the forward direction. For e.g. a load from
+	a zero-on-read register in a device, that would be e.g.:
+
+		machine0.mainbus0.cpu0: 0x12345678  ab cd 01 00  ld r12,[r13+0x100]
+		machine0.mainbus0.isabus0.somedevice0: status: 0x0014 -> 0x0000
+		machine0.mainbus0.cpu0: r12: 0x2828 -> 0x0014
+
+	This would be especially good on CISC machines, where instructions have
+	multiple side-effects (flags etc), or when an exception occurs.
+
+
+  [ ]	NEW DYNTRANS IMPLEMENTATION, ...
+
+	[ ]  Guarantee that single-stepping and bulk execution end up with
+	     _EXACTLY_ the same state!
+
+
   [X]	OnReset commands, usually Load commands. Filenames listed on the command
  	line should not be loaded initially, but added to the onreset command
  	list. Just before running, when an UI has been created, do a Reset.
@@ -93,83 +177,6 @@ MAIN GOAL for 0.6.0:
 	[ ]  Implement 88K instruction execution.
 	[ ]  Implement 88K virtual to physical memory translation.
 
-   [ ]  Main execution loop should probably be looked over, so
-	that it is general enough to support lots of variants of
-	execution.
-
-	[ ]  Think about Verboseness. Is this per-component? How many levels?
-		E.g. a CPU can show state change in many ways:
-		o)  the instruction being executed
-		o)  the registers/state being changed
-		o)  function call trace (enter/leave function)
-		
-	[ ]  Think about error reporting / exceptions.
-
-	A "step" should be the core concept. A step on a single-cpu machine is
-	one instruction for that cpu. For a multi-cpu machine, or where multiple
-	devices run at different speeds, a step should STILL only run one thing
-	from one component, and the different components' execution will be
-	interleaved. This way, there is always a specific order to what happens.
-
-	In other words, I plan for GXemul 0.6.x to support Cycle Accurate
-	component implementations. But obviously, this does not automatically
-	mean that all shipped/implemented components will be Cycle Accurate.
-	There will still be no superscalar CPU models, or pipelines CPU models,
-	as shipped by me. Each instruction will execute in one cycle, by
-	default. (Simple CPUs like AVR could perhaps be implemented as fully
-	cycle accurate models, for fun, but that's an exception to the rule.)
-
-	Stepping should probably print the shortest possible part of the
-	component name, followed by the component's single-step printout.
-	
-	[X]  Implement Component::GenerateShortestPossiblePath(). 
-	
-	E.g.:
-
-		step 42:
-		cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
-	
-	if there is only one machine, or
-
-		step 43:
-		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
-	
-	if cpu0 was not unique (i.e. multiple machines exist).
-	If multiple components are affected in the step, then all should
-	print out what they do:
-
-		step 44:
-		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
-		machine0.mainbus0.intc: timer 2 tick, asserting interrupt T2
-		machine1.mainbus0.cpu0: 0x01234564  5e 9a 39 01  jmp 0x1234
-
-	Optionally print emulated time after the step:
-	
-		step 45, t = 0.418:
-		...
-
-	Running in reverse should show the step (and time), but does it need
-	to show the instruction being executed? No. I don't think so. But it
-	could show the change in state:
-
-		step 43:
-		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
-		machine0.mainbus0.cpu0: r1: 0x9512 -> 0x3456
-		GXemul> b			(to step backwards)
-		step 43 -> 42:
-		machine0.mainbus0.cpu0: r1: 0x3456 -> 0x9512
-
-	As in the example above, it might be good to show exactly what the
-	state change is also in the forward direction. For e.g. a load from
-	a zero-on-read register in a device, that would be e.g.:
-
-		machine0.mainbus0.cpu0: 0x12345678  ab cd 01 00  ld r12,[r13+0x100]
-		machine0.mainbus0.isabus0.somedevice0: status: 0x0014 -> 0x0000
-		machine0.mainbus0.cpu0: r12: 0x2828 -> 0x0014
-
-	This would be especially good on CISC machines, where instructions have
-	multiple side-effects (flags etc), or when an exception occurs.
-
   [/]	Mainbus component:
 	[ ]  Maybe this should simply be a "Bus" base class? That way,
 	     it could be reused by PCI Busses, VME busses, and others. HOWEVER,
@@ -208,30 +215,7 @@ MAIN GOAL for 0.6.0:
 	     i.e. overlays must be used if reverse execution support is
 	     enabled.
 
-   [ ]  Reverse execution:
-        [ ]  Must be explicitly enabled, since it will slow down the emulator,
-             use more memory, and require disk images to have overlays!
-	[ ]  Regular saving of state, and limiting the number of such
-	     saves by logarithmic removal.
-	[ ]  In addition to saving state, all modifications done to the
-	     component tree, and e.g. breakpoints, need to be stored
-	     together with their time stamp ("step"). I.e. if a USB
-	     storage device is connected as step 1000, and we're
-	     running in reverse to step 800 to check something, and
-	     then continue again, the default behaviour should be that
-	     at step 1000 the USB device is connected again.
-   	[/]  [Re]read these:
-		<a href="http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html">http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html</a>
-		<a href="http://www.codesourcery.com/publications/reversible_debugging.pdf">http://www.codesourcery.com/publications/reversible_debugging.pdf</a>
-		<a href="http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf">http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf</a>
-	     They resemble to a large degree what I have in mind.
-	[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
-	[ ]  "c" = "continue", "backward-continue" commands
-	[ ]  Simulation across multiple hosts?
-
    [ ]  File loaders:
-	[ ]  How about "reset"? The list of files could be stored somewhere.
-	     For now, reset does _NOT_ reload binaries.
 	[ ]  symbol handling, line number info, data types?
 	[ ]  argument handling! (arg count, at least)
 	[ ]  all the others (macho, ecoff, srec, raw, ...)
@@ -264,7 +248,12 @@ MAIN GOAL for 0.6.0:
 	     generation, except for stuff like "check if pc = xyz"-
 	     style breakpoints. Those can be embedded.
 
-   [ ]  Function call trace
+   [ ]  Function call trace etc.
+	[ ]  Think about Verboseness. Is this per-component? How many levels?
+		E.g. a CPU can show state change in many ways:
+		o)  the instruction being executed
+		o)  the registers/state being changed
+		o)  function call trace (enter/leave function)
 
    [ ]  Stack dump (of the emulated machine)
    	[ ]  A method on CPU components?
@@ -333,6 +322,23 @@ MAIN GOAL for 0.6.0:
 			[ ]  scan all commands' args at startup, and have an
 				assert() in place, so that unknown arg types
 				are caught during development!
+
+	[ ]	recursive component.var
+			Dumps a tree of the "var" variable _FROM_ the component,
+			i.e. including all children. E.g.
+			recursive mainbus0.memoryMappedAddr
+			would dump
+				mainbus0
+				|-- ram0  memoryMappedAddr = 0
+				|-- rom0  memoryMappedAddr = 0x1fc00000
+				\-- com0  memoryMappedAddr = 0x190003f8
+			or something.
+
+	[ ]	recursive component.var = value
+			would set the "var" variable in the component including
+			all sub components. Not all components may have the
+			variable, so debug output should indicate which variables
+			were set and which were not set.
 
 	[/]	reset		Resets the emulation. (Reloads files, clears RAM, etc.)
 				step = 0.
