@@ -766,6 +766,7 @@ struct ComponentAndFrequency
 {
 	refcount_ptr<Component>	component;
 	double			frequency;
+	StateVariable*		step;
 };
 
 
@@ -775,11 +776,13 @@ static void GetComponentsAndFrequencies(refcount_ptr<Component> component,
 	vector<ComponentAndFrequency>& componentsAndFrequencies)
 {
 	StateVariable* freq = component->GetVariable("frequency");
-	if (freq != NULL) {
+	StateVariable* step = component->GetVariable("step");
+	if (freq != NULL && step != NULL) {
 		struct ComponentAndFrequency caf;
 		caf.component = component;
 		caf.frequency = freq->ToDouble();
-		
+		caf.step      = step;
+
 		componentsAndFrequencies.push_back(caf);
 	}
 	
@@ -801,6 +804,15 @@ void GXemul::Execute()
 		return;
 	}
 
+	// Find the fastest component:
+	double fastestFrequency = componentsAndFrequencies[0].frequency;
+	size_t fastestComponentIndex = 0;
+	for (size_t i=0; i<componentsAndFrequencies.size(); ++i)
+		if (componentsAndFrequencies[i].frequency > fastestFrequency) {
+			fastestFrequency = componentsAndFrequencies[i].frequency;
+			fastestComponentIndex = i;
+		}
+
 	switch (GetRunState()) {
 	
 	case SingleStepping:
@@ -811,25 +823,32 @@ void GXemul::Execute()
 			ss << "step " << step << ": time = " << GetGlobalTime() << "\n";
 			GetUI()->ShowDebugMessage(ss.str());
 
-			// TODO: Relative speeds, scheduling, correctness!
-			bool allSameSpeed = true;
+			++ step;
+			
+			// Component X, using frequency fX, should have executed
+			// nstepsX = steps * fX / fastestFrequency  nr of steps.
 			for (size_t k=0; k<componentsAndFrequencies.size(); ++k) {
-				if (componentsAndFrequencies[k].frequency !=
-				    componentsAndFrequencies[0].frequency)
-					allSameSpeed = false;
-			}
+				uint64_t nsteps = (k == fastestComponentIndex ? step
+				    : step * componentsAndFrequencies[k].frequency / fastestFrequency);
 
-			if (!allSameSpeed) {
-				std::cerr << "TODO: THIS IS JUST A QUICK HACK WHICH"
-				    " WORKS IF ALL COMPONENTS HAVE THE SAME SPEED!\n";
-				throw std::exception();
-			}
+				uint64_t stepsExecutedSoFar = componentsAndFrequencies[k].step->ToInteger();
 
-			for (size_t i=0; i<componentsAndFrequencies.size(); ++i)
-				componentsAndFrequencies[i].component->Execute(1);
+				if (stepsExecutedSoFar > nsteps) {
+					std::cerr << "Internal error: Too many steps executed?\n";
+					throw std::exception();
+				}
+				
+				if (stepsExecutedSoFar < nsteps) {
+					++ stepsExecutedSoFar;
+					componentsAndFrequencies[k].component->Execute(this, 1);
+
+					// Write back the number of executed steps:
+					componentsAndFrequencies[k].step->SetValue(stepsExecutedSoFar);
+				}
+			}
 
 			// Done. Let's pause again.
-			SetStep(++ step);
+			SetStep(step);
 			SetRunState(Paused);
 		}
 		break;

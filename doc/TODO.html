@@ -41,32 +41,17 @@ MAIN GOAL for 0.6.0:
 
    [ ]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
-	[ ] Scheduler, taking care of the interleaving of multiple comonents
-	    at varying frequencies.
-
-	    [ ] Unit tests.
-
 	[/] Single-stepping:
-		[/]  Execute the step.
-			[ ] Scheduling of multiple components.
+		[X]  Execute the step.
+			[X] Scheduling of multiple components.
 		[X]  Increase the step count.
 		[X]  Set runstate to Paused after executing something.
-		[/]  Unit tests. (DummyComponent)
+		[X]  Unit tests. (DummyComponent)
 
 	[ ] Continuous execution:
 		TODO.
 
-	Single-stepping should probably print the shortest possible part of the
-	component name, followed by the component's single-step printout
-	(verbose single-step debug messages).
-	
-	E.g.:
-		step 42:
-		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
-		machine0.mainbus0.intc: timer 2 tick, asserting interrupt T2
-		machine1.mainbus0.cpu0: 0x01234564  5e 9a 39 01  jmp 0x1234
-
-	   [ ]  Reverse execution:
+	[ ] Reverse execution/debugging:
 		[ ]  Must be explicitly enabled, since it will slow down the emulator,
 		     use more memory, and require disk images to have overlays!
 		[ ]  Regular saving of state, and limiting the number of such

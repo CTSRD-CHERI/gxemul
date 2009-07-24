@@ -31,21 +31,18 @@
 
 RootComponent::RootComponent()
 	: Component("root", "root")
-	, m_step(0)
 	, m_time(0.0)
 {
 	SetVariableValue("name", "\"root\"");
 
 	ResetState();
 
-	AddVariable("step", &m_step);
 	AddVariable("time", &m_time);
 }
 
 
 void RootComponent::ResetState()
 {
-	m_step = 0;
 	m_time = 0.0;
 
 	Component::ResetState();

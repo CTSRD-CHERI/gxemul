@@ -46,6 +46,7 @@
  *
  * <ul>
  *	<li>step: The number of executed steps since the start of the emulation.
+ *		(actually this variable is in the Component base class)
  *	<li>time: The time, in seconds, that the emulation has been running.
  * </ul>
  *
@@ -73,7 +74,6 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
-	uint64_t	m_step;
 	double		m_time;
 };
 

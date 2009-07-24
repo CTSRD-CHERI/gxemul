@@ -170,8 +170,8 @@ void ConsoleUI::ShowDebugMessage(Component* component, const string& msg)
 	vector<string> lines = SplitIntoRows(msg);
 
 	// Let's say the input msg is "blahlonger\nblahshort".
-
-	if (m_gxemul->GetRunState() == GXemul::Running) {
+	if (m_gxemul->GetRunState() == GXemul::Running ||
+	    m_gxemul->GetRunState() == GXemul::BackwardsRunning) {
 		// If runstate is Running, then show pre-0.6.0 style [ ] output.
 		//
 		// [ cpu0: blahlonger ]

@@ -594,7 +594,7 @@ public:
 		return new DummyComponentWithCounter();
 	}
 
-	virtual int Execute(int nrOfCycles)
+	virtual int Execute(GXemul* gxemul, int nrOfCycles)
 	{
 		// Limit max nr of cycles per Execute call.
 		if (nrOfCycles > 5)
@@ -703,6 +703,62 @@ static void Test_DummyComponent_Execute_TwoComponentsSameSpeed()
 	    counterB->GetVariable("counter")->ToInteger(), 10044);
 }
 
+static void Test_DummyComponent_Execute_TwoComponentsDifferentSpeed()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
+	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
+
+	UnitTest::Assert("the testcounters should have been added",
+	    gxemul.GetRootComponent()->GetChildren().size(), 2);
+
+	refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+	refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
+
+	UnitTest::Assert("name A mismatch",
+	    counterA->GetVariable("name")->ToString(), "testcounter0");
+	UnitTest::Assert("name B mismatch",
+	    counterB->GetVariable("name")->ToString(), "testcounter1");
+
+	// Counter B should run twice as fast:
+	counterA->SetVariableValue("frequency", "100000");
+	counterB->SetVariableValue("frequency", "200000");
+
+	counterB->SetVariableValue("counter", "10042");
+
+	// Step 0:
+	UnitTest::Assert("the step should initially be 0",
+	    gxemul.GetStep(), 0);
+	UnitTest::Assert("counterA should initially be 42",
+	    counterA->GetVariable("counter")->ToInteger(), 42);
+	UnitTest::Assert("counterB should initially be 10042",
+	    counterB->GetVariable("counter")->ToInteger(), 10042);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+
+	// Step 2:
+	UnitTest::Assert("the step should now be 2", gxemul.GetStep(), 2);
+	UnitTest::Assert("counter A should now be 43",
+	    counterA->GetVariable("counter")->ToInteger(), 43);
+	UnitTest::Assert("counter B should now be 10044",
+	    counterB->GetVariable("counter")->ToInteger(), 10044);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+
+	// Step 4:
+	UnitTest::Assert("the step should now be 4", gxemul.GetStep(), 4);
+	UnitTest::Assert("counter A should now be 44",
+	    counterA->GetVariable("counter")->ToInteger(), 44);
+	UnitTest::Assert("counter B should now be 10046",
+	    counterB->GetVariable("counter")->ToInteger(), 10046);
+}
+
 UNITTESTS(DummyComponent)
 {
 	ComponentFactory::RegisterComponentClass("dummy2",
@@ -748,6 +804,7 @@ UNITTESTS(DummyComponent)
 	// Cycle execution
 	UNITTEST(Test_DummyComponent_Execute_SingleStep);
 	UNITTEST(Test_DummyComponent_Execute_TwoComponentsSameSpeed);
+	UNITTEST(Test_DummyComponent_Execute_TwoComponentsDifferentSpeed);
 }
 
 #endif

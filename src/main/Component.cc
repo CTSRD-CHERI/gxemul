@@ -41,9 +41,11 @@ Component::Component(const string& className, const string& visibleClassName)
 	: m_parentComponent(NULL)
 	, m_className(className)
 	, m_visibleClassName(visibleClassName)
+	, m_step(0)
 {
 	AddVariable("name", &m_name);
 	AddVariable("template", &m_template);
+	AddVariable("step", &m_step);
 }
 
 
@@ -140,7 +142,8 @@ void Component::Reset()
 
 void Component::ResetState()
 {
-	// Base implementation: Do nothing.
+	// Base implementation.
+	m_step = 0;
 }
 
 
@@ -179,7 +182,7 @@ void Component::FlushCachedStateForComponent()
 }
 
 
-int Component::Execute(int nrOfCycles)
+int Component::Execute(GXemul* gxemul, int nrOfCycles)
 {
 	// Base implementation: Do nothing, but pretend we executed
 	// the instructions. Actual components that inherit from this

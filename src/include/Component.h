@@ -177,10 +177,11 @@ public:
 	 * has a StateVariable named "frequency". Components that do not have
 	 * any frequency do not execute anything periodically by themselves.
 	 *
+	 * @param gxemul A pointer to the GXemul instance.
 	 * @param nrOfCycles	The requested number of cycles to run.
 	 * @return	The number of cycles actually executed.
 	 */
-	virtual int Execute(int nrOfCycles);
+	virtual int Execute(GXemul* gxemul, int nrOfCycles);
 
 	/**
 	 * \brief Returns the current frequency (in Hz) that the component
@@ -629,6 +630,7 @@ private:
 	string		m_name;		// This Component's instance name.
 	string		m_template;	// Set if this Component
 					// was based on a template.
+	uint64_t	m_step;		// Nr of executed steps.
 };
 
 
