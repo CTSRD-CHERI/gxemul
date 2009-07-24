@@ -237,7 +237,7 @@ size_t MIPS_CPUComponent::DisassembleInstructionMIPS16(uint64_t vaddr,
 {
 	// Read the instruction word:
 	uint16_t iword = *((uint16_t *) instruction);
-	if (m_endianness == BigEndian)
+	if (m_isBigEndian)
 		iword = BE16_TO_HOST(iword);
 	else
 		iword = LE16_TO_HOST(iword);
@@ -271,7 +271,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 
 	// Read the instruction word:
 	uint32_t iword = *((uint32_t *) instruction);
-	if (m_endianness == BigEndian)
+	if (m_isBigEndian)
 		iword = BE32_TO_HOST(iword);
 	else
 		iword = LE32_TO_HOST(iword);

@@ -152,7 +152,7 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 
 	// Read the instruction word:
 	uint32_t iword = *((uint32_t *) instruction);
-	if (m_endianness == BigEndian)
+	if (m_isBigEndian)
 		iword = BE32_TO_HOST(iword);
 	else
 		iword = LE32_TO_HOST(iword);

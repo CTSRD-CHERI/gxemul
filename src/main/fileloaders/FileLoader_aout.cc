@@ -132,13 +132,9 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 	file.seekg(0, std::ios_base::beg);
 
 	Endianness endianness = BigEndian;
-
-	StateVariable* var = component->GetVariable("endianness");
-	if (var != NULL) {
-		// TODO
-		std::cerr << "FileLoader_aout::LoadIntoComponent: endianness\n";
-		throw std::exception();
-	}
+	StateVariable* var = component->GetVariable("bigendian");
+	if (var != NULL)
+		endianness = var->ToInteger() == 0? LittleEndian : BigEndian;
 
 	struct exec aout_header;
 	uint32_t entry, datasize, textsize;
@@ -230,7 +226,6 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 	stringstream ss;
 	ss << (int64_t)(int32_t)entry;
 	component->SetVariableValue("pc", ss.str());
-	// TODO: Error handling if there was no "pc"?
 
 	return true;
 }

@@ -521,7 +521,8 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 	stringstream ss;
 	ss << e_entry;
 	component->SetVariableValue("pc", ss.str());
-	// TODO: Error handling if there was no "pc"?
+	component->SetVariableValue("bigendian",
+	    elfDataEncoding == ELFDATA2LSB? "false" : "true");
 
 	return true;
 }

@@ -162,7 +162,7 @@ protected:
 	uint64_t		m_lastDumpAddr;
 	uint64_t		m_lastUnassembleVaddr;
 	bool			m_hasUsedUnassemble;
-	enum Endianness		m_endianness;
+	bool			m_isBigEndian;
 
 	// Cached state:
 	AddressDataBus *	m_addressDataBus;

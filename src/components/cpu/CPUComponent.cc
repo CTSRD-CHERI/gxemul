@@ -44,7 +44,7 @@ CPUComponent::CPUComponent(const string& className, const string& cpuArchitectur
 	, m_lastDumpAddr(0)
 	, m_lastUnassembleVaddr(0)
 	, m_hasUsedUnassemble(false)
-	, m_endianness(BigEndian)
+	, m_isBigEndian(true)
 	, m_addressDataBus(NULL)
 	, m_currentCodePage(NULL)
 {
@@ -54,8 +54,7 @@ CPUComponent::CPUComponent(const string& className, const string& cpuArchitectur
 	AddVariable("lastUnassembleVaddr", &m_lastUnassembleVaddr);
 	AddVariable("hasUsedUnassemble", &m_hasUsedUnassemble);
 	AddVariable("frequency", &m_frequency);
-
-	// TODO: Endianness as a variable!
+	AddVariable("bigendian", &m_isBigEndian);
 }
 
 
@@ -376,7 +375,8 @@ bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t vaddr)
 		// If the lookup failed, read using the AddressDataBus
 		// interface manually.
 		m_addressDataBus->AddressSelect(paddr);
-		bool success = m_addressDataBus->ReadData(iword, m_endianness);
+		bool success = m_addressDataBus->ReadData(iword,
+		    m_isBigEndian? BigEndian : LittleEndian);
 		
 		if (!success)
 			return false;
@@ -385,7 +385,7 @@ bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t vaddr)
 		uint16_t itmp = ((uint16_t *)m_currentCodePage)
 		    [offsetInCodePage >> 1];
 
-		if (m_endianness == BigEndian)
+		if (m_isBigEndian)
 			iword = BE16_TO_HOST(itmp);
 		else
 			iword = LE16_TO_HOST(itmp);
@@ -427,7 +427,8 @@ bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t vaddr)
 		// If the lookup failed, read using the AddressDataBus
 		// interface manually.
 		m_addressDataBus->AddressSelect(paddr);
-		bool success = m_addressDataBus->ReadData(iword, m_endianness);
+		bool success = m_addressDataBus->ReadData(iword,
+		    m_isBigEndian? BigEndian : LittleEndian);
 		
 		if (!success)
 			return false;
@@ -436,7 +437,7 @@ bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t vaddr)
 		uint32_t itmp = ((uint32_t *)m_currentCodePage)
 		    [offsetInCodePage >> 2];
 
-		if (m_endianness == BigEndian)
+		if (m_isBigEndian)
 			iword = BE32_TO_HOST(itmp);
 		else
 			iword = LE32_TO_HOST(itmp);
