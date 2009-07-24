@@ -179,7 +179,7 @@ void Component::FlushCachedStateForComponent()
 }
 
 
-int Component::Run(int nrOfCycles)
+int Component::Execute(int nrOfCycles)
 {
 	// Base implementation: Do nothing, but pretend we executed
 	// the instructions. Actual components that inherit from this

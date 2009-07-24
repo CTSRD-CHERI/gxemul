@@ -164,6 +164,7 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 }
 
 
+#if 0
 int MIPS_CPUComponent::Run(int nrOfCycles)
 {
 	int nrOfCyclesExecuted = 0;
@@ -196,6 +197,7 @@ int MIPS_CPUComponent::Run(int nrOfCycles)
 
 	return nrOfCyclesExecuted;
 }
+#endif
 
 
 void MIPS_CPUComponent::ExecuteMIPS16Instruction(uint16_t iword)

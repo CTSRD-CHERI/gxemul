@@ -60,6 +60,8 @@ string DummyComponent::GetAttribute(const string& attributeName)
 
 #ifdef WITHUNITTESTS
 
+#include "GXemul.h"
+
 static void Test_DummyComponent_CreateComponent()
 {
 	refcount_ptr<Component> component;
@@ -466,6 +468,8 @@ public:
 		AddVariable("m_sint16", &m_sint16);
 		AddVariable("m_sint32", &m_sint32);
 		AddVariable("m_sint64", &m_sint64);
+		// TODO: Custom
+		// TODO: Bool
 	}
 
 	virtual void ResetState()
@@ -566,10 +570,95 @@ static void Test_DummyComponent_SerializeDeserialize()
 	    dummy->CheckConsistency() == true);
 }
 
+class DummyComponentWithCounter
+	: public DummyComponent
+{
+public:
+	DummyComponentWithCounter()
+		: DummyComponent("testcounter")
+		, m_frequency(1e6)
+	{
+		ResetState();
+		AddVariable("frequency", &m_frequency);
+		AddVariable("counter", &m_counter);
+	}
+
+	virtual void ResetState()
+	{
+		DummyComponent::ResetState();
+		m_counter = 42;
+	}
+
+	static refcount_ptr<Component> Create()
+	{
+		return new DummyComponentWithCounter();
+	}
+
+	virtual int Execute(int nrOfCycles)
+	{
+		// Limit max nr of cycles per Execute call.
+		if (nrOfCycles > 5)
+			nrOfCycles = 5;
+
+		// Increase counter one per cycle.
+		m_counter += nrOfCycles;
+
+		return nrOfCycles;
+	}
+
+private:
+	double		m_frequency;
+	uint64_t	m_counter;
+};
+
+static void Test_DummyComponent_Execute_SingleStep()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
+
+	UnitTest::Assert("the testcounter should have been added",
+	    gxemul.GetRootComponent()->GetChildren().size(), 1);
+
+	refcount_ptr<Component> counter = gxemul.GetRootComponent()->GetChildren()[0];
+
+	UnitTest::Assert("the component should be the counter",
+	    counter->GetVariable("name")->ToString(), "testcounter0");
+
+	// Step 0:
+	UnitTest::Assert("the step should initially be 0",
+	    gxemul.GetStep(), 0);
+	UnitTest::Assert("the counter should initially be 42",
+	    counter->GetVariable("counter")->ToInteger(), 42);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+
+	// Step 1:
+	UnitTest::Assert("runstate wasn't reset after step 0?",
+	    gxemul.GetRunState() == GXemul::Paused);
+	UnitTest::Assert("the step should now be 1", gxemul.GetStep(), 1);
+	UnitTest::Assert("the counter should now be 43",
+	    counter->GetVariable("counter")->ToInteger(), 43);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+
+	// Step 2:
+	UnitTest::Assert("runstate wasn't reset after step 1?",
+	    gxemul.GetRunState() == GXemul::Paused);
+	UnitTest::Assert("the step should now be 2", gxemul.GetStep(), 2);
+	UnitTest::Assert("the counter should now be 44",
+	    counter->GetVariable("counter")->ToInteger(), 44);
+}
+
 UNITTESTS(DummyComponent)
 {
 	ComponentFactory::RegisterComponentClass("dummy2",
 	    DummyComponentWithAllVariableTypes::Create,
+	    Component::GetAttribute);
+
+	ComponentFactory::RegisterComponentClass("testcounter",
+	    DummyComponentWithCounter::Create,
 	    Component::GetAttribute);
 
 	// Creation using CreateComponent
@@ -603,6 +692,9 @@ UNITTESTS(DummyComponent)
 
 	// Serialization/deserialization
 	UNITTEST(Test_DummyComponent_SerializeDeserialize);
+
+	// Cycle execution
+	UNITTEST(Test_DummyComponent_Execute_SingleStep);
 }
 
 #endif

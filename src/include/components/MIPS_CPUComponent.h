@@ -161,8 +161,6 @@ public:
 
 	virtual void ResetState();
 
-	virtual int Run(int nrOfCycles);
-
 	virtual size_t DisassembleInstruction(uint64_t vaddr, size_t maxlen,
 		unsigned char *instruction, vector<string>& result);
 

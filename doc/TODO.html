@@ -41,11 +41,18 @@ MAIN GOAL for 0.6.0:
 
    [ ]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
+	[ ] Scheduler, taking care of the interleaving of multiple comonents
+	    at varying frequencies.
+
+	    [ ] Unit tests.
+
 	[/] Single-stepping:
-		[ ]  Execute the step.
+		[/]  Execute the step.
+			[ ] Scheduling of multiple components.
 		[X]  Increase the step count.
 		[X]  Set runstate to Paused after executing something.
-	
+		[/]  Unit tests. (DummyComponent)
+
 	[ ] Continuous execution:
 		TODO.
 
@@ -111,15 +118,6 @@ MAIN GOAL for 0.6.0:
 	     _EXACTLY_ the same state!
 
 
-  [X]	OnReset commands, usually Load commands. Filenames listed on the command
- 	line should not be loaded initially, but added to the onreset command
- 	list. Just before running, when an UI has been created, do a Reset.
- 	This will load the initial binaries.
- 
- 	[X]  If not all binaries can be loaded, then abort?
-
-  [X]	When loading a X-endian ELF, set the CPU's endianness to X-endian!
-
   [ ]	Symbol registry.
   	[ ]  Add ELF symbols (see end of FileLoader_ELF.cc).
   	[ ]  Load a.out symbols.
@@ -127,18 +125,17 @@ MAIN GOAL for 0.6.0:
   [ ]   Make sure that BOTH old and new configuration files work!
 
   [ ]	Niceness fixes:
-  	[/]  make refcount_ptr<T> support const T as well, so that e.g. code in
+  	[/]  make refcount_ptr&lt;T&gt; support const T as well, so that e.g. code in
   	     Component::LookupPath can be made to work without a const_cast!
   	[ ]  avoid exceptions (better to return failure some other way)
 
   [ ]	Call m_gxemul->GetRootComponent()->FlushCachedState(); when a component
-  	is e.g. moved or copied! Example: cpu0 in machine0 is moved to machine1,
+  	is e.g. moved or copied?  Example: cpu0 in machine0 is moved to machine1,
   	and then cpu.dump is executed. It should then use the mainbus of machine1,
-  	not machine0!
+  	not machine0!  (Maybe not necessary for interactive use; FlushCachedState
+  	is called by consoleui before very command... hm.)
 
   [ ]	Cache short path names if evaluation/generation of them becomes too heavy.
-
-  [X]	CPU endianness serialization/deserialization!
 
   [ ]	cpu.model = "R4000"   <==  assigning to the "model" variable should:
   	[ ]  handle writes specifically
@@ -170,9 +167,6 @@ MAIN GOAL for 0.6.0:
 	     it could be reused by PCI Busses, VME busses, and others. HOWEVER,
 	     the concept of address range and overlap may differ between
 	     bus types, or maybe not even exist in some busses.
-	[X]  Handle overlaps in MakeSureMemoryMapExists some nice way.
-		[X]  Refuse to run if there are overlapping components?
-		     A "Pre Run Check" of some kind should be implemented.
 	[ ]  AddressDataBus should be extended to allow for direct
 	     page mapping.
 	[ ]  Unit tests for the above!
@@ -336,11 +330,8 @@ MAIN GOAL for 0.6.0:
 
 	[ ]	step		single-step (Paused)
 
-  [/]	RAM component:
-	[X]  unit tests for the write protect bit
-	[X]  save/load state!
-		[ ]  Make this more efficient. Right now, it's a hex dump! Yuck.
-	[X]  method for dumping contents ("dump") in hex and ascii (7-bit only to be safe).
+   [/]	RAM component:
+	[ ]  Make the save/load of state more efficient. Right now, it's a hex dump! Yuck.
 	[ ]  methods for searching for values (strings, words, etc?)
 
    [ ]  Cache components.

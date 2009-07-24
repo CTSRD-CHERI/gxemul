@@ -166,12 +166,21 @@ public:
 	void FlushCachedState();
 
 	/**
-	 * \brief Runs the component for a number of cycles.
+	 * \brief Execute one or more cycles.
 	 *
-	 * @param nrOfCycles	The number of cycles to run.
+	 * At least 1 cycle must be executed by the component.
+	 *
+	 * Note 1: A component may execute fewer cycles that requested,
+	 * if the requested number of cycles is more than 1.
+	 *
+	 * Note 2: The framework will only call this function if the component
+	 * has a StateVariable named "frequency". Components that do not have
+	 * any frequency do not execute anything periodically by themselves.
+	 *
+	 * @param nrOfCycles	The requested number of cycles to run.
 	 * @return	The number of cycles actually executed.
 	 */
-	virtual int Run(int nrOfCycles);
+	virtual int Execute(int nrOfCycles);
 
 	/**
 	 * \brief Returns the current frequency (in Hz) that the component

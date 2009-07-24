@@ -762,8 +762,45 @@ void GXemul::SetQuietMode(bool quietMode)
 }
 
 
+struct ComponentAndFrequency
+{
+	refcount_ptr<Component>	component;
+	double			frequency;
+};
+
+
+// Gathers a list of components and their frequencies. (Only components that
+// have a variable named "frequency" are executable.)
+static void GetComponentsAndFrequencies(refcount_ptr<Component> component,
+	vector<ComponentAndFrequency>& componentsAndFrequencies)
+{
+	StateVariable* freq = component->GetVariable("frequency");
+	if (freq != NULL) {
+		struct ComponentAndFrequency caf;
+		caf.component = component;
+		caf.frequency = freq->ToDouble();
+		
+		componentsAndFrequencies.push_back(caf);
+	}
+	
+	Components children = component->GetChildren();
+	for (size_t i=0; i<children.size(); ++i)
+		GetComponentsAndFrequencies(children[i], componentsAndFrequencies);
+}
+
+
 void GXemul::Execute()
 {
+	vector<ComponentAndFrequency> componentsAndFrequencies;
+	GetComponentsAndFrequencies(GetRootComponent(), componentsAndFrequencies);
+
+	if (componentsAndFrequencies.size() == 0) {
+		GetUI()->ShowDebugMessage("No executable components"
+		    " found in the configuration.\n");
+		SetRunState(Paused);
+		return;
+	}
+
 	switch (GetRunState()) {
 	
 	case SingleStepping:
@@ -774,8 +811,17 @@ void GXemul::Execute()
 			ss << "step " << step << ": time = " << GetGlobalTime() << "\n";
 			GetUI()->ShowDebugMessage(ss.str());
 
-			// TODO
+			// TODO: Relative speeds, scheduling, correctness!
+			
+			if (componentsAndFrequencies.size() != 1) {
+				std::cerr << "TODO: THIS IS A HACK WHICH ONLY"
+				    " WORKS FOR 1 COMPONENT REALLY! FOR TESTING.\n";
+				throw std::exception();
+			}
 
+			componentsAndFrequencies[0].component->Execute(1);
+
+			// Done. Let's pause again.
 			SetStep(++ step);
 			SetRunState(Paused);
 		}
@@ -800,8 +846,8 @@ void GXemul::Execute()
 		break;
 	
 	default:
-		std::cerr << "GXemul::Execute() called without being in the"
-		    " Running state. Internal error?\n";
+		std::cerr << "GXemul::Execute() called without being in a"
+		    " running state. Internal error?\n";
 		throw std::exception();
 	}
 }

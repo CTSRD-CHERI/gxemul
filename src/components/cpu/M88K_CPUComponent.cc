@@ -96,6 +96,7 @@ void M88K_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 }
 
 
+#if 0
 int M88K_CPUComponent::Run(int nrOfCycles)
 {
 	int nrOfCyclesExecuted = 0;
@@ -117,6 +118,7 @@ int M88K_CPUComponent::Run(int nrOfCycles)
 
 	return nrOfCyclesExecuted;
 }
+#endif
 
 
 void M88K_CPUComponent::ExecuteInstruction(uint32_t iword)
