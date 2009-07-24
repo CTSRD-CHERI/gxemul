@@ -616,6 +616,17 @@ static void Test_RAMComponent_ManualSerialization()
 	UnitTest::Assert("16-bit read", data16_a, 0x3512);
 }
 
+static void Test_RAMComponent_Methods_Reexecutableness()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+
+	UnitTest::Assert("dump method SHOULD be re-executable"
+	    " without args", ram->MethodMayBeReexecutedWithoutArgs("dump") == true);
+
+	UnitTest::Assert("nonexistant method should NOT be re-executable"
+	    " without args", ram->MethodMayBeReexecutedWithoutArgs("nonexistant") == false);
+}
+
 UNITTESTS(RAMComponent)
 {
 	UNITTEST(Test_RAMComponent_IsStable);
@@ -626,6 +637,7 @@ UNITTESTS(RAMComponent)
 	UNITTEST(Test_RAMComponent_WriteProtect);
 	UNITTEST(Test_RAMComponent_Clone);
 	UNITTEST(Test_RAMComponent_ManualSerialization);
+	UNITTEST(Test_RAMComponent_Methods_Reexecutableness);
 }
 
 #endif
