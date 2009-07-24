@@ -651,6 +651,58 @@ static void Test_DummyComponent_Execute_SingleStep()
 	    counter->GetVariable("counter")->ToInteger(), 44);
 }
 
+static void Test_DummyComponent_Execute_TwoComponentsSameSpeed()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
+	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
+
+	UnitTest::Assert("the testcounters should have been added",
+	    gxemul.GetRootComponent()->GetChildren().size(), 2);
+
+	refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+	refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
+
+	UnitTest::Assert("name A mismatch",
+	    counterA->GetVariable("name")->ToString(), "testcounter0");
+	UnitTest::Assert("name B mismatch",
+	    counterB->GetVariable("name")->ToString(), "testcounter1");
+
+	counterB->SetVariableValue("counter", "10042");
+
+	// Step 0:
+	UnitTest::Assert("the step should initially be 0",
+	    gxemul.GetStep(), 0);
+	UnitTest::Assert("counterA should initially be 42",
+	    counterA->GetVariable("counter")->ToInteger(), 42);
+	UnitTest::Assert("counterB should initially be 10042",
+	    counterB->GetVariable("counter")->ToInteger(), 10042);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+
+	// Step 1:
+	UnitTest::Assert("runstate wasn't reset after step 0?",
+	    gxemul.GetRunState() == GXemul::Paused);
+	UnitTest::Assert("the step should now be 1", gxemul.GetStep(), 1);
+	UnitTest::Assert("counter A should now be 43",
+	    counterA->GetVariable("counter")->ToInteger(), 43);
+	UnitTest::Assert("counter B should now be 10043",
+	    counterB->GetVariable("counter")->ToInteger(), 10043);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+
+	// Step 2:
+	UnitTest::Assert("runstate wasn't reset after step 1?",
+	    gxemul.GetRunState() == GXemul::Paused);
+	UnitTest::Assert("the step should now be 2", gxemul.GetStep(), 2);
+	UnitTest::Assert("counter A should now be 44",
+	    counterA->GetVariable("counter")->ToInteger(), 44);
+	UnitTest::Assert("counter B should now be 10044",
+	    counterB->GetVariable("counter")->ToInteger(), 10044);
+}
+
 UNITTESTS(DummyComponent)
 {
 	ComponentFactory::RegisterComponentClass("dummy2",
@@ -695,6 +747,7 @@ UNITTESTS(DummyComponent)
 
 	// Cycle execution
 	UNITTEST(Test_DummyComponent_Execute_SingleStep);
+	UNITTEST(Test_DummyComponent_Execute_TwoComponentsSameSpeed);
 }
 
 #endif

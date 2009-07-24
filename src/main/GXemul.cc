@@ -812,14 +812,21 @@ void GXemul::Execute()
 			GetUI()->ShowDebugMessage(ss.str());
 
 			// TODO: Relative speeds, scheduling, correctness!
-			
-			if (componentsAndFrequencies.size() != 1) {
-				std::cerr << "TODO: THIS IS A HACK WHICH ONLY"
-				    " WORKS FOR 1 COMPONENT REALLY! FOR TESTING.\n";
+			bool allSameSpeed = true;
+			for (size_t k=0; k<componentsAndFrequencies.size(); ++k) {
+				if (componentsAndFrequencies[k].frequency !=
+				    componentsAndFrequencies[0].frequency)
+					allSameSpeed = false;
+			}
+
+			if (!allSameSpeed) {
+				std::cerr << "TODO: THIS IS JUST A QUICK HACK WHICH"
+				    " WORKS IF ALL COMPONENTS HAVE THE SAME SPEED!\n";
 				throw std::exception();
 			}
 
-			componentsAndFrequencies[0].component->Execute(1);
+			for (size_t i=0; i<componentsAndFrequencies.size(); ++i)
+				componentsAndFrequencies[i].component->Execute(1);
 
 			// Done. Let's pause again.
 			SetStep(++ step);

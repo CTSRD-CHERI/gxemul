@@ -3923,5 +3923,4 @@ Changelog for GXemul:
 20090724	The CPUComponent's .unassemble and .dump methods, and the
 		RAMComponent's .dump method, are now also re-executable.
 		CPU endianness is now serialized (as a bool, not enum).
-		Beginning to work on cycle execution! Single-step of single
-		component works (quick hack).
+		Beginning to work on cycle execution!
