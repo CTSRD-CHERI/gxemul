@@ -844,6 +844,10 @@ bool CommandInterpreter::RunComponentMethod(
 	if (nrOfMatches == 1) {
 		// Execute it!
 		component->ExecuteMethod(m_GXemul, fullMatch, arguments);
+
+		if (component->MethodMayBeReexecutedWithoutArgs(fullMatch))
+			m_mayBeReexecuted = componentPathAndMethod;
+
 		return true;
 	}
 
@@ -921,6 +925,8 @@ bool CommandInterpreter::RunCommand(const string& command, bool* pSuccess)
 	vector<string> arguments;
 	SplitIntoWords(command, commandName, arguments);
 
+	m_mayBeReexecuted = "";
+
 	m_GXemul->GetUI()->ShowCommandMessage(command);
 
 	// Find the command...
@@ -962,11 +968,8 @@ bool CommandInterpreter::RunCommand(const string& command, bool* pSuccess)
 	if (pSuccess != NULL)
 		*pSuccess = success;
 
-	if ((it->second)->MayBeReexecutedWithoutArgs()) {
+	if ((it->second)->MayBeReexecutedWithoutArgs())
 		m_mayBeReexecuted = it->first;
-	} else {
-		m_mayBeReexecuted = "";
-	}
 
 	return true;
 }

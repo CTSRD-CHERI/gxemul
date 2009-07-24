@@ -70,37 +70,18 @@ public:
 	 */
 	static string GetAttribute(const string& attributeName);
 
-	/**
-	 * \brief Returns the current frequency (in Hz) that the component
-	 *      runs at.
-	 *
-	 * @return      The component's frequency in Hz.
-	 */
 	virtual double GetCurrentFrequency() const;
 
-	/**
-	 * \brief Returns the component's CPUComponent interface.
-	 *
-	 * @return The %CPUComponent itself.
-	 */
 	virtual CPUComponent* AsCPUComponent();
 
-	/**
-	 * \brief Retrieves a CPUComponent's method names.
-	 *
-	 * @param names A vector where method names are added.
-	 */
         virtual void GetMethodNames(vector<string>& names) const;
+
+	virtual bool MethodMayBeReexecutedWithoutArgs(const string& methodName) const;
 
 	virtual void ExecuteMethod(GXemul* gxemul,
 		const string& methodName,
 		const vector<string>& arguments);
 
-	/**
-	 * \brief Returns the component's AddressDataBus interface.
-	 *
-	 * @return	A pointer to an AddressDataBus.
-	 */
 	virtual AddressDataBus* AsAddressDataBus();
 
 	/* Implementation of AddressDataBus: */

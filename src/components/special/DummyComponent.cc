@@ -390,6 +390,15 @@ static void Test_DummyComponent_GetUnknownVariable()
 	    dummy->GetVariable("variablename") == NULL);
 }
 
+static void Test_DummyComponent_NonexistantMethodNotReexecutable()
+{
+	refcount_ptr<Component> dummy = new DummyComponent;
+
+	UnitTest::Assert("by default, methods should NOT be re-executable"
+	    " without args",
+	    dummy->MethodMayBeReexecutedWithoutArgs("nonexistant") == false);
+}
+
 static void Test_DummyComponent_Clone_Basic()
 {
 	refcount_ptr<Component> dummy = new DummyComponent;
@@ -584,6 +593,9 @@ UNITTESTS(DummyComponent)
 
 	// Get state variables
 	UNITTEST(Test_DummyComponent_GetUnknownVariable);
+
+	// Methods
+	UNITTEST(Test_DummyComponent_NonexistantMethodNotReexecutable);
 
 	// Clone
 	UNITTEST(Test_DummyComponent_Clone_Basic);

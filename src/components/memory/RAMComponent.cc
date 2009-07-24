@@ -95,6 +95,16 @@ void RAMComponent::GetMethodNames(vector<string>& names) const
 }
 
 
+bool RAMComponent::MethodMayBeReexecutedWithoutArgs(const string& methodName) const
+{
+	if (methodName == "dump")
+		return true;
+
+	// ... and make sure to call the base class implementation:
+	return Component::MethodMayBeReexecutedWithoutArgs(methodName);
+}
+
+
 void RAMComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 	const vector<string>& arguments)
 {

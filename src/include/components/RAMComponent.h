@@ -102,6 +102,8 @@ public:
 
         virtual void GetMethodNames(vector<string>& names) const;
 
+	virtual bool MethodMayBeReexecutedWithoutArgs(const string& methodName) const;
+
 	virtual void ExecuteMethod(GXemul* gxemul,
 		const string& methodName,
 		const vector<string>& arguments);

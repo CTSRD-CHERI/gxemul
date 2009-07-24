@@ -49,39 +49,23 @@ MAIN GOAL for 0.6.0:
 	[ ] Continuous execution:
 		TODO.
 
-
 	Single-stepping should probably print the shortest possible part of the
 	component name, followed by the component's single-step printout
 	(verbose single-step debug messages).
 	
 	E.g.:
 		step 42:
-		cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
-	
-	if there is only one machine, or
-
-		step 43:
-		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
-	
-	if cpu0 was not unique (i.e. multiple machines exist).
-	If multiple components are affected in the step, then all should
-	print out what they do:
-
-		step 44:
 		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
 		machine0.mainbus0.intc: timer 2 tick, asserting interrupt T2
 		machine1.mainbus0.cpu0: 0x01234564  5e 9a 39 01  jmp 0x1234
-
-	Optionally print emulated time after the step:
-	
-		step 45 (time = 0.418s):
-		...
 
 	   [ ]  Reverse execution:
 		[ ]  Must be explicitly enabled, since it will slow down the emulator,
 		     use more memory, and require disk images to have overlays!
 		[ ]  Regular saving of state, and limiting the number of such
 		     saves by logarithmic removal.
+		[ ]  Deltas for memories? Or complete memories?
+		[ ]  Disk image overlays!
 		[ ]  In addition to saving state, all modifications done to the
 		     component tree, and e.g. breakpoints, need to be stored
 		     together with their time stamp ("step"). I.e. if a USB
@@ -99,7 +83,7 @@ MAIN GOAL for 0.6.0:
 		[ ]  Simulation across multiple hosts?
 
 	Running in reverse should show the step (and time), but does it need
-	to show the instruction being executed? No. I don't think so. But it
+	to show the instruction being reversed? No. I don't think so. But it
 	could show the change in state:
 
 		step 43:

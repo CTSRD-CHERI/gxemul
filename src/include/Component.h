@@ -232,6 +232,21 @@ public:
 	virtual void GetMethodNames(vector<string>& names) const;
 
 	/**
+	 * \brief Returns whether a method name may be re-executed without args.
+	 *
+	 * Typical examples may be a RAMComponent which has a "dump" method,
+	 * or a CPUComponent which has "dump" and "unassemble" methods.
+	 *
+	 * Note that a component's implementation should call its
+	 * base class' MethodMayBeReexecutedWithoutArgs(cosnt string&) too.
+	 *
+	 * @param methodName The name of the method.
+	 * @return true if the method may be re-executed without arguments,
+	 *	false otherwise.
+	 */
+	virtual bool MethodMayBeReexecutedWithoutArgs(const string& methodName) const;
+
+	/**
 	 * \brief Executes a method on the component.
 	 *
 	 * Note 1: The method name must be one of those returned

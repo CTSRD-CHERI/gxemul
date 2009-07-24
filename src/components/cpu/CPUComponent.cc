@@ -89,6 +89,19 @@ void CPUComponent::GetMethodNames(vector<string>& names) const
 }
 
 
+bool CPUComponent::MethodMayBeReexecutedWithoutArgs(const string& methodName) const
+{
+	if (methodName == "dump")
+		return true;
+
+	if (methodName == "unassemble")
+		return true;
+
+	// ... and make sure to call the base class implementation:
+	return Component::MethodMayBeReexecutedWithoutArgs(methodName);
+}
+
+
 void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 	const vector<string>& arguments)
 {
@@ -597,6 +610,7 @@ static void Test_CPUComponent_IsStable()
 
 static void Test_CPUComponent_Create()
 {
+	// CPUComponent is abstract, and should not be possible to create.
 	refcount_ptr<Component> cpu =
 	    ComponentFactory::CreateComponent("cpu");
 	UnitTest::Assert("component was created?", cpu.IsNULL());
@@ -617,11 +631,30 @@ static void Test_CPUComponent_PreRunCheck()
 	    gxemul.GetRootComponent()->PreRunCheck(&gxemul) == true);
 }
 
+static void Test_CPUComponent_Methods_Reexecutableness()
+{
+	refcount_ptr<Component> cpu =
+	    ComponentFactory::CreateComponent("mips_cpu");
+
+	UnitTest::Assert("dump method SHOULD be re-executable"
+	    " without args", cpu->MethodMayBeReexecutedWithoutArgs("dump") == true);
+
+	UnitTest::Assert("registers method should NOT be re-executable"
+	    " without args", cpu->MethodMayBeReexecutedWithoutArgs("registers") == false);
+
+	UnitTest::Assert("unassemble method SHOULD be re-executable"
+	    " without args", cpu->MethodMayBeReexecutedWithoutArgs("unassemble") == true);
+
+	UnitTest::Assert("nonexistant method should NOT be re-executable"
+	    " without args", cpu->MethodMayBeReexecutedWithoutArgs("nonexistant") == false);
+}
+
 UNITTESTS(CPUComponent)
 {
 	UNITTEST(Test_CPUComponent_IsStable);
 	UNITTEST(Test_CPUComponent_Create);
 	UNITTEST(Test_CPUComponent_PreRunCheck);
+	UNITTEST(Test_CPUComponent_Methods_Reexecutableness);
 }
 
 #endif

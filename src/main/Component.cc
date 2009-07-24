@@ -240,6 +240,13 @@ void Component::GetMethodNames(vector<string>& names) const
 }
 
 
+bool Component::MethodMayBeReexecutedWithoutArgs(const string& methodName) const
+{
+	// By default, methods are _not_ re-executable without args.
+	return false;
+}
+
+
 void Component::ExecuteMethod(GXemul* gxemul,
 	const string& methodName,
 	const vector<string>& arguments)
