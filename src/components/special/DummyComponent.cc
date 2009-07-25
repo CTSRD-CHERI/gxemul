@@ -651,6 +651,46 @@ static void Test_DummyComponent_Execute_SingleStep()
 	    counter->GetVariable("counter")->ToInteger(), 44);
 }
 
+static void Test_DummyComponent_Execute_MultiSingleStep()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
+
+	UnitTest::Assert("the testcounter should have been added",
+	    gxemul.GetRootComponent()->GetChildren().size(), 1);
+
+	refcount_ptr<Component> counter = gxemul.GetRootComponent()->GetChildren()[0];
+
+	UnitTest::Assert("the component should be the counter",
+	    counter->GetVariable("name")->ToString(), "testcounter0");
+
+	const int nrOfStepsToRun = 23;
+	gxemul.SetNrOfSingleStepsInARow(nrOfStepsToRun);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+
+	// Note: This should execute all nrOfStepsToRun steps, unless there
+	// was some fatal abort condition.
+	gxemul.Execute();
+
+	// Step n:
+	UnitTest::Assert("runstate wasn't reset?",
+	    gxemul.GetRunState() == GXemul::Paused);
+	UnitTest::Assert("the step should now be n", gxemul.GetStep(), nrOfStepsToRun);
+	UnitTest::Assert("the counter should now be 42+nrOfStepsToRun",
+	    counter->GetVariable("counter")->ToInteger(), 42+nrOfStepsToRun);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+
+	// Step n+1:
+	UnitTest::Assert("runstate wasn't reset after step 1?",
+	    gxemul.GetRunState() == GXemul::Paused);
+	UnitTest::Assert("the step should now be n+1", gxemul.GetStep(), nrOfStepsToRun+1);
+	UnitTest::Assert("the counter should now be 43+nrOfStepsToRun",
+	    counter->GetVariable("counter")->ToInteger(), 43+nrOfStepsToRun);
+}
+
 static void Test_DummyComponent_Execute_TwoComponentsSameSpeed()
 {
 	GXemul gxemul;
@@ -803,6 +843,7 @@ UNITTESTS(DummyComponent)
 
 	// Cycle execution
 	UNITTEST(Test_DummyComponent_Execute_SingleStep);
+	UNITTEST(Test_DummyComponent_Execute_MultiSingleStep);
 	UNITTEST(Test_DummyComponent_Execute_TwoComponentsSameSpeed);
 	UNITTEST(Test_DummyComponent_Execute_TwoComponentsDifferentSpeed);
 }

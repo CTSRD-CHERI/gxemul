@@ -43,6 +43,15 @@ MAIN GOAL for 0.6.0:
 
 	[ ] Remove the "global time" concept; it's not meaningful right now.
 
+	[ ] Type "step X: " on the same line as first component's single step
+	    output, and then indent the following lines? I.e. add indentation
+	    support for show debug message. (?) Maybe, maybe not.
+
+	[ ] When a component is added to the tree, recalculate its nr of steps!
+
+	[ ] When a component's frequency is changed, recalculate its nr of steps!
+	    (This requires variable write handlers, including inheritance!)
+
 	[/] Single-stepping:
 		[X]  Execute the step.
 			[X] Scheduling of multiple components.
@@ -52,7 +61,12 @@ MAIN GOAL for 0.6.0:
 		[ ]  Multiple singlesteps in a row (argument to the step command).
 
 	[ ] Continuous execution:
-		TODO.
+		[ ]  TODO. :-)		
+		[ ]  "Hazardous" cycles, i.e. those that require cycle accurate
+		     synch between components, need to be taken care of. I.e.
+		     running in large-chunk dyntrans mode UNTIL an ll/sc/cas
+		     or device access. Think about this...
+		     UNFORTUNATELY also normal read/writes may interfere :(
 
 	[ ] Reverse execution/debugging:
 		[ ]  Must be explicitly enabled, since it will slow down the emulator,
@@ -68,11 +82,6 @@ MAIN GOAL for 0.6.0:
 		     running in reverse to step 800 to check something, and
 		     then continue again, the default behaviour should be that
 		     at step 1000 the USB device is connected again.
-	   	[/]  [Re]read these:
-			<a href="http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html">http://www.usenix.org/events/usenix05/tech/general/king/king_html/index.html</a>
-			<a href="http://www.codesourcery.com/publications/reversible_debugging.pdf">http://www.codesourcery.com/publications/reversible_debugging.pdf</a> (QEMU)
-			<a href="http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf">http://www.ece.gatech.edu/research/codesign/publications/tankut/paper/git-cc-02-49.pdf</a>
-		     They resemble to a large degree what I have in mind.
 		[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
 		[ ]  "c" = "continue", "backward-continue" commands
 		[ ]  Simulation across multiple hosts?
@@ -295,6 +304,14 @@ MAIN GOAL for 0.6.0:
 			[ ]  scan all commands' args at startup, and have an
 				assert() in place, so that unknown arg types
 				are caught during development!
+
+	[ ]  Command aliases? e.g.
+		d = cpu0.dump
+		c = continue
+		s = step
+		u = cpu.unassemble
+	     But maybe the cpu in question may be changed with a "focus" command?
+	     Otherwise it would only work with 1 cpu.
 
 	[ ]	recursive component.var
 			Dumps a tree of the "var" variable _FROM_ the component,

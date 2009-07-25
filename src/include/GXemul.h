@@ -210,6 +210,13 @@ public:
 	void SetQuietMode(bool quietMode);
 
 	/**
+	 * \brief Sets the nr of single-steps to perform in a row.
+	 *
+	 * @param steps The number of steps, at least 1.
+	 */
+	void SetNrOfSingleStepsInARow(uint64_t steps);
+
+	/**
 	 * \brief Run the emulation for "a while".
 	 *
 	 * When single-stepping, this function will:
@@ -280,6 +287,7 @@ private:
 
 	// Runtime:
 	RunState		m_runState;
+	uint64_t		m_nrOfSingleStepsLeft;
 
 	// Model:
 	string			m_emulationFileName;

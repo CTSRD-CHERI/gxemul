@@ -3924,3 +3924,4 @@ Changelog for GXemul:
 		RAMComponent's .dump method, are now also re-executable.
 		CPU endianness is now serialized (as a bool, not enum).
 		Beginning to work on cycle execution!
+20090725	The step command now takes an argument (default is 1).

@@ -162,6 +162,7 @@ GXemul::GXemul()
 	, m_ui(new NullUI(this))
 	, m_commandInterpreter(this)
 	, m_runState(Paused)
+	, m_nrOfSingleStepsLeft(1)
 	, m_rootComponent(new RootComponent)
 {
 	ClearEmulation();
@@ -762,6 +763,15 @@ void GXemul::SetQuietMode(bool quietMode)
 }
 
 
+void GXemul::SetNrOfSingleStepsInARow(uint64_t steps)
+{
+	if (steps < 1)
+		steps = 1;
+
+	m_nrOfSingleStepsLeft = steps;
+}
+
+
 struct ComponentAndFrequency
 {
 	refcount_ptr<Component>	component;
@@ -814,9 +824,14 @@ void GXemul::Execute()
 		}
 
 	switch (GetRunState()) {
-	
+
 	case SingleStepping:
-		{
+		if (m_nrOfSingleStepsLeft == 0)
+			m_nrOfSingleStepsLeft = 1;
+
+		// Note that setting run state to something else, OR
+		// decreasing nr of single steps left to 0, will break the loop.
+		while (m_nrOfSingleStepsLeft > 0 && GetRunState() == SingleStepping) {
 			uint64_t step = GetStep();
 
 			stringstream ss;
@@ -847,10 +862,13 @@ void GXemul::Execute()
 				}
 			}
 
-			// Done. Let's pause again.
 			SetStep(step);
-			SetRunState(Paused);
+			-- m_nrOfSingleStepsLeft;
 		}
+
+		// Done. Let's pause again.
+		SetRunState(Paused);
+		m_nrOfSingleStepsLeft = 0;
 		break;
 
 	case BackwardsSingleStepping:
@@ -891,6 +909,9 @@ static void Test_Construction()
 UNITTESTS(GXemul)
 {
 	UNITTEST(Test_Construction);
+
+	// Note: Most execution tests are in DummyComponent.cc, because they
+	// test component behavior. But they also test GXemul::Execute etc.
 }
 
 
