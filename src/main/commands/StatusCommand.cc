@@ -44,8 +44,7 @@ bool StatusCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
 	stringstream ss;
 	ss <<
-	    "step " << gxemul.GetStep() << ": " <<
-	    "time = " << gxemul.GetGlobalTime() << "  " <<
+	    "step " << gxemul.GetStep() << ", " <<
 	    gxemul.GetRunStateAsString() << "\n";
 
 	gxemul.GetUI()->ShowDebugMessage(ss.str());
@@ -65,7 +64,6 @@ string StatusCommand::GetLongDescription() const
 	return
 	    "Shows the current status, which includes:\n\n"
 	    "  *  Number of emulated step\n"
-	    "  *  Emulated time\n"
 	    "  *  Runstate (Running or Paused)\n"
 	    "\n"
 	    "Typing CTRL-T at the command prompt also executes the 'status' command.\n";

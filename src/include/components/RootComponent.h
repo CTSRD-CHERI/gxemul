@@ -41,17 +41,8 @@
 /**
  * \brief A Component which is the default root node in the configuration.
  *
- * This Component is mostly a dummy component, but it holds some global state
- * which is used for the entire emulation step:
- *
- * <ul>
- *	<li>step: The number of executed steps since the start of the emulation.
- *		(actually this variable is in the Component base class)
- *	<li>time: The time, in seconds, that the emulation has been running.
- * </ul>
- *
- * Other than the members listed above, the root component is mostly a dummy
- * component, and the interesting stuff is stored as child components.
+ * This Component is mostly a dummy component, but it holds the 'step'
+ * count for the entire emultion.
  *
  * NOTE: A RootComponent is not registered in the component registry, and
  * can thus not be created interactively by the user at runtime.
@@ -66,15 +57,10 @@ public:
 	 */
 	RootComponent();
 
-	virtual void ResetState();
-
 
 	/********************************************************************/
 public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
-
-private:
-	double		m_time;
 };
 
 

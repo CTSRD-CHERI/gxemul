@@ -625,18 +625,6 @@ CommandInterpreter& GXemul::GetCommandInterpreter()
 }
 
 
-double GXemul::GetGlobalTime() const
-{
-	const StateVariable* time = GetRootComponent()->GetVariable("time");
-	if (time == NULL) {
-		std::cerr << "root component has no 'time' variable? aborting.\n";
-		throw std::exception();
-	}
-
-	return time->ToDouble();
-}
-
-
 uint64_t GXemul::GetStep() const
 {
 	const StateVariable* step = GetRootComponent()->GetVariable("step");
@@ -835,8 +823,10 @@ void GXemul::Execute()
 			uint64_t step = GetStep();
 
 			stringstream ss;
-			ss << "step " << step << ": time = " << GetGlobalTime() << "\n";
-			GetUI()->ShowDebugMessage(ss.str());
+			ss << "step " << step << ": ";
+
+			// Indent all debug output with message header "step X: ":
+			UI::SetIndentationMessageHelper indentationHelper(GetUI(), ss.str());
 
 			++ step;
 			

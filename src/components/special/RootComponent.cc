@@ -31,21 +31,8 @@
 
 RootComponent::RootComponent()
 	: Component("root", "root")
-	, m_time(0.0)
 {
 	SetVariableValue("name", "\"root\"");
-
-	ResetState();
-
-	AddVariable("time", &m_time);
-}
-
-
-void RootComponent::ResetState()
-{
-	m_time = 0.0;
-
-	Component::ResetState();
 }
 
 
@@ -63,21 +50,21 @@ static void Test_RootComponent_CreateComponent()
 	    "should NOT be possible", component.IsNULL() == true);
 }
 
-static void Test_RootComponent_InitialStepAndTime()
+static void Test_RootComponent_InitialStepAndName()
 {
 	refcount_ptr<Component> component = new RootComponent;
 
-	StateVariable* time = component->GetVariable("time");
+	StateVariable* name = component->GetVariable("name");
 	StateVariable* step = component->GetVariable("step");
 
-	UnitTest::Assert("time should be 0.0", time->ToDouble(), 0.0);
+	UnitTest::Assert("name should be root", name->ToString(), "root");
 	UnitTest::Assert("step should be 0", step->ToInteger(), 0);
 }
 
 UNITTESTS(RootComponent)
 {
 	UNITTEST(Test_RootComponent_CreateComponent);
-	UNITTEST(Test_RootComponent_InitialStepAndTime);
+	UNITTEST(Test_RootComponent_InitialStepAndName);
 }
 
 #endif

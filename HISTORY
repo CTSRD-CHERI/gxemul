@@ -3925,3 +3925,5 @@ Changelog for GXemul:
 		CPU endianness is now serialized (as a bool, not enum).
 		Beginning to work on cycle execution!
 20090725	The step command now takes an argument (default is 1).
+20090726	Removing the "global time" concept.
+		Adding a helper for debug message indentation.

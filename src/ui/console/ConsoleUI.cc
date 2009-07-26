@@ -128,14 +128,7 @@ void ConsoleUI::ShowStartupBanner()
 }
 
 
-void ConsoleUI::ShowDebugMessage(const string& msg)
-{
-	std::cout << msg;
-	std::cout.flush();
-}
-
-
-static vector<string> SplitIntoRows(const string &msg)
+static vector<string> SplitIntoRows(const string &msg, bool addEmptyLines)
 {
 	// This is slow and hackish, but works.
 	vector<string> result;
@@ -144,7 +137,7 @@ static vector<string> SplitIntoRows(const string &msg)
 	for (size_t i=0, n=msg.length(); i<n; i++) {
 		stringchar ch = msg[i];
 		if (ch == '\n') {
-			if (line.length() > 0)
+			if (line.length() > 0 || addEmptyLines)
 				result.push_back(line);
 			line = "";
 		} else {
@@ -159,6 +152,22 @@ static vector<string> SplitIntoRows(const string &msg)
 }
 
 
+void ConsoleUI::ShowDebugMessage(const string& msg)
+{
+	vector<string> lines = SplitIntoRows(msg, true);
+
+	for (size_t i=0; i<lines.size(); ++i) {
+		std::cout << m_indentationMsg << lines[i] << "\n"; 
+
+		// Replace indentation string with spaces.
+		for (size_t j=m_indentationMsg.length(); j>0; --j)
+			m_indentationMsg[j-1] = ' ';
+	}
+
+	std::cout.flush();
+}
+
+
 void ConsoleUI::ShowDebugMessage(Component* component, const string& msg)
 {
 	if (m_gxemul->GetQuietMode())
@@ -167,7 +176,7 @@ void ConsoleUI::ShowDebugMessage(Component* component, const string& msg)
 	stringstream ss;
 	string componentName = component->GenerateShortestPossiblePath();
 
-	vector<string> lines = SplitIntoRows(msg);
+	vector<string> lines = SplitIntoRows(msg, false);
 
 	// Let's say the input msg is "blahlonger\nblahshort".
 	if (m_gxemul->GetRunState() == GXemul::Running ||

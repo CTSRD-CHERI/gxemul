@@ -41,6 +41,27 @@ class UI
 	: public ReferenceCountable
 {
 public:
+	class SetIndentationMessageHelper
+	{
+	public:
+		SetIndentationMessageHelper(UI* ui, const string& msg)
+			: m_UI(ui)
+		{
+			m_oldMsg = m_UI->GetIndentationMessage();
+			m_UI->SetIndentationMessage(msg);
+		}
+
+		~SetIndentationMessageHelper()
+		{
+			m_UI->SetIndentationMessage(m_oldMsg);
+		}
+
+	private:
+		UI *	m_UI;
+		string	m_oldMsg;
+	};
+
+public:
 	/**
 	 * \brief Constructs a User Interface.
 	 *
@@ -76,6 +97,31 @@ public:
 	 * </ul>
 	 */
 	virtual void UpdateUI() = 0;
+
+	/**
+	 * \brief Sets an indentation message, which indents all debug output.
+	 *
+	 * Note: An UI implementation may change the indentation string. E.g.
+	 * from "step X: " to "        ".
+	 *
+	 * @param msg The indentation message. If the message is an empty
+	 *	string, indentation is not used.
+	 */
+	void SetIndentationMessage(const string& msg)
+	{
+		m_indentationMsg = msg;
+	}
+
+	/**
+	 * \brief Gets the indentation message.
+	 *
+	 * @return The indentation message. If the message is an empty
+	 *	string, indentation is not used.
+	 */
+	string GetIndentationMessage() const
+	{
+		return m_indentationMsg;
+	}
 
 	/**
 	 * \brief Shows a debug message.
@@ -160,6 +206,7 @@ public:
 
 protected:
 	GXemul*		m_gxemul;
+	string		m_indentationMsg;
 };
 
 

@@ -187,15 +187,6 @@ public:
 	uint64_t GetStep() const;
 
 	/**
-	 * \brief Gets the current global time of the emulation.
-	 *
-	 * Note: This is not necessarily equal to real-world time.
-	 *
-	 * @return The time, in seconds, that the emulation has been executing.
-	 */
-	double GetGlobalTime() const;
-
-	/**
 	 * \brief Gets the current quiet mode setting.
 	 *
 	 * @return True if running in quiet mode, false for normal operation.

@@ -39,11 +39,15 @@ MAIN GOAL for 0.6.0:
 
 -------------------------------------------------------------------------------
 
-   [ ]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
+   [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
-	[ ] Remove the "global time" concept; it's not meaningful right now.
+	[ ] root component:  accuracy = "cycle" or "sloppy", where sloppy
+	    allows long-running chunks in a non-cycle-accurate manner (and
+	    obviously also disables reverse execution). Default should be "cycle"?
+	    Write handler should complain if the value is set to something
+	    else.
 
-	[ ] Type "step X: " on the same line as first component's single step
+	[X] Type "step X: " on the same line as first component's single step
 	    output, and then indent the following lines? I.e. add indentation
 	    support for show debug message. (?) Maybe, maybe not.
 
@@ -51,6 +55,8 @@ MAIN GOAL for 0.6.0:
 
 	[ ] When a component's frequency is changed, recalculate its nr of steps!
 	    (This requires variable write handlers, including inheritance!)
+	    Frequency changes are tricky, especially when it comes to reverse
+	    execution, so think CAREFULLY about this!
 
 	[/] Single-stepping:
 		[X]  Execute the step.
@@ -67,6 +73,31 @@ MAIN GOAL for 0.6.0:
 		     running in large-chunk dyntrans mode UNTIL an ll/sc/cas
 		     or device access. Think about this...
 		     UNFORTUNATELY also normal read/writes may interfere :(
+		     so for now, I only feel comfortable with the following:
+		     
+		     1) Simple case: only ONE component is executable. Then it
+		        can of course be executed chunk-wise however is most
+		        convenient.
+
+		     2) Semi-simple case 1:  ONE component is "fast" (say, 100 MHz),
+		        and one or more are slow (say, 100 Hz). The difference
+		        is 1 M times, so the fast component could run lots of
+		        chunk-wise execution passes, with e.g. 10000 cycles per
+		        chunk, before the slow ones need to run at all. THEN
+		        they are interleaved in a single-cycle manner.
+
+		     3) Semi-simple but hardcoded case 2: TWO components run at
+		        fixed high speed (e.g. 100 MHz). _IF_ (and there are LOTS
+		        of annoying ifs there) they are both CPUs and both are
+		        dyntrans and so on... then they could be executed in a
+		        xyxyxyxyxyxy interleaved manner by the dyntrans system.
+		        But that would be horrible. :-|
+
+		     So to preserve correctness, until I've figured out some
+		     better way, only cases 1 and 2 will most likely be supported,
+		     unless in "sloppy mode" where accuracy is lost and all
+		     devices may run chunk-wise (and also reverse execution is
+		     turned off).
 
 	[ ] Reverse execution/debugging:
 		[ ]  Must be explicitly enabled, since it will slow down the emulator,
@@ -199,6 +230,10 @@ MAIN GOAL for 0.6.0:
 	[ ]  argument handling! (arg count, at least)
 	[ ]  all the others (macho, ecoff, srec, raw, ...)
 	[ ]  Disk images.
+		[ ]  r vs R modifier: read only disk images causes writes to
+		     fail, while R could create an implicit empty overlay
+		     in the tmp directory, so that writes within a session
+		     will succeed. At reboot/reset they'd be lost.
 
    [ ]  Breakpoints
 

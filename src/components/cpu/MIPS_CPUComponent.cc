@@ -166,7 +166,7 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 
 int MIPS_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 {
-	gxemul->GetUI()->ShowDebugMessage(this, "MIPS_CPUComponent: TODO");
+	gxemul->GetUI()->ShowDebugMessage(this, "MIPS_CPUComponent: TODO\nHELLO\nSOMETHING");
 
 	return nrOfCycles;
 }
