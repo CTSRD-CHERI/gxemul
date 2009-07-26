@@ -455,6 +455,7 @@ public:
 	/**
 	 * \brief Deserializes a string into a component tree.
 	 *
+	 * @param messages A stream where errors/warnings may be reported.
 	 * @param str The string to deserialize.
 	 * @param pos Initial deserialization position in the string; should
 	 *	be 0 when invoked manually. (Used for recursion, to avoid
@@ -463,7 +464,7 @@ public:
 	 *	reference counted pointer will point to a component tree;
 	 *	on error, it will be set to NULL
 	 */
-	static refcount_ptr<Component> Deserialize(
+	static refcount_ptr<Component> Deserialize(ostream& messages,
 	    const string& str, size_t& pos);
 
 	/**

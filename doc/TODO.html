@@ -41,16 +41,6 @@ MAIN GOAL for 0.6.0:
 
    [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
-	[ ] root component:  accuracy = "cycle" or "sloppy", where sloppy
-	    allows long-running chunks in a non-cycle-accurate manner (and
-	    obviously also disables reverse execution). Default should be "cycle"?
-	    Write handler should complain if the value is set to something
-	    else.
-
-	[X] Type "step X: " on the same line as first component's single step
-	    output, and then indent the following lines? I.e. add indentation
-	    support for show debug message. (?) Maybe, maybe not.
-
 	[ ] When a component is added to the tree, recalculate its nr of steps!
 
 	[ ] When a component's frequency is changed, recalculate its nr of steps!
@@ -64,7 +54,13 @@ MAIN GOAL for 0.6.0:
 		[X]  Increase the step count.
 		[X]  Set runstate to Paused after executing something.
 		[X]  Unit tests. (DummyComponent)
-		[ ]  Multiple singlesteps in a row (argument to the step command).
+		[X]  Multiple singlesteps in a row (argument to the step command).
+		[ ]  Show ALL state change, using "serialize and compare everything
+		     except large structures", e.g.:
+
+			machine0.mainbus0.cpu0: 0x12345678  ab cd 01 00  ld r12,[r13+0x100]
+			machine0.mainbus0.isabus0.somedevice0: status: 0x0014 -> 0x0000
+			machine0.mainbus0.cpu0: r12: 0x2828 -> 0x0014
 
 	[ ] Continuous execution:
 		[ ]  TODO. :-)		
@@ -116,28 +112,6 @@ MAIN GOAL for 0.6.0:
 		[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
 		[ ]  "c" = "continue", "backward-continue" commands
 		[ ]  Simulation across multiple hosts?
-
-	Running in reverse should show the step (and time), but does it need
-	to show the instruction being reversed? No. I don't think so. But it
-	could show the change in state:
-
-		step 43:
-		machine0.mainbus0.cpu0: 0x12345678  fe 9a 39 12  xor r1,r2,r3
-		machine0.mainbus0.cpu0: r1: 0x9512 -> 0x3456
-		GXemul> b			(to step backwards)
-		step 43 -> 42:
-		machine0.mainbus0.cpu0: r1: 0x3456 -> 0x9512
-
-	As in the example above, it might be good to show exactly what the
-	state change is also in the forward direction. For e.g. a load from
-	a zero-on-read register in a device, that would be e.g.:
-
-		machine0.mainbus0.cpu0: 0x12345678  ab cd 01 00  ld r12,[r13+0x100]
-		machine0.mainbus0.isabus0.somedevice0: status: 0x0014 -> 0x0000
-		machine0.mainbus0.cpu0: r12: 0x2828 -> 0x0014
-
-	This would be especially good on CISC machines, where instructions have
-	multiple side-effects (flags etc), or when an exception occurs.
 
 
   [ ]	NEW DYNTRANS IMPLEMENTATION, ...

@@ -417,16 +417,7 @@ bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *fil
 				optionsEnoughToStartRunning = true;
 
 				string cmd = "load " + configfileName;
-				GetCommandInterpreter().RunCommand(cmd);
-
-				if (GetRootComponent()->GetChildren().size()
-				    == 0) {
-					std::cerr << "Failed to load "
-					    "configuration: " <<
-					    configfileName << "\n" <<
-					    "Aborting." << "\n";
-					return false;
-				}
+				m_onResetCommands.push_back(cmd);
 			} else {
 				std::cerr << "More than one configfile name "
 				    "supplied on the command line?" << "\n" <<

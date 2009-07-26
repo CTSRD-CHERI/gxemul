@@ -602,7 +602,8 @@ static void Test_RAMComponent_ManualSerialization()
 
 	string result = ss.str();
 	size_t pos = 0;
-	refcount_ptr<Component> ram2 = Component::Deserialize(result, pos);
+	stringstream messages;
+	refcount_ptr<Component> ram2 = Component::Deserialize(messages, result, pos);
 	bus = ram2->AsAddressDataBus();
 
 	data32 = 0x22222222;

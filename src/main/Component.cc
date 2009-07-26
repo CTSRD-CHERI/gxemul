@@ -31,6 +31,7 @@
 #include "assert.h"
 #include <fstream>
 
+#include "components/RootComponent.h"
 #include "Component.h"
 #include "ComponentFactory.h"
 #include "EscapedString.h"
@@ -848,24 +849,38 @@ static bool GetNextToken(const string& str, size_t& pos, string& token)
 }
 
 
-refcount_ptr<Component> Component::Deserialize(const string& str, size_t& pos)
+refcount_ptr<Component> Component::Deserialize(ostream& messages, const string& str, size_t& pos)
 {
 	refcount_ptr<Component> deserializedTree = NULL;
 	string token;
 
-	if (!GetNextToken(str, pos, token) || token != "component")
+	if (!GetNextToken(str, pos, token) || token != "component") {
+		messages << "Expecting \"component\".\n";
 		return deserializedTree;
+	}
 
 	string className;
-	if (!GetNextToken(str, pos, className))
+	if (!GetNextToken(str, pos, className)) {
+		messages << "Expecting a class name.\n";
 		return deserializedTree;
+	}
 
-	if (!GetNextToken(str, pos, token) || token != "{")
+	if (!GetNextToken(str, pos, token) || token != "{") {
+		messages << "Expecting {.\n";
 		return deserializedTree;
+	}
 
-	deserializedTree = ComponentFactory::CreateComponent(className);
-	if (deserializedTree.IsNULL())
-		return deserializedTree;
+	// root is a special case (cannot be created by the factory). All other
+	// class types should be possible to create using the factory.
+	if (className == "root") {
+		deserializedTree = new RootComponent;
+	} else {
+		deserializedTree = ComponentFactory::CreateComponent(className);
+		if (deserializedTree.IsNULL()) {
+			messages << "Could not create a '" << className << "' component.\n";
+			return deserializedTree;
+		}
+	}
 
 	while (pos < str.length()) {
 		size_t savedPos = pos;
@@ -876,6 +891,7 @@ refcount_ptr<Component> Component::Deserialize(const string& str, size_t& pos)
 
 		if (!GetNextToken(str, pos, token)) {
 			// Failure.
+			messages << "Failure. (0)\n";
 			deserializedTree = NULL;
 			break;
 		}
@@ -887,6 +903,7 @@ refcount_ptr<Component> Component::Deserialize(const string& str, size_t& pos)
 		string name;
 		if (!GetNextToken(str, pos, name)) {
 			// Failure.
+			messages << "Failure. (1)\n";
 			deserializedTree = NULL;
 			break;
 		}
@@ -894,9 +911,10 @@ refcount_ptr<Component> Component::Deserialize(const string& str, size_t& pos)
 		if (token == "component") {
 			// Case 2:
 			refcount_ptr<Component> child =
-			    Component::Deserialize(str, savedPos);
+			    Component::Deserialize(messages, str, savedPos);
 			if (child.IsNULL()) {
 				// Failure.
+				messages << "Failure. (2)\n";
 				deserializedTree = NULL;
 				break;
 			}
@@ -909,14 +927,14 @@ refcount_ptr<Component> Component::Deserialize(const string& str, size_t& pos)
 			string varValue;
 			if (!GetNextToken(str, pos, varValue)) {
 				// Failure.
+				messages << "Failure. (3)\n";
 				deserializedTree = NULL;
 				break;
 			}
 
 			if (!deserializedTree->SetVariableValue(name,
 			    varValue)) {
-				// TODO: Report failure some other way.
-				std::cerr << "Warning: variable '" << name <<
+				messages << "Warning: variable '" << name <<
 				    "' for component class " << className <<
 				    " could not be deserialized; skipping.\n";
 			}
@@ -941,7 +959,8 @@ bool Component::CheckConsistency() const
 
 	// Deserialize
 	size_t pos = 0;
-	refcount_ptr<Component> tmpDeserializedTree = Deserialize(result, pos);
+	stringstream messages;
+	refcount_ptr<Component> tmpDeserializedTree = Deserialize(messages, result, pos);
 	if (tmpDeserializedTree.IsNULL())
 		return false;
 

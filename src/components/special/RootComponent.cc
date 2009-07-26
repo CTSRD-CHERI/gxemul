@@ -27,12 +27,27 @@
 
 #include "components/RootComponent.h"
 #include "ComponentFactory.h"
+#include "GXemul.h"
 
 
 RootComponent::RootComponent()
 	: Component("root", "root")
+	, m_accuracy("cycle")
 {
 	SetVariableValue("name", "\"root\"");
+
+	AddVariable("accuracy", &m_accuracy);
+}
+
+
+bool RootComponent::PreRunCheckForComponent(GXemul* gxemul)
+{
+	if (m_accuracy != "cycle" && m_accuracy != "sloppy") {
+		gxemul->GetUI()->ShowDebugMessage(this, "accuracy must be \"cycle\" or \"sloppy\"\n");		
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -50,21 +65,41 @@ static void Test_RootComponent_CreateComponent()
 	    "should NOT be possible", component.IsNULL() == true);
 }
 
-static void Test_RootComponent_InitialStepAndName()
+static void Test_RootComponent_InitialVariables()
 {
 	refcount_ptr<Component> component = new RootComponent;
 
 	StateVariable* name = component->GetVariable("name");
 	StateVariable* step = component->GetVariable("step");
+	StateVariable* accuracy = component->GetVariable("accuracy");
 
 	UnitTest::Assert("name should be root", name->ToString(), "root");
 	UnitTest::Assert("step should be 0", step->ToInteger(), 0);
+	UnitTest::Assert("accuracy should be cycle", accuracy->ToString(), "cycle");
+}
+
+static void Test_RootComponent_AccuracyValues()
+{
+	GXemul dummyGXemul;
+
+	refcount_ptr<Component> component = new RootComponent;
+	StateVariable* accuracy = component->GetVariable("accuracy");
+
+	accuracy->SetValue("\"sloppy\"");
+	UnitTest::Assert("sloppy should be ok", component->PreRunCheck(&dummyGXemul));
+
+	accuracy->SetValue("\"nonsense\"");
+	UnitTest::Assert("nonsense should not be ok", !component->PreRunCheck(&dummyGXemul));
+
+	accuracy->SetValue("\"cycle\"");
+	UnitTest::Assert("cycle should be ok", component->PreRunCheck(&dummyGXemul));
 }
 
 UNITTESTS(RootComponent)
 {
 	UNITTEST(Test_RootComponent_CreateComponent);
-	UNITTEST(Test_RootComponent_InitialStepAndName);
+	UNITTEST(Test_RootComponent_InitialVariables);
+	UNITTEST(Test_RootComponent_AccuracyValues);
 }
 
 #endif

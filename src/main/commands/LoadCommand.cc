@@ -94,20 +94,27 @@ bool LoadCommand::LoadComponentTree(GXemul& gxemul, const string&filename,
 	// TODO: This is wasteful, of course. It actually takes twice the
 	// size of the file, since the string constructor generates a _copy_.
 	// But string takes care of unicode and such (if compiled as ustring).
-	char* buf = (char*) malloc(fileSize);
-	if (buf == NULL) {
-		std::cerr << "LoadCommand::LoadComponentTree: out of memory\n";
-		throw std::exception();
+	vector<char> buf;
+	buf.resize((size_t)fileSize + 1);
+
+	memset(&buf[0], 0, fileSize);
+	file.read(&buf[0], fileSize);
+	if (file.gcount() != fileSize) {
+		ShowMsg(gxemul, "Loading from " + filename + " failed; "
+		    "could not read all of the file?\n");
+		return false;
 	}
 
-	memset(buf, 0, fileSize);
-	file.read(buf, fileSize);
-	string str(buf, fileSize);
-	free(buf);
+	string str(&buf[0], fileSize);
+
 	file.close();
 
 	size_t strPos = 0;
-	component = Component::Deserialize(str, strPos);
+	stringstream messages;
+	component = Component::Deserialize(messages, str, strPos);
+
+	if (messages.str().length() > 0)
+		ShowMsg(gxemul, messages.str());
 
 	if (component.IsNULL()) {
 		ShowMsg(gxemul, "Loading from " + filename + " failed; "

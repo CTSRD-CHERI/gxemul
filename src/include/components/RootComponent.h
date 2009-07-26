@@ -37,12 +37,19 @@
 
 #include "UnitTest.h"
 
+class GXemul;
+
 
 /**
  * \brief A Component which is the default root node in the configuration.
  *
  * This Component is mostly a dummy component, but it holds the 'step'
- * count for the entire emultion.
+ * count for the entire emulation (inherited from Component), and the following
+ * settings:
+ *
+ * <ul>
+ *	<li>accuracy ("cycle" or "sloppy")
+ * </ul>
  *
  * NOTE: A RootComponent is not registered in the component registry, and
  * can thus not be created interactively by the user at runtime.
@@ -57,10 +64,16 @@ public:
 	 */
 	RootComponent();
 
+	virtual bool PreRunCheckForComponent(GXemul* gxemul);
+
 
 	/********************************************************************/
 public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
+
+private:
+	// Model:
+	string		m_accuracy;
 };
 
 

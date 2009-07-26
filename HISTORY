@@ -3927,3 +3927,5 @@ Changelog for GXemul:
 20090725	The step command now takes an argument (default is 1).
 20090726	Removing the "global time" concept.
 		Adding a helper for debug message indentation.
+		Adding an "accuracy" variable to the RootComponent, which must
+		be set to either "cycle" or "sloppy".
