@@ -43,7 +43,6 @@ M88K_CPUComponent::M88K_CPUComponent()
 
 	AddVariable("model", &m_m88k_type);
 
-	// TODO: r0 is NOT writable!
 	for (size_t i=0; i<N_M88K_REGS; i++) {
 		stringstream ss;
 		ss << "r" << i;
@@ -69,6 +68,18 @@ void M88K_CPUComponent::ResetState()
 	m_pc = 0;
 
 	CPUComponent::ResetState();
+}
+
+
+bool M88K_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
+{
+	if (m_r[0] != 0) {
+		gxemul->GetUI()->ShowDebugMessage(this, "the r0 register "
+		    "must contain the value 0.\n");
+		return false;
+	}
+
+	return CPUComponent::PreRunCheckForComponent(gxemul);
 }
 
 

@@ -63,7 +63,6 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 	AddVariable("hi", &m_hi);
 	AddVariable("lo", &m_lo);
 
-	// TODO: GPR 0 (ZERO) is NOT writable!
 	for (size_t i=0; i<N_MIPS_GPRS; i++)
 		AddVariable(regnames[i], &m_gpr[i]);
 
@@ -101,6 +100,18 @@ void MIPS_CPUComponent::ResetState()
 	m_gpr[MIPS_GPR_SP] = MIPS_INITIAL_STACK_POINTER;
 
 	CPUComponent::ResetState();
+}
+
+
+bool MIPS_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
+{
+	if (m_gpr[MIPS_GPR_ZERO] != 0) {
+		gxemul->GetUI()->ShowDebugMessage(this, "the zero register (zr) "
+		    "must contain the value 0.\n");
+		return false;
+	}
+
+	return CPUComponent::PreRunCheckForComponent(gxemul);
 }
 
 

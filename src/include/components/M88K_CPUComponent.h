@@ -241,6 +241,8 @@ public:
 
 	virtual void ResetState();
 
+	virtual bool PreRunCheckForComponent(GXemul* gxemul);
+
 	virtual size_t DisassembleInstruction(uint64_t vaddr, size_t maxlen,
 		unsigned char *instruction, vector<string>& result);
 

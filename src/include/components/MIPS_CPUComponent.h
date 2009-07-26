@@ -161,6 +161,8 @@ public:
 
 	virtual void ResetState();
 
+	virtual bool PreRunCheckForComponent(GXemul* gxemul);
+
 	virtual int Execute(GXemul* gxemul, int nrOfCycles);
 
 	virtual size_t DisassembleInstruction(uint64_t vaddr, size_t maxlen,

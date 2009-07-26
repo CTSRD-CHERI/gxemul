@@ -3929,3 +3929,5 @@ Changelog for GXemul:
 		Adding a helper for debug message indentation.
 		Adding an "accuracy" variable to the RootComponent, which must
 		be set to either "cycle" or "sloppy".
+		Implementing pre-run-checks for M88K and MIPS cpus, for
+		checking the r0 and zr registers, respectively.
