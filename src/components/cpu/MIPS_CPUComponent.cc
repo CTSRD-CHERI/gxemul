@@ -157,7 +157,7 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 	else
 		ss << std::setw(16);
 	ss << Trunc3264(m_lo, is32bit) << "\n";
-	
+
 	for (size_t i=0; i<N_MIPS_GPRS; i++) {
 		ss << regnames[i] << "=";
 		if (is32bit)
@@ -177,7 +177,11 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 
 int MIPS_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 {
-	gxemul->GetUI()->ShowDebugMessage(this, "MIPS_CPUComponent: TODO\nHELLO\nSOMETHING");
+	gxemul->GetUI()->ShowDebugMessage(this, "MIPS_CPUComponent: execute cycle: TODO");
+
+	m_gpr[1] += nrOfCycles * 42;
+
+	m_pc += sizeof(uint32_t);
 
 	return nrOfCycles;
 }

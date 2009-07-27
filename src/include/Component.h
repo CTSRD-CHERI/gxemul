@@ -9,7 +9,7 @@
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright  
+ *  2. Redistributions in binary form must reproduce the above copyright 
  *     notice, this list of conditions and the following disclaimer in the 
  *     documentation and/or other materials provided with the distribution.
  *  3. The name of the author may not be used to endorse or promote products
@@ -18,7 +18,7 @@
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE   
+ *  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE  
  *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  *  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  *  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -123,6 +123,39 @@ public:
 	 * @return A reference counted pointer to the clone.
 	 */
 	refcount_ptr<Component> Clone() const;
+
+	/**
+	 * \brief Makes a light clone of the component and all its children.
+	 *
+	 * Modifying the original component will not affect the component
+	 * returned by this function.
+	 *
+	 * The new copy is <i>not</i> a complete copy. Expensive data
+	 * structures are not copied, only "light" data structures. For
+	 * example, RAM memory cell contents is not cloned.
+	 *
+	 * The main purpose of this function is to allow e.g. a single
+	 * stepper to take a light clone, run one step, and the compare
+	 * the current component tree with the light clone, to see what
+	 * was modified in the step.
+	 *
+	 * @return A const reference counted pointer to the light clone.
+	 */
+	const refcount_ptr<Component> LightClone() const;
+
+	/**
+	 * \brief Compare an older clone to the current tree, to find changes.
+	 *
+	 * Any changes found are written as messages to changeMessages.
+	 * Typical use of this function is to input a "light clone" which
+	 * is taken before running a single execution step, to find out
+	 * any side effects of that execution step.
+	 *
+	 * @param oldClone The original component tree to compare to.
+	 * @param changeMessages An output stream where to send messages.
+	 */
+	void DetectChanges(const refcount_ptr<Component>& oldClone,
+		ostream& changeMessages) const;
 
 	/**
 	 * \brief Generates an ASCII tree dump of a component tree.
@@ -484,7 +517,7 @@ public:
 	 * @param checksum The checksum to add to.
 	 */
 	void AddChecksum(Checksum& checksum) const;
-	
+
 protected:
 	/**
 	 * \brief Adds a state variable of type T to the %Component.
@@ -612,6 +645,13 @@ private:
 	 *	components' paths.
 	 */
 	void AddAllComponentPaths(vector<string>& allComponentPaths) const;
+
+	/**
+	 * \brief Internal helper for LightClone.
+	 *
+	 * See LightClone() for details.
+	 */
+	refcount_ptr<Component> LightCloneInternal() const;
 
 	/**
 	 * \brief Disallow creation of %Component objects using the

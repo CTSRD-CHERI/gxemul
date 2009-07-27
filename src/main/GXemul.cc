@@ -6,8 +6,8 @@
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright  
- *     notice, this list of conditions and the following disclaimer in the 
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
  *  3. The name of the author may not be used to endorse or promote products
  *     derived from this software without specific prior written permission.
@@ -15,7 +15,7 @@
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE   
+ *  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
  *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  *  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  *  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -820,7 +820,7 @@ void GXemul::Execute()
 			UI::SetIndentationMessageHelper indentationHelper(GetUI(), ss.str());
 
 			++ step;
-			
+
 			// Component X, using frequency fX, should have executed
 			// nstepsX = steps * fX / fastestFrequency  nr of steps.
 			for (size_t k=0; k<componentsAndFrequencies.size(); ++k) {
@@ -833,13 +833,26 @@ void GXemul::Execute()
 					std::cerr << "Internal error: Too many steps executed?\n";
 					throw std::exception();
 				}
-				
+
 				if (stepsExecutedSoFar < nsteps) {
 					++ stepsExecutedSoFar;
+
+					const refcount_ptr<Component> lightClone =
+					    GetRootComponent()->LightClone();
+
+					// Execute one step...
 					componentsAndFrequencies[k].component->Execute(this, 1);
 
-					// Write back the number of executed steps:
+					// ... and write back the number of executed steps:
 					componentsAndFrequencies[k].step->SetValue(stepsExecutedSoFar);
+
+					// Now, let's compare the clone of the comopnent tree
+					// before execution with what we have now.
+					stringstream changeMessages;
+					GetRootComponent()->DetectChanges(lightClone, changeMessages);
+					string msg = changeMessages.str();
+					if (msg.length() > 0)
+						GetUI()->ShowDebugMessage(msg);
 				}
 			}
 
@@ -857,19 +870,19 @@ void GXemul::Execute()
 		throw std::exception();
 		// TODO
 		break;
-	
+
 	case Running:
 		std::cerr << "GXemul::Execute(): TODO: Running\n";
 		throw std::exception();
 		// TODO
 		break;
-	
+
 	case BackwardsRunning:
 		std::cerr << "GXemul::Execute(): TODO: BackwardsRunning\n";
 		throw std::exception();
 		// TODO
 		break;
-	
+
 	default:
 		std::cerr << "GXemul::Execute() called without being in a"
 		    " running state. Internal error?\n";

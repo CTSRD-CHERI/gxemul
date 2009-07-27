@@ -79,16 +79,17 @@ string Component::GetAttribute(const string& attributeName)
 
 refcount_ptr<Component> Component::Clone() const
 {
-	refcount_ptr<Component> clone =
-	    ComponentFactory::CreateComponent(GetClassName());
+	refcount_ptr<Component> clone;
+
+	if (GetClassName() == "root")
+		clone = new RootComponent;
+	else
+		clone = ComponentFactory::CreateComponent(GetClassName());
+
 	if (clone.IsNULL()) {
 		std::cerr << "INTERNAL ERROR in Component::Clone(): "
-		    "could not clone a '" << GetClassName()
-		    << "'\n";
-		assert(false);
-
-		// Return NULL:
-		return clone;
+		    "could not clone a '" << GetClassName() << "'\n";
+		throw std::exception();
 	}
 
 	// Copy the value of each state variable to the clone:
@@ -128,6 +129,156 @@ refcount_ptr<Component> Component::Clone() const
 	}
 
 	return clone;
+}
+
+
+refcount_ptr<Component> Component::LightCloneInternal() const
+{
+	refcount_ptr<Component> clone;
+
+	if (GetClassName() == "root")
+		clone = new RootComponent;
+	else
+		clone = ComponentFactory::CreateComponent(GetClassName());
+
+	if (clone.IsNULL()) {
+		std::cerr << "INTERNAL ERROR in Component::LightCloneInternal(): "
+		    "could not clone a '" << GetClassName() << "'\n";
+		throw std::exception();
+	}
+
+	// Copy the value of each state variable to the clone:
+	StateVariableMap::const_iterator varIt = m_stateVariables.begin();
+	for ( ; varIt != m_stateVariables.end(); ++varIt) {
+		const string& varName = varIt->first;
+		const StateVariable& variable = varIt->second;
+
+		StateVariableMap::iterator cloneVarIt =
+		    clone->m_stateVariables.find(varName);
+
+		if (cloneVarIt == clone->m_stateVariables.end()) {
+			std::cerr << "INTERNAL ERROR in Component::LightCloneInternal(): "
+			    "could not copy variable " << varName << "'s "
+			    << " value to the clone: clone is missing"
+			    " this variable?\n";
+			throw std::exception();
+		}
+
+		// Skip custom variables:
+		if (variable.GetType() == StateVariable::Custom)
+			continue;
+
+		if (!(cloneVarIt->second).CopyValueFrom(variable)) {
+			std::cerr << "INTERNAL ERROR in Component::LightCloneInternal(): "
+			    "could not copy variable " << varName << "'s "
+			    << " value to the clone.\n";
+			throw std::exception();
+		}
+	}
+
+	for (Components::const_iterator it = m_childComponents.begin();
+	    it != m_childComponents.end(); ++it) {
+		refcount_ptr<Component> child = (*it)->LightCloneInternal();
+		if (child.IsNULL()) {
+			std::cerr << "INTERNAL ERROR in Component::LightCloneInternal(): "
+			    "could not clone child of class '" <<
+			    (*it)->GetClassName() << "'\n";
+			throw std::exception();
+		} else {
+			clone->AddChild(child);
+		}
+	}
+
+	return clone;
+}
+
+
+const refcount_ptr<Component> Component::LightClone() const
+{
+	return LightCloneInternal();
+}
+
+
+void Component::DetectChanges(const refcount_ptr<Component>& oldClone,
+	ostream& changeMessages) const
+{
+	// Recursively look for changes in state. Compare the
+	// oldClone component with this component first.
+
+	if (oldClone->GetClassName() != GetClassName()) {
+		changeMessages << oldClone->GenerateShortestPossiblePath() <<
+		    " changed class from " << oldClone->GetClassName() <<
+		    " to " << GetClassName() << "?\n";
+		return;
+	}
+
+	// Compare all state variables:
+	StateVariableMap::const_iterator varIt = m_stateVariables.begin();
+	for ( ; varIt != m_stateVariables.end(); ++varIt) {
+		const string& varName = varIt->first;
+
+		// Don't output "step" changes, because they happen all
+		// the time for all executable components.
+		if (varName == "step")
+			continue;
+
+		const StateVariable& variable = varIt->second;
+		const StateVariable* oldVariable = oldClone->GetVariable(varName);
+
+		// NOTE: Custom types have a nonsense tostring, which
+		// usually just says "(custom)" or something, so they
+		// are quickly compared.
+
+		// TODO: In the future, maybe RAM components and such (i.e.
+		// custom data types) can be lazily reference counted or
+		// similar, to detect changes in RAM as well.
+
+		string var = variable.ToString();
+		string varOld = oldVariable->ToString();
+
+		if (var != varOld)
+			changeMessages << "=> " << GenerateShortestPossiblePath() << "."
+			    << varName << ": " << varOld << " -> " << var << "\n";
+	}
+
+	// Compare all children.
+	const Components& oldChildren = oldClone->GetChildren();
+	for (size_t i = 0; i < m_childComponents.size(); ++ i) {
+		string myName = m_childComponents[i]->GetVariable("name")->ToString();
+
+		// Find the corresponding child component in the oldClone:
+		size_t j;
+		bool found = false;
+		for (j=0; j<oldChildren.size(); ++j)
+			if (oldChildren[j]->GetVariable("name")->ToString() == myName) {
+				m_childComponents[i]->DetectChanges(oldChildren[j], changeMessages);
+				found = true;
+				break;
+			}
+
+		if (!found)
+			changeMessages << m_childComponents[i]->
+			    GenerateShortestPossiblePath() << " (appeared)\n";
+	}
+
+	// ... and see if any disappeared (i.e. were in the old clone,
+	// but not in the current tree):
+	for (size_t j=0; j<oldChildren.size(); ++j) {
+		string oldName = oldChildren[j]->GetVariable("name")->ToString();
+
+		bool found = false;
+		for (size_t k=0; k<m_childComponents.size(); ++k) {
+			string newName = m_childComponents[k]->GetVariable("name")->ToString();
+			if (newName == oldName) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+			changeMessages << oldChildren[j]->
+			    GenerateShortestPossiblePath() << " (disappeared)\n";
+	}
 }
 
 
