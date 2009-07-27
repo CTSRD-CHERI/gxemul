@@ -63,14 +63,32 @@ struct m88k_cpu_type_def {
 	"xor",      "xor.u",    "or",       "or.u",			\
 	"addu",     "subu",     "divu",     "mulu",			\
 	"add",      "sub",      "div",      "cmp",			\
-	"(multi)",  "opcode21", "opcode22", "opcode23",			\
+	"c(multi)", "f(multi)", "opcode22", "opcode23",			\
 	"opcode24", "opcode25", "opcode26", "opcode27",			\
 	"opcode28", "opcode29", "opcode2a", "opcode2b",			\
 	"opcode2c", "opcode2d", "opcode2e", "opcode2f",			\
 	"br",       "br.n",     "bsr",      "bsr.n",			\
-	"opcode34", "opcode35", "opcode36", "opcode37",			\
-	"opcode38", "opcode39", "opcode3a", "opcode3b",			\
-	"opcode3c", "opcode3d", "tbnd",     "opcode3f" }
+	"bb0",      "bb0.n",    "bb1",      "bb1.n",			\
+	"opcode38", "opcode39", "bcnd",     "bcnd.n",			\
+	"opcode3c", "3(multi)", "tbnd",     "opcode3f" }
+
+#define	M88K_3C_OPCODE_NAMES {						\
+	"opcode3c_00", "opcode3c_01", "opcode3c_02", "opcode3c_03",	\
+	"opcode3c_04", "opcode3c_05", "opcode3c_06", "opcode3c_07",	\
+	"opcode3c_08", "opcode3c_09", "opcode3c_0a", "opcode3c_0b",	\
+	"opcode3c_0c", "opcode3c_0d", "opcode3c_0e", "opcode3c_0f",	\
+	"opcode3c_10", "opcode3c_11", "opcode3c_12", "opcode3c_13",	\
+	"opcode3c_14", "opcode3c_15", "opcode3c_16", "opcode3c_17",	\
+	"opcode3c_18", "opcode3c_19", "opcode3c_1a", "opcode3c_1b",	\
+	"opcode3c_1c", "opcode3c_1d", "opcode3c_1e", "opcode3c_1f",	\
+	"clr",         "opcode3c_21", "set",         "opcode3c_23",	\
+	"ext",         "opcode3c_25", "extu",        "opcode3c_27",	\
+	"mak",         "opcode3c_29", "rot",         "opcode3c_2b",	\
+	"opcode3c_2c", "opcode3c_2d", "opcode3c_2e", "opcode3c_2f",	\
+	"opcode3c_30", "opcode3c_31", "opcode3c_32", "opcode3c_33",	\
+	"tb0",         "opcode3c_35", "tb1",         "opcode3c_37",	\
+	"opcode3c_38", "opcode3c_39", "opcode3c_3a", "opcode3c_3b",	\
+	"opcode3c_3c", "opcode3c_3d", "opcode3c_3e", "opcode3c_3f" }
 
 #define	M88K_3D_OPCODE_NAMES {						\
 	"opcode3d_00", "opcode3d_01", "opcode3d_02", "opcode3d_03",	\
@@ -239,18 +257,6 @@ struct m88k_cpu_type_def {
 /*  ... TODO: more  */
 
 
-#define	M88K_N_IC_ARGS			3
-#define	M88K_INSTR_ALIGNMENT_SHIFT	2
-#define	M88K_IC_ENTRIES_SHIFT		10
-#define	M88K_IC_ENTRIES_PER_PAGE	(1 << M88K_IC_ENTRIES_SHIFT)
-#define	M88K_PC_TO_IC_ENTRY(a)		(((a)>>M88K_INSTR_ALIGNMENT_SHIFT) \
-					& (M88K_IC_ENTRIES_PER_PAGE-1))
-#define	M88K_ADDR_TO_PAGENR(a)		((a) >> (M88K_IC_ENTRIES_SHIFT \
-					+ M88K_INSTR_ALIGNMENT_SHIFT))
-
-#define	M88K_MAX_VPH_TLB_ENTRIES		128
-
-
 #define	N_M88K_REGS		32
 
 /*  Register r0 is always zero, r1 is the return address on function calls.  */
@@ -312,6 +318,9 @@ struct m8820x_cmmu {
 
 /**
  * \brief A Component representing a Motorola 88000 processor.
+ *
+ * The only two implementations there were of the 88K architecture were
+ * 88100 and 88110. GXemul only supports 88100 emulation so far.
  */
 class M88K_CPUComponent
 	: public CPUComponent

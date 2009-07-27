@@ -34,9 +34,11 @@
 #include "components/M88K_CPUComponent.h"
 
 static const char* opcode_names[] = M88K_OPCODE_NAMES;
+static const char* opcode_names_3c[] = M88K_3C_OPCODE_NAMES;
 static const char* opcode_names_3d[] = M88K_3D_OPCODE_NAMES;
 static m88k_cpu_type_def cpu_type_defs[] = M88K_CPU_TYPE_DEFS;
 
+static const char *memop[4] = { ".d", "", ".h", ".b" };
 
 static const char *m88k_cr_names[] = M88K_CR_NAMES;
 //static const char *m88k_cr_197_names[] = M88K_CR_NAMES_197;
@@ -194,6 +196,20 @@ void M88K_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 		done = true;
 	}
 
+	if (find(arguments.begin(), arguments.end(), "crn") != arguments.end()) {
+		for (size_t i=0; i<N_M88K_CONTROL_REGS; i++) {
+			ss << std::setfill(' ');
+			ss << std::setw(5) << m88k_cr_name(i) << " = 0x";
+			ss << std::setfill('0') << std::setw(8) << m_cr[i];
+			if ((i&3) == 3)
+				ss << "\n";
+			else
+				ss << "  ";
+		}
+
+		done = true;
+	}
+
 	if (find(arguments.begin(), arguments.end(), "fcr") != arguments.end()) {
 		for (size_t i=0; i<N_M88K_FPU_CONTROL_REGS; i++) {
 			stringstream regname;
@@ -212,9 +228,10 @@ void M88K_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 	}
 
 	if (!done) {
-		ss << "M88K usage: .registers [r] [cr] [fcr]\n"
+		ss << "M88K usage: .registers [r] [cr] [crn] [fcr]\n"
 		    "r   = pc and general purpose registers  (default)\n"
 		    "cr  = control registers\n"
+		    "crn = control registers with symbolic names instead of crX\n"
 		    "fcr = floating point control registers\n";
 	}
 
@@ -271,17 +288,16 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	result.push_back(tmp);
 
 	uint32_t op26   = (iw >> 26) & 0x3f;
-//	uint32_t op11   = (iw >> 11) & 0x1f;
-//	uint32_t op10   = (iw >> 10) & 0x3f;
+	uint32_t op11   = (iw >> 11) & 0x1f;
+	uint32_t op10   = (iw >> 10) & 0x3f;
 	uint32_t d      = (iw >> 21) & 0x1f;
 	uint32_t s1     = (iw >> 16) & 0x1f;
 	uint32_t s2     =  iw        & 0x1f;
 	uint32_t op3d   = (iw >>  8) & 0xff;
 	uint32_t imm16  = iw & 0xffff;
-//	int32_t  simm16 = (int16_t) (iw & 0xffff);
-//	uint32_t w5     = (iw >>  5) & 0x1f;
+	uint32_t w5     = (iw >>  5) & 0x1f;
 	uint32_t cr6    = (iw >>  5) & 0x3f;
-//	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
+	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
 	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
 
 	switch (op26) {
@@ -383,7 +399,7 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			result.push_back("unimpl_0x20_variant");
 		}
 		break;
-#if 0
+
 	case 0x21:
 		switch (op11) {
 		case 0x00:	/*  fmul  */
@@ -391,46 +407,66 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		case 0x06:	/*  fsub  */
 		case 0x07:	/*  fcmp  */
 		case 0x0e:	/*  fdiv  */
-			switch (op11) {
-			case 0x00: mnem = "fmul"; break;
-			case 0x05: mnem = "fadd"; break;
-			case 0x06: mnem = "fsub"; break;
-			case 0x07: mnem = "fcmp"; break;
-			case 0x0e: mnem = "fdiv"; break;
+			{
+				stringstream ss;
+				switch (op11) {
+				case 0x00: ss << "fmul"; break;
+				case 0x05: ss << "fadd"; break;
+				case 0x06: ss << "fsub"; break;
+				case 0x07: ss << "fcmp"; break;
+				case 0x0e: ss << "fdiv"; break;
+				}
+				ss << "." <<
+				    (((iw >> 5) & 1)? "d" : "s") <<
+				    (((iw >> 9) & 1)? "d" : "s") <<
+				    (((iw >> 7) & 1)? "d" : "s");
+				result.push_back(ss.str());
+
+				stringstream ss2;
+				ss2 << "r" << d << ",r" << s1 << ",r" << s2;
+				result.push_back(ss2.str());
 			}
-			debug("%s.%c%c%c r%i,r%i,r%i\n",
-			    mnem,
-			    ((iw >> 5) & 1)? 'd' : 's',
-			    ((iw >> 9) & 1)? 'd' : 's',
-			    ((iw >> 7) & 1)? 'd' : 's',
-			    d, s1, s2);
 			break;
 		case 0x04:	/*  flt  */
-			switch (op11) {
-			case 0x04: mnem = "flt"; break;
+			{
+				stringstream ss;
+				switch (op11) {
+				case 0x04: ss << "flt"; break;
+				}
+				ss << "." << (((iw >> 5) & 1)? "d" : "s") << "s";
+				result.push_back(ss.str());
+
+				stringstream ss2;
+				ss2 << "r" << d << ",r" << s2;
+				result.push_back(ss2.str());
 			}
-			debug("%s.%cs\tr%i,r%i\n",
-			    mnem,
-			    ((iw >> 5) & 1)? 'd' : 's',
-			    d, s2);
 			break;
 		case 0x09:	/*  int  */
 		case 0x0a:	/*  nint  */
 		case 0x0b:	/*  trnc  */
-			switch (op11) {
-			case 0x09: mnem = "int"; break;
-			case 0x0a: mnem = "nint"; break;
-			case 0x0b: mnem = "trnc"; break;
+			{
+				stringstream ss;
+				switch (op11) {
+				case 0x09: ss << "int"; break;
+				case 0x0a: ss << "nint"; break;
+				case 0x0b: ss << "trnc"; break;
+				}
+				ss << ".s" << (((iw >> 7) & 1)? "d" : "s");
+				result.push_back(ss.str());
+
+				stringstream ss2;
+				ss2 << "r" << d << ",r" << s2;
+				result.push_back(ss2.str());
 			}
-			debug("%s.s%c r%i,r%i\n",
-			    mnem,
-			    ((iw >> 7) & 1)? 'd' : 's',
-			    d, s2);
 			break;
-		default:debug("UNIMPLEMENTED 0x21, op11=0x%02x\n", op11);
+		default:{
+				stringstream ss;
+				ss << "unimpl_0x21, op11=" << op11;
+				result.push_back(ss.str());
+			}
 		}
 		break;
-#endif
+
 	case 0x30:	/*  br  */
 	case 0x31:	/*  br.n  */
 	case 0x32:	/*  bsr  */
@@ -444,83 +480,71 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			result.push_back(ss.str());
 		}
 		break;
-#if 0
+
 	case 0x34:	/*  bb0    */
 	case 0x35:	/*  bb0.n  */
 	case 0x36:	/*  bb1    */
 	case 0x37:	/*  bb1.n  */
 	case 0x3a:	/*  bcnd    */
 	case 0x3b:	/*  bcnd.n  */
-		switch (op26) {
-		case 0x34:
-		case 0x35: mnem = "bb0"; break;
-		case 0x36:
-		case 0x37: mnem = "bb1"; break;
-		case 0x3a:
-		case 0x3b: mnem = "bcnd"; break;
-		}
-		debug("%s%s\t", mnem, op26 & 1? ".n" : "");
-		if (op26 == 0x3a || op26 == 0x3b) {
-			/*  Attempt to decode bcnd condition:  */
-			switch (d) {
-			case 0x1: debug("gt0"); break;
-			case 0x2: debug("eq0"); break;
-			case 0x3: debug("ge0"); break;
-			case 0x7: debug("not_maxneg"); break;
-			case 0x8: debug("maxneg"); break;
-			case 0xc: debug("lt0"); break;
-			case 0xd: debug("ne0"); break;
-			case 0xe: debug("le0"); break;
-			default:  debug("unimplemented_%i", d);
+		{
+			result.push_back(opcode_names[op26]);
+
+			stringstream ss;
+			if (op26 == 0x3a || op26 == 0x3b) {
+				/*  Attempt to decode bcnd condition:  */
+				switch (d) {
+				case 0x1: ss << "gt0"; break;
+				case 0x2: ss << "eq0"; break;
+				case 0x3: ss << "ge0"; break;
+				case 0x7: ss << "not_maxneg"; break;
+				case 0x8: ss << "maxneg"; break;
+				case 0xc: ss << "lt0"; break;
+				case 0xd: ss << "ne0"; break;
+				case 0xe: ss << "le0"; break;
+				default:  ss << "unk_" << d;
+				}
+			} else {
+				ss << d;
 			}
-		} else {
-			debug("%i", d);
+
+			ss << ",r" << s1 << ",";
+
+			ss.flags(std::ios::hex | std::ios::showbase);
+			ss << ((uint32_t) (vaddr + d16));
+			result.push_back(ss.str());
 		}
-		debug(",r%i,0x%08"PRIx32, s1, (uint32_t) (dumpaddr + d16));
-		symbol = get_symbol_name(&cpu->machine->symbol_context,
-		    dumpaddr + d16, &offset);
-		if (symbol != NULL && supervisor)
-			debug("\t; <%s>", symbol);
-		debug("\n");
+
 		break;
 
 	case 0x3c:
 		if ((iw & 0x0000f000)==0x1000 || (iw & 0x0000f000)==0x2000) {
-			int scale = 0;
-
 			/*  Load/store:  */
-			debug("%s", (iw & 0x0000f000) == 0x1000? "ld" : "st");
+			stringstream ss;
+			ss << ((iw & 0x0000f000) == 0x1000? "ld" : "st");
+
 			switch (iw & 0x00000c00) {
-			case 0x000: scale = 8; debug(".d"); break;
-			case 0x400: scale = 4; break;
-			case 0x800: debug(".x"); break;
-			default: debug(".UNIMPLEMENTED");
+			case 0x000: ss << ".d"; break;
+			case 0x400: break;
+			case 0x800: ss << ".x"; break;
+			default: ss << ".UNIMPLEMENTED";
 			}
+
 			if (iw & 0x100)
-				debug(".usr");
+				ss << ".usr";
 			if (iw & 0x80)
-				debug(".wt");
-			debug("\tr%i,r%i", d, s1);
+				ss << ".wt";
+
+			result.push_back(ss.str());
+
+			stringstream ss2;
+			ss2 << "r" << d << ",r" << s1;
 			if (iw & 0x200)
-				debug("[r%i]", s2);
+				ss2 << "[r" << s2 << "]";
 			else
-				debug(",r%i", s2);
+				ss2 << ",r" << s2;
 
-			if (running && scale >= 1) {
-				uint32_t tmpaddr = cpu->cd.m88k.r[s1];
-				if (iw & 0x200)
-					tmpaddr += scale * cpu->cd.m88k.r[s2];
-				else
-					tmpaddr += cpu->cd.m88k.r[s2];
-				symbol = get_symbol_name(&cpu->machine->
-				    symbol_context, tmpaddr, &offset);
-				if (symbol != NULL && supervisor)
-					debug("\t; [<%s>]", symbol);
-				else
-					debug("\t; [0x%08"PRIx32"]", tmpaddr);
-			}
-
-			debug("\n");
+			result.push_back(ss2.str());
 		} else switch (op10) {
 		case 0x20:	/*  clr  */
 		case 0x22:	/*  set  */
@@ -528,91 +552,88 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		case 0x26:	/*  extu  */
 		case 0x28:	/*  mak  */
 		case 0x2a:	/*  rot  */
-			switch (op10) {
-			case 0x20: mnem = "clr"; break;
-			case 0x22: mnem = "set"; break;
-			case 0x24: mnem = "ext"; break;
-			case 0x26: mnem = "extu"; break;
-			case 0x28: mnem = "mak"; break;
-			case 0x2a: mnem = "rot"; break;
+			/*  Two-register plus bit position/length:  */
+			{
+				result.push_back(opcode_names_3c[op10]);
+
+				stringstream ss;
+				ss << "r" << d << ",r" << s1 << ",";
+
+				/*  Don't include w5 for the rot instruction:  */
+				if (op10 != 0x2a)
+					ss << w5;
+
+				/*  Note: o5 = s2:  */
+				ss << "<" << s2 << ">";
+
+				result.push_back(ss.str());
 			}
-			debug("%s\tr%i,r%i,", mnem, d, s1);
-			/*  Don't include w5 for the rot instruction:  */
-			if (op10 != 0x2a)
-				debug("%i", w5);
-			/*  Note: o5 = s2:  */
-			debug("<%i>\n", s2);
 			break;
 		case 0x34:	/*  tb0  */
 		case 0x36:	/*  tb1  */
-			switch (op10) {
-			case 0x34: mnem = "tb0"; break;
-			case 0x36: mnem = "tb1"; break;
+			/*  Two-register plus 9-bit immediate:  */
+			{
+				result.push_back(opcode_names_3c[op10]);
+
+				stringstream ss;
+				ss << "r" << d << ",r" << s1 << ",";
+				ss.flags(std::ios::hex | std::ios::showbase);
+				ss << (iw & 0x1ff);
+				result.push_back(ss.str());
 			}
-			debug("%s\t%i,r%i,0x%x\n", mnem, d, s1, iw & 0x1ff);
 			break;
-		default:debug("UNIMPLEMENTED 0x3c, op10=0x%02x\n", op10);
+		default:{
+				stringstream ss;
+				ss << "unimpl_" << opcode_names_3c[op10];
+				result.push_back(ss.str());
+			}
 		}
 		break;
-#endif
 
 	case 0x3d:
 		if ((iw & 0xf000) <= 0x3fff) {
-#if 0
-			int scale = 0;
-
 			/*  Load, Store, xmem, and lda:  */
+			stringstream op;
+			
 			switch (iw & 0xf000) {
-			case 0x2000: debug("st"); break;
-			case 0x3000: debug("lda"); break;
+			case 0x2000: op << "st"; break;
+			case 0x3000: op << "lda"; break;
 			default:     if ((iw & 0xf800) >= 0x0800)
-					  debug("ld");
+					op << "ld";
 				     else
-					  debug("xmem");
+					op << "xmem";
 			}
+			
 			if ((iw & 0xf000) >= 0x1000) {
 				/*  ld, st, lda  */
-				scale = 1 << (3 - ((iw >> 10) & 3));
-				debug("%s", memop[(iw >> 10) & 3]);
+				op << memop[(iw >> 10) & 3];
 			} else if ((iw & 0xf800) == 0x0000) {
 				/*  xmem  */
-				if (iw & 0x400)
-					scale = 4;
-				else
-					debug(".bu"), scale = 1;
+				if (!(iw & 0x400))
+					op << ".bu";
 			} else {
 				/*  ld  */
 				if ((iw & 0xf00) < 0xc00)
-					debug(".hu"), scale = 2;
+					op << ".hu";
 				else
-					debug(".bu"), scale = 1;
+					op << ".bu";
 			}
+			
 			if (iw & 0x100)
-				debug(".usr");
+				op << ".usr";
 			if (iw & 0x80)
-				debug(".wt");
-			debug("\tr%i,r%i", d, s1);
+				op << ".wt";
+
+			result.push_back(op.str());
+
+			stringstream ss;
+			ss << "r" << d << ",r" << s1;
 			if (iw & 0x200)
-				debug("[r%i]", s2);
+				ss << "[r" << s2 << "]";
 			else
-				debug(",r%i", s2);
+				ss << ",r" << s2;
 
-			if (running && scale >= 1) {
-				uint32_t tmpaddr = cpu->cd.m88k.r[s1];
-				if (iw & 0x200)
-					tmpaddr += scale * cpu->cd.m88k.r[s2];
-				else
-					tmpaddr += cpu->cd.m88k.r[s2];
-				symbol = get_symbol_name(&cpu->machine->
-				    symbol_context, tmpaddr, &offset);
-				if (symbol != NULL && supervisor)
-					debug("\t; [<%s>]", symbol);
-				else
-					debug("\t; [0x%08"PRIx32"]", tmpaddr);
-			}
-
-			debug("\n");
-#endif
+			result.push_back(ss.str());
 		} else switch (op3d) {
 		case 0x40:	/*  and  */
 		case 0x44:	/*  and.c  */

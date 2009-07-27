@@ -839,7 +839,7 @@ int m88k_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 	const char *symbol, *mnem = NULL;
 	uint64_t offset;
 	uint32_t op26, op10, op11, d, s1, s2, w5, cr6, imm16;
-	int32_t d16, d26, simm16;
+	int32_t d16, d26;
 
 	if (running)
 		dumpaddr = cpu->pc;
@@ -875,7 +875,6 @@ int m88k_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 	s1     = (iw >> 16) & 0x1f;
 	s2     =  iw        & 0x1f;
 	imm16  = iw & 0xffff;
-	simm16 = (int16_t) (iw & 0xffff);
 	w5     = (iw >>  5) & 0x1f;
 	cr6    = (iw >>  5) & 0x3f;
 	d16    = ((int16_t) (iw & 0xffff)) * 4;
