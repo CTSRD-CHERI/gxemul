@@ -63,14 +63,83 @@ struct m88k_cpu_type_def {
 	"xor",      "xor.u",    "or",       "or.u",			\
 	"addu",     "subu",     "divu",     "mulu",			\
 	"add",      "sub",      "div",      "cmp",			\
-	"opcode20", "opcode21", "opcode22", "opcode23",			\
+	"(multi)",  "opcode21", "opcode22", "opcode23",			\
 	"opcode24", "opcode25", "opcode26", "opcode27",			\
 	"opcode28", "opcode29", "opcode2a", "opcode2b",			\
 	"opcode2c", "opcode2d", "opcode2e", "opcode2f",			\
-	"opcode30", "opcode31", "opcode32", "opcode33",			\
+	"br",       "br.n",     "bsr",      "bsr.n",			\
 	"opcode34", "opcode35", "opcode36", "opcode37",			\
 	"opcode38", "opcode39", "opcode3a", "opcode3b",			\
 	"opcode3c", "opcode3d", "tbnd",     "opcode3f" }
+
+#define	M88K_3D_OPCODE_NAMES {						\
+	"opcode3d_00", "opcode3d_01", "opcode3d_02", "opcode3d_03",	\
+	"opcode3d_04", "opcode3d_05", "opcode3d_06", "opcode3d_07",	\
+	"opcode3d_08", "opcode3d_09", "opcode3d_0a", "opcode3d_0b",	\
+	"opcode3d_0c", "opcode3d_0d", "opcode3d_0e", "opcode3d_0f",	\
+	"opcode3d_10", "opcode3d_11", "opcode3d_12", "opcode3d_13",	\
+	"opcode3d_14", "opcode3d_15", "opcode3d_16", "opcode3d_17",	\
+	"opcode3d_18", "opcode3d_19", "opcode3d_1a", "opcode3d_1b",	\
+	"opcode3d_1c", "opcode3d_1d", "opcode3d_1e", "opcode3d_1f",	\
+	"opcode3d_20", "opcode3d_21", "opcode3d_22", "opcode3d_23",	\
+	"opcode3d_24", "opcode3d_25", "opcode3d_26", "opcode3d_27",	\
+	"opcode3d_28", "opcode3d_29", "opcode3d_2a", "opcode3d_2b",	\
+	"opcode3d_2c", "opcode3d_2d", "opcode3d_2e", "opcode3d_2f",	\
+	"opcode3d_30", "opcode3d_31", "opcode3d_32", "opcode3d_33",	\
+	"opcode3d_34", "opcode3d_35", "opcode3d_36", "opcode3d_37",	\
+	"opcode3d_38", "opcode3d_39", "opcode3d_3a", "opcode3d_3b",	\
+	"opcode3d_3c", "opcode3d_3d", "opcode3d_3e", "opcode3d_3f",	\
+									\
+	"and",         "opcode3d_41", "opcode3d_42", "opcode3d_43",	\
+	"and.c",       "opcode3d_45", "opcode3d_46", "opcode3d_47",	\
+	"opcode3d_48", "opcode3d_49", "opcode3d_4a", "opcode3d_4b",	\
+	"opcode3d_4c", "opcode3d_4d", "opcode3d_4e", "opcode3d_4f",	\
+	"xor",         "opcode3d_51", "opcode3d_52", "opcode3d_53",	\
+	"xor.c",       "opcode3d_55", "opcode3d_56", "opcode3d_57",	\
+	"or",          "opcode3d_59", "opcode3d_5a", "opcode3d_5b",	\
+	"or.c",        "opcode3d_5d", "opcode3d_5e", "opcode3d_5f",	\
+	"addu",        "addu.co",     "addu.ci",     "addu.cio",	\
+	"subu",        "subu.co",     "subu.ci",     "subu.cio",	\
+	"divu",        "divu.d",      "opcode3d_6a", "opcode3d_6b",	\
+	"mul",         "mulu.d",      "muls",        "opcode3d_6f",	\
+	"add",         "add.co",      "add.ci",      "add.cio", 	\
+	"sub",         "sub.co",      "sub.ci",      "sub.cio",		\
+	"div",         "opcode3d_79", "opcode3d_7a", "opcode3d_7b",	\
+	"cmp",         "opcode3d_7d", "opcode3d_7e", "opcode3d_7f",	\
+									\
+	"clr",         "opcode3d_81", "opcode3d_82", "opcode3d_83",	\
+	"opcode3d_84", "opcode3d_85", "opcode3d_86", "opcode3d_87",	\
+	"set",         "opcode3d_89", "opcode3d_8a", "opcode3d_8b",	\
+	"opcode3d_8c", "opcode3d_8d", "opcode3d_8e", "opcode3d_8f",	\
+	"ext",         "opcode3d_91", "opcode3d_92", "opcode3d_93",	\
+	"opcode3d_94", "opcode3d_95", "opcode3d_96", "opcode3d_97",	\
+	"extu",        "opcode3d_99", "opcode3d_9a", "opcode3d_9b",	\
+	"opcode3d_9c", "opcode3d_9d", "opcode3d_9e", "opcode3d_9f",	\
+	"mak",         "opcode3d_a1", "opcode3d_a2", "opcode3d_a3",	\
+	"opcode3d_a4", "opcode3d_a5", "opcode3d_a6", "opcode3d_a7",	\
+	"rot",         "opcode3d_a9", "opcode3d_aa", "opcode3d_ab",	\
+	"opcode3d_ac", "opcode3d_ad", "opcode3d_ae", "opcode3d_af",	\
+	"opcode3d_b0", "opcode3d_b1", "opcode3d_b2", "opcode3d_b3",	\
+	"opcode3d_b4", "opcode3d_b5", "opcode3d_b6", "opcode3d_b7",	\
+	"opcode3d_b8", "opcode3d_b9", "opcode3d_ba", "opcode3d_bb",	\
+	"opcode3d_bc", "opcode3d_bd", "opcode3d_be", "opcode3d_bf",	\
+									\
+	"jmp",         "opcode3d_c1", "opcode3d_c2", "opcode3d_c3",	\
+	"jmp.n",       "opcode3d_c5", "opcode3d_c6", "opcode3d_c7",	\
+	"jsr",         "opcode3d_c9", "opcode3d_ca", "opcode3d_cb",	\
+	"jsr.n",       "opcode3d_cd", "opcode3d_ce", "opcode3d_cf",	\
+	"opcode3d_d0", "opcode3d_d1", "opcode3d_d2", "opcode3d_d3",	\
+	"opcode3d_d4", "opcode3d_d5", "opcode3d_d6", "opcode3d_d7",	\
+	"opcode3d_d8", "opcode3d_d9", "opcode3d_da", "opcode3d_db",	\
+	"opcode3d_dc", "opcode3d_dd", "opcode3d_de", "opcode3d_df",	\
+	"opcode3d_e0", "opcode3d_e1", "opcode3d_e2", "opcode3d_e3",	\
+	"opcode3d_e4", "opcode3d_e5", "opcode3d_e6", "opcode3d_e7",	\
+	"ff1",         "opcode3d_e9", "opcode3d_ea", "opcode3d_eb",	\
+	"ff0",         "opcode3d_ed", "opcode3d_ee", "opcode3d_ef",	\
+	"opcode3d_f0", "opcode3d_f1", "opcode3d_f2", "opcode3d_f3",	\
+	"opcode3d_f4", "opcode3d_f5", "opcode3d_f6", "opcode3d_f7",	\
+	"tbnd",        "opcode3d_f9", "opcode3d_fa", "opcode3d_fb",	\
+	"opcode3d_fc", "opcode3d_fd", "opcode3d_fe", "opcode3d_ff" }
 
 /*  Control register names:  */
 #define	N_M88K_CONTROL_REGS	64

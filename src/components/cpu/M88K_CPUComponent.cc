@@ -34,7 +34,23 @@
 #include "components/M88K_CPUComponent.h"
 
 static const char* opcode_names[] = M88K_OPCODE_NAMES;
+static const char* opcode_names_3d[] = M88K_3D_OPCODE_NAMES;
 static m88k_cpu_type_def cpu_type_defs[] = M88K_CPU_TYPE_DEFS;
+
+
+static const char *m88k_cr_names[] = M88K_CR_NAMES;
+//static const char *m88k_cr_197_names[] = M88K_CR_NAMES_197;
+
+static const char *m88k_cr_name(int i)
+{
+	const char **cr_names = m88k_cr_names;
+
+	// TODO: Is this really MVME197 specific? Or 88110?
+	//if (cpu->machine->machine_subtype == MACHINE_MVME88K_197)
+	//	cr_names = m88k_cr_197_names;
+
+	return cr_names[i];
+}
 
 
 M88K_CPUComponent::M88K_CPUComponent()
@@ -259,13 +275,14 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 //	uint32_t op10   = (iw >> 10) & 0x3f;
 	uint32_t d      = (iw >> 21) & 0x1f;
 	uint32_t s1     = (iw >> 16) & 0x1f;
-//	uint32_t s2     =  iw        & 0x1f;
+	uint32_t s2     =  iw        & 0x1f;
+	uint32_t op3d   = (iw >>  8) & 0xff;
 	uint32_t imm16  = iw & 0xffff;
 //	int32_t  simm16 = (int16_t) (iw & 0xffff);
 //	uint32_t w5     = (iw >>  5) & 0x1f;
-//	uint32_t cr6    = (iw >>  5) & 0x3f;
+	uint32_t cr6    = (iw >>  5) & 0x3f;
 //	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
-//	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
+	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
 
 	switch (op26) {
 
@@ -299,10 +316,8 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	case 0x1f:	/*  cmp    */
 		if (iw == 0x00000000) {
 			result.push_back("-");
-			break;
-		}
-
-		{
+		} else {
+			// Two registers (d, s1) and an immediate.
 			result.push_back(opcode_names[op26]);
 
 			stringstream ss;
@@ -311,49 +326,64 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			ss << "," << imm16;
 			result.push_back(ss.str());
 		}
-
 		break;
-#if 0
+
 	case 0x20:
 		if ((iw & 0x001ff81f) == 0x00004000) {
-			debug("ldcr\tr%i,%s\n", d,
-			    m88k_cr_name(cpu, cr6));
+			result.push_back("ldcr");
+			stringstream ss;
+			ss << "r" << d << ",cr" << cr6;
+			result.push_back(ss.str());
+
+			stringstream comment;
+			comment << "; cr" << cr6 << " = " << m88k_cr_name(cr6);
+			result.push_back(comment.str());
 		} else if ((iw & 0x001ff81f) == 0x00004800) {
-			debug("fldcr\tr%i,%s\n", d,
-			    m88k_fcr_name(cpu, cr6));
+			result.push_back("fldcr");
+			stringstream ss;
+			ss << "r" << d << ",fcr" << cr6;
+			result.push_back(ss.str());
 		} else if ((iw & 0x03e0f800) == 0x00008000) {
-			debug("stcr\tr%i,%s", s1,
-			    m88k_cr_name(cpu, cr6));
+			result.push_back("stcr");
+			stringstream ss;
+			ss << "r" << s1 << ",cr" << cr6;
+			result.push_back(ss.str());
 			if (s1 != s2)
-				debug("\t\t; NOTE: weird encoding: "
-				    "low 5 bits = 0x%02x", s2);
-			debug("\n");
+				result.push_back("; Weird encoding: s1 != s2");
+
+			stringstream comment;
+			comment << "; cr" << cr6 << " = " << m88k_cr_name(cr6);
+			result.push_back(comment.str());
 		} else if ((iw & 0x03e0f800) == 0x00008800) {
-			debug("fstcr\tr%i,%s", s1,
-			    m88k_fcr_name(cpu, cr6));
+			result.push_back("fstcr");
+			stringstream ss;
+			ss << "r" << s1 << ",fcr" << cr6;
+			result.push_back(ss.str());
 			if (s1 != s2)
-				debug("\t\t; NOTE: weird encoding: "
-				    "low 5 bits = 0x%02x", s2);
-			debug("\n");
+				result.push_back("; Weird encoding: s1 != s2");
 		} else if ((iw & 0x0000f800) == 0x0000c000) {
-			debug("xcr\tr%i,r%i,%s", d, s1,
-			    m88k_cr_name(cpu, cr6));
+			result.push_back("xcr");
+			stringstream ss;
+			ss << "r" << d << ",r" << s1 << ",cr" << cr6;
+			result.push_back(ss.str());
 			if (s1 != s2)
-				debug("\t\t; NOTE: weird encoding: "
-				    "low 5 bits = 0x%02x", s2);
-			debug("\n");
+				result.push_back("; Weird encoding: s1 != s2");
+
+			stringstream comment;
+			comment << "; cr" << cr6 << " = " << m88k_cr_name(cr6);
+			result.push_back(comment.str());
 		} else if ((iw & 0x0000f800) == 0x0000c800) {
-			debug("fxcr\tr%i,r%i,%s", d, s1,
-			    m88k_fcr_name(cpu, cr6));
+			result.push_back("fxcr");
+			stringstream ss;
+			ss << "r" << d << ",r" << s1 << ",fcr" << cr6;
+			result.push_back(ss.str());
 			if (s1 != s2)
-				debug("\t\t; NOTE: weird encoding: "
-				    "low 5 bits = 0x%02x", s2);
-			debug("\n");
+				result.push_back("; Weird encoding: s1 != s2");
 		} else {
-			debug("UNIMPLEMENTED 0x20\n");
+			result.push_back("unimpl_0x20_variant");
 		}
 		break;
-
+#if 0
 	case 0x21:
 		switch (op11) {
 		case 0x00:	/*  fmul  */
@@ -400,22 +430,21 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		default:debug("UNIMPLEMENTED 0x21, op11=0x%02x\n", op11);
 		}
 		break;
+#endif
+	case 0x30:	/*  br  */
+	case 0x31:	/*  br.n  */
+	case 0x32:	/*  bsr  */
+	case 0x33:	/*  bsr.n  */
+		{
+			result.push_back(opcode_names[op26]);
 
-	case 0x30:
-	case 0x31:
-	case 0x32:
-	case 0x33:
-		debug("b%sr%s\t",
-		    op26 >= 0x32? "s" : "",
-		    op26 & 1? ".n" : "");
-		debug("0x%08"PRIx32, (uint32_t) (dumpaddr + d26));
-		symbol = get_symbol_name(&cpu->machine->symbol_context,
-		    dumpaddr + d26, &offset);
-		if (symbol != NULL && supervisor)
-			debug("\t; <%s>", symbol);
-		debug("\n");
+			stringstream ss;
+			ss.flags(std::ios::hex | std::ios::showbase);
+			ss << ((uint32_t) (vaddr + d26));
+			result.push_back(ss.str());
+		}
 		break;
-
+#if 0
 	case 0x34:	/*  bb0    */
 	case 0x35:	/*  bb0.n  */
 	case 0x36:	/*  bb1    */
@@ -525,9 +554,11 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		default:debug("UNIMPLEMENTED 0x3c, op10=0x%02x\n", op10);
 		}
 		break;
+#endif
 
 	case 0x3d:
 		if ((iw & 0xf000) <= 0x3fff) {
+#if 0
 			int scale = 0;
 
 			/*  Load, Store, xmem, and lda:  */
@@ -581,7 +612,8 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			}
 
 			debug("\n");
-		} else switch ((iw >> 8) & 0xff) {
+#endif
+		} else switch (op3d) {
 		case 0x40:	/*  and  */
 		case 0x44:	/*  and.c  */
 		case 0x50:	/*  xor  */
@@ -618,95 +650,79 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		case 0xa0:	/*  mak  */
 		case 0xa8:	/*  rot  */
 			/*  Three-register opcodes:  */
-			switch ((iw >> 8) & 0xff) {
-			case 0x40: mnem = "and"; break;
-			case 0x44: mnem = "and.c"; break;
-			case 0x50: mnem = "xor"; break;
-			case 0x54: mnem = "xor.c"; break;
-			case 0x58: mnem = "or"; break;
-			case 0x5c: mnem = "or.c"; break;
-			case 0x60: mnem = "addu"; break;
-			case 0x61: mnem = "addu.co"; break;
-			case 0x62: mnem = "addu.ci"; break;
-			case 0x63: mnem = "addu.cio"; break;
-			case 0x64: mnem = "subu"; break;
-			case 0x65: mnem = "subu.co"; break;
-			case 0x66: mnem = "subu.ci"; break;
-			case 0x67: mnem = "subu.cio"; break;
-			case 0x68: mnem = "divu"; break;
-			case 0x69: mnem = "divu.d"; break;
-			case 0x6c: mnem = "mul"; break;
-			case 0x6d: mnem = "mulu.d"; break;
-			case 0x6e: mnem = "muls"; break;
-			case 0x70: mnem = "add"; break;
-			case 0x71: mnem = "add.co"; break;
-			case 0x72: mnem = "add.ci"; break;
-			case 0x73: mnem = "add.cio"; break;
-			case 0x74: mnem = "sub"; break;
-			case 0x75: mnem = "sub.co"; break;
-			case 0x76: mnem = "sub.ci"; break;
-			case 0x77: mnem = "sub.cio"; break;
-			case 0x78: mnem = "div"; break;
-			case 0x7c: mnem = "cmp"; break;
-			case 0x80: mnem = "clr"; break;
-			case 0x88: mnem = "set"; break;
-			case 0x90: mnem = "ext"; break;
-			case 0x98: mnem = "extu"; break;
-			case 0xa0: mnem = "mak"; break;
-			case 0xa8: mnem = "rot"; break;
+			{
+				result.push_back(opcode_names_3d[op3d]);
+
+				stringstream ss;
+				ss << "r" << d << ",r" << s1 << ",r" << s2;
+				result.push_back(ss.str());
 			}
-			debug("%s\tr%i,r%i,r%i\n", mnem, d, s1, s2);
 			break;
 		case 0xc0:	/*  jmp  */
 		case 0xc4:	/*  jmp.n  */
 		case 0xc8:	/*  jsr  */
 		case 0xcc:	/*  jsr.n  */
-			debug("%s%s\t(r%i)",
-			    op11 & 1? "jsr" : "jmp",
-			    iw & 0x400? ".n" : "",
-			    s2);
-			if (running) {
-				uint32_t tmpaddr = cpu->cd.m88k.r[s2];
-				symbol = get_symbol_name(&cpu->machine->
-				    symbol_context, tmpaddr, &offset);
-				debug("\t\t; ");
-				if (symbol != NULL && supervisor)
-					debug("<%s>", symbol);
-				else
-					debug("0x%08"PRIx32, tmpaddr);
+			/*  One-register jump opcodes:  */
+			{
+				result.push_back(opcode_names_3d[op3d]);
+
+				stringstream ss;
+				ss << "(r" << s2 << ")";
+				result.push_back(ss.str());
 			}
-			debug("\n");
 			break;
 		case 0xe8:	/*  ff1  */
 		case 0xec:	/*  ff0  */
-			debug("%s\tr%i,r%i\n",
-			    ((iw >> 8) & 0xff) == 0xe8 ? "ff1" : "ff0", d, s2);
+			/*  Two-register opcodes d,s2:  */
+			{
+				result.push_back(opcode_names_3d[op3d]);
+
+				stringstream ss;
+				ss << "r" << d << ",r" << s2;
+				result.push_back(ss.str());
+			}
 			break;
 		case 0xf8:	/*  tbnd  */
-			debug("tbnd\tr%i,r%i\n", s1, s2);
+			/*  Two-register opcodes s1,s2:  */
+			{
+				result.push_back(opcode_names_3d[op3d]);
+
+				stringstream ss;
+				ss << "r" << s1 << ",r" << s2;
+				result.push_back(ss.str());
+			}
 			break;
 		case 0xfc:
 			switch (iw & 0xff) {
 			case 0x00:
-				debug("rte\n");
+				result.push_back("rte");
 				break;
 			case 0x01:
 			case 0x02:
 			case 0x03:
-				debug("illop%i\n", iw & 0xff);
+				{
+					stringstream ss;
+					ss << "illop" << (iw & 0xff);
+					result.push_back(ss.str());
+				}
 				break;
 			case (M88K_PROM_INSTR & 0xff):
-				debug("gxemul_prom_call\n");
+				result.push_back("gxemul_prom_call");
 				break;
-			default:debug("UNIMPLEMENTED 0x3d,0xfc: 0x%02x\n",
-				    iw & 0xff);
+			default:{
+					stringstream ss;
+					ss << "unimpl_3d_0xfc_" << (iw & 0xff);
+					result.push_back(ss.str());
+				}
 			}
 			break;
-		default:debug("UNIMPLEMENTED 0x3d, opbyte = 0x%02x\n",
-			    (iw >> 8) & 0xff);
+		default:{
+				stringstream ss;
+				ss << "unimpl_" << opcode_names_3d[op3d];
+				result.push_back(ss.str());
+			}
 		}
 		break;
-#endif
 
 	case 0x3e:	/*  tbnd  */
 		{
@@ -773,8 +789,46 @@ static void Test_M88K_CPUComponent_IsCPU()
 {
 	refcount_ptr<Component> m88k_cpu =
 	    ComponentFactory::CreateComponent("m88k_cpu");
+
 	CPUComponent* cpu = m88k_cpu->AsCPUComponent();
 	UnitTest::Assert("m88k_cpu is not a CPUComponent?", cpu != NULL);
+}
+
+static void Test_M88K_CPUComponent_DefaultModel()
+{
+	refcount_ptr<Component> cpu =
+	    ComponentFactory::CreateComponent("m88k_cpu");
+
+	// Suitable default models would be 88100 and 88110 (the only two
+	// implementations there were of the 88K architecture). However,
+	// right now (2009-07-27), 88110 emulation isn't implemented yet.
+	UnitTest::Assert("wrong default model",
+	    cpu->GetVariable("model")->ToString(), "88100");
+}
+
+static void Test_M88K_CPUComponent_Disassembly_Basic()
+{
+	refcount_ptr<Component> m88k_cpu =
+	    ComponentFactory::CreateComponent("m88k_cpu");
+	CPUComponent* cpu = m88k_cpu->AsCPUComponent();
+
+	vector<string> result;
+	size_t len;
+	unsigned char instruction[sizeof(uint32_t)];
+	// This assumes that the default endianness is BigEndian...
+	instruction[0] = 0x63;
+	instruction[1] = 0xdf;
+	instruction[2] = 0x00;
+	instruction[3] = 0x10;
+
+	len = cpu->DisassembleInstruction(0x12345678, sizeof(uint32_t),
+	    instruction, result);
+
+	UnitTest::Assert("disassembled instruction was wrong length?", len, 4);
+	UnitTest::Assert("disassembly result incomplete?", result.size(), 3);
+	UnitTest::Assert("disassembly result[0]", result[0], "63df0010");
+	UnitTest::Assert("disassembly result[1]", result[1], "addu");
+	UnitTest::Assert("disassembly result[2]", result[2], "r30,r31,0x10");
 }
 
 UNITTESTS(M88K_CPUComponent)
@@ -782,6 +836,10 @@ UNITTESTS(M88K_CPUComponent)
 	UNITTEST(Test_M88K_CPUComponent_IsStable);
 	UNITTEST(Test_M88K_CPUComponent_Create);
 	UNITTEST(Test_M88K_CPUComponent_IsCPU);
+	UNITTEST(Test_M88K_CPUComponent_DefaultModel);
+
+	// Disassembly:
+	UNITTEST(Test_M88K_CPUComponent_Disassembly_Basic);
 }
 
 #endif

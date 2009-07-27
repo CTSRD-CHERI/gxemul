@@ -811,6 +811,16 @@ static void Test_MIPS_CPUComponent_IsCPU()
 	UnitTest::Assert("mips_cpu is not a CPUComponent?", cpu != NULL);
 }
 
+static void Test_MIPS_CPUComponent_DefaultModel()
+{
+	refcount_ptr<Component> cpu =
+	    ComponentFactory::CreateComponent("mips_cpu");
+
+	// 5KE is a good default model (MIPS64 rev 2 ISA)
+	UnitTest::Assert("wrong default model",
+	    cpu->GetVariable("model")->ToString(), "5KE");
+}
+
 static void Test_MIPS_CPUComponent_Disassembly_Basic()
 {
 	refcount_ptr<Component> mips_cpu =
@@ -841,6 +851,7 @@ UNITTESTS(MIPS_CPUComponent)
 	UNITTEST(Test_MIPS_CPUComponent_IsStable);
 	UNITTEST(Test_MIPS_CPUComponent_Create);
 	UNITTEST(Test_MIPS_CPUComponent_IsCPU);
+	UNITTEST(Test_MIPS_CPUComponent_DefaultModel);
 
 	// Disassembly:
 	UNITTEST(Test_MIPS_CPUComponent_Disassembly_Basic);
