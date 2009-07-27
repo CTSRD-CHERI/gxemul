@@ -1,0 +1,34 @@
+GXemul's source code contain a large portion of LEGACY code, and some
+new (better structured) code.
+
+
+NEW CODE
+--------
+
+	components
+	main
+	ui
+
+
+SHARED
+------
+
+	include
+
+
+LEGACY CODE  (Should be removed as soon as it's been reimplemented)
+-------------------------------------------------------------------
+
+	console
+	cpus		(new cpus are in components/cpu/)
+	debugger	(corresponds to main/CommandInterpreter.cc)
+	devices		(corresponds to components/)
+	disk
+	file		(new file loaders are in main/fileloaders/)
+	machines	(new machines are in components/machines/)
+	net
+	old_main
+	promemul
+	symbol
+
+

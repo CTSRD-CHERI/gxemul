@@ -8,7 +8,7 @@ LIBS=$(XLIB) $(OTHERLIBS)
 all: build
 
 build: do_src
-	$(CXX) $(COPTIM) src/components/*/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/main/*.o src/main/*/*.o src/net/*.o src/promemul/*.o src/symbol/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
+	$(CXX) $(COPTIM) src/components/*/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/main/*.o src/main/*/*.o src/net/*.o src/old_main/*.o src/promemul/*.o src/symbol/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
 
 do_src:
 	cd src; $(MAKE)
@@ -59,7 +59,7 @@ clean_all: clean
 	rm -f src/debugger/Makefile src/devices/Makefile
 	rm -f src/devices/fonts/Makefile src/disk/Makefile
 	rm -f src/file/Makefile src/machines/Makefile
-	rm -f src/main/Makefile src/net/Makefile
+	rm -f src/main/Makefile src/old_main/Makefile src/net/Makefile
 	rm -f src/promemul/Makefile src/include/Makefile
 	rm -f src/useremul/Makefile src/include/Makefile
 	rm -f src/console/Makefile src/symbol/Makefile
