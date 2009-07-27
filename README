@@ -1,5 +1,4 @@
 
-
           --------------------------------------------------------
              Gavare's eXperimental Emulator   --   GXemul 0.6.0
           --------------------------------------------------------
@@ -46,6 +45,8 @@ Possible uses of GXemul include:
  o)  hobby operating system development; the emulator can be used as a
      complement to testing your code on real hardware
 
+ o)  preservation of computer history, by simulating old/obsolete hardware
+
  o)  simulating (ethernet) networks of computers running various
      operating systems, to study their interaction with each other
 
@@ -70,9 +71,13 @@ new framework, but this will take quite some time.
 GXemul's limitations
 --------------------
 
- o)  GXemul is not a cycle-accurate simulator, because it does not simulate
-     things smaller than an instruction. Pipe-line stalls, instruction latency
-     effects etc. are more or less completely ignored.
+ o)  GXemul is not a cycle-accurate simulator when it comes to simulating
+     modern CPUs, because it does not simulate things smaller than an
+     instruction. Pipe-line stalls, instruction latency effects, out-of-order
+     execution etc. are more or less completely ignored.
+
+     (Note: The new framework could possibly allow cycle-accurate models
+     to be implemented; however, no such component has been written.)
 
  o)  Hardware devices have been implemented in an ad-hoc and as-needed manner,
      usually only enough to fool certain guest operating systems, e.g. NetBSD,
