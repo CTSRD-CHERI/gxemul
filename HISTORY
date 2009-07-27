@@ -3933,3 +3933,4 @@ Changelog for GXemul:
 		checking the r0 and zr registers, respectively.
 20090727	When single-stepping, all state change (except for Custom
 		StateVariables such as RAM contents) is now displayed.
+		Beginning to port M88K disassembly from the old implementation.

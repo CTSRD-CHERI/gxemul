@@ -56,6 +56,11 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 		}
 	}
 
+	if (m_type.name == NULL) {
+		std::cerr << "Internal error: Unimplemented MIPS type?\n";
+		throw std::exception();
+	}
+
 	ResetState();
 
 	AddVariable("model", &m_mips_type);
@@ -65,11 +70,6 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 
 	for (size_t i=0; i<N_MIPS_GPRS; i++)
 		AddVariable(regnames[i], &m_gpr[i]);
-
-	if (m_type.name == NULL) {
-		std::cerr << "Internal error: Unimplemented MIPS type?\n";
-		throw std::exception();
-	}
 }
 
 

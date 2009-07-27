@@ -38,7 +38,7 @@
 
 /*  M88K CPU types:  */
 struct m88k_cpu_type_def {
-	char		*name;
+	const char	*name;
 	int		type;
 	uint32_t	pid;
 };
@@ -50,6 +50,27 @@ struct m88k_cpu_type_def {
 	{ "88110", 88110, M88K_PID(M88K_ARN_88110,0) },		\
 	{ NULL,        0, 0			     }		\
 	}
+
+/*
+ * Opcode names:
+ */
+#define	M88K_OPCODE_NAMES {						\
+	"xmem.bu",  "xmem",     "ld.hu",    "ld.bu",			\
+	"ld.d",     "ld",       "ld.h",     "ld.b",			\
+	"st.d",     "st",       "st.h",     "st.b",			\
+	"opcode0c", "opcode0d", "opcode0e", "opcode0f",			\
+	"and",      "and.u",    "mask",     "mask.u",			\
+	"xor",      "xor.u",    "or",       "or.u",			\
+	"addu",     "subu",     "divu",     "mulu",			\
+	"add",      "sub",      "div",      "cmp",			\
+	"opcode20", "opcode21", "opcode22", "opcode23",			\
+	"opcode24", "opcode25", "opcode26", "opcode27",			\
+	"opcode28", "opcode29", "opcode2a", "opcode2b",			\
+	"opcode2c", "opcode2d", "opcode2e", "opcode2f",			\
+	"opcode30", "opcode31", "opcode32", "opcode33",			\
+	"opcode34", "opcode35", "opcode36", "opcode37",			\
+	"opcode38", "opcode39", "opcode3a", "opcode3b",			\
+	"opcode3c", "opcode3d", "tbnd",     "opcode3f" }
 
 /*  Control register names:  */
 #define	N_M88K_CONTROL_REGS	64
@@ -260,31 +281,32 @@ protected:
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
 
 private:
-	void ExecuteInstruction(uint32_t iword);
-
-private:
-	// State:
+	/*
+	 * State:
+	 */
 	string			m_m88k_type;	// E.g. "88100"
 
-	/*
-	 *  General-Purpose Registers:
-	 *
-	 *  32 (N_M88K_REGS) registers, plus one which is always zero. (This
-	 *  is to support st.d with d = r31. ld.d with d=r31 is converted to
-	 *  just ld. TODO)
-	 */
+	// General-Purpose Registers:
+	//
+	// 32 (N_M88K_REGS) registers, plus one which is always zero. (This
+	// is to support st.d with d = r31. ld.d with d=r31 is converted to
+	// just ld.
 	uint32_t		m_r[N_M88K_REGS+1];
 
-	/*  Destination scratch register for non-nop instructions with d=r0:  */
+	// Destination scratch register for non-nop instructions with d=r0.
+	// (Not serialized.)
 	uint32_t		m_zero_scratch;
 
-	/*  Control Registers:  */
+	// Control Registers:
 	uint32_t		m_cr[N_M88K_CONTROL_REGS];
 
-	/*  Floating Point Control registers:  */
+	// Floating Point Control registers:
 	uint32_t		m_fcr[N_M88K_FPU_CONTROL_REGS];
 
-
+	/*
+	 * Cached other state:
+	 */
+	m88k_cpu_type_def	m_type;	// based on m_m88k_type
 };
 
 

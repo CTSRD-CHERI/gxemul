@@ -189,15 +189,18 @@ private:
 	bool Is32Bit() const;
 
 private:
-	// State:
+	/*
+	 * State:
+	 */
 	string		m_mips_type;		// E.g. "R4400"
 	uint64_t	m_gpr[N_MIPS_GPRS];
 	uint64_t	m_hi;
 	uint64_t	m_lo;
 
-	// Cached other state:
+	/*
+	 * Cached other state:
+	 */
 	mips_cpu_type_def	m_type;	// based on m_mips_type
-
 };
 
 
