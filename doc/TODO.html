@@ -55,7 +55,7 @@ MAIN GOAL for 0.6.0:
 		[X]  Set runstate to Paused after executing something.
 		[X]  Unit tests. (DummyComponent)
 		[X]  Multiple singlesteps in a row (argument to the step command).
-		[ ]  Show ALL state change, using "serialize and compare everything
+		[X]  Show ALL state change, using "serialize and compare everything
 		     except large structures", e.g.:
 
 			machine0.mainbus0.cpu0: 0x12345678  ab cd 01 00  ld r12,[r13+0x100]
@@ -118,6 +118,9 @@ MAIN GOAL for 0.6.0:
 
 	[ ]  Guarantee that single-stepping and bulk execution end up with
 	     _EXACTLY_ the same state!
+
+	[ ]  For risc archs with delay slots, this means that single-stepping
+	     should be able to go half-way through a delay slot combo.
 
 
   [ ]	Symbol registry.
