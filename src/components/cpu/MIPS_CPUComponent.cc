@@ -177,8 +177,11 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 
 int MIPS_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 {
-	gxemul->GetUI()->ShowDebugMessage(this, "MIPS_CPUComponent: execute cycle: TODO");
+	stringstream disasm;
+	Unassemble(1, false, m_pc, disasm);
+	gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
 
+	// TODO: Replace this bogus stuff with actual instruction execution.
 	m_gpr[1] += nrOfCycles * 42;
 
 	m_pc += sizeof(uint32_t);
@@ -443,7 +446,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			case SPECIAL_XOR:
 			case SPECIAL_NOR:
 			case SPECIAL_SLT:
-			case SPECIAL_SLTU: 
+			case SPECIAL_SLTU:
 			case SPECIAL_DADD:
 			case SPECIAL_DADDU:
 			case SPECIAL_DSUB:
@@ -462,9 +465,9 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			case SPECIAL_DMULTU:
 			case SPECIAL_DIV:
 			case SPECIAL_DIVU:
-			case SPECIAL_DDIV:  
+			case SPECIAL_DDIV:
 			case SPECIAL_DDIVU:
-			case SPECIAL_TGE:                
+			case SPECIAL_TGE:
 			case SPECIAL_TGEU:
 			case SPECIAL_TLT:
 			case SPECIAL_TLTU:
@@ -501,7 +504,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 					result.push_back(ss.str());
 				}
 				break;
-				
+
 			case SPECIAL_MFSA:
 				if (m_type.rev == MIPS_R5900) {
 					result.push_back("mfsa");
@@ -581,7 +584,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	case HI6_XORI:
 		{
 			result.push_back(hi6_names[hi6]);
-			
+
 			stringstream ss;
 			ss << regnames[rt] << "," << regnames[rs] << ",";
 			if (hi6 == HI6_ANDI || hi6 == HI6_ORI ||
@@ -598,7 +601,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	case HI6_LUI:
 		{
 			result.push_back(hi6_names[hi6]);
-			
+
 			stringstream ss;
 			ss << regnames[rt] << ",";
 			ss.flags(std::ios::hex | std::ios::showbase);
@@ -634,7 +637,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	case HI6_SWC3:
 	case HI6_SDC1:
 	case HI6_SDC2:
-	case HI6_LWL:   
+	case HI6_LWL:
 	case HI6_LWR:
 	case HI6_LDL:
 	case HI6_LDR:
@@ -643,7 +646,6 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	case HI6_SDL:
 	case HI6_SDR:
 		{
-		
 			if (hi6 == HI6_LQ_MDMX && m_type.rev != MIPS_R5900) {
 				result.push_back("mdmx (UNIMPLEMENTED)");
 				break;
@@ -661,7 +663,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			/*  TODO: Which ISAs? IV? V? 32? 64?  */
 			if (m_type.isa_level >= 4 && hi6 == HI6_LWC3) {
 				result.push_back("pref");
-				
+
 				ss << rt << "," << imm <<
 				    "(" << regnames[rs] << ")";
 				result.push_back(ss.str());
@@ -692,7 +694,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	case HI6_JAL:
 		{
 			result.push_back(hi6_names[hi6]);
-			
+
 			int imm = (iword & 0x03ffffff) << 2;
 			uint64_t addr = (vaddr + 4) & ~((1 << 28) - 1);
 			addr |= imm;
@@ -701,7 +703,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			ss.flags(std::ios::hex | std::ios::showbase);
 			ss << addr;
 			result.push_back(ss.str());
-			
+
 			// TODO: Symbol lookup.
 		}
 		break;

@@ -132,6 +132,8 @@ protected:
 	bool ReadInstructionWord(uint16_t& iword, uint64_t vaddr);
 	bool ReadInstructionWord(uint32_t& iword, uint64_t vaddr);
 
+	uint64_t Unassemble(int nRows, bool indicatePC, uint64_t vaddr, ostream& output);
+
 	/**
 	 * \brief Virtual to physical address translation (MMU).
 	 *

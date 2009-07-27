@@ -6,8 +6,8 @@
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright  
- *     notice, this list of conditions and the following disclaimer in the 
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
  *  3. The name of the author may not be used to endorse or promote products
  *     derived from this software without specific prior written permission.
@@ -15,7 +15,7 @@
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE   
+ *  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
  *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  *  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  *  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -143,9 +143,9 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 				AddressSelect(vaddr + k);
 				readable[k] = ReadData(data[k]);
 			}
-			
+
 			ss << " ";
-			
+
 			for (k=0; k<len; ++k) {
 				if ((k&3) == 0)
 					ss << " ";
@@ -163,13 +163,13 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 				char s[2];
 				s[0] = data[k] >= 32 && data[k] < 127? data[k] : '.';
 				s[1] = '\0';
-				
+
 				if (readable[k])
 					ss << s;
 				else
 					ss << "-";
 			}
-			
+
 			ss << "\n";
 
 			gxemul->GetUI()->ShowDebugMessage(ss.str());
@@ -208,44 +208,10 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 		}
 
 		const int nRows = 20;
-		for (int i=0; i<nRows; i++) {
-			// TODO: GENERALIZE! Some archs will have longer
-			// instructions, or unaligned, or over page boundaries!
-			const size_t maxLen = sizeof(uint32_t);
-			unsigned char instruction[maxLen];
-			vector<string> result;
 
-			bool readOk = true;			
-			for (size_t k=0; k<maxLen; ++k) {
-				AddressSelect(vaddr + k);
-				readOk &= ReadData(instruction[k]);
-			}
-			
-			stringstream ss;
-			ss.flags(std::ios::hex | std::ios::showbase);
-			ss << vaddr;
-
-			if (!readOk) {
-				ss << "\tmemory could not be read";
-				if (m_addressDataBus == NULL)
-					ss << "; no address/data bus connected to the CPU?";
-				ss << "\n";
-				gxemul->GetUI()->ShowDebugMessage(ss.str());
-				break;
-			} else {
-				size_t len = DisassembleInstruction(vaddr,
-				    maxLen, instruction, result);
-				vaddr += len;
-
-				// TODO: Rewrite this to gather all nRows of
-				// output, and then output with equal-width
-				// columns!
-				for (size_t j=0; j<result.size(); ++j)
-					ss << "\t" << result[j];
-				ss << "\n";
-				gxemul->GetUI()->ShowDebugMessage(ss.str());
-			}
-		}
+		stringstream output;
+		vaddr = Unassemble(nRows, true, vaddr, output);
+		gxemul->GetUI()->ShowDebugMessage(output.str());
 
 		m_hasUsedUnassemble = true;
 		m_lastUnassembleVaddr = vaddr;
@@ -254,6 +220,97 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 
 	// Call base...
 	Component::ExecuteMethod(gxemul, methodName, arguments);
+}
+
+
+uint64_t CPUComponent::Unassemble(int nRows, bool indicatePC, uint64_t vaddr, ostream& output)
+{
+	vector< vector<string> > outputRows;
+
+	for (int i=0; i<nRows; i++) {
+		outputRows.push_back(vector<string>());
+
+		// TODO: GENERALIZE! Some archs will have longer
+		// instructions, or unaligned, or over page boundaries!
+		const size_t maxLen = sizeof(uint32_t);
+		unsigned char instruction[maxLen];
+
+		bool readOk = true;
+		for (size_t k=0; k<maxLen; ++k) {
+			AddressSelect(vaddr + k);
+			readOk &= ReadData(instruction[k]);
+		}
+
+		stringstream ss;
+		ss.flags(std::ios::hex | std::ios::showbase);
+		ss << vaddr;
+
+		if (indicatePC && m_pc == vaddr)
+			ss << " <- ";
+		else
+			ss << "    ";
+
+		outputRows[outputRows.size()-1].push_back(ss.str());
+
+		if (!readOk) {
+			stringstream ss2;
+			ss2 << "\tmemory could not be read";
+			if (m_addressDataBus == NULL)
+				ss2 << "; no address/data bus connected to the CPU";
+			ss2 << "\n";
+
+			outputRows[outputRows.size()-1].push_back(ss2.str());
+			break;
+		} else {
+			vector<string> result;
+
+			size_t len = DisassembleInstruction(vaddr,
+			    maxLen, instruction, result);
+			vaddr += len;
+
+			for (size_t j=0; j<result.size(); ++j)
+				outputRows[outputRows.size()-1].push_back(result[j]);
+		}
+	}
+
+	// Output the rows with equal-width columns:
+	vector<size_t> columnWidths;
+	size_t row;
+	for (row=0; row<outputRows.size(); ++row) {
+		size_t nColumns = outputRows[row].size();
+		if (columnWidths.size() < nColumns)
+			columnWidths.resize(nColumns);
+
+		for (size_t col=0; col<nColumns; ++col) {
+			const string& s = outputRows[row][col];
+			if (s.length() > columnWidths[col])
+				columnWidths[col] = s.length();
+		}
+	}
+
+	for (row=0; row<outputRows.size(); ++row) {
+		const vector<string>& rowVector = outputRows[row];
+
+		for (size_t i=0; i<rowVector.size(); ++i) {
+			// Note: i>=2 because:
+			// index 0 is the first column, no spaces before that one,
+			// but also: index 1 because the spaces after the vaddr
+			// is a special case ("<-" pc indicator).
+			if (i >= 2)
+				output << "   ";
+
+			size_t len = rowVector[i].length();
+			output << rowVector[i];
+			
+			size_t nspaces = columnWidths[i] - len;
+			for (size_t j=0; j<nspaces; ++j)
+				output << " ";
+		}
+
+		output << "\n";
+	}
+	
+	return vaddr;
 }
 
 
