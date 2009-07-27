@@ -83,8 +83,8 @@ string TestM88KMachine::GetAttribute(const string& attributeName)
 	if (attributeName == "machine")
 		return "yes";
 
-	// if (attributeName == "stable")
-	//	return "yes";
+	if (attributeName == "stable")
+		return "yes";
 
 	if (attributeName == "description")
 		return "Experimental M88K machine.";

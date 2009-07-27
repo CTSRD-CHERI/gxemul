@@ -1,0 +1,91 @@
+
+The <tt>testm88k</tt> machine is a GXemul-specific machine used for simple
+tests. It is based around a
+<a href="../components/component_m88k_cpu.html">Motorola 88100 CPU</a>,
+and some simple devices.
+
+<p>To start the emulator with a binary built for the testm88k machine,
+type:
+<pre>
+	gxemul -e testm88k <i>filename</i>
+</pre>
+
+<p>You may add -V to start in the paused mode, and enter the single-step
+debugger.
+
+<p>Example:
+<pre>
+$ <b>gxemul -V -e testm88k test/FileLoader_A.OUT_M88K</b>
+GXemul (unknown version)      Copyright (C) 2003-2009  Anders Gavare
+
+  mainbus0
+  |-- ram0  (32 MB at offset 0)
+  |-- rom0  (4 MB at offset 0xff800000)
+  \-- cpu0  (88100, 50 MHz)
+
+cpu0: test/FileLoader_A.OUT_M88K loaded
+      a.out: entry point 0x000012b8
+      text + data = 4096 + 4096 bytes
+      symbols = 1260 bytes: TODO
+
+GXemul&gt; <b>cpu0.unassemble</b>
+0x12b8 &lt;- 67ff0020   subu    r31,r31,0x20 
+0x12bc    27df0010   st      r30,r31,0x10 
+0x12c0    63df0010   addu    r30,r31,0x10 
+0x12c4    58400320   or      r2,r0,0x320  
+0x12c8    58600258   or      r3,r0,0x258  
+0x12cc    243f0014   st      r1,r31,0x14  
+0x12d0    231f0008   st.d    r24,r31,0x8  
+0x12d4    cfffffe7   bsr.n   0x1270       
+0x12d8    f6c0201f   st.d    r22,r0,r31   
+0x12dc    cbffff89   bsr     0x1100       
+0x12e0    f6c05802   or      r22,r0,r2    
+0x12e4    69b60320   divu    r13,r22,0x320
+0x12e8    6dad0320   mulu    r13,r13,0x320
+0x12ec    cfffff85   bsr.n   0x1100       
+0x12f0    f6d6640d   subu    r22,r22,r13  
+0x12f4    f6e05802   or      r23,r0,r2    
+0x12f8    69b70258   divu    r13,r23,0x258
+0x12fc    6dad0258   mulu    r13,r13,0x258
+0x1300    cfffff80   bsr.n   0x1100       
+0x1304    f6f7640d   subu    r23,r23,r13  
+GXemul&gt; <b>cpu0.registers</b>
+   pc = 0x000012b8
+   r0 = 0x00000000     r1 = 0x00000000     r2 = 0x00000000     r3 = 0x00000000
+   r4 = 0x00000000     r5 = 0x00000000     r6 = 0x00000000     r7 = 0x00000000
+   r8 = 0x00000000     r9 = 0x00000000    r10 = 0x00000000    r11 = 0x00000000
+  r12 = 0x00000000    r13 = 0x00000000    r14 = 0x00000000    r15 = 0x00000000
+  r16 = 0x00000000    r17 = 0x00000000    r18 = 0x00000000    r19 = 0x00000000
+  r20 = 0x00000000    r21 = 0x00000000    r22 = 0x00000000    r23 = 0x00000000
+  r24 = 0x00000000    r25 = 0x00000000    r26 = 0x00000000    r27 = 0x00000000
+  r28 = 0x00000000    r29 = 0x00000000    r30 = 0x00000000    r31 = 0x00000000
+GXemul> <b>cpu0.registers help</b>
+M88K usage: .registers [r] [cr] [crn] [fcr]
+r   = pc and general purpose registers  (default)
+cr  = control registers
+crn = control registers with symbolic names instead of crX
+fcr = floating point control registers
+GXemul&gt; <b>cpu0.registers crn</b>
+  PID = 0x00000007    PSR = 0x80000002   EPSR = 0x00000000   SSBR = 0x00000000
+ SXIP = 0x00000000   SNIP = 0x00000000   SFIP = 0x00000000    VBR = 0x00000000
+ DMT0 = 0x00000000   DMD0 = 0x00000000   DMA0 = 0x00000000   DMT1 = 0x00000000
+ DMD1 = 0x00000000   DMA1 = 0x00000000   DMT2 = 0x00000000   DMD2 = 0x00000000
+ DMA2 = 0x00000000    SR0 = 0x00000000    SR1 = 0x00000000    SR2 = 0x00000000
+  SR3 = 0x00000000   CR21 = 0x00000000   CR22 = 0x00000000   CR23 = 0x00000000
+ CR24 = 0x00000000   CR25 = 0x00000000   CR26 = 0x00000000   CR27 = 0x00000000
+ CR28 = 0x00000000   CR29 = 0x00000000   CR30 = 0x00000000   CR31 = 0x00000000
+ CR32 = 0x00000000   CR33 = 0x00000000   CR34 = 0x00000000   CR35 = 0x00000000
+ CR36 = 0x00000000   CR37 = 0x00000000   CR38 = 0x00000000   CR39 = 0x00000000
+ CR40 = 0x00000000   CR41 = 0x00000000   CR42 = 0x00000000   CR43 = 0x00000000
+ CR44 = 0x00000000   CR45 = 0x00000000   CR46 = 0x00000000   CR47 = 0x00000000
+ CR48 = 0x00000000   CR49 = 0x00000000   CR50 = 0x00000000   CR51 = 0x00000000
+ CR52 = 0x00000000   CR53 = 0x00000000   CR54 = 0x00000000   CR55 = 0x00000000
+ CR56 = 0x00000000   CR57 = 0x00000000   CR58 = 0x00000000   CR59 = 0x00000000
+ CR60 = 0x00000000   CR61 = 0x00000000   CR62 = 0x00000000   CR63 = 0x00000000
+GXemul&gt; 
+
+</pre>
+
+<p><hr>
+</body>
+</html>

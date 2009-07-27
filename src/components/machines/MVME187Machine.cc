@@ -86,8 +86,8 @@ string MVME187Machine::GetAttribute(const string& attributeName)
 	if (attributeName == "machine")
 		return "yes";
 
-	if (attributeName == "stable")
-		return "yes";
+	// if (attributeName == "stable")
+	//	return "yes";
 
 	if (attributeName == "description")
 		return "MVME187 machine.";
