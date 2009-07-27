@@ -116,8 +116,8 @@ CDROM images if the kernel is included in the image as a plain file.
 
 <p>Thanks to (in no specific order) Joachim Buss, Olivier Houchard, Juli 
 Mallett, Juan Romero Pardines, Carl van Schaik, Miod Vallat, Alec Voropay,
-Göran Weinholt, Alexander Yurchenko, and everyone else who has provided me
-with feedback.
+Göran Weinholt, Alexander Yurchenko, and everyone else who has provided
+feedback on previous releases.
 
 
 
@@ -305,8 +305,30 @@ the real-world clock.
 <a name="emulmodes"></a>
 <h3>Which machines does GXemul emulate?</h3>
 
-A few different machine types are emulated. The following machine types 
-are emulated well enough to run at least one "guest OS":
+A few different machine types are emulated. The criteria used to include a
+machine in these lists is:
+<ul>
+	<li>For real machines: That the machine emulation is complete enough
+		to run <i>at least one</i> unmodified "guest OS".
+	<li>For GXemul's <tt>test*</tt> machines: That the experimental
+		devices for test machines work according to the documentation.
+</ul>
+
+<p>Machines emulated using the new framework: (TODO: not really yet)
+<ul
+  <li><b><u>MIPS</u></b>
+  <ul>
+    <li><b>testmips</b> (<a href="experiments.html#expdevices">experimental</a>)
+  </ul>
+  <p>
+  <li><b><u>Motorola 88K</u></b>
+  <ul>
+    <li><a href="machines/machine_mvme187.html"><b>Motorola MVME187</b></a> (<a href="machines/machine_mvme187.html#openbsdmvme88kinstall">OpenBSD/mvme88k</a>)
+    <li><b>testm88k</b> (<a href="experiments.html#expdevices">experimental</a>)
+  </ul>
+</ul>
+
+<p>Machines emulated using the legacy framework:
 
 <p>
 <ul>
@@ -316,6 +338,7 @@ are emulated well enough to run at least one "guest OS":
 	<a href="guestoses.html#openbsdcatsinstall">OpenBSD/cats</a>)
     <li><b>IQ80321</b> (<a href="guestoses.html#netbsdevbarminstall">NetBSD/evbarm</a>)
     <li><b>NetWinder</b> (<a href="guestoses.html#netbsdnetwinderinstall">NetBSD/netwinder</a>)
+    <li><b>testarm</b> (<a href="experiments.html#expdevices">experimental</a>)
   </ul>
   <p>
   <li><b><u>MIPS</u></b>
@@ -332,11 +355,13 @@ are emulated well enough to run at least one "guest OS":
     <li><b>Algorithmics P5064</b> (<a href="guestoses.html#netbsdalgorinstall">NetBSD/algor</a>)
     <li><b>SGI O2 (aka IP32)</b> <font color="#0000e0">(<super>*2</super>)</font>
 	(<a href="guestoses.html#netbsdsgimips">NetBSD/sgi</a>)
+    <li><b>testmips</b> (<a href="experiments.html#expdevices">experimental</a>)
   </ul>
   <p>
   <li><b><u>Motorola 88K</u></b>
   <ul>
     <li><b>Motorola MVME187</b> (<a href="guestoses.html#openbsdmvme88kinstall">OpenBSD/mvme88k</a>)
+    <li><b>testm88k</b> (<a href="experiments.html#expdevices">experimental</a>)
   </ul>
   <p>
   <li><b><u>PowerPC</u></b>
@@ -345,12 +370,14 @@ are emulated well enough to run at least one "guest OS":
     <li><b>MacPPC (generic "G4" Macintosh)</b> (<a href="guestoses.html#netbsdmacppcinstall">NetBSD/macppc</a>)
     <li><b>Artesyn PM/PPC</b> <font color="#0000e0">(<super>*2</super>)</font>
 	(<a href="guestoses.html#netbsdpmppc">NetBSD/pmppc</a>)
+    <li><b>testppc</b> (<a href="experiments.html#expdevices">experimental</a>)
   </ul>
   <p>
   <li><b><u>SuperH</u></b>
   <ul>
     <li><b>Sega Dreamcast</b> (<a href="dreamcast.html#netbsd_generic_md">NetBSD/dreamcast</a>, <a href="dreamcast.html#linux_live_cd">Linux/dreamcast</a>)
     <li><b>Landisk I-O DATA USL-5P</b> (<a href="guestoses.html#openbsdlandiskinstall">OpenBSD/landisk</a>)
+    <li><b>testsh</b> (<a href="experiments.html#expdevices">experimental</a>)
   </ul>
 </ul>
 
@@ -370,15 +397,15 @@ IDE) is emulated yet for this machine type.</small>
 raw PROM images for most machines, SGI IRIX, MacOS X or Darwin, Windows 
 NT, or Dreamcast games.
 
-<p>There is code in GXemul for emulation of several other machine types; the
+<p>There may be code in GXemul for emulation of some other machine types; the
 degree to which these work range from almost being able to run a complete
 OS, to almost completely unsupported, perhaps just enough support to
 output a few boot messages via serial console. (See the end of
 <a href="guestoses.html#generalnotes">this section</a> on the Guest OSes 
 page for some examples, but remember that these do not necessarily work.)
 
-<p>In addition to emulating real machines, there is also a "test-machine".
-A test-machine consists of one or more CPUs and a few experimental devices
+<p>In addition to emulating real machines, there are also the test machines.
+A test machine consists of one or more CPUs and a few experimental devices
 such as:
 
 <p>
