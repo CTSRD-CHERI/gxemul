@@ -128,6 +128,55 @@ MAIN GOAL for 0.6.0:
 
 	[ ]  Native translation possibilities.
 
+	[ ]  Basically the same as dyntrans ideas as in GXemul pre-0.6.0 should
+	     work! However, try to avoid the "macro magic".
+
+	[ ]  Native code generation? (Not at first...)
+
+		[ ] Target amd64 and Alpha hosts first, if native generation is to be
+	    	attempted, since those are the only realistic ones I have for testing.
+
+		[ ] Ability to show disassembly of generated host
+		    instruction sequence!
+
+		[ ] Try to make the generated code as linear and branch
+		    free as possible. Experiment with making e.g. all
+		    "exceptional" branches go away to some place outside
+		    the basic block? If it is worth it.
+
+		[ ] Exceptions from device access, or from load/store to
+		    unmapped pages/devices/handlers should break the
+		    native code execution.
+
+	[ ] Instruction cache emulation:  For each emulated
+	    instruction, call a stub handler with the current pc.
+	    It is responsible for updating statistics etc.
+	    Should not be enabled by default (i.e. if there is no instruction cache).
+
+	[ ] Generic bus load/store access:
+		[ ] Pointers to host memory pages, for fast loads and stores:
+			[ ]  host_load and host_store (as before)
+			[ ]  host_load_user and host_store_user (as before,
+			     for those archs that need it, e.g. ARM and M88K?)
+		[ ]  Pointers to handler functions, for:
+			[ ]  device access
+			[ ]  data cache emulation
+			[ ]  breakpoints
+			[ ]  Investigate: http://vm-kernel.org/blog/2009/07/10/qemu-internal-part-2-softmmu/
+			     indicates that QEMU uses similar lookup mechanisms as GXemul, but
+			     uses an additional bit in the looked up page address to indicate
+			     I/O space. Investigate whether this is faster than having a pure
+			     pointer, and a separate lookup when the pointer is NULL!
+
+	[ ] Conditional breakpoints before AND after device accesses!
+
+	[ ] Conditional breakpoints before AND after CPU instruction
+	    execution (somewhat different from generic device access).
+
+	[ ] Unit tests! When executed on a host which has native code generation,
+	    try both with and without native code generation, and with and without
+	    other instruction combinations.
+
   [ ]	Address formats?
   	"xxxx:yyyy", "xxxx:yyyyyyyy", "zzzzzzzzzzzzzzzz" for amd64, plus i/o ports
   	"uxxxxxxxx" vs "sxxxxxxxx" for M88K
@@ -369,7 +418,7 @@ MAIN GOAL for 0.6.0:
 	     in the cache (a small memory area), do not call the main memory.
 	     Rather straight-forward idea, but will take time to implement
 	     all common variants: associativity, statistics gathering (i.e.
-	     "who evicted who from the cache"), ...
+	     "who [i.e. which PC] evicted who [which other PC] from the cache"), ...
 
 		[ ]  Caches should be added _onto_ a cpu. The cpu first looks
 		     for a cache as an address data bus, THEN for a parent. Hm.
@@ -389,59 +438,6 @@ MAIN GOAL for 0.6.0:
 
    	[ ]  Begin with e.g. FreeBSD/amd64, or FreeBSD/alpha, NetBSD/something,
    	     or Linux/something.
-
-   [ ]  Dyntrans: Portable (C++) _AND_ native code generation?
-
-	[ ] Basically the same as dyntrans ideas as in GXemul pre-0.6.0 should
-	    work! However, try to avoid the "macro magic".
-
-	[ ] Native code generation? (Not at first...)
-
-		[ ] Target amd64 and Alpha hosts first, if native generation is to be
-	    	attempted, since those are the only realistic ones I have for testing.
-
-		[ ] Ability to show disassembly of generated host
-		    instruction sequence!
-
-		[ ] Try to make the generated code as linear and branch
-		    free as possible. Experiment with making e.g. all
-		    "exceptional" branches go away to some place outside
-		    the basic block? If it is worth it.
-
-		[ ] Exceptions from device access, or from load/store to
-		    unmapped pages/devices/handlers should break the
-		    native code execution.
-
-	[ ] Instruction cache emulation:  For each emulated
-	    instruction, call a stub handler with the current pc.
-	    It is responsible for updating statistics etc.
-	    Should not be enabled by default (i.e. if there is no instruction cache).
-
-	[ ] Generic bus load/store access:
-		[ ] Pointers to host memory pages, for fast loads and stores:
-			[ ]  host_load and host_store (as before)
-			[ ]  host_load_user and host_store_user (as before,
-			     for those archs that need it, e.g. ARM and M88K?)
-		[ ]  Pointers to handler functions, for:
-			[ ]  device access
-			[ ]  data cache emulation
-			[ ]  breakpoints
-			[ ]  Investigate: http://vm-kernel.org/blog/2009/07/10/qemu-internal-part-2-softmmu/
-			     indicates that QEMU uses similar lookup mechanisms as GXemul, but
-			     uses an additional bit in the looked up page address to indicate
-			     I/O space. Investigate whether this is faster than having a pure
-			     pointer, and a separate lookup when the pointer is NULL!
-
-	[ ] Conditional breakpoints before AND after device accesses!
-
-	[ ] Conditional breakpoints before AND after CPU instruction
-	    execution (somewhat different from generic device access).
-
-	[ ] Keep nr-of-instructions-executed up to date! NOTE: Not same as nr of steps.
-
-	[ ] Unit tests! When executed on a host which has native code generation,
-	    try both with and without native code generation, and with and without
-	    other instruction combinations.
 
    [ ]	Output handlers:
 

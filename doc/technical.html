@@ -307,7 +307,11 @@ fragmentation issue mentioned above.
 <a name="devices"></a>
 <h3>Emulation of hardware devices</h3>
 
-Each file called <tt>dev_*.c</tt> in the 
+<font color="#ff0000">NOTE/TODO: This section is very old, and is about
+the legacy framework. New machines and devices should be implemented using the
+new <a href="doxygen/html/classComponent.html">Component</a> framework.</font>
+
+<p>Each file called <tt>dev_*.c</tt> in the 
 <a href="../src/devices/"><tt>src/devices/</tt></a> directory is
 responsible for one hardware device. These are used from
 <a href="../src/machines/"><tt>src/machines</tt></a><tt>/machine_*.c</tt>,

@@ -48,6 +48,10 @@
  * See GXemul's home page for more information about %GXemul in general:
  * <a href="http://gxemul.sourceforge.net/">http://gxemul.sourceforge.net/</a>
  *
+ * (<b>NOTE:</b> There is a huge portion of code in
+ * %GXemul which is legacy code. The documentation you will find on this page
+ * is only about the new framework, which is available from release 0.6.0.)
+ *
  * The main program creates a GXemul instance, and does one of two things:
  * <ul>
  *	<li>Starts without any template %machine. (<tt>-V</tt>)
@@ -109,9 +113,8 @@
  * the TAB key either completes the word currently being written, or writes
  * out a list of possible completions.
  *
- * When running <tt>gxemul</tt>, the %CommandInterpreter is the UI as seen
- * by the user. When running <tt>gxemul-gui</tt>, the %CommandInterpreter is
- * located in a window. The functionality should be the same in both cases.
+ * The %CommandInterpreter, via the ConsoleUI, is the user interface as seen
+ * by the user.
  *
  * \subsection unittest_subsec Unit tests
  *
@@ -132,10 +135,13 @@
  * that it is only meant for internal use and debugging.)
  *
  * Unit tests are normally executed by <tt>make test</tt>. This is implicitly
- * done when doing <tt>make install</tt> as well, for non-release builds.
+ * done when doing <tt>make install</tt> as well.
+ *
  * It is recommended to run the <tt>configure</tt> script with the
- * <tt>--debug</tt> option during development; this enables Wu Yongwei's
- * new/debug %memory leak detector.
+ * <tt>--debug</tt> option during development; this enables
+ * <a href="http://wyw.dcweb.cn/">Wu Yongwei</a>'s new/debug %memory
+ * leak detector (part of
+ * <a href="http://sourceforge.net/projects/nvwa/">Stones of NVWA</a>).
  */
 
 

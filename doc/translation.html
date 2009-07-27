@@ -65,7 +65,7 @@ dynamically. It is not possible to do a "one-pass" (static) translation.
 Self-modifying code and Just-in-Time compilers running inside 
 the emulator are other things that would not work with a static 
 translator. GXemul is a dynamic translator. However, it does not 
-necessarily translate into native code, like many other emulators.
+necessarily translate into native code, like some other emulators.
 
 
 <p><br>
@@ -74,16 +74,16 @@ necessarily translate into native code, like many other emulators.
 
 <p>Dynamic translators usually translate from the emulated architecture
 (e.g. MIPS) into a kind of <i>intermediate representation</i> (IR), and then
-to native code (e.g. AMD64 or x86 code). Since one of my main goals for
-GXemul is to keep everything as portable as possible, I have tried to make
-sure that the IR is something which can be executed regardless of whether 
+to native code (e.g. AMD64 or x86 code) which can be executed by the host.
+Since one of the main goals for GXemul is to keep everything as portable as
+possible, the IR is something which can be executed regardless of whether
 the final step (translation from IR to native code) has been implemented
 or not.
 
 <p>The IR in GXemul consists of arrays of pointers to functions, and a few 
 arguments which are passed along to those functions. The functions are 
-implemented in either manually hand-coded C, or automatically generated C.
-In any case, this is all statically linked into the GXemul binary at link 
+implemented in either manually hand-coded C/C++, or automatically generated
+C/C++. In any case, this is all statically linked into the GXemul binary at link 
 time.
 
 <p>Here is a simplified diagram of how these arrays work.
@@ -91,8 +91,8 @@ time.
 <p><center><img src="simplified_dyntrans.png"></center>
 
 <p>There is one instruction call slot for every possible program counter
-location. In the MIPS case, instruction words are 32 bits in length,
-and pages are (usually) 4 KB large, resulting in 1024 instruction call
+location. In the traditional MIPS case, instruction words are 32 bits in length,
+and pages are 4 KB large, resulting in 1024 instruction call
 slots. After the last of these instruction calls, there is an additional
 call to a special "end of page" function (which doesn't count as an executed
 instruction). This function switches to the first instruction
@@ -132,7 +132,7 @@ compromise.
 <p>The overhead per emulated instruction is usually around or below
 approximately 10 host instructions. This is very much dependent on your
 host architecture and what compiler and compiler switches you are using.
-Added to this instruction count is (of course) also the C code used to
+Added to this instruction count is (of course) also the C/C++ code used to
 implement each specific instruction.
 
 
@@ -169,12 +169,10 @@ translations are invalidated, and replaced by normal instruction calls
 <p>In theory, it will be possible to implement native code generation,
 similar to what is used in high-performance emulators such as <a
 href="http://www.nongnu.org/qemu/">QEMU</a>, as long as that generated code
-abides to the C ABI on the host.
+abides to the C or C++ ABI on the host.
 
 <p>However, since I wanted to make sure that GXemul works without such 
-native code back-ends, there are no implemented backends in this release.
-
-
+native code back-ends first, there are no implemented backends in this release.
 
 
 
