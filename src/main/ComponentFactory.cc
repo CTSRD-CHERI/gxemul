@@ -211,16 +211,16 @@ static void Test_ComponentFactory_FromTemplate()
 static void Test_ComponentFactory_HasAttribute()
 {
 	UnitTest::Assert("nonexistantattr should not exist",
-	    !ComponentFactory::HasAttribute("mvme187", "nonexistantattr"));
+	    !ComponentFactory::HasAttribute("testm88k", "nonexistantattr"));
 
-	UnitTest::Assert("mvme187 is a machine",
-	    ComponentFactory::HasAttribute("mvme187", "machine"));
+	UnitTest::Assert("testm88k is a machine",
+	    ComponentFactory::HasAttribute("testm88k", "machine"));
 
-	UnitTest::Assert("mvme187 is stable",
-	    ComponentFactory::HasAttribute("mvme187", "stable"));
+	UnitTest::Assert("testm88k is stable",
+	    ComponentFactory::HasAttribute("testm88k", "stable"));
 
-	UnitTest::Assert("mvme187 has a description",
-	    ComponentFactory::HasAttribute("mvme187", "description"));
+	UnitTest::Assert("testm88k has a description",
+	    ComponentFactory::HasAttribute("testm88k", "description"));
 }
 
 UNITTESTS(ComponentFactory)
