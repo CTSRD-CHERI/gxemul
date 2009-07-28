@@ -3939,3 +3939,4 @@ Changelog for GXemul:
 20090728	Including screenshots in auto generated machines.html.
 		Finally managed to implement cycle-accurate continuous
 		execution of multiple components at different speeds. :-)
+		RAMComponent now clears ram on reset.

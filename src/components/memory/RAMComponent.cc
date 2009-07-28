@@ -85,6 +85,12 @@ string RAMComponent::GetAttribute(const string& attributeName)
 }
 
 
+void RAMComponent::ResetState()
+{
+	ReleaseAllBlocks();
+}
+
+
 void RAMComponent::GetMethodNames(vector<string>& names) const
 {
 	// Add our method names...
@@ -554,6 +560,28 @@ static void Test_RAMComponent_WriteProtect()
 	UnitTest::Assert("16-bit read", data16_a, 0x5678);
 }
 
+static void Test_RAMComponent_ClearOnReset()
+{
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+	AddressDataBus* bus = ram->AsAddressDataBus();
+
+	uint32_t data32 = 0x89abcdef;
+	bus->AddressSelect(256);
+	bus->WriteData(data32, BigEndian);
+
+	uint16_t data16_a = 0;
+	bus->AddressSelect(256 + 2);
+	bus->ReadData(data16_a, BigEndian);
+	UnitTest::Assert("16-bit read", data16_a, 0xcdef);
+
+	ram->Reset();
+
+	uint16_t data16_b = 0;
+	bus->AddressSelect(256 + 2);
+	bus->ReadData(data16_b, BigEndian);
+	UnitTest::Assert("reset should have cleared RAM", data16_b, 0x0000);
+}
+
 static void Test_RAMComponent_Clone()
 {
 	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
@@ -636,6 +664,7 @@ UNITTESTS(RAMComponent)
 	UNITTEST(Test_RAMComponent_WriteThenRead);
 	UNITTEST(Test_RAMComponent_WriteThenRead_ReverseEndianness);
 	UNITTEST(Test_RAMComponent_WriteProtect);
+	UNITTEST(Test_RAMComponent_ClearOnReset);
 	UNITTEST(Test_RAMComponent_Clone);
 	UNITTEST(Test_RAMComponent_ManualSerialization);
 	UNITTEST(Test_RAMComponent_Methods_Reexecutableness);

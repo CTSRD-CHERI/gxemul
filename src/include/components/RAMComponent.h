@@ -92,6 +92,8 @@ public:
 	 */
 	static refcount_ptr<Component> Create();
 
+	virtual void ResetState();
+
 	/**
 	 * \brief Get attribute information about the RAMComponent class.
 	 *
