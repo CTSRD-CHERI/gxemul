@@ -180,9 +180,6 @@ protected:
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
 
 private:
-	void ExecuteMIPS16Instruction(uint16_t iword);
-	void ExecuteInstruction(uint32_t iword);
-
 	size_t DisassembleInstructionMIPS16(uint64_t vaddr,
 		unsigned char *instruction, vector<string>& result);
 

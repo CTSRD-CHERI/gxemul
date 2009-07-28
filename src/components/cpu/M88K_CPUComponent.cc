@@ -60,6 +60,8 @@ M88K_CPUComponent::M88K_CPUComponent()
 	: CPUComponent("m88k_cpu", "Motorola 88000")
 	, m_m88k_type("88100")
 {
+	m_frequency = 50e6;	// 50 MHz
+
 	// Find (and cache) the cpu type in m_type:
 	memset((void*) &m_type, 0, sizeof(m_type));
 	for (size_t j=0; cpu_type_defs[j].name != NULL; j++) {
@@ -107,7 +109,6 @@ refcount_ptr<Component> M88K_CPUComponent::Create()
 void M88K_CPUComponent::ResetState()
 {
 	m_pageSize = 4096;
-	m_frequency = 50e6;	// 50 MHz
 
 	// r0 .. r31 and the extra "r32/r0" zero register:
 	for (size_t i=0; i<N_M88K_REGS+1; i++)

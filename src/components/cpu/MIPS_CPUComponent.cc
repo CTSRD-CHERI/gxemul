@@ -47,6 +47,8 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 	: CPUComponent("mips_cpu", "MIPS")
 	, m_mips_type("5KE")	// defaults to a MIPS64 rev 2 cpu
 {
+	m_frequency = 100e6;
+
 	// Find (and cache) the cpu type in m_type:
 	memset((void*) &m_type, 0, sizeof(m_type));
 	for (size_t j=0; cpu_type_defs[j].name != NULL; j++) {
@@ -84,8 +86,6 @@ void MIPS_CPUComponent::ResetState()
 	// Most MIPS CPUs use 4 KB native page size.
 	// TODO: A few use 1 KB pages; this should be supported as well.
 	m_pageSize = 4096;
-
-	m_frequency = 100e6;
 
 	m_hi = 0;
 	m_lo = 0;
@@ -188,62 +188,6 @@ int MIPS_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 	m_pc += nrOfCycles * sizeof(uint32_t);
 
 	return nrOfCycles;
-}
-
-
-#if 0
-int MIPS_CPUComponent::Run(int nrOfCycles)
-{
-	int nrOfCyclesExecuted = 0;
-
-	// Check for interrupts. TODO
-	// (This may cause an exception, i.e. a change of PC and other state.)
-
-	while (nrOfCycles-- > 0) {
-		bool mips16 = (m_pc & 1) != 0;
-
-		// Read an instruction from emulated memory and execute it:
-		if (mips16) {
-			uint16_t iword;
-			if (!ReadInstructionWord(iword, m_pc & ~1)) {
-				std::cerr << "TODO: MIPS: no instruction?\n";
-				throw std::exception();
-			}
-			ExecuteMIPS16Instruction(iword);
-		} else {
-			uint32_t iword;
-			if (!ReadInstructionWord(iword, m_pc)) {
-				std::cerr << "TODO: MIPS: no instruction?\n";
-				throw std::exception();
-			}
-			ExecuteInstruction(iword);
-		}
-
-		++ nrOfCyclesExecuted;
-	}
-
-	return nrOfCyclesExecuted;
-}
-#endif
-
-
-void MIPS_CPUComponent::ExecuteMIPS16Instruction(uint16_t iword)
-{
-	// TODO: switch/case for all instructions
-	std::cerr.flags(std::ios::hex | std::ios::showbase);	
-	std::cerr << "EXECUTE iword16 " << iword << " at pc " << m_pc << "\n";
-	std::cerr << "TODO: MIPS: unimplemented instruction\n";
-	throw std::exception();
-}
-
-
-void MIPS_CPUComponent::ExecuteInstruction(uint32_t iword)
-{
-	// TODO: switch/case for all instructions
-	std::cerr.flags(std::ios::hex | std::ios::showbase);	
-	std::cerr << "EXECUTE iword32 " << iword << " at pc " << m_pc << "\n";
-	std::cerr << "TODO: MIPS: unimplemented instruction\n";
-	throw std::exception();
 }
 
 
