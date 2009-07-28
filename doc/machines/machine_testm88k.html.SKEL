@@ -1,5 +1,6 @@
+<p><a href="machine_testm88k.png"><img src="machine_testm88k-thumb.png"></a>
 
-The <tt>testm88k</tt> machine is a GXemul-specific machine used for simple
+<p>The <tt>testm88k</tt> machine is a GXemul-specific machine used for simple
 tests. It is based around a
 <a href="../components/component_m88k_cpu.html">Motorola 88100 CPU</a>,
 and some simple devices.
@@ -83,9 +84,8 @@ GXemul&gt; <b>cpu0.registers crn</b>
  CR56 = 0x00000000   CR57 = 0x00000000   CR58 = 0x00000000   CR59 = 0x00000000
  CR60 = 0x00000000   CR61 = 0x00000000   CR62 = 0x00000000   CR63 = 0x00000000
 GXemul&gt; 
-
 </pre>
 
-<p><hr>
+<p><br><hr>
 </body>
 </html>
