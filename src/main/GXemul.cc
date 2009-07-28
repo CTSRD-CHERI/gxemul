@@ -924,7 +924,14 @@ void GXemul::Execute(const int longestTotalRun)
 			uint64_t startingStep = step;
 
 			// TODO: sloppy vs cycle accuracy.
-			// The following code is cycle accurate.
+			if (GetRootComponent()->GetVariable("accuracy")->ToString() != "cycle") {
+				std::cerr << "GXemul::Execute(): TODO: Only "
+				    "root.accuracy=\"cycle\" is currently supported\n";
+				SetRunState(Paused);
+				return;
+			}
+
+			// The following code is for cycle accurate emulation:
 
 			while (step < startingStep + longestTotalRun) {
 				if (GetRunState() != Running)
