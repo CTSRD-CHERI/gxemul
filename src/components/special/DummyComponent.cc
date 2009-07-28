@@ -574,9 +574,11 @@ class DummyComponentWithCounter
 	: public DummyComponent
 {
 public:
-	DummyComponentWithCounter()
+	DummyComponentWithCounter(ostream* os = NULL, char c = 'X')
 		: DummyComponent("testcounter")
 		, m_frequency(1e6)
+		, m_os(os)
+		, m_c(c)
 	{
 		ResetState();
 		AddVariable("frequency", &m_frequency);
@@ -596,12 +598,13 @@ public:
 
 	virtual int Execute(GXemul* gxemul, int nrOfCycles)
 	{
-		// Limit max nr of cycles per Execute call.
-		if (nrOfCycles > 5)
-			nrOfCycles = 5;
-
 		// Increase counter one per cycle.
 		m_counter += nrOfCycles;
+
+		if (m_os != NULL) {
+			for (int i=0; i<nrOfCycles; ++i)
+				(*m_os) << m_c;
+		}
 
 		return nrOfCycles;
 	}
@@ -609,6 +612,8 @@ public:
 private:
 	double		m_frequency;
 	uint64_t	m_counter;
+	ostream*	m_os;
+	char		m_c;
 };
 
 static void Test_DummyComponent_Execute_SingleStep()
@@ -746,8 +751,9 @@ static void Test_DummyComponent_Execute_TwoComponentsSameSpeed()
 static void Test_DummyComponent_Execute_TwoComponentsDifferentSpeed()
 {
 	GXemul gxemul;
-	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
-	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
+	stringstream os;
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'A'));
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'B'));
 
 	UnitTest::Assert("the testcounters should have been added",
 	    gxemul.GetRootComponent()->GetChildren().size(), 2);
@@ -776,8 +782,11 @@ static void Test_DummyComponent_Execute_TwoComponentsDifferentSpeed()
 
 	gxemul.SetRunState(GXemul::SingleStepping);
 	gxemul.Execute();
+	// B executes in the first step.
+	
 	gxemul.SetRunState(GXemul::SingleStepping);
 	gxemul.Execute();
+	// A,B execute in the second step.
 
 	// Step 2:
 	UnitTest::Assert("the step should now be 2", gxemul.GetStep(), 2);
@@ -797,6 +806,207 @@ static void Test_DummyComponent_Execute_TwoComponentsDifferentSpeed()
 	    counterA->GetVariable("counter")->ToInteger(), 44);
 	UnitTest::Assert("counter B should now be 10046",
 	    counterB->GetVariable("counter")->ToInteger(), 10046);
+
+	UnitTest::Assert("output stream mismatch?",
+	    os.str(), "BABBAB");
+}
+
+static void Test_DummyComponent_Execute_Continuous_SingleComponent()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testcounter");
+	refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+
+	counterA->SetVariableValue("counter", "10042");
+
+	// Step 0:
+	UnitTest::Assert("the step should initially be 0",
+	    gxemul.GetStep(), 0);
+	UnitTest::Assert("counterA should initially be 10042",
+	    counterA->GetVariable("counter")->ToInteger(), 10042);
+
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute();
+
+	// Step n:
+	int n = gxemul.GetStep();
+	UnitTest::Assert("counter A should now be 10042 + n",
+	    counterA->GetVariable("counter")->ToInteger(), 10042 + n);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute();
+
+	// Step n + 1:
+	UnitTest::Assert("the step should now be n + 1", gxemul.GetStep(), n + 1);
+	UnitTest::Assert("counter B should now be 10042 + n + 1",
+	    counterA->GetVariable("counter")->ToInteger(), 10042 + n + 1);
+}
+
+static void Test_DummyComponent_Execute_Continuous_TwoComponentsSameSpeed()
+{
+	GXemul gxemul;
+	stringstream os;
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'A'));
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'B'));
+
+	UnitTest::Assert("accuracy should be cycle!",
+	    gxemul.GetRootComponent()->GetVariable("accuracy")->ToString(), "cycle");
+
+	refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+	refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
+
+	counterA->SetVariableValue("counter", "123");
+	counterB->SetVariableValue("counter", "0");
+
+	// Step 0:
+	UnitTest::Assert("counterA should initially be 123",
+	    counterA->GetVariable("counter")->ToInteger(), 123);
+	UnitTest::Assert("counterB should initially be 0",
+	    counterB->GetVariable("counter")->ToInteger(), 0);
+
+	// The two components have the same speed, which is a "worst case"
+	// for cycle accurate emulation. They have to be interleaved one
+	// cycle at a time.
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute();
+
+	// Step n:
+	int n = gxemul.GetStep();
+	UnitTest::Assert("n very low?", n > 100);
+	UnitTest::Assert("counter A should now be 123 + n",
+	    counterA->GetVariable("counter")->ToInteger(), 123 + n);
+	UnitTest::Assert("counter B should now be 0 + n",
+	    counterB->GetVariable("counter")->ToInteger(), 0 + n);
+
+	// After n steps, the stream should be ABABABAB... n times.
+	stringstream correct;
+	for (int i=0; i<n; ++i)
+		correct << "AB";
+
+	UnitTest::Assert("output stream mismatch?", os.str(), correct.str());
+}
+
+static void Test_DummyComponent_Execute_Continuous_TwoComponentsDifferentSpeed()
+{
+	GXemul gxemul;
+	stringstream os;
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'A'));
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'B'));
+
+	UnitTest::Assert("accuracy should be cycle!",
+	    gxemul.GetRootComponent()->GetVariable("accuracy")->ToString(), "cycle");
+
+	refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+	refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
+
+	counterA->SetVariableValue("counter", "123");
+	counterB->SetVariableValue("counter", "0");
+
+	// Counter B should run three times as fast:
+	counterA->SetVariableValue("frequency", "100000");
+	counterB->SetVariableValue("frequency", "300000");
+
+	// Step 0:
+	UnitTest::Assert("counterA should initially be 123",
+	    counterA->GetVariable("counter")->ToInteger(), 123);
+	UnitTest::Assert("counterB should initially be 0",
+	    counterB->GetVariable("counter")->ToInteger(), 0);
+
+	// Step 0: B
+	// Step 1: B
+	// Step 2: A and B
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute();
+
+	// Step n: B should have executed 1 per cycle
+	// but A only 1/3 of the cycles.
+	int n = gxemul.GetStep();
+	int a = counterA->GetVariable("counter")->ToInteger();
+	UnitTest::Assert("counter A should now be approximately 123 + n/3",
+	    (a >= 122 + n/3) && (a <= 123 + n/3));
+	UnitTest::Assert("counter B should now be 0 + n",
+	    counterB->GetVariable("counter")->ToInteger(), 0 + n);
+
+	// After n steps, the stream should be BBAB... n cycles.
+	stringstream correct;
+	for (int i=0; i<n; ++i) {
+		if ((i%3) <= 1)
+			correct << "B";
+		else
+			correct << "AB";
+	}
+	
+	UnitTest::Assert("output stream mismatch?", os.str(), correct.str());
+}
+
+static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed()
+{
+	GXemul gxemul;
+	stringstream os;
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'A'));
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'B'));
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'C'));
+
+	UnitTest::Assert("accuracy should be cycle!",
+	    gxemul.GetRootComponent()->GetVariable("accuracy")->ToString(), "cycle");
+
+	refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+	refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
+	refcount_ptr<Component> counterC = gxemul.GetRootComponent()->GetChildren()[2];
+
+	counterA->SetVariableValue("counter", "0");
+	counterB->SetVariableValue("counter", "0");
+	counterC->SetVariableValue("counter", "0");
+
+	counterA->SetVariableValue("frequency", "1");
+	counterB->SetVariableValue("frequency", "10000");
+	counterC->SetVariableValue("frequency", "100");
+
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute();
+
+	int n = gxemul.GetStep();
+	UnitTest::Assert("n very low?", n > 20000);
+
+	int a = counterA->GetVariable("counter")->ToInteger();
+	UnitTest::Assert("counter A should now be approximately n / 10000",
+	    (a >= n / 10000 - 1) && (a <= n / 10000 + 1));
+
+	UnitTest::Assert("counter B should now be n",
+	    counterB->GetVariable("counter")->ToInteger(), n);
+
+	int c = counterC->GetVariable("counter")->ToInteger();
+	UnitTest::Assert("counter C should now be approximately n / 100",
+	    (c >= n / 100 - 1) && (c <= n / 100 + 1));
+
+
+	// Compare with single-step stream:
+	{
+		GXemul gxemul;
+		stringstream singleStepStream;
+		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'A'));
+		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'B'));
+		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'C'));
+
+		refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+		refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
+		refcount_ptr<Component> counterC = gxemul.GetRootComponent()->GetChildren()[2];
+
+		counterA->SetVariableValue("counter", "0");
+		counterB->SetVariableValue("counter", "0");
+		counterC->SetVariableValue("counter", "0");
+
+		counterA->SetVariableValue("frequency", "1");
+		counterB->SetVariableValue("frequency", "10000");
+		counterC->SetVariableValue("frequency", "100");
+
+		for (int i=0; i<n; ++i) {
+			gxemul.SetRunState(GXemul::SingleStepping);
+			gxemul.Execute();
+		}
+		
+		UnitTest::Assert("output stream mismatch?", os.str() == singleStepStream.str());
+	}	
 }
 
 UNITTESTS(DummyComponent)
@@ -846,6 +1056,10 @@ UNITTESTS(DummyComponent)
 	UNITTEST(Test_DummyComponent_Execute_MultiSingleStep);
 	UNITTEST(Test_DummyComponent_Execute_TwoComponentsSameSpeed);
 	UNITTEST(Test_DummyComponent_Execute_TwoComponentsDifferentSpeed);
+	UNITTEST(Test_DummyComponent_Execute_Continuous_SingleComponent);
+	UNITTEST(Test_DummyComponent_Execute_Continuous_TwoComponentsSameSpeed);
+	UNITTEST(Test_DummyComponent_Execute_Continuous_TwoComponentsDifferentSpeed);
+	UNITTEST(Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed);
 }
 
 #endif

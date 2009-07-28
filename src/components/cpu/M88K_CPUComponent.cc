@@ -242,14 +242,15 @@ void M88K_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 
 int M88K_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 {
-	stringstream disasm;
-	Unassemble(1, false, m_pc, disasm);
-	gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
+	if (gxemul->GetRunState() == GXemul::SingleStepping) {
+		stringstream disasm;
+		Unassemble(1, false, m_pc, disasm);
+		gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
+	}
 
 	// TODO: Replace this bogus stuff with actual instruction execution.
 	m_r[1] += nrOfCycles * 42;
-
-	m_pc += sizeof(uint32_t);
+	m_pc += nrOfCycles * sizeof(uint32_t);
 
 	return nrOfCycles;
 }

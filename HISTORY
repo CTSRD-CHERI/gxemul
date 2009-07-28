@@ -3937,3 +3937,5 @@ Changelog for GXemul:
 		to the new.
 		Moving old main files into src/old_main/ (for clarity).
 20090728	Including screenshots in auto generated machines.html.
+		Finally managed to implement cycle-accurate continuous
+		execution of multiple components at different speeds. :-)

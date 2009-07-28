@@ -201,12 +201,16 @@ public:
 	/**
 	 * \brief Execute one or more cycles.
 	 *
-	 * At least 1 cycle must be executed by the component.
+	 * Note 1: A component must attempt to execute exactly the number of
+	 * specified cycles.
 	 *
-	 * Note 1: A component may execute fewer cycles that requested,
-	 * if the requested number of cycles is more than 1.
+	 * Note 2: If e.g. a breakpoint is reached, or some fatal error occurs
+	 * (such as an unimplemented feature in the emulation of the component
+	 * is triggered), then it is ok to return fewer than the requested
+	 * number of cycles. Execution will then stop (or the breakpoint will
+	 * be handled, etc).
 	 *
-	 * Note 2: The framework will only call this function if the component
+	 * Note 3: The framework will only call this function if the component
 	 * has a StateVariable named "frequency". Components that do not have
 	 * any frequency do not execute anything periodically by themselves.
 	 *

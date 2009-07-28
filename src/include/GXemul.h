@@ -221,8 +221,10 @@ public:
 	 * once, if possible. In the most common case (no breakpoints or other
 	 * special cases), when this function returns, the run state will not
 	 * have been affected.
+	 *
+	 * @param longestTotalRun Maximum number of steps to execute.
 	 */
-	void Execute();
+	void Execute(const int longestTotalRun = 50000);
 
 	/**
 	 * \brief Dump a list to stdout with all available machine templates.

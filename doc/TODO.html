@@ -43,7 +43,8 @@ MAIN GOAL for 0.6.0:
    [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
 	[ ] When a component is added to the tree, recalculate its nr of steps!
-
+	[ ] Removing components (at least if the Fastest one is removed) should
+	    also trigger recalculation.
 	[ ] When a component's frequency is changed, recalculate its nr of steps!
 	    (This requires variable write handlers, including inheritance!)
 	    Frequency changes are tricky, especially when it comes to reverse
@@ -51,10 +52,10 @@ MAIN GOAL for 0.6.0:
 
 	[X] Single-stepping forward.
 
-	[ ] Continuous execution forward.
-		[ ]  Base framework in GXemul::Execute.
+	[/] Continuous execution forward.
+		[X]  Base framework in GXemul::Execute.
 		[ ]  Focus on the 88100 CPU implementation, dyntrans etc.
-		[ ]  Scheduling:
+		[X]  Scheduling:
 		     If ONE component is "fast" (say, 100 MHz), and one or more
 		     are slow (say, 100 Hz). The difference is 1 M times, so the
 		     fast component could run lots of chunk-wise execution
@@ -62,7 +63,7 @@ MAIN GOAL for 0.6.0:
 		     ones need to run at all. THEN they are interleaved in a
 		     single-cycle manner.
 
-		     In "sloppy" accuracy mode, then it will be possible to
+		[ ]  In "sloppy" accuracy mode, then it will be possible to
 		     interleave with large chunks even when components "collide"
 		     in time. (This will cause reverse execution support to
 		     be turned off.)
@@ -96,6 +97,11 @@ MAIN GOAL for 0.6.0:
 
 	[ ]  Guarantee that single-stepping and bulk execution end up with
 	     _EXACTLY_ the same state!
+
+	[ ]  For instruction combination implementations, the first thing
+	     checked is whether instr combos is allowed, if not then call
+	     the original function call instead. This makes it possible to
+	     run fast, and then "break slowly" before a hazard.
 
 	[ ]  For risc archs with delay slots, this means that single-stepping
 	     should be able to go half-way through a delay slot combo.
@@ -318,15 +324,15 @@ MAIN GOAL for 0.6.0:
 			cpu.pc+4	should print the _expression_ pc+4
 			cpu.pc=expr	assignment
 
+	[ ]  BUG! m88k_cpu:   cpu0.r29 works but cpu0.r2 doesn't!
+		r2: not a method or variable of root.machine0.mainbus0.cpu0.
+
 	[ ]  Help on methods and method arguments? E.g. cpu.unassemble [addr]
 
 	[ ]  help for the "root" command.
 
 	[ ]  Right now, entering a command such as "c" says "unknown command".
 	     It should say "ambigous command"!
-
-	[ ]  MayBeReexecutedWithoutArgs functionality for methods! Like dump,
-		and unassemble.
 
 	[/]  Tab completion for everything:
 

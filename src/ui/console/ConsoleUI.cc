@@ -157,7 +157,11 @@ void ConsoleUI::ShowDebugMessage(const string& msg)
 	vector<string> lines = SplitIntoRows(msg, true);
 
 	for (size_t i=0; i<lines.size(); ++i) {
-		std::cout << m_indentationMsg << lines[i] << "\n"; 
+		if (m_gxemul->GetRunState() == GXemul::Running ||
+		    m_gxemul->GetRunState() == GXemul::BackwardsRunning)
+			std::cout << "[ " << m_indentationMsg << lines[i] << " ]\n";
+		else
+			std::cout << m_indentationMsg << lines[i] << "\n";
 
 		// Replace indentation string with spaces.
 		for (size_t j=m_indentationMsg.length(); j>0; --j)
@@ -178,30 +182,17 @@ void ConsoleUI::ShowDebugMessage(Component* component, const string& msg)
 
 	vector<string> lines = SplitIntoRows(msg, false);
 
-	// Let's say the input msg is "blahlonger\nblahshort".
-	if (m_gxemul->GetRunState() == GXemul::Running ||
-	    m_gxemul->GetRunState() == GXemul::BackwardsRunning) {
-		// If runstate is Running, then show pre-0.6.0 style [ ] output.
-		//
-		// [ cpu0: blahlonger ]
-		// [ cpu0: blahshort ]
-		for (size_t i=0; i<lines.size(); ++i)
-			ss << "[ " << componentName << ": " << lines[i] << " ]\n";
-	} else {
-		// ... otherwise show new style output:
-		//
-		// cpu0: blahlonger
-		//       blahshort
-		size_t i;
-		string spaces = "";
-		for (i=0; i<componentName.length() + 2; i++)
-			spaces += " ";
-		
-		ss << componentName << ": " << lines[0] << "\n";
+	// cpu0: blahlonger
+	//       blahshort
+	size_t i;
+	string spaces = "";
+	for (i=0; i<componentName.length() + 2; i++)
+		spaces += " ";
+	
+	ss << componentName << ": " << lines[0] << "\n";
 
-		for (i=1; i<lines.size(); ++i)
-			ss << spaces << lines[i] << "\n";
-	}
+	for (i=1; i<lines.size(); ++i)
+		ss << spaces << lines[i] << "\n";
 
 	ShowDebugMessage(ss.str());
 }

@@ -158,7 +158,7 @@
 #include <assert.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
@@ -793,6 +793,8 @@ struct ComponentAndFrequency
 	refcount_ptr<Component>	component;
 	double			frequency;
 	StateVariable*		step;
+
+	uint64_t		nextTimeToExecute;
 };
 
 
@@ -805,6 +807,8 @@ static void GetComponentsAndFrequencies(refcount_ptr<Component> component,
 	StateVariable* step = component->GetVariable("step");
 	if (freq != NULL && step != NULL) {
 		struct ComponentAndFrequency caf;
+		memset(&caf, 0, sizeof(caf));
+
 		caf.component = component;
 		caf.frequency = freq->ToDouble();
 		caf.step      = step;
@@ -818,7 +822,7 @@ static void GetComponentsAndFrequencies(refcount_ptr<Component> component,
 }
 
 
-void GXemul::Execute()
+void GXemul::Execute(const int longestTotalRun)
 {
 	vector<ComponentAndFrequency> componentsAndFrequencies;
 	GetComponentsAndFrequencies(GetRootComponent(), componentsAndFrequencies);
@@ -878,12 +882,16 @@ void GXemul::Execute()
 					    GetRootComponent()->LightClone();
 
 					// Execute one step...
-					componentsAndFrequencies[k].component->Execute(this, 1);
-
+					int n = componentsAndFrequencies[k].component->Execute(this, 1);
+					if (n != 1) {
+						std::cerr << "TODO: execute failed, single-step.\n";
+						throw std::exception();
+					}
+					
 					// ... and write back the number of executed steps:
 					componentsAndFrequencies[k].step->SetValue(stepsExecutedSoFar);
 
-					// Now, let's compare the clone of the comopnent tree
+					// Now, let's compare the clone of the component tree
 					// before execution with what we have now.
 					stringstream changeMessages;
 					GetRootComponent()->DetectChanges(lightClone, changeMessages);
@@ -909,9 +917,100 @@ void GXemul::Execute()
 		break;
 
 	case Running:
-		std::cerr << "GXemul::Execute(): TODO: Running\n";
-		throw std::exception();
-		// TODO
+		{
+			uint64_t step = GetStep();
+			uint64_t startingStep = step;
+
+			// TODO: sloppy vs cycle accuracy.
+			// The following code is cycle accurate.
+
+			while (step < startingStep + longestTotalRun) {
+				if (GetRunState() != Running)
+					break;
+
+				int toExecute = -1;
+				
+				if (componentsAndFrequencies.size() == 1) {
+					toExecute = longestTotalRun;
+					componentsAndFrequencies[0].nextTimeToExecute = step;
+				} else {
+					// First, calculate the next time step when each
+					// component k will execute.
+					//
+					// For n = 0,1,2,3, ...
+					// n * fastestFrequency / componentsAndFrequencies[k].frequency
+					// are the steps at which the component executes
+					// (when rounded UP! i.e. executing at step 4.2 means that it
+					// did not execute at step 4, but will at step 5).
+				
+					for (size_t k=0; k<componentsAndFrequencies.size(); ++k) {
+						double q = (k == fastestComponentIndex ? 1.0
+						    : fastestFrequency / componentsAndFrequencies[k].frequency);
+
+						double c = (componentsAndFrequencies[k].step->ToInteger()+1) * q;
+						componentsAndFrequencies[k].nextTimeToExecute = ceil(c) - 1;
+					}
+
+					// std::cerr << "step " << step << " debug:\n";
+					for (size_t k=0; k<componentsAndFrequencies.size(); ++k) {
+						// std::cerr << "  next step for component " <<
+						//    componentsAndFrequencies[k].component->GetVariable("name")->ToString()
+						//    << ": " << componentsAndFrequencies[k].nextTimeToExecute << "\n";
+
+						int diff = componentsAndFrequencies[k].nextTimeToExecute -
+						    componentsAndFrequencies[fastestComponentIndex].nextTimeToExecute;
+						if (k != fastestComponentIndex) {
+							if (toExecute == -1 || diff < toExecute)
+								toExecute = diff;
+						}
+					}
+
+					if (toExecute < 1)
+						toExecute = 1;
+				}
+
+				if (step + toExecute > startingStep + longestTotalRun)
+					toExecute = startingStep + longestTotalRun - step;
+
+				// std::cerr << "  toExecute = " << toExecute << "\n";
+
+				// Run the components.
+				// If multiple components are to run at the same time (i.e.
+				// same nextTimeToExecute), toExecute will be exactly 1.
+				int maxExecuted = 0;
+				for (size_t k=0; k<componentsAndFrequencies.size(); ++k) {
+					if (step != componentsAndFrequencies[k].nextTimeToExecute)
+						continue;
+
+					// Execute the calculated number of steps...
+					int n = componentsAndFrequencies[k].component->Execute(this, toExecute);
+					if (n != toExecute) {
+						std::cerr << "TODO: execute failed, continuous.\n";
+						throw std::exception();
+					}
+
+					// ... and write back the number of executed steps:
+					uint64_t stepsExecutedSoFar = toExecute +
+					    componentsAndFrequencies[k].step->ToInteger();
+					componentsAndFrequencies[k].step->SetValue(stepsExecutedSoFar);
+
+					if (k == fastestComponentIndex)
+						maxExecuted = toExecute;
+				}
+
+				if (maxExecuted == 0) {
+					std::cerr << "maxExecuted=0. internal error\n";
+					throw std::exception();
+				}
+
+				step += maxExecuted;
+				SetStep(step);
+			}
+
+			stringstream ss;
+			ss << step << " steps\n";
+			GetUI()->ShowDebugMessage(ss.str());
+		}
 		break;
 
 	case BackwardsRunning:
