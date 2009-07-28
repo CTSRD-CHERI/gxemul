@@ -871,7 +871,9 @@ void GXemul::Execute(const int longestTotalRun)
 				uint64_t stepsExecutedSoFar = componentsAndFrequencies[k].step->ToInteger();
 
 				if (stepsExecutedSoFar > nsteps) {
-					std::cerr << "Internal error: Too many steps executed?\n";
+					std::cerr << "Internal error: " <<
+					    componentsAndFrequencies[k].component->GetVariable("name")->ToString() <<
+					    " has executed " << stepsExecutedSoFar << " steps, goal is " << nsteps << ".\n";
 					throw std::exception();
 				}
 

@@ -79,6 +79,8 @@ CPUComponent * CPUComponent::AsCPUComponent()
 void CPUComponent::ResetState()
 {
 	m_hasUsedUnassemble = false;
+
+	Component::ResetState();
 }
 
 
@@ -713,12 +715,25 @@ static void Test_CPUComponent_Methods_Reexecutableness()
 	    " without args", cpu->MethodMayBeReexecutedWithoutArgs("nonexistant") == false);
 }
 
+static void Test_CPUComponent_ResetSteps()
+{
+	refcount_ptr<Component> cpu =
+	    ComponentFactory::CreateComponent("mips_cpu");
+
+	cpu->SetVariableValue("step", "42");
+	UnitTest::Assert("steps should be 42", cpu->GetVariable("step")->ToInteger(), 42);
+
+	cpu->Reset();
+	UnitTest::Assert("steps should be 0", cpu->GetVariable("step")->ToInteger(), 0);
+}
+
 UNITTESTS(CPUComponent)
 {
 	UNITTEST(Test_CPUComponent_IsStable);
 	UNITTEST(Test_CPUComponent_Create);
 	UNITTEST(Test_CPUComponent_PreRunCheck);
 	UNITTEST(Test_CPUComponent_Methods_Reexecutableness);
+	UNITTEST(Test_CPUComponent_ResetSteps);
 }
 
 #endif
