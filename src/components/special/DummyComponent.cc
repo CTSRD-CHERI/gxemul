@@ -1068,6 +1068,65 @@ static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed
 	}	
 }
 
+static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeedWeird2()
+{
+	// Same as the test above, but with even more horribly choosen frequencies.
+	GXemul gxemul;
+	stringstream os;
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'A'));
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'B'));
+	gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&os, 'C'));
+
+	UnitTest::Assert("accuracy should be cycle!",
+	    gxemul.GetRootComponent()->GetVariable("accuracy")->ToString(), "cycle");
+
+	refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+	refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
+	refcount_ptr<Component> counterC = gxemul.GetRootComponent()->GetChildren()[2];
+
+	counterA->SetVariableValue("counter", "0");
+	counterB->SetVariableValue("counter", "0");
+	counterC->SetVariableValue("counter", "0");
+
+	counterA->SetVariableValue("frequency", "1983");
+	counterB->SetVariableValue("frequency", "1991");
+	counterC->SetVariableValue("frequency", "1904");
+
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute();
+
+	int n = gxemul.GetStep();
+	UnitTest::Assert("n very low?", n > 20000);
+
+	// Compare with single-step stream:
+	{
+		GXemul gxemul;
+		stringstream singleStepStream;
+		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'A'));
+		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'B'));
+		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'C'));
+
+		refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
+		refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
+		refcount_ptr<Component> counterC = gxemul.GetRootComponent()->GetChildren()[2];
+
+		counterA->SetVariableValue("counter", "0");
+		counterB->SetVariableValue("counter", "0");
+		counterC->SetVariableValue("counter", "0");
+
+		counterA->SetVariableValue("frequency", "1983");
+		counterB->SetVariableValue("frequency", "1991");
+		counterC->SetVariableValue("frequency", "1904");
+
+		for (int i=0; i<n; ++i) {
+			gxemul.SetRunState(GXemul::SingleStepping);
+			gxemul.Execute();
+		}
+		
+		UnitTest::Assert("output stream mismatch?", os.str() == singleStepStream.str());
+	}	
+}
+
 UNITTESTS(DummyComponent)
 {
 	ComponentFactory::RegisterComponentClass("dummy2",
@@ -1120,6 +1179,7 @@ UNITTESTS(DummyComponent)
 	UNITTEST(Test_DummyComponent_Execute_Continuous_TwoComponentsDifferentSpeed);
 	UNITTEST(Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed);
 	UNITTEST(Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeedWeird);
+	UNITTEST(Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeedWeird2);
 }
 
 #endif
