@@ -857,6 +857,14 @@ bool CommandInterpreter::RunComponentMethod(
 	nrOfMatches = 0;
 	fullMatch = "";
 	for (size_t i=0; i<names.size(); ++i) {
+		// Exact match?
+		if (names[i] == methodName) {
+			nrOfMatches = 1;
+			fullMatch = names[i];
+			break;
+		}
+
+		// Partial match?
 		if (names[i].substr(0, methodName.length()) == methodName) {
 			++ nrOfMatches;
 			fullMatch = names[i];
@@ -911,8 +919,13 @@ bool CommandInterpreter::RunComponentMethod(
 		return true;
 	}
 
-	ss << methodName << ": not a method or variable of "
-	    << component->GeneratePath() << ".\n";
+	if (nrOfMatches > 1)
+		ss << methodName << ": ambiguous method or variable name of "
+		    << component->GeneratePath() << ".\n";
+	else
+		ss << methodName << ": not a method or variable of "
+		    << component->GeneratePath() << ".\n";
+
 	m_GXemul->GetUI()->ShowDebugMessage(ss.str());
 
 	return false;
@@ -1899,6 +1912,33 @@ static void Test_CommandInterpreter_ComponentVariables_NoArgs()
 	    ci.RunCommand("root.machine0.mainbus0.cpu0.g") == true);
 }
 
+static void Test_CommandInterpreter_ComponentVariables_Ambiguous()
+{
+	GXemul gxemul;
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	UnitTest::Assert("Huh? Could not add testmips.",
+	    ci.RunCommand("add testmipsk") == true);
+
+	UnitTest::Assert("cpu.t should not work, there should be multiple matches",
+	    ci.RunCommand("cpu.t") == false);
+}
+
+static void Test_CommandInterpreter_ComponentVariables_PartialIsOk()
+{
+	GXemul gxemul;
+	CommandInterpreter& ci = gxemul.GetCommandInterpreter();
+
+	UnitTest::Assert("Huh? Could not add testm88k.",
+	    ci.RunCommand("add testm88k") == true);
+
+	// Make sure that r2 works, and doesn't complain about ambiguity.
+	UnitTest::Assert("gpr 2",
+	    ci.RunCommand("cpu.r2") == true);
+	UnitTest::Assert("gpr 29",
+	    ci.RunCommand("cpu.r29") == true);
+}
+
 UNITTESTS(CommandInterpreter)
 {
 	// Key and current buffer:
@@ -1943,6 +1983,8 @@ UNITTESTS(CommandInterpreter)
 	UNITTEST(Test_CommandInterpreter_SimpleCommand_NoArgsAllowed);
 	UNITTEST(Test_CommandInterpreter_ComponentMethods);
 	UNITTEST(Test_CommandInterpreter_ComponentVariables_NoArgs);
+	UNITTEST(Test_CommandInterpreter_ComponentVariables_Ambiguous);
+	UNITTEST(Test_CommandInterpreter_ComponentVariables_PartialIsOk);
 }
 
 #endif
