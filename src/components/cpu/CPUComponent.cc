@@ -80,6 +80,8 @@ void CPUComponent::ResetState()
 {
 	m_hasUsedUnassemble = false;
 
+	m_symbolRegistry.Clear();
+
 	Component::ResetState();
 }
 
@@ -249,6 +251,12 @@ uint64_t CPUComponent::Unassemble(int nRows, bool indicatePC, uint64_t vaddr, os
 			readOk &= ReadData(instruction[k]);
 		}
 
+		string symbol = GetSymbolRegistry().LookupAddress(vaddr, false);
+		if (symbol != "") {
+			outputRows[outputRows.size()-1].push_back("<" + symbol + ">");
+			outputRows.push_back(vector<string>());
+		}
+
 		stringstream ss;
 		ss.flags(std::ios::hex | std::ios::showbase);
 		ss << vaddr;
@@ -286,6 +294,12 @@ uint64_t CPUComponent::Unassemble(int nRows, bool indicatePC, uint64_t vaddr, os
 	size_t row;
 	for (row=0; row<outputRows.size(); ++row) {
 		size_t nColumns = outputRows[row].size();
+
+		// Skip lines such as "<symbol>" on empty lines, when
+		// calculating column width.
+		if (nColumns <= 1)
+			continue;
+
 		if (columnWidths.size() < nColumns)
 			columnWidths.resize(nColumns);
 
@@ -310,14 +324,14 @@ uint64_t CPUComponent::Unassemble(int nRows, bool indicatePC, uint64_t vaddr, os
 			size_t len = rowVector[i].length();
 			output << rowVector[i];
 			
-			size_t nspaces = columnWidths[i] - len;
-			for (size_t j=0; j<nspaces; ++j)
+			int nspaces = columnWidths[i] - len;
+			for (int j=0; j<nspaces; ++j)
 				output << " ";
 		}
 
 		output << "\n";
 	}
-	
+
 	return vaddr;
 }
 

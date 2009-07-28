@@ -162,8 +162,12 @@ void M88K_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 
 	if (arguments.size() == 0 ||
 	    find(arguments.begin(), arguments.end(), "r") != arguments.end()) {
-		ss << "   pc = 0x" << std::setfill('0') << std::setw(8) << m_pc << "\n";
-		// TODO: Symbol lookup
+		ss << "   pc = 0x" << std::setfill('0') << std::setw(8) << m_pc;
+
+		string symbol = GetSymbolRegistry().LookupAddress(m_pc, true);
+		if (symbol != "")
+			ss << "  <" << symbol << ">";
+		ss << "\n";
 
 		for (size_t i=0; i<N_M88K_REGS; i++) {
 			stringstream regname;
@@ -481,6 +485,11 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			ss.flags(std::ios::hex | std::ios::showbase);
 			ss << ((uint32_t) (vaddr + d26));
 			result.push_back(ss.str());
+
+			string symbol = GetSymbolRegistry().LookupAddress(
+			    (uint32_t) (vaddr + d26), true);
+			if (symbol != "")
+				result.push_back("; <" + symbol + ">");
 		}
 		break;
 
@@ -516,6 +525,11 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			ss.flags(std::ios::hex | std::ios::showbase);
 			ss << ((uint32_t) (vaddr + d16));
 			result.push_back(ss.str());
+
+			string symbol = GetSymbolRegistry().LookupAddress(
+			    (uint32_t) (vaddr + d16), true);
+			if (symbol != "")
+				result.push_back("; <" + symbol + ">");
 		}
 
 		break;

@@ -5,8 +5,8 @@
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(DINCLUDE)
 
 OBJS=Checksum.o Command.o CommandInterpreter.o Component.o ComponentFactory.o \
-	EscapedString.o FileLoader.o GXemul.o StateVariable.o UnitTest.o \
-	debug_new.o
+	EscapedString.o FileLoader.o GXemul.o StateVariable.o \
+	SymbolRegistry.o UnitTest.o debug_new.o
 
 all: $(OBJS) do_commands do_fileloaders
 

@@ -127,6 +127,12 @@ static uint64_t Trunc3264(uint64_t x, bool is32bit)
 }
 
 
+static uint64_t TruncSigned3264(uint64_t x, bool is32bit)
+{
+	return is32bit? (int32_t)x : x;
+}
+
+
 void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const
 {
 	bool is32bit = Is32Bit();
@@ -144,7 +150,11 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 		ss << std::setw(8);
 	else
 		ss << std::setw(16);
-	ss << Trunc3264(m_pc, is32bit) << " \n";	// TODO: Symbol lookup
+	ss << Trunc3264(m_pc, is32bit);
+	string symbol = GetSymbolRegistry().LookupAddress(TruncSigned3264(m_pc, is32bit), true);
+	if (symbol != "")
+		ss << " <" << symbol << ">";
+	ss << "\n";
 
 	ss << "hi=";
 	if (is32bit)
@@ -514,7 +524,9 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			ss << addr;
 			result.push_back(ss.str());
 
-			// TODO: symbol lookup
+			string symbol = GetSymbolRegistry().LookupAddress(addr, true);
+			if (symbol != "")
+				result.push_back("; <" + symbol + ">");
 		}
 		break;
 
@@ -649,7 +661,9 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			ss << addr;
 			result.push_back(ss.str());
 
-			// TODO: Symbol lookup.
+			string symbol = GetSymbolRegistry().LookupAddress(addr, true);
+			if (symbol != "")
+				result.push_back("; <" + symbol + ">");
 		}
 		break;
 

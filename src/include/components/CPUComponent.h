@@ -33,7 +33,7 @@
 
 #include "AddressDataBus.h"
 #include "Component.h"
-
+#include "SymbolRegistry.h"
 #include "UnitTest.h"
 
 class AddressDataBus;
@@ -69,6 +69,20 @@ public:
 	 * @return A string representing the attribute value.
 	 */
 	static string GetAttribute(const string& attributeName);
+
+	/**
+	 * \brief Gets a reference to the CPU's symbol registry.
+	 *
+	 * @return A reference to the symbol registry.
+	 */
+	SymbolRegistry& GetSymbolRegistry()
+	{
+		return m_symbolRegistry;
+	}
+	const SymbolRegistry& GetSymbolRegistry() const
+	{
+		return m_symbolRegistry;
+	}
 
 	virtual void ResetState();
 
@@ -174,6 +188,9 @@ protected:
 
 	// Other volatile state:
 	uint64_t		m_addressSelect;
+
+private:
+	SymbolRegistry		m_symbolRegistry;
 };
 
 

@@ -35,8 +35,11 @@ using std::setfill;
 using std::ifstream;
 
 #include "AddressDataBus.h"
+#include "components/CPUComponent.h"
 #include "FileLoader_ELF.h"
+
 #include "thirdparty/exec_elf.h"
+
 
 /*  ELF machine types as strings: (same as exec_elf.h)  */
 #define N_ELF_MACHINE_TYPES     89
@@ -407,8 +410,13 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 		}
 	}
 
+	SymbolRegistry* symbolRegistry = NULL;
+	CPUComponent* cpu = component->AsCPUComponent();
+	if (cpu != NULL)
+		symbolRegistry = &cpu->GetSymbolRegistry();
+
 	// Symbols
-	if (symtab.size() > 0 && symstrings.size() > 0) {
+	if (symbolRegistry != NULL && symtab.size() > 0 && symstrings.size() > 0) {
 		int entrySize = elf32? sizeof(Elf32_Sym) : sizeof(Elf64_Sym);
 		int nEntries = symtab.size() / entrySize;
 
@@ -416,6 +424,8 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 		symstrings.resize(symstrings.size() + 1);
 		symstrings[symstrings.size() - 1] = '\0';
 
+		int nsymbols = 0;
+		
 		messages.flags(std::ios::hex);
 
 		for (int j=0; j<nEntries; j++) {
@@ -464,8 +474,12 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 			//    st_value << ", size 0x" << st_size << "\n";
 
 			// Add this symbol to the symbol registry:
-			// TODO
+			symbolRegistry->AddSymbol(symbol, st_value);
+			++ nsymbols;
 		}
+
+		messages.flags(std::ios::dec);
+		messages << nsymbols << " symbols read\n";
 	}
 
 	// Set the CPU's entry point.

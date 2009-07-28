@@ -169,9 +169,11 @@ MAIN GOAL for 0.6.0:
 
   [ ]	Memory/bus reads in "no exception" mode (for disasm and other things).
 
-  [ ]	Symbol registry.
-  	[ ]  Add ELF symbols (see end of FileLoader_ELF.cc).
-  	[ ]  Load a.out symbols.
+  [/]	Symbol registry.
+  	[X]  Add ELF symbols (see end of FileLoader_ELF.cc).
+  	[X]  Load a.out symbols.
+  	[ ]  Cloning a CPUComponent should also clone its symbol registry!
+  	     Think about serializing symbols...
 
   [ ]   Make sure that BOTH old and new configuration files work!
 

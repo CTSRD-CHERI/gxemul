@@ -35,9 +35,16 @@ using std::setfill;
 using std::ifstream;
 
 #include "AddressDataBus.h"
+#include "components/CPUComponent.h"
 #include "FileLoader_aout.h"
 
 #include "thirdparty/exec_aout.h"
+
+struct aout_symbol {
+	uint32_t	strindex;
+	uint32_t	type;
+	uint32_t	addr;
+};
 
 
 FileLoader_aout::FileLoader_aout(const string& filename)
@@ -85,7 +92,7 @@ string FileLoader_aout::DetectFileType(unsigned char *buf, size_t buflen, float&
 }
 
 
-static uint32_t unencode32(unsigned char *p, Endianness endianness)
+static uint32_t unencode32(uint8_t *p, Endianness endianness)
 {
 	uint32_t res;
 	
@@ -133,8 +140,14 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 
 	Endianness endianness = BigEndian;
 	StateVariable* var = component->GetVariable("bigendian");
-	if (var != NULL)
-		endianness = var->ToInteger() == 0? LittleEndian : BigEndian;
+	if (var == NULL) {
+		messages << "Target does not have the 'bigendian' variable,"
+		    " which is needed to\n"
+		    "load a.out files.\n";
+		return false;
+	}
+
+	endianness = var->ToInteger() == 0? LittleEndian : BigEndian;
 
 	struct exec aout_header;
 	uint32_t entry, datasize, textsize;
@@ -194,12 +207,14 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 	messages.flags(std::ios::dec);
 	messages << "text + data = " << textsize << " + " << datasize << " bytes\n";
 
-	/*  Load text and data:  */
+	// Load text and data:
 	total_len = textsize + datasize;
 	while (total_len != 0) {
 		int len = total_len > sizeof(buf) ? sizeof(buf) : total_len;
 		file.read((char *)buf, len);
 		len = file.gcount();
+		if (len < 1)
+			break;
 
 		// Write to the bus, one byte at a time.
 		for (int k=0; k<len; ++k) {
@@ -216,10 +231,87 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 
 		total_len -= len;
 	}
-	
-	// TODO: Symbols
-	if (symbsize > 0) {
-		messages << "symbols = " << symbsize << " bytes: TODO\n";
+
+	if (total_len != 0) {
+		messages << "Failed to read the entire file.\n";
+		return false;
+	}
+
+	SymbolRegistry* symbolRegistry = NULL;
+	CPUComponent* cpu = component->AsCPUComponent();
+	if (cpu != NULL)
+		symbolRegistry = &cpu->GetSymbolRegistry();
+
+	// Symbols:
+	if (symbolRegistry != NULL && symbsize > 0) {
+		messages.flags(std::ios::dec);
+		messages << "symbols: " << symbsize << " bytes at 0x";
+		messages.flags(std::ios::hex);
+		messages << file.tellg() << "\n";
+
+		vector<char> symbolData;
+		symbolData.resize(symbsize);
+		file.read(&symbolData[0], symbsize);
+		if (file.gcount() != symbsize) {
+			messages << "Failed to read all symbols.\n";
+			return false;
+		}
+
+		off_t oldpos = file.tellg();
+		file.seekg(0, std::ios_base::end);
+		int strings_len = file.tellg() - oldpos;
+		file.seekg(oldpos, std::ios_base::beg);
+
+		messages.flags(std::ios::dec);
+		messages << "strings: " << strings_len << " bytes at 0x";
+		messages.flags(std::ios::hex);
+		messages << file.tellg() << "\n";
+
+		vector<char> symbolStrings;
+		// Note: len + 1 for a nul terminator, for safety.
+		symbolStrings.resize(strings_len + 1);
+		file.read(&symbolStrings[0], strings_len);
+		if (file.gcount() != strings_len) {
+			messages << "Failed to read all strings.\n";
+			return false;
+		}
+
+		assert(sizeof(struct aout_symbol) == 12);
+
+		int nsymbols = 0;
+
+		struct aout_symbol* aout_symbol_ptr = (struct aout_symbol *) &symbolData[0];
+		int n_symbols = symbsize / sizeof(struct aout_symbol);
+		for (int i = 0; i < n_symbols; i++) {
+			uint32_t index = unencode32((unsigned char*)&aout_symbol_ptr[i].strindex, endianness);
+			uint32_t type  = unencode32((unsigned char*)&aout_symbol_ptr[i].type, endianness);
+			uint32_t addr  = unencode32((unsigned char*)&aout_symbol_ptr[i].addr, endianness);
+
+			// TODO: These bits probably mean different things for
+			// different a.out formats. For OpenBSD/m88k at least,
+			// this bit (0x1000000) seems to mean "a normal symbol".
+			if (!(type & 0x1000000))
+				continue;
+
+			if (index >= (uint32_t)strings_len) {
+				messages << "symbol " << i << " has invalid string index\n";
+				continue;
+			}
+
+			string symbol = ((char*) &symbolStrings[0]) + index;
+			if (symbol == "")
+				continue;
+
+			// messages << "\"" << symbol << "\" at addr " << addr
+			//   << ", type " << type << "\n";
+
+			// Add this symbol to the symbol registry:
+			symbolRegistry->AddSymbol(symbol, addr);
+			++ nsymbols;
+		}
+
+		messages.flags(std::ios::dec);
+		messages << nsymbols << " symbols read\n";
 	}
 
 	// Set the CPU's entry point.

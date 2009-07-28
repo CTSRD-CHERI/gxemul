@@ -3940,3 +3940,5 @@ Changelog for GXemul:
 		Finally managed to implement cycle-accurate continuous
 		execution of multiple components at different speeds. :-)
 		RAMComponent now clears ram on reset.
+		Implementing a symbol registry for the new framework (which
+		is per CPU).
