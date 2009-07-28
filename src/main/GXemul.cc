@@ -266,7 +266,10 @@ void GXemul::GenerateHTMLListOfComponents(bool machines)
 		"<tr>\n"
 		" <td><b><u>" <<
 		(machines? "Machine&nbsp;name" : "Component&nbsp;name") << ":"
-		"</u></b>&nbsp;&nbsp;</td>\n"
+		"</u></b>&nbsp;&nbsp;</td>\n";
+	if (machines)
+		std::cout << " <td><b><u>Screenshot:</u></b>&nbsp;&nbsp;</td>\n";
+	std::cout <<
 #ifdef UNSTABLE_DEVEL
 		" <td><b><u>Status:</u></b>&nbsp;&nbsp;</td>\n"
 #endif
@@ -351,6 +354,34 @@ void GXemul::GenerateHTMLListOfComponents(bool machines)
 			std::cout <<
 				" <td valign=top><tt>" << componentName
 				<< "</tt></td>\n";
+
+		if (machines) {
+			// Include an img and a href link to a screenshot for a component,
+			// if it exists:
+			std::ifstream screenshotThumbFile((
+			    "doc/machines/machine_"
+			    + componentName + "-thumb.png").c_str());
+			std::ifstream screenshotLargeFile((
+			    "doc/machines/machine_"
+			    + componentName + ".png").c_str());
+
+			std::cout << " <td valign=top align=center><tt>";
+
+			if (screenshotLargeFile.is_open())
+				std::cout << "<a href=machines/machine_" <<
+				    componentName << ".png>";
+
+			if (screenshotThumbFile.is_open())
+				std::cout << "<img src=machines/machine_" <<
+				    componentName << "-thumb.png>";
+			else if (screenshotLargeFile.is_open())
+				std::cout << "(screenshot)";
+
+			if (screenshotLargeFile.is_open())
+				std::cout << "</a>";
+
+			std::cout << "</tt></td>\n";
+		}
 
 		std::cout <<
 #ifdef UNSTABLE_DEVEL

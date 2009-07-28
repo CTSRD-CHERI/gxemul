@@ -49,52 +49,23 @@ MAIN GOAL for 0.6.0:
 	    Frequency changes are tricky, especially when it comes to reverse
 	    execution, so think CAREFULLY about this!
 
-	[/] Single-stepping:
-		[X]  Execute the step.
-			[X] Scheduling of multiple components.
-		[X]  Increase the step count.
-		[X]  Set runstate to Paused after executing something.
-		[X]  Unit tests. (DummyComponent)
-		[X]  Multiple singlesteps in a row (argument to the step command).
-		[X]  Show ALL state change, using "serialize and compare everything
-		     except large structures", e.g.:
+	[X] Single-stepping forward.
 
-			machine0.mainbus0.cpu0: 0x12345678  ab cd 01 00  ld r12,[r13+0x100]
-			machine0.mainbus0.isabus0.somedevice0: status: 0x0014 -> 0x0000
-			machine0.mainbus0.cpu0: r12: 0x2828 -> 0x0014
+	[ ] Continuous execution forward.
+		[ ]  Base framework in GXemul::Execute.
+		[ ]  Focus on the 88100 CPU implementation, dyntrans etc.
+		[ ]  Scheduling:
+		     If ONE component is "fast" (say, 100 MHz), and one or more
+		     are slow (say, 100 Hz). The difference is 1 M times, so the
+		     fast component could run lots of chunk-wise execution
+		     passes, with e.g. 10000 cycles per chunk, before the slow
+		     ones need to run at all. THEN they are interleaved in a
+		     single-cycle manner.
 
-	[ ] Continuous execution:
-		[ ]  TODO. :-)		
-		[ ]  "Hazardous" cycles, i.e. those that require cycle accurate
-		     synch between components, need to be taken care of. I.e.
-		     running in large-chunk dyntrans mode UNTIL an ll/sc/cas
-		     or device access. Think about this...
-		     UNFORTUNATELY also normal read/writes may interfere :(
-		     so for now, I only feel comfortable with the following:
-		     
-		     1) Simple case: only ONE component is executable. Then it
-		        can of course be executed chunk-wise however is most
-		        convenient.
-
-		     2) Semi-simple case 1:  ONE component is "fast" (say, 100 MHz),
-		        and one or more are slow (say, 100 Hz). The difference
-		        is 1 M times, so the fast component could run lots of
-		        chunk-wise execution passes, with e.g. 10000 cycles per
-		        chunk, before the slow ones need to run at all. THEN
-		        they are interleaved in a single-cycle manner.
-
-		     3) Semi-simple but hardcoded case 2: TWO components run at
-		        fixed high speed (e.g. 100 MHz). _IF_ (and there are LOTS
-		        of annoying ifs there) they are both CPUs and both are
-		        dyntrans and so on... then they could be executed in a
-		        xyxyxyxyxyxy interleaved manner by the dyntrans system.
-		        But that would be horrible. :-|
-
-		     So to preserve correctness, until I've figured out some
-		     better way, only cases 1 and 2 will most likely be supported,
-		     unless in "sloppy mode" where accuracy is lost and all
-		     devices may run chunk-wise (and also reverse execution is
-		     turned off).
+		     In "sloppy" accuracy mode, then it will be possible to
+		     interleave with large chunks even when components "collide"
+		     in time. (This will cause reverse execution support to
+		     be turned off.)
 
 	[ ] Reverse execution/debugging:
 		[ ]  Must be explicitly enabled, since it will slow down the emulator,
@@ -115,6 +86,13 @@ MAIN GOAL for 0.6.0:
 		[ ]  Simulation across multiple hosts?
 
   [ ]	NEW DYNTRANS IMPLEMENTATION, ...
+
+	[ ]  Basic run loop.
+
+	[ ]  Helpers for CPU implementations:
+		dyntrans pages?
+		pc to dyntrans page lookups? 32-bit and 64-bit
+		memory to direct host page lookups, TLB-entry based
 
 	[ ]  Guarantee that single-stepping and bulk execution end up with
 	     _EXACTLY_ the same state!
@@ -326,6 +304,9 @@ MAIN GOAL for 0.6.0:
 			A pcibus can be added into a mainbus (in a machine.)
 			etc.
 		bool IsItOkToAddItToThisProposedParentComponent(propsedParent) const;
+
+  [ ]	ConsoleUI and/or CommandInterpreter: Make use of COLUMNS environment variable
+	when printing e.g. tab completion tables.
 
   [ ]	Command interpreter:
 

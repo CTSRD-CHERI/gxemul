@@ -3936,3 +3936,4 @@ Changelog for GXemul:
 		Porting the 88100 disassembly code from the old implementation
 		to the new.
 		Moving old main files into src/old_main/ (for clarity).
+20090728	Including screenshots in auto generated machines.html.

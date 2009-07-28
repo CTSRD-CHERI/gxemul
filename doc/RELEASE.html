@@ -36,9 +36,28 @@ and <a href="guestoses.html#netbsdcatsinstall">NetBSD/cats</a>.
 
 <ul>
 
-  <li>TODO
-  
-  <li>There is now finally an <tt>install</tt> Makefile target.
+  <li>The beginnings of a completely new emulation framework, written
+  	in C++, is now in place.
+
+	<p>Note: So far, <i>only the
+	<a href="machines/machine_testm88k.html">testm88k</a> machine mode</i>
+	has been rewritten to use
+	the new framework, all other machine modes run in legacy mode using
+	the old framework.
+
+  <p>
+  <li>Many unused, rarely used, and bogus emulation modes and features
+  	were removed, to reduce the maintenance burden.
+
+  <p>
+  <li>Unit tests for newly written (C++) code.
+
+  <p>
+  <li>Source code is <a href="doxygen/html/index.html">documented using Doxygen comments</a>.
+
+  <p>
+  <li>There is now finally an <tt>install</tt> Makefile target, and
+  	the <tt>-j</tt> make option can be used to parallelize builds.
   
 </ul>
 
@@ -49,15 +68,18 @@ and <a href="guestoses.html#netbsdcatsinstall">NetBSD/cats</a>.
     HISTORY                       Detailed revision history / changelog.
     LICENSE                       Copyright message / license.
     README                        Quick start instructions, for the impatient.
-    RELEASE.html                  This file.
-    <a href="TODO.html">TODO</a>                          TODO notes.
     configure, Makefile.skel      sh and make scripts for building GXemul.
     demos/                        Tutorial-like demos of testmachine functionality.
-    <a href="index.html">doc/</a>                          Documentation.
+    <a href="index.html">doc/</a>                          Documentation. (*)
+    doc/RELEASE.html              This file.
+    <a href="TODO.html">doc/TODO</a>                      TODO notes.
     experiments/                  Experimental code. (Usually not needed.)
     man/                          Man page.
     src/                          Source code.
 </pre>
+
+<p>(*) Note: In general, the documentation refers to how things worked
+in pre-0.6.0 releases.
 
 <p>To build the emulator, run the <tt>configure</tt> script, and then run 
 <tt>make</tt>. This should work on most Unix-like systems, with few or no 
