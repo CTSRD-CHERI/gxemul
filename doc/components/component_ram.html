@@ -20,8 +20,46 @@
 
 The <tt>ram</tt> component represents a Random Access Memory.
 
-<p>Note that also ROM (Read-Only Memory) components are emulated using this
-component. The difference is that ROM is write-protected.
+<p>Note that also ROM (Read-Only Memory) circuits are emulated using this
+component. A ROM circuit is a RAM with <tt>writeProtect = true</tt>.
+
+<p>The following example shows how to interactively add a <tt>ram</tt>
+component to a machine:
+
+<pre>
+$ <b>gxemul -V</b>
+..
+GXemul> <b>add machine</b>
+GXemul> <b>add mainbus machine0</b>
+GXemul> <b>root</b>
+  root
+  \-- machine0
+      \-- mainbus0
+
+  accuracy = cycle
+  step     = 0
+GXemul> <b>add ram mainbus0</b>
+GXemul> <b>ram</b>
+  ram0  (0 bytes at offset 0)
+
+  data                = (custom)
+  lastDumpAddr        = 0
+  memoryMappedAddrMul = 0x1
+  memoryMappedBase    = 0
+  memoryMappedSize    = 0
+  step                = 0
+  writeProtect        = false
+GXemul> <b>ram0.memoryMappedSize = 0x400000</b>
+GXemul> <b>root</b>
+  root
+  \-- machine0
+      \-- mainbus0
+          \-- ram0  (4 MB at offset 0)
+
+  accuracy = cycle
+  step     = 0
+GXemul> 
+</pre>
 
 <p>
 Source code documentation for this component can be found
