@@ -76,6 +76,12 @@ CPUComponent * CPUComponent::AsCPUComponent()
 }
 
 
+void CPUComponent::ResetState()
+{
+	m_hasUsedUnassemble = false;
+}
+
+
 void CPUComponent::GetMethodNames(vector<string>& names) const
 {
 	// Add our method names...

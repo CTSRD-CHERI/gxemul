@@ -70,6 +70,8 @@ public:
 	 */
 	static string GetAttribute(const string& attributeName);
 
+	virtual void ResetState();
+
 	virtual double GetCurrentFrequency() const;
 
 	virtual CPUComponent* AsCPUComponent();
