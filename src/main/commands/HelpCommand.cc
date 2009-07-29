@@ -51,6 +51,17 @@ bool HelpCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 	}
 
 	if (arguments.size() == 1) {
+		// Special case: root isn't really a command
+		if (arguments[0] == "root") {
+			gxemul.GetUI()->ShowDebugMessage(
+			    "\nroot\n----\n\n"
+			    "Shows the component tree which makes up the current emulation configuration.\n"
+			    "Technically, 'root' is not a command, but the name of the root node. Typing\n"
+			    "the name of any node in the configuration tree will dump the sub-tree starting\n"
+			    "at that node, followed by that node's own variables.\n\n");
+			return true;
+		}
+		
 		it = commands.find(arguments[0]);
 		if (it == commands.end()) {
 			gxemul.GetUI()->ShowDebugMessage(

@@ -57,8 +57,11 @@ string ResetCommand::GetShortDescription() const
 
 string ResetCommand::GetLongDescription() const
 {
-	return "Resets the emulation, by clearing the state of all\n"
-	    "components, and setting the current RunState to NotRunning.";
+	return "Resets the emulation, by:\n\n"
+	    "  1) setting the current run state to Paused,\n"
+	    "  2) clearing the state of all components\n"
+	    "  3) reloading any binaries loaded on the command"
+	    	" line (on-reset commands)\n";
 }
 
 

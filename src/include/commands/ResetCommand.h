@@ -38,7 +38,7 @@
  * \brief A Command which resets the current emulation.
  *
  * The emulation is reset by resetting all components' state variables to
- * their initial state, and by changing the current RunState to NotRunning.
+ * their initial state, and by changing the current RunState to Paused.
  */
 class ResetCommand
 	: public Command

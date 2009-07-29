@@ -113,8 +113,9 @@ string AddComponentCommand::GetLongDescription() const
 	    "setup. If path is omitted, the component is added at the root of the\n"
 	    "component tree.\n"
 	    "\n"
-	    "See also:  copy      (to copy/clone a component in the tree)\n"
-	    "           remove    (to remove a component from the emulation)\n"
-	    "           root      (to inspect the current emulation setup)\n";
+	    "See also:  copy             (to copy/clone a component in the tree)\n"
+	    "           list-components  (to get a list of available component types)\n"
+	    "           remove           (to remove a component from the emulation)\n"
+	    "           root             (to inspect the current emulation setup)\n";
 }
 

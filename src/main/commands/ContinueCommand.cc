@@ -55,8 +55,9 @@ string ContinueCommand::GetShortDescription() const
 
 string ContinueCommand::GetLongDescription() const
 {
-	return "Continues the emulation, by setting the "
-	    "current RunState to Running.";
+	return "Continues the emulation.\n"
+	    "\n"
+	    "See also:  step      (to single-step forward)\n";
 }
 
 
