@@ -228,8 +228,24 @@ protected:
 	DECLARE_DYNTRANS_INSTR(abort);
 	DECLARE_DYNTRANS_INSTR(endOfPage);
 	DECLARE_DYNTRANS_INSTR(endOfPage2);
+
+	// Data movement.
+	DECLARE_DYNTRANS_INSTR(set_u64_imms32);
+
+	// Arithmetic.
 	DECLARE_DYNTRANS_INSTR(add_u32_u32_immu32);
+	DECLARE_DYNTRANS_INSTR(add_u32_u32_u32);
+	DECLARE_DYNTRANS_INSTR(add_u64_u64_imms32_truncS32);
+	DECLARE_DYNTRANS_INSTR(add_u64_u64_imms32);
 	DECLARE_DYNTRANS_INSTR(sub_u32_u32_immu32);
+	DECLARE_DYNTRANS_INSTR(sub_u32_u32_u32);
+
+	// Logic.
+	DECLARE_DYNTRANS_INSTR(and_u64_u64_immu32);
+	DECLARE_DYNTRANS_INSTR(or_u32_u32_u32);
+	DECLARE_DYNTRANS_INSTR(or_u64_u64_immu32);
+	DECLARE_DYNTRANS_INSTR(xor_u32_u32_u32);
+	DECLARE_DYNTRANS_INSTR(xor_u64_u64_immu32);
 
 protected:
 	// Variables common to all (or most) kinds of CPUs:

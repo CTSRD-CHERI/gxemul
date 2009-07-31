@@ -561,7 +561,7 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 }
 
 
-UI* Component::GetUI()
+GXemul* Component::GetRunningGXemulInstance()
 {
 	Component* root = this;
 	while (root->GetParent() != NULL)
@@ -571,7 +571,13 @@ UI* Component::GetUI()
 	if (rootComponent == NULL)
 		return NULL;
 
-	GXemul* gxemul = rootComponent->GetOwner();
+	return rootComponent->GetOwner();
+}
+
+
+UI* Component::GetUI()
+{
+	GXemul* gxemul = GetRunningGXemulInstance();
 	if (gxemul == NULL)
 		return NULL;
 

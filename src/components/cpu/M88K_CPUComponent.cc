@@ -807,6 +807,8 @@ string M88K_CPUComponent::GetAttribute(const string& attributeName)
 
 DYNTRANS_INSTR(M88K_CPUComponent,todo)
 {
+// This is a placeholder for implementing 88k-specific instructions, that
+// are not generic enough to be placed in CPUComponent.
 //	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 //	REG32(ic->arg[0]) = REG32(ic->arg[1]) + (uint32_t)ic->arg[2];
 }
@@ -824,7 +826,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //	uint32_t op10   = (iw >> 10) & 0x3f;
 	uint32_t d      = (iw >> 21) & 0x1f;
 	uint32_t s1     = (iw >> 16) & 0x1f;
-//	uint32_t s2     =  iw        & 0x1f;
+	uint32_t s2     =  iw        & 0x1f;
 //	uint32_t op3d   = (iw >>  8) & 0xff;
 	uint32_t imm16  = iw & 0xffff;
 //	uint32_t w5     = (iw >>  5) & 0x1f;
@@ -866,11 +868,103 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 		}
 		break;
 
+	case 0x3d:
+		if ((iw & 0xf000) <= 0x3fff ) {
+			// Load, Store, xmem, and lda:
+			// TODO
+		} else switch ((iw >> 8) & 0xff) {
+//		case 0x40:	/*  and    */
+//		case 0x44:	/*  and.c  */
+		case 0x50:	/*  xor    */
+//		case 0x54:	/*  xor.c  */
+		case 0x58:	/*  or     */
+//		case 0x5c:	/*  or.c   */
+		case 0x60:	/*  addu   */
+//		case 0x61:	/*  addu.co  */
+//		case 0x62:	/*  addu.ci  */
+		case 0x64:	/*  subu   */
+//		case 0x65:	/*  subu.co  */
+//		case 0x66:	/*  subu.ci  */
+//		case 0x68:	/*  divu   */
+//		case 0x6c:	/*  mul    */
+//		case 0x70:	/*  add    */
+//		case 0x78:	/*  div    */
+//		case 0x7c:	/*  cmp    */
+//		case 0x80:	/*  clr    */
+//		case 0x88:	/*  set    */
+//		case 0x90:	/*  ext    */
+//		case 0x98:	/*  extu   */
+//		case 0xa0:	/*  mak    */
+//		case 0xa8:	/*  rot    */
+			ic->arg[0] = (size_t) &m_r[d];
+			ic->arg[1] = (size_t) &m_r[s1];
+			ic->arg[2] = (size_t) &m_r[s2];
+
+			switch ((iw >> 8) & 0xff) {
+//			case 0x40: ic->f = instr(and);   break;
+//			case 0x44: ic->f = instr(and_c); break;
+			case 0x50: ic->f = instr_xor_u32_u32_u32; break;
+//			case 0x54: ic->f = instr(xor_c); break;
+			case 0x58: ic->f = instr_or_u32_u32_u32; break;
+//			case 0x5c: ic->f = instr(or_c);  break;
+			case 0x60: ic->f = instr_add_u32_u32_u32; break;
+//			case 0x61: ic->f = instr(addu_co); break;
+//			case 0x62: ic->f = instr(addu_ci); break;
+			case 0x64: ic->f = instr_sub_u32_u32_u32; break;
+//			case 0x65: ic->f = instr(subu_co); break;
+//			case 0x66: ic->f = instr(subu_ci); break;
+//			case 0x68: ic->f = instr(divu);  break;
+//			case 0x6c: ic->f = instr(mul);   break;
+//			case 0x70: ic->f = instr(add);   break;
+//			case 0x78: ic->f = instr(div);   break;
+//			case 0x7c: ic->f = instr(cmp);   break;
+//			case 0x80: ic->f = instr(clr);   break;
+//			case 0x88: ic->f = instr(set);   break;
+//			case 0x90: ic->f = instr(ext);   break;
+//			case 0x98: ic->f = instr(extu);  break;
+//			case 0xa0: ic->f = instr(mak);   break;
+//			case 0xa8: ic->f = instr(rot);   break;
+			}
+
+			/*
+			 * Handle the case when the destination register is r0:
+			 *
+			 * If there is NO SIDE-EFFECT! (i.e. no carry out),
+			 * then replace the instruction with a nop. If there is
+			 * a side-effect, we still have to run the instruction,
+			 * so replace the destination register with a scratch
+			 * register.
+			 */
+			if (d == M88K_ZERO_REG) {
+				int opc = (iw >> 8) & 0xff;
+				if (opc != 0x61 && opc != 0x63 &&
+				    opc != 0x65 && opc != 0x67 &&
+				    opc != 0x71 && opc != 0x73 &&
+				    opc != 0x75 && opc != 0x77)
+					ic->f = instr_nop;
+				else
+					ic->arg[0] = (size_t)
+					    &m_zero_scratch;
+			}
+			break;
+//		case 0xc0:	/*  jmp    */
+//		case 0xc4:	/*  jmp.n  */
+//		case 0xc8:	/*  jsr    */
+//		case 0xcc:	/*  jsr.n  */
+			// TODO
+//		case 0xe8:	/*  ff1  */
+//		case 0xec:      /*  ff0  */
+			// TODO
+//		case 0xfc:
+			// TODO
+		}
+		break;
+
 	default:
 		if (ui != NULL) {
 			stringstream ss;
 			ss.flags(std::ios::hex);
-			ss << "unimplemented opcode 0x" << op26 << " at 0x" << m_pc;
+			ss << "unimplemented opcode 0x" << op26;
 			ui->ShowDebugMessage(this, ss.str());
 		}
 	}

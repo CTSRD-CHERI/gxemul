@@ -115,25 +115,25 @@
  */
 
 struct mips_cpu_type_def {
-	const char *name;
-	int	rev;
-	int	sub;
-	char	flags;
-	char	exc_model;		/*  EXC3K or EXC4K  */
-	char	mmu_model;		/*  MMU3K or MMU4K  */
-	char	isa_level;		/*  1, 2, 3, 4, 5, 32, 64  */
-	char	isa_revision;		/*  1 or 2 (for MIPS32/64)  */
-	int	nr_of_tlb_entries;	/*  32, 48, 64, ...  */
-	char	instrs_per_cycle;	/*  simplified, 1, 2, or 4  */
-	int	picache;
-	int	pilinesize;
-	int	piways;
-	int	pdcache;
-	int	pdlinesize;
-	int	pdways;
-	int	scache;
-	int	slinesize;
-	int	sways;
+	const char *	name;
+	int		rev;
+	int		sub;
+	int		flags;
+	int		exc_model;		/*  EXC3K or EXC4K  */
+	int		mmu_model;		/*  MMU3K or MMU4K  */
+	int		isa_level;		/*  1, 2, 3, 4, 5, 32, 64  */
+	int		isa_revision;		/*  1 or 2 (for MIPS32/64)  */
+	int		nr_of_tlb_entries;	/*  32, 48, 64, ...  */
+	int		instrs_per_cycle;	/*  simplified, 1, 2, or 4  */
+	int		picache;
+	int		pilinesize;
+	int		piways;
+	int		pdcache;
+	int		pdlinesize;
+	int		pdways;
+	int		scache;
+	int		slinesize;
+	int		sways;
 };
 
 
@@ -177,6 +177,9 @@ protected:
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	    bool& writable);
 
+	virtual int GetDyntransICshift() const;
+	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;
+
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
 
 private:
@@ -184,6 +187,10 @@ private:
 		unsigned char *instruction, vector<string>& result);
 
 	bool Is32Bit() const;
+
+private:
+	void Translate(uint32_t iword, struct DyntransIC* ic);
+	DECLARE_DYNTRANS_INSTR(ToBeTranslated);
 
 private:
 	/*

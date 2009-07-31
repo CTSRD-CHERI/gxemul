@@ -634,6 +634,14 @@ protected:
 	virtual void FlushCachedStateForComponent();
 
 	/**
+	 * \brief Returns a reference to the current GXemul instance.
+	 *
+	 * @return NULL if there was no currently running instance, otherwise
+	 * a pointer to the currently running GXemul instance.
+	 */
+	GXemul* GetRunningGXemulInstance();
+
+	/**
 	 * \brief Gets an UI reference for outputting debug messages during
 	 * runtime.
 	 *

@@ -54,7 +54,7 @@ MAIN GOAL for 0.6.0:
 
 	[/] Continuous execution forward.
 		[X]  Base framework in GXemul::Execute.
-		[ ]  Focus on the 88100 CPU implementation, dyntrans etc.
+		[/]  Focus on the 88100 CPU implementation, dyntrans etc.
 		[X]  Scheduling:
 		     If ONE component is "fast" (say, 100 MHz), and one or more
 		     are slow (say, 100 Hz). The difference is 1 M times, so the
@@ -174,7 +174,7 @@ MAIN GOAL for 0.6.0:
   [ ]	Address formats?
   	"xxxx:yyyy", "xxxx:yyyyyyyy", "zzzzzzzzzzzzzzzz" for amd64, plus i/o ports
   	"uxxxxxxxx" vs "sxxxxxxxx" for M88K
-  	etc.
+	most likely others for "bank select" embedded archs/microcontrollers.
 
   [ ]	Memory/bus reads in "no exception" mode (for disasm and other things).
 
@@ -209,6 +209,8 @@ MAIN GOAL for 0.6.0:
   	instead of
   		add mips_cpu
   		cpu.model = "R3000"
+  	Also useful for e.g. selecting nr of CPUs or memory amount on the
+  	command line (sending args to template machines!)
 
   [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
 	first thing to implement, without breaking other architectures.
@@ -219,7 +221,7 @@ MAIN GOAL for 0.6.0:
 	     separate devices.
 	[X]  Implement 88100 instruction disassembly.
 	[ ]  Implement 88110 instruction disassembly.
-	[ ]  Implement 88K instruction execution.
+	[/]  Implement 88K instruction execution.
 	[ ]  Implement 88K virtual to physical memory translation.
 
   [/]	Mainbus component:
@@ -328,12 +330,19 @@ MAIN GOAL for 0.6.0:
   [ ]	Command interpreter:
 
 	[/]  State variable assignments:
-		[ ]  Expression evaluator, +-*/, string concatenation, etc.
+		[ ]  Expression evaluator, +-*/, string concatenation, type
+		     correctness (e.g. bool vs int), hex vs decimal,
+		     prefixes like M, K etc.  (4M = 4*1048576 ...)
 			(StateVariable::EvaluateExpression)
 		[ ]  Execution of _expressions_, not just variables. e.g.:
 			cpu.pc		prints the pc value
 			cpu.pc+4	should print the _expression_ pc+4
 			cpu.pc=expr	assignment
+
+	[ ]  Minimal paths ala machine0.cpu0 would be cool if they worked.
+	     I.e. if there's machine0.mainbus0.cpu0 and machine1.mainbus0.cpu0,
+	     but no mainbus1, then machineX.cpu0 would be shorter, and still
+	     uniquely identify the cpu.
 
 	[ ]  Help on methods and method arguments? E.g. cpu.unassemble [addr]
 

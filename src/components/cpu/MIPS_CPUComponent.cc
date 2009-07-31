@@ -191,16 +191,38 @@ int MIPS_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 }
 
 
+int MIPS_CPUComponent::GetDyntransICshift() const
+{
+	bool mips16 = m_pc & 1? true : false;
+
+	// Normal encoding: 4 bytes per instruction, i.e. shift is 2 bits.
+	// MIPS16 encoding: 2 bytes per instruction, i.e. shift is 1 bit.
+	return mips16? 1 : 2;
+}
+
+
+void (*MIPS_CPUComponent::GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const
+{
+	return instr_ToBeTranslated;
+}
+
+
 bool MIPS_CPUComponent::VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	bool& writable)
 {
-	// TODO. For now, just return the lowest 30 bits.
-
 	if (Is32Bit())
 		vaddr = (int32_t)vaddr;
 
+	// TODO. For now, just return the lowest 30 bits.
 	if (vaddr >= 0xffffffff80000000 && vaddr < 0xffffffffc0000000) {
 		paddr = vaddr & 0x3fffffff;
+		writable = true;
+		return true;
+	}
+
+	// TODO  ... or the lowest 44.
+	if (vaddr >= 0xa800000000000000 && vaddr < 0xa8000fffffffffff) {
+		paddr = vaddr & 0xfffffffffff;
 		writable = true;
 		return true;
 	}
@@ -725,6 +747,145 @@ string MIPS_CPUComponent::GetAttribute(const string& attributeName)
 		return "MIPS processor.";
 
 	return Component::GetAttribute(attributeName);
+}
+
+
+/*****************************************************************************/
+
+
+void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
+{
+	UI* ui = GetUI();	// for debug messages
+	int requiredISA = 1;		// 1, 2, 3, 4, 32, or 64
+	int requiredISArevision = 1;	// 1 or 2 (for MIPS32/64)
+
+	int hi6 = iword >> 26;
+	int rs = (iword >> 21) & 31;
+	int rt = (iword >> 16) & 31;
+//	int rd = (iword >> 11) & 31;
+//	int sa = (iword >>  6) & 31;
+	int32_t imm = (int16_t)iword;
+//	s6 = iword & 63;
+//	s10 = (rs << 5) | sa;
+
+	switch (hi6) {
+
+//	case HI6_ADDI:
+	case HI6_ADDIU:
+//	case HI6_SLTI:
+//	case HI6_SLTIU:
+//	case HI6_DADDI:
+	case HI6_DADDIU:
+	case HI6_ANDI:
+	case HI6_ORI:
+	case HI6_XORI:
+		ic->arg[0] = (size_t)&m_gpr[rt];
+		ic->arg[1] = (size_t)&m_gpr[rs];
+		if (hi6 == HI6_ADDI || hi6 == HI6_ADDIU ||
+		    hi6 == HI6_SLTI || hi6 == HI6_SLTIU ||
+		    hi6 == HI6_DADDI || hi6 == HI6_DADDIU)
+			ic->arg[2] = (int16_t)iword;
+		else
+			ic->arg[2] = (uint16_t)iword;
+
+		switch (hi6) {
+//		case HI6_ADDI:    ic->f = instr(addi); break;
+		case HI6_ADDIU:   ic->f = instr_add_u64_u64_imms32_truncS32; break;
+//		case HI6_SLTI:    ic->f = instr(slti); break;
+//		case HI6_SLTIU:   ic->f = instr(sltiu); break;
+//		case HI6_DADDI:   ic->f = instr(daddi); requiredISA = 3; break;
+		case HI6_DADDIU:  ic->f = instr_add_u64_u64_imms32; requiredISA = 3; break;
+		case HI6_ANDI:    ic->f = instr_and_u64_u64_immu32; break;
+		case HI6_ORI:     ic->f = instr_or_u64_u64_immu32; break;
+		case HI6_XORI:    ic->f = instr_xor_u64_u64_immu32; break;
+		}
+
+		if (rt == MIPS_GPR_ZERO)
+			ic->f = instr_nop;
+		break;
+
+	case HI6_LUI:
+		ic->f = instr_set_u64_imms32;
+		ic->arg[0] = (size_t)&m_gpr[rt];
+		ic->arg[1] = (int32_t) (imm << 16);
+
+		if (rt == MIPS_GPR_ZERO)
+			ic->f = instr_nop;
+		break;
+
+	default:
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "unimplemented opcode 0x" << hi6;
+			ui->ShowDebugMessage(this, ss.str());
+		}
+	}
+
+	// Attempting a MIPS32 instruction on e.g. a MIPS IV CPU?
+	if (requiredISA > m_type.isa_level) {
+		// TODO: Cause MIPS "unimplemented instruction" exception instead.
+		ic->f = NULL;
+
+		// TODO: Only print the warning once; actual real-world code may
+		// rely on this mechanism to detect cpu type, or similar.
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "instruction at 0x" << m_pc << " requires ISA level ";
+			ss.flags(std::ios::dec);
+			ss << requiredISA << "; this cpu supports only ISA level " <<
+			    m_type.isa_level << "\n";
+			ui->ShowDebugMessage(this, ss.str());
+		}
+	}
+
+	// Attempting a MIPS III or IV instruction on e.g. a MIPS32 CPU?
+	if ((requiredISA == 3 || requiredISA == 4) && Is32Bit()) {
+		// TODO: Cause MIPS "unimplemented instruction" exception instead.
+		ic->f = NULL;
+
+		// TODO: Only print the warning once; actual real-world code may
+		// rely on this mechanism to detect cpu type, or similar.
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "instruction at 0x" << m_pc << " is a 64-bit instruction,"
+			    " which cannot be executed on this CPU\n";
+			ui->ShowDebugMessage(this, ss.str());
+		}
+	}
+
+	// Attempting a revision 2 opcode on a revision1 MIPS32/64 CPU?
+	if (requiredISArevision > 1 && m_type.isa_revision) {
+		// TODO: Cause MIPS "unimplemented instruction" exception instead.
+		ic->f = NULL;
+
+		// TODO: Only print the warning once; actual real-world code may
+		// rely on this mechanism to detect cpu type, or similar.
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "instruction at 0x" << m_pc << " is a MIPS32/64 revision ";
+			ss << requiredISArevision << " instruction; this cpu supports"
+			    " only revision " << m_type.isa_revision << "\n";
+			ui->ShowDebugMessage(this, ss.str());
+		}
+	}
+}
+
+
+DYNTRANS_INSTR(MIPS_CPUComponent,ToBeTranslated)
+{
+	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
+
+	cpu->DyntransToBeTranslatedBegin(ic);
+
+	uint32_t iword;
+	if (cpu->DyntransReadInstruction(iword))
+		cpu->Translate(iword, ic);
+
+	cpu->DyntransToBeTranslatedDone(ic);
 }
 
 

@@ -311,9 +311,21 @@ void CPUComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 	if (ic->f == NULL) {
 		UI* ui = GetUI();
 		if (ui != NULL) {
+			bool isSingleStepping = GetRunningGXemulInstance()->GetRunState() == GXemul::SingleStepping;
+
 			stringstream ss;
 			ss.flags(std::ios::hex);
-			ss << "instruction translation failed at 0x" << m_pc << "!";
+			ss << "instruction translation failed";
+
+			// If we were single-stepping, then the instruction
+			// disassembly has already been displayed. If we were
+			// running in continuous mode, then we need to display
+			// it now:
+			if (!isSingleStepping) {
+				ss << " at:\n";
+				Unassemble(1, false, m_pc, ss);
+			}
+
 			ui->ShowDebugMessage(this, ss.str());
 		}
 
@@ -803,11 +815,19 @@ bool CPUComponent::WriteData(const uint64_t& data, Endianness endianness)
 /*****************************************************************************/
 
 
+/*
+ * A do-nothing instruction. (It still counts as a cylce, though.)
+ */
 DYNTRANS_INSTR(CPUComponent,nop)
 {
 }
 
 
+/*
+ * A break-out-of-dyntrans function. Setting ic->f to this function will
+ * cause dyntrans execution to be aborted. The cycle counter will _not_
+ * count this as executed cycles.
+ */
 DYNTRANS_INSTR(CPUComponent,abort)
 {
 	// Cycle reduction:
@@ -831,15 +851,171 @@ DYNTRANS_INSTR(CPUComponent,endOfPage2)
 }
 
 
+/*
+ * arg 0: 64-bit register
+ * arg 1: 32-bit signed immediate
+ *
+ * Sets the register at arg 0 to the immediate value in arg 1.
+ */
+DYNTRANS_INSTR(CPUComponent,set_u64_imms32)
+{
+	REG64(ic->arg[0]) = (int32_t) ic->arg[1];
+}
+
+
+/*
+ * arg 0: 32-bit register
+ * arg 1: 32-bit register
+ * arg 2: 32-bit unsigned immediate
+ *
+ * Adds the unsigned immediate to arg 1, and stores the result in arg 0.
+ */
 DYNTRANS_INSTR(CPUComponent,add_u32_u32_immu32)
 {
 	REG32(ic->arg[0]) = REG32(ic->arg[1]) + (uint32_t)ic->arg[2];
 }
 
 
+/*
+ * arg 0: 32-bit register
+ * arg 1: 32-bit register
+ * arg 2: 32-bit register
+ *
+ * Adds arg 1 and arg 2, and stores the result in arg 0.
+ */
+DYNTRANS_INSTR(CPUComponent,add_u32_u32_u32)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) + REG32(ic->arg[2]);
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 32-bit signed immediate
+ *
+ * Adds the signed immediate to arg 1, and stores the result in arg 0, truncated
+ * to a signed 32-bit value.
+ */
+DYNTRANS_INSTR(CPUComponent,add_u64_u64_imms32_truncS32)
+{
+	REG64(ic->arg[0]) = (int32_t) (REG64(ic->arg[1]) + (int32_t)ic->arg[2]);
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 32-bit signed immediate
+ *
+ * Adds the signed immediate to arg 1, and stores the result in arg 0.
+ */
+DYNTRANS_INSTR(CPUComponent,add_u64_u64_imms32)
+{
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) + (int64_t)(int32_t)ic->arg[2];
+}
+
+
+/*
+ * arg 0: 32-bit register
+ * arg 1: 32-bit register
+ * arg 2: 32-bit unsigned immediate
+ *
+ * Subtracts the unsigned immediate from arg 1, and stores the result in arg 0.
+ */
 DYNTRANS_INSTR(CPUComponent,sub_u32_u32_immu32)
 {
 	REG32(ic->arg[0]) = REG32(ic->arg[1]) - (uint32_t)ic->arg[2];
+}
+
+
+/*
+ * arg 0: 32-bit register
+ * arg 1: 32-bit register
+ * arg 2: 32-bit register
+ *
+ * Subtracts arg 2 from arg 1, and stores the result in arg 0.
+ */
+DYNTRANS_INSTR(CPUComponent,sub_u32_u32_u32)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) - REG32(ic->arg[2]);
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 32-bit unsigned immediate
+ *
+ * ANDs the 32-bit immediate into arg 1, storing the result in arg 0.
+ *
+ * Note: No sign truncation is performed, i.e. if arg 1 is 0xffffffff80001234
+ * and arg 2 is 0x80001200, then arg 0 becomes 0x0000000080001200 (note: the
+ * upper bits are not sign-extended from bit 31).
+ */
+DYNTRANS_INSTR(CPUComponent,and_u64_u64_immu32)
+{
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) & (uint32_t)ic->arg[2];
+}
+
+
+/*
+ * arg 0: 32-bit register
+ * arg 1: 32-bit register
+ * arg 2: 32-bit register
+ *
+ * ORs arg 1 and arg 2 together, and stores the result in arg 0.
+ */
+DYNTRANS_INSTR(CPUComponent,or_u32_u32_u32)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) | REG32(ic->arg[2]);
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 32-bit unsigned immediate
+ *
+ * ORs the 32-bit immediate into arg 1, storing the result in arg 0.
+ *
+ * Note: No sign truncation is performed, i.e. if arg 1 is 0x0000000000001234
+ * and arg 2 is 0x80001200, then arg 0 becomes 0x0000000080001234 (note: the
+ * upper bits are not sign extended from bit 31).
+ */
+DYNTRANS_INSTR(CPUComponent,or_u64_u64_immu32)
+{
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) | (uint32_t)ic->arg[2];
+}
+
+
+/*
+ * arg 0: 32-bit register
+ * arg 1: 32-bit register
+ * arg 2: 32-bit register
+ *
+ * XORs arg 1 and arg 2, and stores the result in arg 0.
+ */
+DYNTRANS_INSTR(CPUComponent,xor_u32_u32_u32)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) ^ REG32(ic->arg[2]);
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 32-bit unsigned immediate
+ *
+ * XORs the 32-bit immediate into arg 1, storing the result in arg 0.
+ *
+ * Note: No sign truncation is performed, i.e. if arg 1 is 0xffffffff80001234
+ * and arg 2 is 0x80001200, then arg 0 becomes 0xffffffff00000034 (note: the
+ * upper bits are not sign-extended from bit 31).
+ */
+DYNTRANS_INSTR(CPUComponent,xor_u64_u64_immu32)
+{
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) ^ (uint32_t)ic->arg[2];
 }
 
 

@@ -325,7 +325,7 @@ void GXemul::GenerateHTMLListOfComponents(bool machines)
 
 		std::cout <<
 			"<tr bgcolor=" <<
-			(everyOther? "#f0f0f0" : "#e0e0e0") << ">\n";
+			(everyOther? "#f2f2f2" : "#e4e4e4") << ">\n";
 
 		// Include a href link to a "full html page" for a component,
 		// if it exists:
@@ -573,6 +573,11 @@ int GXemul::Run()
 	// place to call its constructor. TODO
 
 	GetUI()->Initialize();
+
+
+	// Not really running yet:
+	RunState savedRunState = GetRunState();
+	SetRunState(Paused);
 	
 	if (!GetQuietMode()) {
 		GetUI()->ShowStartupBanner();
@@ -592,26 +597,21 @@ int GXemul::Run()
 		}
 	}
 
-	{
-		// Not really running yet:
-		RunState savedRunState = GetRunState();
-		SetRunState(Paused);
-
-		if (!Reset()) {
-			GetUI()->ShowDebugMessage("Aborting.\n");
-			return 1;
-		}
-
-		SetRunState(savedRunState);
+	if (!Reset()) {
+		GetUI()->ShowDebugMessage("Aborting.\n");
+		return 1;
 	}
 
 	if (!GetQuietMode()) {
 		// A separator line, if we start emulating directly without dropping
 		// into the interactive debugger. (To mimic pre-0.6.0 appearance.)
-		if (GetRunState() == Running)
+		if (savedRunState == Running)
 			GetUI()->ShowDebugMessage("--------------------------------"
 			    "-----------------------------------------------\n\n");
 	}
+
+	SetRunState(savedRunState);
+
 
 	try {
 		GetUI()->MainLoop();
