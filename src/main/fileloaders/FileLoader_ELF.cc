@@ -269,8 +269,10 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 		Elf64_Phdr* phdr64 = (Elf64_Phdr*) phdr_buf;
 
 		memset(phdr_buf, 0, sizeof(phdr_buf));
-		file.read(phdr_buf, sizeof(phdr_buf));
-		if (file.gcount() != sizeof(phdr_buf)) {
+
+		int toRead = elf32? sizeof(Elf32_Phdr) : sizeof(Elf64_Phdr);
+		file.read(phdr_buf, toRead);
+		if (file.gcount() != toRead) {
 			messages << "Unable to read Phdr.\n";
 			return false;
 		}
@@ -354,9 +356,11 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 		Elf64_Shdr* shdr64 = (Elf64_Shdr*) shdr_buf;
 
 		memset(shdr_buf, 0, sizeof(shdr_buf));
-		file.read(shdr_buf, sizeof(shdr_buf));
-		if (file.gcount() != sizeof(shdr_buf)) {
-			messages << "Unable to read Phdr.\n";
+		
+		int toRead = elf32? sizeof(Elf32_Shdr) : sizeof(Elf64_Shdr);
+		file.read(shdr_buf, toRead);
+		if (file.gcount() != toRead) {
+			messages << "Unable to read Shdr.\n";
 			return false;
 		}
 
@@ -394,7 +398,9 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 			}
 		}
 		
-		if (sh_type == SHT_STRTAB) {
+		// TODO/HACK: Figure out which strtab to use. For now, simply
+		// use the largest one!
+		if (sh_type == SHT_STRTAB && sh_size > symstrings.size()) {
 			messages.flags(std::ios::dec);
 			messages << "strtab: " << sh_size << " bytes at 0x";
 			messages.flags(std::ios::hex);
