@@ -36,6 +36,7 @@ using std::ifstream;
 #include "FileLoader.h"
 #include "FileLoader_aout.h"
 #include "FileLoader_ELF.h"
+#include "FileLoader_raw.h"
 
 
 FileLoader::FileLoader(const string& filename)
@@ -43,6 +44,7 @@ FileLoader::FileLoader(const string& filename)
 {
 	m_fileLoaders.push_back(new FileLoader_aout(filename));
 	m_fileLoaders.push_back(new FileLoader_ELF(filename));
+	m_fileLoaders.push_back(new FileLoader_raw(filename));
 }
 
 
@@ -56,22 +58,17 @@ string FileLoader::DetectFileFormat(refcount_ptr<const FileLoaderImpl>& loader) 
 {
 	loader = NULL;
 
+	// TODO: Disk images?
+
 	ifstream file(m_filename.c_str());
 
-	// TODO: Disk images?
-	// TODO: Raw binaries?
-	// Should these be detected by prefixes, as in GXemul 0.4 and below?
-	// Like   loadaddr:skiplen:initialpc:filename
-	// but how about disk images?
-
-	if (!file.is_open())
-		return "Not accessible";
-
 	unsigned char buf[512];
-
 	memset(buf, 0, sizeof(buf));
-	file.read((char *)buf, sizeof(buf));
-	size_t amountRead = file.gcount();
+	size_t amountRead = 0;
+	if (file.is_open()) {
+		file.read((char *)buf, sizeof(buf));
+		amountRead = file.gcount();
+	}
 
 	// Ask all file loaders about how well they handle the format. Return
 	// the format string from the loader that had the highest score.
@@ -87,6 +84,9 @@ string FileLoader::DetectFileFormat(refcount_ptr<const FileLoaderImpl>& loader) 
 			loader = *it;
 		}
 	}
+
+	if (bestMatch == 0.0 && !file.is_open())
+		return "Not accessible";
 
 	return bestFormat;
 }

@@ -25,18 +25,17 @@
  *  SUCH DAMAGE.
  */
 
-#include "components/SGI_IP30_Machine.h"
+#include "components/SGI_IP32_Machine.h"
 #include "ComponentFactory.h"
 #include "GXemul.h"
 
 
-refcount_ptr<Component> SGI_IP30_Machine::Create(const ComponentCreateArgs& args)
+refcount_ptr<Component> SGI_IP32_Machine::Create(const ComponentCreateArgs& args)
 {
 	// Defaults:
 	ComponentCreationSettings settings;
-	settings["cpu"] = "R10000";	// or R12000 or R14000
+	settings["cpu"] = "R5000";	// R5000, RM7000, R10000, R12000
 	settings["ram"] = "0x8000000";
-	settings["ncpus"] = "1";
 
 	if (!ComponentFactory::GetCreationArgOverrides(settings, args))
 		return NULL;
@@ -46,7 +45,7 @@ refcount_ptr<Component> SGI_IP30_Machine::Create(const ComponentCreateArgs& args
 	if (machine.IsNULL())
 		return NULL;
 
-	machine->SetVariableValue("template", "\"sgi_ip30\"");
+	machine->SetVariableValue("template", "\"sgi_ip32\"");
 
 	refcount_ptr<Component> mainbus =
 	    ComponentFactory::CreateComponent("mainbus");
@@ -59,49 +58,32 @@ refcount_ptr<Component> SGI_IP30_Machine::Create(const ComponentCreateArgs& args
 	if (ram.IsNULL())
 		return NULL;
 
-	ram->SetVariableValue("memoryMappedBase", "0x20000000");
+	ram->SetVariableValue("memoryMappedBase", "0");		// TODO?
 	ram->SetVariableValue("memoryMappedSize", settings["ram"]);
 	mainbus->AddChild(ram);
 
-	refcount_ptr<Component> rom = ComponentFactory::CreateComponent("ram");
-	if (rom.IsNULL())
+	refcount_ptr<Component> prom = ComponentFactory::CreateComponent("ram");
+	if (prom.IsNULL())
 		return NULL;
 
-	stringstream tmpss2;
-	tmpss2 << 4 * 1048576;		// TODO: Actual ROM size
-	rom->SetVariableValue("name", "\"rom0\"");
-	rom->SetVariableValue("memoryMappedBase", "0x1fc00000");
-	rom->SetVariableValue("memoryMappedSize", tmpss2.str());
-	rom->SetVariableValue("writeProtect", "true");
-	mainbus->AddChild(rom);
+	prom->SetVariableValue("name", "\"prom0\"");
+	prom->SetVariableValue("memoryMappedBase", "0x1fc00000");
+	prom->SetVariableValue("memoryMappedSize", "0x80000");
+	// The prom (or at least part of it) is flashable/writeable.
+	mainbus->AddChild(prom);
 
-	int ncpus;
-	stringstream tmpss3;
-	tmpss3 << settings["ncpus"];
-	tmpss3 >> ncpus;
-	if (ncpus < 1) {
-		if (args.gxemul != NULL)
-			args.gxemul->GetUI()->ShowDebugMessage("nr of cpus must be more than 0.");
+	refcount_ptr<Component> cpu = ComponentFactory::CreateComponent(
+	    "mips_cpu(model=" + settings["cpu"] + ")");
+	if (cpu.IsNULL())
 		return NULL;
-	}
 
-	for (int i=0; i<ncpus; ++i) {
-		refcount_ptr<Component> cpu =
-		    ComponentFactory::CreateComponent("mips_cpu(model=" + settings["cpu"] + ")");
-		if (cpu.IsNULL())
-			return NULL;
-
-		if (i > 0)
-			cpu->SetVariableValue("paused", "true");
-
-		mainbus->AddChild(cpu);
-	}
+	mainbus->AddChild(cpu);
 
 	return machine;
 }
 
 
-string SGI_IP30_Machine::GetAttribute(const string& attributeName)
+string SGI_IP32_Machine::GetAttribute(const string& attributeName)
 {
 	if (attributeName == "template")
 		return "yes";
@@ -113,11 +95,12 @@ string SGI_IP30_Machine::GetAttribute(const string& attributeName)
 	//	return "yes";
 
 	if (attributeName == "comments")
-		return "For experiments with NetBSD/sgimips, and possibly"
-		    " also Linux for SGI Octane in the future.";
+		return "For experiments with NetBSD/sgimips, OpenBSD/sgi, "
+		    "Linux for O2, and possibly also SGI O2 PROMs and/or"
+		    " IRIX in the future.";
 
 	if (attributeName == "description")
-		return "SGI IP30 (Octane) machine.";
+		return "SGI IP32 (O2) machine.";
 
 	return "";
 }

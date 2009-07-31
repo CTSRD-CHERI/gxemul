@@ -12,7 +12,7 @@ if [ ! -x gxemul ]; then
 fi
 
 for a in doc/machines/*.SKEL; do
-	MACHINE=`echo $a|cut -d _ -f 2 | cut -d . -f 1`
+	MACHINE=`echo $a|cut -d _ -f 2- | cut -d . -f 1`
 	echo Generating final HTML documentation for machine $MACHINE...
 	
 	sed s/XMACHINEX/$MACHINE/g < doc/machine_template.html > doc/machines/machine_$MACHINE.html

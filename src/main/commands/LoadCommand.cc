@@ -163,16 +163,6 @@ bool LoadCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 	if (arguments.size() > 1)
 		path = arguments[1];
 
-	// Is the file accessible at all?
-	{
-		std::ifstream file(filename.c_str());
-		if (file.fail()) {
-			ShowMsg(gxemul, "Unable to open " + filename +
-			    " for reading.\n");
-			return false;
-		}
-	}
-
 	// Figure out the component path, if it was specified.
 	refcount_ptr<Component> specifiedComponent;
 	if (path != "") {

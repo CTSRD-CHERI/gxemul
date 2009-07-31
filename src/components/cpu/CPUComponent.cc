@@ -108,7 +108,7 @@ int CPUComponent::GetDyntransICshift() const
 }
 
 
-void (*CPUComponent::GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const
+void (*CPUComponent::GetDyntransToBeTranslated())(CPUComponent* cpu, DyntransIC* ic) const
 {
 	std::cerr << "CPUComponent::GetDyntransToBeTranslated() must be overridden"
 	    " by the specific CPU implementation.\n";

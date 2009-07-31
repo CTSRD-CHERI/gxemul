@@ -225,9 +225,9 @@ bool MIPS_CPUComponent::VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	if (Is32Bit())
 		vaddr = (int32_t)vaddr;
 
-	// TODO. For now, just return the lowest 30 bits.
+	// TODO. For now, just return the lowest 29 bits.
 	if (vaddr >= 0xffffffff80000000 && vaddr < 0xffffffffc0000000) {
-		paddr = vaddr & 0x3fffffff;
+		paddr = vaddr & 0x1fffffff;
 		writable = true;
 		return true;
 	}

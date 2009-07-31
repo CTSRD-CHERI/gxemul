@@ -3950,3 +3950,4 @@ Changelog for GXemul:
 		[Re]implementing some simple MIPS and M88K instructions.
 		Arguments can now be passed during component creation, e.g.
 		nr CPUs, CPU model, or ram amount for a template machine.
+		Adding a 'raw' file loader, and a dummy SGI IP32 template.

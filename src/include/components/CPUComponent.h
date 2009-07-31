@@ -191,7 +191,7 @@ protected:
 					bool& writable) = 0;
 
 	virtual int GetDyntransICshift() const;
-	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;
+	virtual void (*GetDyntransToBeTranslated())(CPUComponent* cpu, DyntransIC* ic) const;
 
 	int DyntransExecute(GXemul* gxemul, int nrOfCycles);
 	void DyntransToBeTranslatedBegin(struct DyntransIC*);
