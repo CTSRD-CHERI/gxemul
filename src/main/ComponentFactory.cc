@@ -284,13 +284,13 @@ static void Test_ComponentFactory_SimpleDummy()
 static void Test_ComponentFactory_FromTemplate()
 {
 	refcount_ptr<Component> component =
-	    ComponentFactory::CreateComponent("mvme187");
+	    ComponentFactory::CreateComponent("testmips");
 	UnitTest::Assert("component should be possible to create from template",
 	    component.IsNULL() == false);
 
-	UnitTest::Assert("the class name of a mvme187 should be 'machine'",
+	UnitTest::Assert("the class name should be 'machine'",
 	    component->GetClassName(), "machine");
-	UnitTest::Assert("the mvme187 component should have children",
+	UnitTest::Assert("the component should have children",
 	    component->GetChildren().size() > 0);
 
 	refcount_ptr<Component> clone = component->Clone();

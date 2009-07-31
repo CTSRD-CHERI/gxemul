@@ -752,8 +752,8 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 
 string MIPS_CPUComponent::GetAttribute(const string& attributeName)
 {
-	// if (attributeName == "stable")
-	//	return "yes";
+	if (attributeName == "stable")
+		return "yes";
 
 	if (attributeName == "description")
 		return "MIPS processor.";
@@ -910,8 +910,8 @@ DYNTRANS_INSTR(MIPS_CPUComponent,ToBeTranslated)
 
 static void Test_MIPS_CPUComponent_IsStable()
 {
-	UnitTest::Assert("the MIPS_CPUComponent should not be stable yet",
-	    !ComponentFactory::HasAttribute("mips_cpu", "stable"));
+	UnitTest::Assert("the MIPS_CPUComponent should be stable",
+	    ComponentFactory::HasAttribute("mips_cpu", "stable"));
 }
 
 static void Test_MIPS_CPUComponent_Create()

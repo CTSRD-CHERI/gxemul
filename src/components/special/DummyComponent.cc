@@ -1131,11 +1131,11 @@ UNITTESTS(DummyComponent)
 {
 	ComponentFactory::RegisterComponentClass("dummy2",
 	    DummyComponentWithAllVariableTypes::Create,
-	    Component::GetAttribute);
+	    DummyComponent::GetAttribute);
 
 	ComponentFactory::RegisterComponentClass("testcounter",
 	    DummyComponentWithCounter::Create,
-	    Component::GetAttribute);
+	    DummyComponent::GetAttribute);
 
 	// Creation using CreateComponent
 	UNITTEST(Test_DummyComponent_CreateComponent);
