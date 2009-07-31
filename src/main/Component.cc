@@ -354,10 +354,16 @@ double Component::GetCurrentFrequency() const
 }
 
 
+RootComponent* Component::AsRootComponent()
+{
+	// Default implementation (the base Component class) is not a RootComponent.
+	return NULL;
+}
+
+
 CPUComponent* Component::AsCPUComponent()
 {
 	// Default implementation (the base Component class) is not a CPU.
-
 	return NULL;
 }
 
@@ -366,7 +372,6 @@ AddressDataBus* Component::AsAddressDataBus()
 {
 	// Default implementation (the base Component class) is not an
 	// address data bus.
-
 	return NULL;
 }
 
@@ -553,6 +558,26 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 	}
 
 	return result;
+}
+
+
+UI* Component::GetUI()
+{
+	Component* root = this;
+	while (root->GetParent() != NULL)
+		root = root->GetParent();
+
+	RootComponent* rootComponent = root->AsRootComponent();
+	if (rootComponent == NULL)
+		return NULL;
+
+	GXemul* gxemul = rootComponent->GetOwner();
+	if (gxemul == NULL)
+		return NULL;
+
+	// TODO: Return NULL if the UI has debug messages turned off.
+
+	return gxemul->GetUI();
 }
 
 

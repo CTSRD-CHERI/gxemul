@@ -62,9 +62,21 @@ public:
 	/**
 	 * \brief Constructs a RootComponent.
 	 */
-	RootComponent();
+	RootComponent(GXemul* owner = NULL);
+
+	virtual RootComponent* AsRootComponent()
+	{
+		return this;
+	}
 
 	virtual bool PreRunCheckForComponent(GXemul* gxemul);
+
+	GXemul* GetOwner()
+	{
+		return m_gxemul;
+	}
+
+	void SetOwner(GXemul* owner);
 
 
 	/********************************************************************/
@@ -72,6 +84,9 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 private:
+	// Pointer to owner (may be NULL):
+	GXemul*		m_gxemul;
+
 	// Model:
 	string		m_accuracy;
 };

@@ -86,9 +86,19 @@ MAIN GOAL for 0.6.0:
 		[ ]  "c" = "continue", "backward-continue" commands
 		[ ]  Simulation across multiple hosts?
 
-  [ ]	NEW DYNTRANS IMPLEMENTATION, ...
+  [/]	NEW DYNTRANS IMPLEMENTATION, ...
 
-	[ ]  Basic run loop.
+	[/]  Basic run loop.
+		[ ]  Dyntrans page allocation
+		[/]  PC to pointers
+		[ ]  Large chunks is safe vs "single stepping" dyntrans...
+		[ ]  Break-out-of-loop IC.
+		[/]  Pointers back to PC. (I.e. "synch pc".)
+		[ ]  Unit tests.
+
+	[ ]  Interrupts should be cycle accurate, and affect the cpu's
+	     m_nextIC (and other state, such as processor status registers)
+	     _immediately_.
 
 	[ ]  Helpers for CPU implementations:
 		dyntrans pages?
@@ -110,11 +120,6 @@ MAIN GOAL for 0.6.0:
 
 	[ ]  Multi-encoding ISAs, such as MIPS (MIPS16), ARM (Thumb), or
 	     amd64 (16/32/64-bit).
-
-	[ ]  Native translation possibilities.
-
-	[ ]  Basically the same as dyntrans ideas as in GXemul pre-0.6.0 should
-	     work! However, try to avoid the "macro magic".
 
 	[ ]  Native code generation? (Not at first...)
 
@@ -161,6 +166,10 @@ MAIN GOAL for 0.6.0:
 	[ ] Unit tests! When executed on a host which has native code generation,
 	    try both with and without native code generation, and with and without
 	    other instruction combinations.
+
+  [X]	GXemul reference/pointer from Component? So that debug messages etc can
+  	be outputted, without having to pass along a GXemul pointer all the time!
+	[ ] Actually use this somewhere. (It's not tested yet.)
 
   [ ]	Address formats?
   	"xxxx:yyyy", "xxxx:yyyyyyyy", "zzzzzzzzzzzzzzzz" for amd64, plus i/o ports

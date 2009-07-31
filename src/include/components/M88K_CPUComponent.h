@@ -356,7 +356,16 @@ protected:
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	    bool& writable);
 
+	virtual int GetDyntransICshift() const;
+	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;
+
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
+
+private:
+	DECLARE_DYNTRANS_INSTR(todo); // placeholder for future instructions
+
+	void Translate(uint32_t iword, struct DyntransIC* ic);
+	DECLARE_DYNTRANS_INSTR(ToBeTranslated);
 
 private:
 	/*

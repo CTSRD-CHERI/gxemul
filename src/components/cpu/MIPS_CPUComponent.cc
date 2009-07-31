@@ -187,17 +187,7 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 
 int MIPS_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 {
-	if (gxemul->GetRunState() == GXemul::SingleStepping) {
-		stringstream disasm;
-		Unassemble(1, false, m_pc, disasm);
-		gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
-	}
-
-	// TODO: Replace this bogus stuff with actual instruction execution.
-	m_gpr[1] += nrOfCycles * 42;
-	m_pc += nrOfCycles * sizeof(uint32_t);
-
-	return nrOfCycles;
+	return DyntransExecute(gxemul, nrOfCycles);
 }
 
 

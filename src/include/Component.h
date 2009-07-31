@@ -39,6 +39,8 @@ class AddressDataBus;
 class Component;
 class CPUComponent;
 class GXemul;
+class RootComponent;
+class UI;
 
 typedef vector< refcount_ptr<Component> > Components;
 
@@ -227,6 +229,14 @@ public:
 	 * @return	The component's frequency in Hz.
 	 */
 	virtual double GetCurrentFrequency() const;
+
+	/**
+	 * \brief Returns the component's RootComponent interface.
+	 *
+	 * @return A pointer to the component as a %RootComponent, or
+	 * NULL if the component isn't a %RootComponent.
+	 */
+	virtual RootComponent* AsRootComponent();
 
 	/**
 	 * \brief Returns the component's CPUComponent interface.
@@ -622,6 +632,15 @@ protected:
 	 * the call to the base class' FlushCachedStateForComponent() function.
 	 */
 	virtual void FlushCachedStateForComponent();
+
+	/**
+	 * \brief Gets an UI reference for outputting debug messages during
+	 * runtime.
+	 *
+	 * @return NULL if debug messages are turned off, or if there is no
+	 * owning GXemul instance. Otherwise, a pointer to an UI.
+	 */
+	 UI* GetUI();
 
 private:
 	/**

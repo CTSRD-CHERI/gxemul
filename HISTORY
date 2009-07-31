@@ -3942,3 +3942,8 @@ Changelog for GXemul:
 		RAMComponent now clears ram on reset.
 		Implementing a symbol registry for the new framework (which
 		is per CPU).
+20090729	Slowly beginning to reimplement dyntrans in C++: Beginning on
+		the CPUComponent::DyntransExecute core loop, and some
+		basic structures. MIPS and M88K cpus call DyntransExecute.
+20090731	Continuing on the new dyntrans core. The first instruction (a
+		M88K subu) can be executed on a dummy IC page.

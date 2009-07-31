@@ -169,7 +169,7 @@ GXemul::GXemul()
 	, m_commandInterpreter(this)
 	, m_runState(Paused)
 	, m_nrOfSingleStepsLeft(1)
-	, m_rootComponent(new RootComponent)
+	, m_rootComponent(new RootComponent(this))
 {
 	ClearEmulation();
 }
@@ -180,7 +180,7 @@ void GXemul::ClearEmulation()
 	if (GetRunState() == Running)
 		SetRunState(Paused);
 
-	m_rootComponent = new RootComponent;
+	m_rootComponent = new RootComponent(this);
 	m_emulationFileName = "";
 
 	GetUI()->UpdateUI();
@@ -697,7 +697,19 @@ const refcount_ptr<Component> GXemul::GetRootComponent() const
 
 void GXemul::SetRootComponent(refcount_ptr<Component> newRootComponent)
 {
-	assert(!newRootComponent.IsNULL());
+	if (newRootComponent.IsNULL()) {
+		std::cerr << "GXemul::SetRootComponent: NULL\n";
+		throw std::exception();
+	}
+
+	RootComponent* rootComponent = newRootComponent->AsRootComponent();
+	if (rootComponent == NULL) {
+		std::cerr << "GXemul::SetRootComponent: not a RootComponent\n";
+		throw std::exception();
+	}
+
+	rootComponent->SetOwner(this);
+
 	m_rootComponent = newRootComponent;
 
 	GetUI()->UpdateUI();
@@ -886,8 +898,9 @@ void GXemul::Execute(const int longestTotalRun)
 					// Execute one step...
 					int n = componentsAndFrequencies[k].component->Execute(this, 1);
 					if (n != 1) {
-						std::cerr << "TODO: execute failed, single-step.\n";
-						throw std::exception();
+						GetUI()->ShowDebugMessage("Single-stepping aborted.\n");
+						SetRunState(Paused);
+						return;
 					}
 					
 					// ... and write back the number of executed steps:
@@ -993,21 +1006,22 @@ void GXemul::Execute(const int longestTotalRun)
 
 					// Execute the calculated number of steps...
 					int n = componentsAndFrequencies[k].component->Execute(this, toExecute);
-					if (n != toExecute) {
-						std::cerr << "TODO: execute failed, continuous.\n";
-						throw std::exception();
-					}
 
 					// ... and write back the number of executed steps:
-					uint64_t stepsExecutedSoFar = toExecute +
+					uint64_t stepsExecutedSoFar = n +
 					    componentsAndFrequencies[k].step->ToInteger();
 					componentsAndFrequencies[k].step->SetValue(stepsExecutedSoFar);
 
 					if (k == fastestComponentIndex)
-						maxExecuted = toExecute;
+						maxExecuted = n;
+
+					if (n != toExecute) {
+						GetUI()->ShowDebugMessage("Continuous execution aborted.\n");
+						SetRunState(Paused);
+					}
 				}
 
-				if (maxExecuted == 0) {
+				if (maxExecuted == 0 && GetRunState() == Running) {
 					std::cerr << "maxExecuted=0. internal error\n";
 					throw std::exception();
 				}

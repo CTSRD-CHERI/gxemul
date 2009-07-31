@@ -46,7 +46,7 @@ CPUComponent::CPUComponent(const string& className, const string& cpuArchitectur
 	, m_hasUsedUnassemble(false)
 	, m_isBigEndian(true)
 	, m_addressDataBus(NULL)
-	, m_currentCodePage(NULL)
+	, m_nextIC(NULL)
 {
 	AddVariable("architecture", &m_cpuArchitecture);
 	AddVariable("pc", &m_pc);
@@ -83,6 +83,246 @@ void CPUComponent::ResetState()
 	m_symbolRegistry.Clear();
 
 	Component::ResetState();
+}
+
+
+void CPUComponent::DyntransInit()
+{
+	m_nextIC = NULL;
+	m_ICpage = NULL;
+
+	m_dyntransICshift = GetDyntransICshift();
+
+	m_dyntransICentriesPerPage = m_pageSize >> m_dyntransICshift;
+	m_dyntransPageMask = (m_pageSize - 1) - ((1 << m_dyntransICshift) - 1);
+}
+
+
+int CPUComponent::GetDyntransICshift() const
+{
+	std::cerr << "CPUComponent::GetDyntransICshift() must be overridden"
+	    " by the specific CPU implementation.\n";
+	throw std::exception();
+}
+
+
+void (*CPUComponent::GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const
+{
+	std::cerr << "CPUComponent::GetDyntransToBeTranslated() must be overridden"
+	    " by the specific CPU implementation.\n";
+	throw std::exception();
+}
+
+
+/*
+ * Dynamic translation core
+ * ------------------------
+ *
+ * The core of GXemul's dynamic translation is a simple function call to
+ * an entry in an array of pointers. Each call also moves the pointer of the
+ * next function call to the next entry in the array. For most simple
+ * instruction implementations, the instruction call pointer (m_nextIC) does
+ * not have to be modified, because it is assumed that an instruction will
+ * change the program counter to the next instruction.
+ *
+ * Before starting the main loop, the pc is used to look up the correct
+ * m_nextIC value, by calling DyntransPCtoPointers().
+ *
+ * During the loop, the pc value is _not_ necessarily updated for each
+ * instruction call. Instead, the low bits of the pc value should be considered
+ * meaningless, and the offset of the m_nextIC pointer within the current
+ * code page (pointed to by m_ICpage) defines the lowest pc bits.
+ *
+ * After completing the main loop, the pc value is resynched by calling
+ * DyntransResyncPC().
+ */
+int CPUComponent::DyntransExecute(GXemul* gxemul, int nrOfCycles)
+{
+	if (gxemul->GetRunState() == GXemul::SingleStepping) {
+		if (nrOfCycles != 1) {
+			std::cerr << "Internal error: Single stepping,"
+			    " but nrOfCycles = " << nrOfCycles << ".\n";
+			throw std::exception();
+		}
+
+		stringstream disasm;
+		Unassemble(1, false, m_pc, disasm);
+		gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
+	}
+
+	DyntransInit();
+
+	DyntransPCtoPointers();
+
+	struct DyntransIC *ic = m_nextIC;
+	if (m_nextIC == NULL || m_ICpage == NULL) {
+		std::cerr << "Internal error: m_nextIC or m_ICpage is NULL.\n";
+		throw std::exception();
+	}
+
+	// TODO: Optimized calls if we're far enough away from a hazard,
+	// so that we can run e.g. instruction combinations
+
+	// TODO: Optimized loops of 120 IC calls...
+
+	// TODO: Possibility to break out. These should not count as
+	// executed cycles.
+
+/*
+ * The normal instruction execution core: Get the instruction call pointer
+ * (and move the nextIC to the following instruction in advance), then
+ * execute the instruction call by calling its f.
+ */
+#define IC	ic = m_nextIC ++; ic->f(this, ic);
+
+	m_executedCycles = nrOfCycles;
+	for (int i=0; i<nrOfCycles; i++) {
+		IC
+	}
+
+	// TODO: ... then slowly execute the last few instructions.
+
+	DyntransResyncPC();
+
+	// If execution aborted, then reset the aborting instruction slot
+	// to the to-be-translated function:
+	if (m_nextIC->f == instr_abort)
+		m_nextIC->f = GetDyntransToBeTranslated();
+
+	return m_executedCycles;
+}
+
+
+void CPUComponent::DyntransPCtoPointers()
+{
+	// TODO. Page lookup.
+	
+	// TODO. If page lookup failed: allocate new page.
+
+	// TODO: Move this to a helper function.
+	// Fill the newly allocated page with suitable function pointers.
+	if (m_dummyICpage.size() == 0) {
+		m_dummyICpage.resize(m_dyntransICentriesPerPage + 2);
+
+		// Fill the page with "to be translated" entries, which when
+		// executed will read the instruction from memory, attempt to
+		// translate it, and then execute it.
+		void (*f)(CPUComponent*, DyntransIC*) = GetDyntransToBeTranslated();
+		for (size_t i=0; i<m_dummyICpage.size(); ++i) {
+			m_dummyICpage[i].f = f;
+		}
+
+		// ... and set the entries after the last instruction slot to
+		// special "end of page" handlers.
+		m_dummyICpage[m_dyntransICentriesPerPage + 0].f = CPUComponent::instr_endOfPage;
+		m_dummyICpage[m_dyntransICentriesPerPage + 1].f = CPUComponent::instr_endOfPage2;
+	}
+
+	// TODO: m_dummyICpage, change to whatever was returned from the code above.
+	m_ICpage = &m_dummyICpage[0];
+
+	// Here, m_ICpage points to a valid page. Calculate m_nextIC from
+	// the low bits of m_pc:
+	int offsetWithinPage = (m_pc & m_dyntransPageMask) >> m_dyntransICshift;
+	m_nextIC = m_ICpage + offsetWithinPage;
+}
+
+
+void CPUComponent::DyntransResyncPC()
+{
+	int offsetWithinICpage = (size_t)m_nextIC - (size_t)m_ICpage;
+	int instructionIndex = offsetWithinICpage / sizeof(struct DyntransIC);
+
+	// On a page with e.g. 1024 instruction slots, instructionIndex is usually
+	// between 0 and 1023. This means that the PC points to within this
+	// page.
+	//
+	// We synchronize the PC by clearing out the bits within the IC page,
+	// and then adding the offset to the instruction.
+	if (instructionIndex >= 0 && instructionIndex < m_dyntransICentriesPerPage) {
+		m_pc &= ~m_dyntransPageMask;
+		m_pc += (instructionIndex << m_dyntransICshift);
+		return;
+	}
+
+	// However, the instruction index may point outside the IC page.
+	// This happens when synching the PC just after the last instruction
+	// on a page has been executed. This means that we set the PC to
+	// the start of the next page.
+	if (instructionIndex == m_dyntransICentriesPerPage) {
+		m_pc &= ~m_dyntransPageMask;
+		m_pc += (m_dyntransPageMask + (1 << m_dyntransICshift));
+		return;
+	}
+
+	if (instructionIndex == m_dyntransICentriesPerPage + 1) {
+		std::cerr << "TODO: DyntransResyncPC: Second end-of-page slot.\n";
+		// This may happen for delay-slot architectures.
+		throw std::exception();
+	}
+
+	// We can arrive here if m_nextIC pointed outside of the IC page.
+	// This is ok if m_nextIC is a "break out" instruction call, for
+	// early termination of the dyntrans core loop.
+
+	// TODO: Check to make sure that it is the break out ic!
+}
+
+
+void CPUComponent::DyntransToBeTranslatedBegin(struct DyntransIC* ic)
+{
+	// Resynchronize the PC to the instruction currently being translated.
+	// (m_nextIC should already have been increased, to point to the _next_
+	// instruction slot.)
+	m_nextIC = ic;
+	DyntransResyncPC();
+
+	// TODO: Check for m_pc breakpoints etc.
+
+	// First, let's assume that the translation will fail.
+	ic->f = NULL;
+}
+
+
+bool CPUComponent::DyntransReadInstruction(uint32_t& iword)
+{
+	// TODO: Fast lookup.
+
+	AddressSelect(m_pc);
+	bool readable = ReadData(iword, m_isBigEndian? BigEndian : LittleEndian);
+
+	if (!readable) {
+		UI* ui = GetUI();
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "instruction at 0x" << m_pc << " could not be read!";
+			ui->ShowDebugMessage(this, ss.str());
+		}
+		return false;
+	}
+
+	return true;
+}
+
+
+void CPUComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
+{
+	if (ic->f == NULL) {
+		UI* ui = GetUI();
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "instruction translation failed at 0x" << m_pc << "!";
+			ui->ShowDebugMessage(this, ss.str());
+		}
+
+		ic->f = instr_abort;
+	}
+
+	// Finally, execute the translated instruction.
+	m_nextIC = ic + 1;
+	ic->f(this, ic);
 }
 
 
@@ -345,7 +585,6 @@ AddressDataBus * CPUComponent::AsAddressDataBus()
 void CPUComponent::FlushCachedStateForComponent()
 {
 	m_addressDataBus = NULL;
-	m_currentCodePage = NULL;
 }
 
 
@@ -428,120 +667,6 @@ void CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& arguments
 {
 	gxemul->GetUI()->ShowDebugMessage("The registers method has not yet "
 	    "been implemented for this CPU type. TODO.\n");
-}
-
-
-bool CPUComponent::ReadInstructionWord(uint16_t& iword, uint64_t vaddr)
-{
-	if (!LookupAddressDataBus())
-		return false;
-
-	uint64_t paddr;
-	bool writable;
-	VirtualToPhysical(vaddr, paddr, writable);
-
-	if (m_currentCodePage == NULL) {
-		// First attempt: Try to look up the code page in memory,
-		// so that we can read directly from it.
-
-		// TODO
-		// m_addressDataBus->LookupPage(addr); something
-	}
-
-	int offsetInCodePage = vaddr & (m_pageSize - 1);
-
-	if (m_currentCodePage == NULL) {
-		// If the lookup failed, read using the AddressDataBus
-		// interface manually.
-		m_addressDataBus->AddressSelect(paddr);
-		bool success = m_addressDataBus->ReadData(iword,
-		    m_isBigEndian? BigEndian : LittleEndian);
-		
-		if (!success)
-			return false;
-	} else {
-		// Read directly from the page:
-		uint16_t itmp = ((uint16_t *)m_currentCodePage)
-		    [offsetInCodePage >> 1];
-
-		if (m_isBigEndian)
-			iword = BE16_TO_HOST(itmp);
-		else
-			iword = LE16_TO_HOST(itmp);
-	}
-
-	// Update the emulated PC after the instruction has been
-	// read. Also, when going off the edge of a page, or when
-	// branching to a different page, the current code page
-	// should be reset to NULL.
-	m_pc += sizeof(iword);
-	offsetInCodePage += sizeof(iword);
-	if (offsetInCodePage >= m_pageSize)
-		m_currentCodePage = NULL;
-
-	return true;
-}
-
-
-bool CPUComponent::ReadInstructionWord(uint32_t& iword, uint64_t vaddr)
-{
-	if (!LookupAddressDataBus())
-		return false;
-
-	uint64_t paddr;
-	bool writable;
-	VirtualToPhysical(vaddr, paddr, writable);
-
-	if (m_currentCodePage == NULL) {
-		// First attempt: Try to look up the code page in memory,
-		// so that we can read directly from it.
-
-		// TODO
-		// m_addressDataBus->LookupPage(addr); something
-	}
-
-	int offsetInCodePage = vaddr & (m_pageSize - 1);
-
-	if (m_currentCodePage == NULL) {
-		// If the lookup failed, read using the AddressDataBus
-		// interface manually.
-		m_addressDataBus->AddressSelect(paddr);
-		bool success = m_addressDataBus->ReadData(iword,
-		    m_isBigEndian? BigEndian : LittleEndian);
-		
-		if (!success)
-			return false;
-	} else {
-		// Read directly from the page:
-		uint32_t itmp = ((uint32_t *)m_currentCodePage)
-		    [offsetInCodePage >> 2];
-
-		if (m_isBigEndian)
-			iword = BE32_TO_HOST(itmp);
-		else
-			iword = LE32_TO_HOST(itmp);
-	}
-
-	// Update the emulated PC after the instruction has been
-	// read. Also, when going off the edge of a page, or when
-	// branching to a different page, the current code page
-	// should be reset to NULL.
-	m_pc += sizeof(iword);
-	offsetInCodePage += sizeof(iword);
-	if (offsetInCodePage >= m_pageSize)
-		m_currentCodePage = NULL;
-	
-	return true;
-}
-
-
-bool CPUComponent::VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
-   bool& writable)
-{
-	// Dummy implementation, return physical address = virtual address.
-	paddr = vaddr;
-	writable = true;
-	return true;
 }
 
 
@@ -678,6 +803,49 @@ bool CPUComponent::WriteData(const uint64_t& data, Endianness endianness)
 /*****************************************************************************/
 
 
+DYNTRANS_INSTR(CPUComponent,nop)
+{
+}
+
+
+DYNTRANS_INSTR(CPUComponent,abort)
+{
+	// Cycle reduction:
+	-- cpubase->m_executedCycles;
+
+	cpubase->m_nextIC = ic;
+}
+
+
+DYNTRANS_INSTR(CPUComponent,endOfPage)
+{
+	std::cerr << "TODO: endOfPage\n";
+	throw std::exception();
+}
+
+
+DYNTRANS_INSTR(CPUComponent,endOfPage2)
+{
+	std::cerr << "TODO: endOfPage2\n";
+	throw std::exception();
+}
+
+
+DYNTRANS_INSTR(CPUComponent,add_u32_u32_immu32)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) + (uint32_t)ic->arg[2];
+}
+
+
+DYNTRANS_INSTR(CPUComponent,sub_u32_u32_immu32)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) - (uint32_t)ic->arg[2];
+}
+
+
+/*****************************************************************************/
+
+
 #ifdef WITHUNITTESTS
 
 #include "ComponentFactory.h"
@@ -741,6 +909,14 @@ static void Test_CPUComponent_ResetSteps()
 	UnitTest::Assert("steps should be 0", cpu->GetVariable("step")->ToInteger(), 0);
 }
 
+static void Test_CPUComponent_Dyntrans_PreReq()
+{
+	struct DyntransIC ic;
+
+	UnitTest::Assert("nr of dyntrans args too few", N_DYNTRANS_IC_ARGS >= 3);
+	UnitTest::Assert("size of dyntrans args to small", sizeof(ic.arg[0]) >= sizeof(uint32_t));
+}
+
 UNITTESTS(CPUComponent)
 {
 	UNITTEST(Test_CPUComponent_IsStable);
@@ -748,6 +924,9 @@ UNITTESTS(CPUComponent)
 	UNITTEST(Test_CPUComponent_PreRunCheck);
 	UNITTEST(Test_CPUComponent_Methods_Reexecutableness);
 	UNITTEST(Test_CPUComponent_ResetSteps);
+
+	// Dyntrans:
+	UNITTEST(Test_CPUComponent_Dyntrans_PreReq);
 }
 
 #endif

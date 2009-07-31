@@ -164,21 +164,23 @@ enum Endianness
 #define	EMUL_LITTLE_ENDIAN		1
 #define	EMUL_BIG_ENDIAN			2
 
+#define	SWAP32(x)	    ((((x) & 0xff000000) >> 24) | (((x)&0xff) << 24) | \
+			     (((x) & 0xff0000) >> 8) | (((x) & 0xff00) << 8))
+#define	SWAP16(x)	    ((((x) & 0xff00) >> 8) | (((x)&0xff) << 8))
+
 #ifdef HOST_LITTLE_ENDIAN
 #define	LE16_TO_HOST(x)	    (x)
-#define	BE16_TO_HOST(x)	    ((((x) & 0xff00) >> 8) | (((x)&0xff) << 8))
+#define	BE16_TO_HOST(x)	    (SWAP16(x))
 #else
-#define	LE16_TO_HOST(x)	    ((((x) & 0xff00) >> 8) | (((x)&0xff) << 8))
+#define	LE16_TO_HOST(x)	    (SWAP16(x))
 #define	BE16_TO_HOST(x)	    (x)
 #endif
 
 #ifdef HOST_LITTLE_ENDIAN
 #define	LE32_TO_HOST(x)	    (x)
-#define	BE32_TO_HOST(x)	    ((((x) & 0xff000000) >> 24) | (((x)&0xff) << 24) | \
-			     (((x) & 0xff0000) >> 8) | (((x) & 0xff00) << 8))
+#define	BE32_TO_HOST(x)	    (SWAP32(x))
 #else
-#define	LE32_TO_HOST(x)	    ((((x) & 0xff000000) >> 24) | (((x)&0xff) << 24) | \
-			     (((x) & 0xff0000) >> 8) | (((x) & 0xff00) << 8))
+#define	LE32_TO_HOST(x)	    (SWAP32(x))
 #define	BE32_TO_HOST(x)	    (x)
 #endif
 

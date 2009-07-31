@@ -39,6 +39,35 @@
 class AddressDataBus;
 
 
+#define N_DYNTRANS_IC_ARGS	3
+/**
+ * \brief A dyntrans instruction call.
+ *
+ * f points to a function to be executed.
+ * arg[] contains arguments, such as pointers to registers.
+ *
+ * The type of arg is size_t, so that it can hold a host pointer; otherwise
+ * the requirement is that arg can hold at least an uint32_t. (uint64_t is
+ * not required.)
+ */
+struct DyntransIC
+{
+	void (*f)(CPUComponent*, DyntransIC*);
+	size_t arg[N_DYNTRANS_IC_ARGS];
+};
+
+
+/*
+ * Some helpers for implementing dyntrans instructions.
+ */
+#define DECLARE_DYNTRANS_INSTR(name) static void instr_##name(CPUComponent* cpubase, DyntransIC* ic);
+#define DYNTRANS_INSTR(class,name) void class::instr_##name(CPUComponent* cpubase, DyntransIC* ic)
+#define DYNTRANS_INSTR_HEAD(class)  class* cpu = (class*) cpubase;
+
+#define REG32(arg)	(*((uint32_t*)arg))
+#define REG64(arg)	(*((uint64_t*)arg))
+
+
 /**
  * \brief A Component base-class for processors.
  */
@@ -141,12 +170,7 @@ public:
 protected:
 	virtual void FlushCachedStateForComponent();
 	virtual bool PreRunCheckForComponent(GXemul* gxemul);
-
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
-
-	// Used by all (or most) CPU implementations:
-	bool ReadInstructionWord(uint16_t& iword, uint64_t vaddr);
-	bool ReadInstructionWord(uint32_t& iword, uint64_t vaddr);
 
 	uint64_t Unassemble(int nRows, bool indicatePC, uint64_t vaddr, ostream& output);
 
@@ -154,8 +178,6 @@ protected:
 	 * \brief Virtual to physical address translation (MMU).
 	 *
 	 * This function should be overridden in each CPU implementation.
-	 * The default implementation is just a dummy, which returns paddr =
-	 * vaddr for all addresses, and everything is writable.
 	 *
 	 * @param vaddr The virtual address to translate.
 	 * @param paddr The return value; physical address.
@@ -166,10 +188,48 @@ protected:
 	 *	translation error.
 	 */
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
-					bool& writable);
+					bool& writable) = 0;
+
+	virtual int GetDyntransICshift() const;
+	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;
+
+	int DyntransExecute(GXemul* gxemul, int nrOfCycles);
+	void DyntransToBeTranslatedBegin(struct DyntransIC*);
+	bool DyntransReadInstruction(uint32_t& iword);
+	void DyntransToBeTranslatedDone(struct DyntransIC*);
 
 private:
+	void DyntransInit();
+
+	/**
+	 * \brief Calculate m_nextIC and m_ICpage, based on m_pc, before running
+	 *	the dyntrans core loop.
+	 *
+	 * This function may return pointers to within an existing translation
+	 * page (hopefully the most common case, since it is the fastest), or
+	 * it may allocate a new empty page.
+	 */
+	void DyntransPCtoPointers();
+
+	/**
+	 * \brief Calculate m_pc based on m_nextIC and m_ICpage, after running
+	 *	the dyntrans core loop.
+	 */
+	void DyntransResyncPC();
+
 	bool LookupAddressDataBus(GXemul* gxemul = NULL);
+
+protected:
+	/*
+	 * Generic dyntrans instruction implementations, that may be used by
+	 * several different cpu architectures.
+	 */
+	DECLARE_DYNTRANS_INSTR(nop);
+	DECLARE_DYNTRANS_INSTR(abort);
+	DECLARE_DYNTRANS_INSTR(endOfPage);
+	DECLARE_DYNTRANS_INSTR(endOfPage2);
+	DECLARE_DYNTRANS_INSTR(add_u32_u32_immu32);
+	DECLARE_DYNTRANS_INSTR(sub_u32_u32_immu32);
 
 protected:
 	// Variables common to all (or most) kinds of CPUs:
@@ -182,15 +242,22 @@ protected:
 	bool			m_hasUsedUnassemble;
 	bool			m_isBigEndian;
 
-	// Cached state:
+	// Cached/volatile state:
 	AddressDataBus *	m_addressDataBus;
-	const uint8_t *		m_currentCodePage;
-
-	// Other volatile state:
 	uint64_t		m_addressSelect;
+	struct DyntransIC *	m_ICpage;
+	struct DyntransIC *	m_nextIC;
+	int			m_dyntransPageMask;
+	int			m_dyntransICentriesPerPage;
+	int			m_dyntransICshift;
+	int			m_executedCycles;
 
 private:
 	SymbolRegistry		m_symbolRegistry;
+
+	// DUMMY/TEST
+	vector< struct DyntransIC > m_dummyICpage;
+	uint32_t		m_dyntransTestVariable;
 };
 
 

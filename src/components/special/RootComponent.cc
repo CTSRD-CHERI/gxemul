@@ -30,8 +30,9 @@
 #include "GXemul.h"
 
 
-RootComponent::RootComponent()
+RootComponent::RootComponent(GXemul* owner)
 	: Component("root", "root")
+	, m_gxemul(owner)
 	, m_accuracy("cycle")
 {
 	SetVariableValue("name", "\"root\"");
@@ -48,6 +49,12 @@ bool RootComponent::PreRunCheckForComponent(GXemul* gxemul)
 	}
 
 	return true;
+}
+
+
+void RootComponent::SetOwner(GXemul* owner)
+{
+	m_gxemul = owner;
 }
 
 
@@ -100,6 +107,8 @@ UNITTESTS(RootComponent)
 	UNITTEST(Test_RootComponent_CreateComponent);
 	UNITTEST(Test_RootComponent_InitialVariables);
 	UNITTEST(Test_RootComponent_AccuracyValues);
+
+	// TODO: Test owner
 }
 
 #endif

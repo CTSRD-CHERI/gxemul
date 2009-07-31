@@ -247,17 +247,20 @@ void M88K_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 
 int M88K_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 {
-	if (gxemul->GetRunState() == GXemul::SingleStepping) {
-		stringstream disasm;
-		Unassemble(1, false, m_pc, disasm);
-		gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
-	}
+	return DyntransExecute(gxemul, nrOfCycles);
+}
 
-	// TODO: Replace this bogus stuff with actual instruction execution.
-	m_r[1] += nrOfCycles * 42;
-	m_pc += nrOfCycles * sizeof(uint32_t);
 
-	return nrOfCycles;
+int M88K_CPUComponent::GetDyntransICshift() const
+{
+	// 4 bytes per instruction, i.e. shift is 2 bits.
+	return 2;
+}
+
+
+void (*M88K_CPUComponent::GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const
+{
+	return instr_ToBeTranslated;
 }
 
 
@@ -802,6 +805,95 @@ string M88K_CPUComponent::GetAttribute(const string& attributeName)
 /*****************************************************************************/
 
 
+DYNTRANS_INSTR(M88K_CPUComponent,todo)
+{
+//	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+//	REG32(ic->arg[0]) = REG32(ic->arg[1]) + (uint32_t)ic->arg[2];
+}
+
+
+/*****************************************************************************/
+
+
+void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
+{
+	UI* ui = GetUI();	// for debug messages
+
+	uint32_t op26   = (iw >> 26) & 0x3f;
+//	uint32_t op11   = (iw >> 11) & 0x1f;
+//	uint32_t op10   = (iw >> 10) & 0x3f;
+	uint32_t d      = (iw >> 21) & 0x1f;
+	uint32_t s1     = (iw >> 16) & 0x1f;
+//	uint32_t s2     =  iw        & 0x1f;
+//	uint32_t op3d   = (iw >>  8) & 0xff;
+	uint32_t imm16  = iw & 0xffff;
+//	uint32_t w5     = (iw >>  5) & 0x1f;
+//	uint32_t cr6    = (iw >>  5) & 0x3f;
+//	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
+//	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
+
+	switch (op26) {
+
+	case 0x18:	/*  addu immu32  */
+	case 0x19:	/*  subu immu32   */
+		{
+			int shift = 0;
+			switch (op26) {
+	/*		case 0x10: ic->f = instr(and_imm); break;
+			case 0x11: ic->f = instr(and_u_imm); shift = 16; break;
+			case 0x12: ic->f = instr(mask_imm); break;
+			case 0x13: ic->f = instr(mask_imm); shift = 16; break;
+			case 0x14: ic->f = instr(xor_imm); break;
+			case 0x15: ic->f = instr(xor_imm); shift = 16; break;
+			case 0x16: ic->f = instr(or_imm); break;
+			case 0x17: ic->f = instr(or_imm); shift = 16; break; */
+			case 0x18: ic->f = instr_add_u32_u32_immu32; break;
+			case 0x19: ic->f = instr_sub_u32_u32_immu32; break;
+	/*		case 0x1a: ic->f = instr(divu_imm); break;
+			case 0x1b: ic->f = instr(mulu_imm); break;
+			case 0x1c: ic->f = instr(add_imm); break;
+			case 0x1d: ic->f = instr(sub_imm); break;
+			case 0x1e: ic->f = instr(div_imm); break;
+			case 0x1f: ic->f = instr(cmp_imm); break;*/
+			}
+
+			ic->arg[0] = (size_t) &m_r[d];
+			ic->arg[1] = (size_t) &m_r[s1];
+			ic->arg[2] = imm16 << shift;
+
+			if (d == M88K_ZERO_REG)
+				ic->f = instr_nop;
+		}
+		break;
+
+	default:
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "unimplemented opcode 0x" << op26 << " at 0x" << m_pc;
+			ui->ShowDebugMessage(this, ss.str());
+		}
+	}
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,ToBeTranslated)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	cpu->DyntransToBeTranslatedBegin(ic);
+
+	uint32_t iword;
+	if (cpu->DyntransReadInstruction(iword))
+		cpu->Translate(iword, ic);
+
+	cpu->DyntransToBeTranslatedDone(ic);
+}
+
+
+/*****************************************************************************/
+
+
 #ifdef WITHUNITTESTS
 
 #include "ComponentFactory.h"
@@ -869,6 +961,46 @@ static void Test_M88K_CPUComponent_Disassembly_Basic()
 	UnitTest::Assert("disassembly result[2]", result[2], "r30,r31,0x10");
 }
 
+static void Test_M88K_CPUComponent_Execute_Basic()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testm88k");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	// Place a hardcoded instruction in memory, and try to execute it.
+	// addu r30, r31, 0x10
+	uint32_t data32 = 0x63df0010;
+	bus->AddressSelect(48);
+	bus->WriteData(data32, BigEndian);
+
+	bus->AddressSelect(52);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "48");
+	cpu->SetVariableValue("r30", "1234");
+	cpu->SetVariableValue("r31", "5678");
+
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(1);
+
+	UnitTest::Assert("pc should have increased", cpu->GetVariable("pc")->ToInteger(), 52);
+	UnitTest::Assert("r30 should have been modified", cpu->GetVariable("r30")->ToInteger(), 5678 + 0x10);
+	UnitTest::Assert("r31 should not have been modified", cpu->GetVariable("r31")->ToInteger(), 5678);
+
+	cpu->SetVariableValue("r31", "1111");
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute(1);
+
+	UnitTest::Assert("pc should have increased again", cpu->GetVariable("pc")->ToInteger(), 56);
+	UnitTest::Assert("r30 should have been modified again", cpu->GetVariable("r30")->ToInteger(), 1111 + 0x10);
+}
+
 UNITTESTS(M88K_CPUComponent)
 {
 	UNITTEST(Test_M88K_CPUComponent_IsStable);
@@ -878,6 +1010,9 @@ UNITTESTS(M88K_CPUComponent)
 
 	// Disassembly:
 	UNITTEST(Test_M88K_CPUComponent_Disassembly_Basic);
+
+	// Dyntrans execution:
+	UNITTEST(Test_M88K_CPUComponent_Execute_Basic);
 }
 
 #endif
