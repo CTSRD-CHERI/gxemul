@@ -43,6 +43,13 @@ class RootComponent;
 class UI;
 
 typedef vector< refcount_ptr<Component> > Components;
+typedef map< string,string > ComponentCreationSettings;
+
+struct ComponentCreateArgs
+{
+	GXemul*				gxemul;
+	ComponentCreationSettings	componentCreationSettings;
+};
 
 
 /**
@@ -104,7 +111,7 @@ public:
 	 * TestMIPSMachine::Create() returns a new MachineComponent
 	 * (with some pre-defined child components), not a TestMIPS component.
 	 */
-	static refcount_ptr<Component> Create();
+//	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
 
 	/**
 	 * \brief Get attribute information about a Component.

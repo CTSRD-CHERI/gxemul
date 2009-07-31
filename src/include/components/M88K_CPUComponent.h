@@ -334,7 +334,7 @@ public:
 	/**
 	 * \brief Creates a M88K_CPUComponent.
 	 */
-	static refcount_ptr<Component> Create();
+	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
 
 	static string GetAttribute(const string& attributeName);
 

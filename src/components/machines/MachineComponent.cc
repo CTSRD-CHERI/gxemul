@@ -34,7 +34,7 @@ MachineComponent::MachineComponent()
 }
 
 
-refcount_ptr<Component> MachineComponent::Create()
+refcount_ptr<Component> MachineComponent::Create(const ComponentCreateArgs& args)
 {
 	return new MachineComponent();
 }

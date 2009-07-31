@@ -37,7 +37,7 @@ DummyComponent::DummyComponent(string className)
 }
 
 
-refcount_ptr<Component> DummyComponent::Create()
+refcount_ptr<Component> DummyComponent::Create(const ComponentCreateArgs& args)
 {
 	return new DummyComponent();
 }
@@ -487,7 +487,7 @@ public:
 		m_sint64 = -42;
 	}
 
-	static refcount_ptr<Component> Create()
+	static refcount_ptr<Component> Create(const ComponentCreateArgs& args)
 	{
 		return new DummyComponentWithAllVariableTypes();
 	}
@@ -591,7 +591,7 @@ public:
 		m_counter = 42;
 	}
 
-	static refcount_ptr<Component> Create()
+	static refcount_ptr<Component> Create(const ComponentCreateArgs& args)
 	{
 		return new DummyComponentWithCounter();
 	}

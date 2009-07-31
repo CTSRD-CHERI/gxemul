@@ -3948,3 +3948,5 @@ Changelog for GXemul:
 20090731	Continuing on the new dyntrans core. The first instruction (a
 		M88K subu) can be executed on a dummy IC page.
 		[Re]implementing some simple MIPS and M88K instructions.
+		Arguments can now be passed during component creation, e.g.
+		nr CPUs, CPU model, or ram amount for a template machine.

@@ -29,11 +29,12 @@
 #include <string.h>
 
 #include "ComponentFactory.h"
+#include "GXemul.h"
 
 
 struct ComponentListEntry {
 	const char* componentName;
-	refcount_ptr<Component> (*Create)();
+	refcount_ptr<Component> (*Create)(const ComponentCreateArgs& args);
 	string (*GetAttribute)(const string& attributeName);
 };
 
@@ -50,7 +51,7 @@ static vector<ComponentListEntry> componentListRunTime;
 
 
 bool ComponentFactory::RegisterComponentClass(const string& name,
-	refcount_ptr<Component> (*createFunc)(),
+	refcount_ptr<Component> (*createFunc)(const ComponentCreateArgs& args),
 	string (*getAttributeFunc)(const string& attributeName))
 {
 	// Attempt to create a component using this name first.
@@ -72,9 +73,70 @@ bool ComponentFactory::RegisterComponentClass(const string& name,
 }
 
 
-refcount_ptr<Component> ComponentFactory::CreateComponent(
-	const string& componentName)
+static vector<string> SplitStringIntoVector(const string &str, const char splitter)
 {
+	// This is slow and hackish, but works.
+	vector<string> strings;
+	string word;
+
+	for (size_t i=0, n=str.length(); i<n; i++) {
+		char ch = str[i];
+		if (ch == splitter) {
+			strings.push_back(word);
+			word = "";
+		} else {
+			word += ch;
+		}
+	}
+
+	strings.push_back(word);
+
+	return strings;
+}
+
+
+refcount_ptr<Component> ComponentFactory::CreateComponent(
+	const string& componentNameAndOptionalArgs, GXemul* gxemul)
+{
+	ComponentCreateArgs args;
+	args.gxemul = gxemul;
+
+	string componentName = componentNameAndOptionalArgs;
+	size_t p = componentName.find('(');
+	if (p != string::npos && p > 0) {
+		componentName = componentName.substr(0, p);
+
+		string argstring = componentNameAndOptionalArgs.substr(p+1);
+
+		// Arguments don't end with a )? Then something's wrong.
+		if (argstring[argstring.length()-1] != ')') {
+			if (gxemul != NULL)
+				gxemul->GetUI()->ShowDebugMessage("Unmatched parenthesis?\n");
+
+			return NULL;
+		}
+
+		argstring = argstring.substr(0, argstring.length()-1);
+		
+		// argstring is now e.g. "cpu=R4400,ncpus=4"
+
+		// Split into assignments:
+		vector<string> assignments = SplitStringIntoVector(argstring, ',');
+
+		// Split each assignment into key and value:
+		for (size_t i=0; i<assignments.size(); ++i) {
+			vector<string> keyAndValue = SplitStringIntoVector(assignments[i], '=');
+			if (keyAndValue.size() != 2) {
+				if (gxemul != NULL)
+					gxemul->GetUI()->ShowDebugMessage("Not a key=value pair: " + assignments[i]);
+
+				return NULL;
+			}
+
+			args.componentCreationSettings[keyAndValue[0]] = keyAndValue[1];
+		}
+	}
+
 	// Find the className in the list of available components, and
 	// call the corresponding create function, if found:
 	size_t i = 0;
@@ -84,7 +146,7 @@ refcount_ptr<Component> ComponentFactory::CreateComponent(
 		    && !componentList[i].GetAttribute("stable").empty()
 #endif
 		    )
-			return componentList[i].Create();
+			return componentList[i].Create(args);
 
 		++ i;
 	}
@@ -95,10 +157,43 @@ refcount_ptr<Component> ComponentFactory::CreateComponent(
 		    && !componentListRunTime[i].GetAttribute("stable").empty()
 #endif
 		    )
-			return componentListRunTime[i].Create();
+			return componentListRunTime[i].Create(args);
 	}
 
 	return NULL;
+}
+
+
+bool ComponentFactory::GetCreationArgOverrides(ComponentCreationSettings& settings, const ComponentCreateArgs& createArgs)
+{
+	// A copy of the default args (for helpful debug output):
+	ComponentCreationSettings defaultSettings = settings;
+
+	// Merge in the overrides:
+	for (ComponentCreationSettings::const_iterator it = createArgs.componentCreationSettings.begin();
+	    it != createArgs.componentCreationSettings.end(); ++it) {
+		const string& key = it->first;
+		const string& value = it->second;
+		
+		if (settings.find(key) == settings.end()) {
+			if (createArgs.gxemul != NULL) {
+				stringstream ss;
+				ss << "Unknown setting '" << key << "'. "
+				    "Available settings (with default values) are:\n";
+				for (ComponentCreationSettings::const_iterator it2 = defaultSettings.begin();
+				    it2 != defaultSettings.end(); ++it2)
+					ss << "  " << it2->first << " = " << it2->second << "\n";
+
+				createArgs.gxemul->GetUI()->ShowDebugMessage(ss.str());
+			}
+
+			return false;
+		}
+
+		settings[key] = value;
+	}
+	
+	return true;
 }
 
 

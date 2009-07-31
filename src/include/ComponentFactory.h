@@ -63,12 +63,18 @@ public:
 	/**
 	 * \brief Creates a component given a short component name.
 	 *
-	 * @param name The component name, e.g. "dummy".
+	 * componentNameAndOptionalArgs may be e.g.
+	 * <tt>"testmips(cpu=R4400,cpus=4)"</tt>.
+	 *
+	 * @param componentNameAndOptionalArgs The component name, e.g. "dummy",
+	 *	optionally followed by arguments in parentheses.
+	 * @param gxemul A pointer to a GXemul instance. May be NULL.
 	 * @return A reference counted Component pointer. This is set to the
 	 *      newly created component on success. On failure it is set to
 	 *      NULL.
 	 */
-	static refcount_ptr<Component> CreateComponent(const string& name);
+	static refcount_ptr<Component> CreateComponent(
+		const string& componentNameAndOptionalArgs, GXemul* gxemul = NULL);
 
 	/**
 	 * \brief Gets a specific attribute value for a component.
@@ -118,8 +124,14 @@ public:
 	 *	if the name was already in use.
 	 */
 	static bool RegisterComponentClass(const string& name,
-		refcount_ptr<Component> (*createFunc)(),
+		refcount_ptr<Component> (*createFunc)(const ComponentCreateArgs& args),
 		string (*getAttributeFunc)(const string& attributeName));
+
+	/**
+	 * \brief Get override arguments for component creation.
+	 */
+	static bool GetCreationArgOverrides(ComponentCreationSettings& settings,
+		const ComponentCreateArgs& createArgs);
 
 
 	/********************************************************************/

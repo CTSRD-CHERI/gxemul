@@ -67,7 +67,7 @@ void RAMComponent::ReleaseAllBlocks()
 }
 
 
-refcount_ptr<Component> RAMComponent::Create()
+refcount_ptr<Component> RAMComponent::Create(const ComponentCreateArgs& args)
 {
 	return new RAMComponent();
 }

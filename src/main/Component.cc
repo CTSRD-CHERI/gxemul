@@ -509,6 +509,15 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 			ss << freq << " Hz";
 	}
 
+	const StateVariable* paused = GetVariable("paused");
+	// TODO: ToBool :)
+	if (paused != NULL && paused->ToInteger() > 0) {
+		if (!ss.str().empty())
+			ss << ", ";
+
+		ss << "paused";
+	}
+
 	const StateVariable* memoryMappedBase = GetVariable("memoryMappedBase");
 	const StateVariable* memoryMappedSize = GetVariable("memoryMappedSize");
 	const StateVariable* memoryMappedAddrMul =

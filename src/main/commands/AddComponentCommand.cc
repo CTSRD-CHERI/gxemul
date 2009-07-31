@@ -62,10 +62,11 @@ bool AddComponentCommand::Execute(GXemul& gxemul, const vector<string>& argument
 	string componentName = arguments[0];
 
 	refcount_ptr<Component> componentToAdd =
-	    ComponentFactory::CreateComponent(componentName);
+	    ComponentFactory::CreateComponent(componentName, &gxemul);
 
 	if (componentToAdd.IsNULL()) {
-		ShowMsg(gxemul, componentName + ": unknown component.\n");
+		ShowMsg(gxemul, componentName + ": unknown component,"
+		    " or invalid arguments given.\n");
 		return false;
 	}
 

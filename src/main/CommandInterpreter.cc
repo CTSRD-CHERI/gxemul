@@ -669,9 +669,16 @@ static void SplitIntoWords(const string& commandOrig,
 	commandName = "";
 	size_t pos = 0;
 
-	// Surround '=' with white spaces:
+	// Surround '=' with white spaces, except when inside parentheses...
+	// NOTE/TODO: This will not be needed in the future (?), when a real
+	// expression evaluator has been [re]implemented.
+	int insideParenthesesCount = 0;
 	while (pos < command.length()) {
-		if (command[pos] == '=') {
+		if (command[pos] == '(')
+			insideParenthesesCount ++;
+		if (command[pos] == ')')
+			insideParenthesesCount --;
+		if (command[pos] == '=' && insideParenthesesCount == 0) {
 			command.replace(pos, 1, " = ");
 			pos ++;
 		}

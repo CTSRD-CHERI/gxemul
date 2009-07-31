@@ -189,10 +189,15 @@ void GXemul::ClearEmulation()
 
 bool GXemul::IsTemplateMachine(const string& templateName) const
 {
-	if (!ComponentFactory::HasAttribute(templateName, "template"))
+	string nameWithoutArgs = templateName;
+	size_t p = nameWithoutArgs.find('(');
+	if (p > 0)
+		nameWithoutArgs = templateName.substr(0, p);
+
+	if (!ComponentFactory::HasAttribute(nameWithoutArgs, "template"))
 		return false;
 
-	if (!ComponentFactory::HasAttribute(templateName, "machine"))
+	if (!ComponentFactory::HasAttribute(nameWithoutArgs, "machine"))
 		return false;
 
 	return true;
@@ -208,7 +213,7 @@ bool GXemul::CreateEmulationFromTemplateMachine(const string& templateName)
 	}
 
 	refcount_ptr<Component> machine =
-	    ComponentFactory::CreateComponent(templateName);
+	    ComponentFactory::CreateComponent(templateName, this);
 	if (machine.IsNULL())
 		return false;
 
@@ -564,7 +569,7 @@ void GXemul::PrintUsage(bool longUsage) const
 }
 
 
-int GXemul::Run()
+void GXemul::InitUI()
 {
 	// Default to the console UI:
 	m_ui = new ConsoleUI(this);
@@ -573,8 +578,11 @@ int GXemul::Run()
 	// place to call its constructor. TODO
 
 	GetUI()->Initialize();
+}
 
 
+int GXemul::Run()
+{
 	// Not really running yet:
 	RunState savedRunState = GetRunState();
 	SetRunState(Paused);
@@ -815,9 +823,11 @@ struct ComponentAndFrequency
 static void GetComponentsAndFrequencies(refcount_ptr<Component> component,
 	vector<ComponentAndFrequency>& componentsAndFrequencies)
 {
-	StateVariable* freq = component->GetVariable("frequency");
+	const StateVariable* paused = component->GetVariable("paused");
+	const StateVariable* freq = component->GetVariable("frequency");
 	StateVariable* step = component->GetVariable("step");
-	if (freq != NULL && step != NULL) {
+	if (freq != NULL && step != NULL &&
+	    (paused == NULL || paused->ToInteger() == 0)) {
 		struct ComponentAndFrequency caf;
 		memset(&caf, 0, sizeof(caf));
 
@@ -1000,6 +1010,7 @@ void GXemul::Execute(const int longestTotalRun)
 				// If multiple components are to run at the same time (i.e.
 				// same nextTimeToExecute), toExecute will be exactly 1.
 				int maxExecuted = 0;
+				bool abort = false;
 				for (size_t k=0; k<componentsAndFrequencies.size(); ++k) {
 					if (step != componentsAndFrequencies[k].nextTimeToExecute)
 						continue;
@@ -1015,10 +1026,13 @@ void GXemul::Execute(const int longestTotalRun)
 					if (k == fastestComponentIndex)
 						maxExecuted = n;
 
-					if (n != toExecute) {
-						GetUI()->ShowDebugMessage("Continuous execution aborted.\n");
-						SetRunState(Paused);
-					}
+					if (n != toExecute)
+						abort = true;
+				}
+
+				if (abort) {
+					GetUI()->ShowDebugMessage("Continuous execution aborted.\n");
+					SetRunState(Paused);
 				}
 
 				if (maxExecuted == 0 && GetRunState() == Running) {

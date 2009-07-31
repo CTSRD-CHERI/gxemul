@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <iomanip>
 
+#include "ComponentFactory.h"
 #include "GXemul.h"
 #include "components/M88K_CPUComponent.h"
 
@@ -100,9 +101,20 @@ M88K_CPUComponent::M88K_CPUComponent()
 }
 
 
-refcount_ptr<Component> M88K_CPUComponent::Create()
+refcount_ptr<Component> M88K_CPUComponent::Create(const ComponentCreateArgs& args)
 {
-	return new M88K_CPUComponent();
+	// Defaults:
+	ComponentCreationSettings settings;
+	settings["model"] = "88100";
+
+	if (!ComponentFactory::GetCreationArgOverrides(settings, args))
+		return NULL;
+
+	refcount_ptr<Component> cpu = new M88K_CPUComponent();
+	if (!cpu->SetVariableValue("model", "\"" + settings["model"] + "\""))
+		return NULL;
+
+	return cpu;
 }
 
 

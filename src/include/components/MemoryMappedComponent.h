@@ -28,7 +28,7 @@
  *  SUCH DAMAGE.
  */
 
-// COMPONENT(memorymapped)
+// Note: not included in the component registry. This is simply a base-class.
 
 
 #include "Component.h"
@@ -56,22 +56,7 @@ public:
 	/**
 	 * \brief Constructs a MemoryMappedComponent.
 	 */
-	MemoryMappedComponent(const string& className,
-		const string& visibleClassName);
-
-	/**
-	 * \brief Creates a MemoryMappedComponent.
-	 */
-	static refcount_ptr<Component> Create();
-
-	/**
-	 * \brief Get attribute information about the MemoryMappedComponent
-	 * class.
-	 *
-	 * @param attributeName The attribute name.
-	 * @return A string representing the attribute value.
-	 */
-	static string GetAttribute(const string& attributeName);
+	MemoryMappedComponent(const string& className, const string& visibleClassName);
 
 private:
 	// Variables common to all memory mapped components:

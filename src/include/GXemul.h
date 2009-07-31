@@ -86,6 +86,11 @@ public:
 	void ClearEmulation();
 
 	/**
+	 * \brief Initializes the %UI.
+	 */
+	void InitUI();
+
+	/**
 	 * \brief Runs GXemul's main loop.
 	 *
 	 * @return Zero on success, non-zero on error.

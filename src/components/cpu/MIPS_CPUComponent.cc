@@ -30,6 +30,7 @@
 #include <string.h>
 #include <iomanip>
 
+#include "ComponentFactory.h"
 #include "GXemul.h"
 #include "components/MIPS_CPUComponent.h"
 #include "mips_cpu_types.h"
@@ -75,9 +76,20 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 }
 
 
-refcount_ptr<Component> MIPS_CPUComponent::Create()
+refcount_ptr<Component> MIPS_CPUComponent::Create(const ComponentCreateArgs& args)
 {
-	return new MIPS_CPUComponent();
+	// Defaults:
+	ComponentCreationSettings settings;
+	settings["model"] = "5KE";
+
+	if (!ComponentFactory::GetCreationArgOverrides(settings, args))
+		return NULL;
+
+	refcount_ptr<Component> cpu = new MIPS_CPUComponent();
+	if (!cpu->SetVariableValue("model", "\"" + settings["model"] + "\""))
+		return NULL;
+
+	return cpu;
 }
 
 

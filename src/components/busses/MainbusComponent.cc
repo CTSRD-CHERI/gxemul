@@ -46,7 +46,7 @@ MainbusComponent::~MainbusComponent()
 }
 
 
-refcount_ptr<Component> MainbusComponent::Create()
+refcount_ptr<Component> MainbusComponent::Create(const ComponentCreateArgs& args)
 {
 	return new MainbusComponent();
 }

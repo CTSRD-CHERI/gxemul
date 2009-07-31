@@ -41,20 +41,3 @@ MemoryMappedComponent::MemoryMappedComponent(const string& className,
 }
 
 
-refcount_ptr<Component> MemoryMappedComponent::Create()
-{
-	return NULL;
-}
-
-
-string MemoryMappedComponent::GetAttribute(const string& attributeName)
-{
-	if (attributeName == "stable")
-		return "yes";
-
-	if (attributeName == "description")
-		return "A base-class for memory-mapped components.";
-
-	return Component::GetAttribute(attributeName);
-}
-

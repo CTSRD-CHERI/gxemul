@@ -29,8 +29,15 @@
 #include "ComponentFactory.h"
 
 
-refcount_ptr<Component> MVME187Machine::Create()
+refcount_ptr<Component> MVME187Machine::Create(const ComponentCreateArgs& args)
 {
+	// Defaults:
+	ComponentCreationSettings settings;
+	settings["ram"] = "0x2000000";
+
+	if (!ComponentFactory::GetCreationArgOverrides(settings, args))
+		return NULL;
+
 	refcount_ptr<Component> machine =
 	    ComponentFactory::CreateComponent("machine");
 	if (machine.IsNULL())
@@ -49,9 +56,7 @@ refcount_ptr<Component> MVME187Machine::Create()
 	if (ram.IsNULL())
 		return NULL;
 
-	stringstream tmpss;
-	tmpss << 64 * 1048576;
-	ram->SetVariableValue("memoryMappedSize", tmpss.str());
+	ram->SetVariableValue("memoryMappedSize", settings["ram"]);
 	mainbus->AddChild(ram);
 
 	refcount_ptr<Component> rom = ComponentFactory::CreateComponent("ram");
@@ -64,10 +69,7 @@ refcount_ptr<Component> MVME187Machine::Create()
 	mainbus->AddChild(rom);
 
 	refcount_ptr<Component> cpu =
-	    ComponentFactory::CreateComponent("m88k_cpu");
-
-	// TODO: Should be moved some other place!
-	cpu->SetVariableValue("kind", "\"Motorola 88100\"");
+	    ComponentFactory::CreateComponent("m88k_cpu(model=88100)");
 
 	if (cpu.IsNULL())
 		return NULL;

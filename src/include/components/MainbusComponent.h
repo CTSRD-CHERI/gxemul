@@ -60,7 +60,7 @@ public:
 	/**
 	 * \brief Creates a MainbusComponent.
 	 */
-	static refcount_ptr<Component> Create();
+	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
 
 	/**
 	 * \brief Get attribute information about the MainbusComponent class.

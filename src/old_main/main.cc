@@ -580,6 +580,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 		int res = 0;
 		{
 			GXemul gxemul;
+			gxemul.InitUI();
 
 			if (single_step == ENTER_SINGLE_STEPPING)
 				gxemul.SetRunState(GXemul::Paused);
@@ -612,7 +613,8 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 			
 			{
 				GXemul gxemul;
-				
+				gxemul.InitUI();
+
 				if (single_step == ENTER_SINGLE_STEPPING)
 					gxemul.SetRunState(GXemul::Paused);
 				else

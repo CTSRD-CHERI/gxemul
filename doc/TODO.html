@@ -43,6 +43,9 @@ MAIN GOAL for 0.6.0:
    [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
 	[ ] When a component is added to the tree, recalculate its nr of steps!
+	[/] "paused" cpu state, in SMP machines during bootup. (Non-executing components.)
+	    [ ] When a component changes state from paused = true to false,
+	        recalculate its number of steps!
 	[ ] Removing components (at least if the Fastest one is removed) should
 	    also trigger recalculation.
 	[ ] When a component's frequency is changed, recalculate its nr of steps!
@@ -167,10 +170,6 @@ MAIN GOAL for 0.6.0:
 	    try both with and without native code generation, and with and without
 	    other instruction combinations.
 
-  [X]	GXemul reference/pointer from Component? So that debug messages etc can
-  	be outputted, without having to pass along a GXemul pointer all the time!
-	[ ] Actually use this somewhere. (It's not tested yet.)
-
   [ ]	Address formats?
   	"xxxx:yyyy", "xxxx:yyyyyyyy", "zzzzzzzzzzzzzzzz" for amd64, plus i/o ports
   	"uxxxxxxxx" vs "sxxxxxxxx" for M88K
@@ -204,13 +203,20 @@ MAIN GOAL for 0.6.0:
   	[ ]  lookup if R4000 is a valid model for the cpu architecture
   	[ ]  change internal state, and then call ResetState().
 
-  [ ]	Ability to send arguments during component creation? E.g.:
-  		add mips_cpu("R3000")
+  [X]	Ability to send arguments during component creation? E.g.:
+  		add mips_cpu(model=R3000)
   	instead of
   		add mips_cpu
   		cpu.model = "R3000"
   	Also useful for e.g. selecting nr of CPUs or memory amount on the
   	command line (sending args to template machines!)
+
+		gxemul -e testmips kernel
+		gxemul -e testmips(cpu=R4400) kernel
+		gxemul -e testmips(cpu=R4400,ncpus=4) kernel
+
+	the arguments would be given as a list of (key,value), and given
+	to the component's Create function.
 
   [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
 	first thing to implement, without breaking other architectures.

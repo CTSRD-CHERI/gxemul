@@ -44,7 +44,7 @@ public:
 	/**
 	 * \brief Creates a MVME187 Component tree.
 	 */
-	static refcount_ptr<Component> Create();
+	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
 
 	/**
 	 * \brief Gets a Component attribute value.

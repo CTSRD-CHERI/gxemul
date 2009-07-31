@@ -90,7 +90,7 @@ public:
 	/**
 	 * \brief Creates a RAMComponent.
 	 */
-	static refcount_ptr<Component> Create();
+	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
 
 	virtual void ResetState();
 

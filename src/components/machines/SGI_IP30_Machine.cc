@@ -27,10 +27,20 @@
 
 #include "components/SGI_IP30_Machine.h"
 #include "ComponentFactory.h"
+#include "GXemul.h"
 
 
-refcount_ptr<Component> SGI_IP30_Machine::Create()
+refcount_ptr<Component> SGI_IP30_Machine::Create(const ComponentCreateArgs& args)
 {
+	// Defaults:
+	ComponentCreationSettings settings;
+	settings["cpu"] = "R10000";	// or R12000 or R14000
+	settings["ram"] = "0x8000000";
+	settings["ncpus"] = "1";
+
+	if (!ComponentFactory::GetCreationArgOverrides(settings, args))
+		return NULL;
+
 	refcount_ptr<Component> machine =
 	    ComponentFactory::CreateComponent("machine");
 	if (machine.IsNULL())
@@ -49,10 +59,8 @@ refcount_ptr<Component> SGI_IP30_Machine::Create()
 	if (ram.IsNULL())
 		return NULL;
 
-	stringstream tmpss;
-	tmpss << 128 * 1048576;		// TODO: Non-hardcoded RAM size
 	ram->SetVariableValue("memoryMappedBase", "0x20000000");
-	ram->SetVariableValue("memoryMappedSize", tmpss.str());
+	ram->SetVariableValue("memoryMappedSize", settings["ram"]);
 	mainbus->AddChild(ram);
 
 	refcount_ptr<Component> rom = ComponentFactory::CreateComponent("ram");
@@ -67,13 +75,27 @@ refcount_ptr<Component> SGI_IP30_Machine::Create()
 	rom->SetVariableValue("writeProtect", "true");
 	mainbus->AddChild(rom);
 
-	// TODO: CPU R10000, R12000, or R14000!
-	refcount_ptr<Component> cpu =
-	    ComponentFactory::CreateComponent("mips_cpu");
-	if (cpu.IsNULL())
+	int ncpus;
+	stringstream tmpss3;
+	tmpss3 << settings["ncpus"];
+	tmpss3 >> ncpus;
+	if (ncpus < 1) {
+		if (args.gxemul != NULL)
+			args.gxemul->GetUI()->ShowDebugMessage("nr of cpus must be more than 0.");
 		return NULL;
+	}
 
-	mainbus->AddChild(cpu);
+	for (int i=0; i<ncpus; ++i) {
+		refcount_ptr<Component> cpu =
+		    ComponentFactory::CreateComponent("mips_cpu(model=" + settings["cpu"] + ")");
+		if (cpu.IsNULL())
+			return NULL;
+
+		if (i > 0)
+			cpu->SetVariableValue("paused", "true");
+
+		mainbus->AddChild(cpu);
+	}
 
 	return machine;
 }

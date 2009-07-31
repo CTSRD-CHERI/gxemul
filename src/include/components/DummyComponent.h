@@ -52,7 +52,7 @@ public:
 	/**
 	 * \brief Creates a DummyComponent.
 	 */
-	static refcount_ptr<Component> Create();
+	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
 
 	/**
 	 * \brief Get attribute information about the DummyComponent class.

@@ -89,7 +89,7 @@ public:
 	/**
 	 * \brief Creates a CPUComponent.
 	 */
-	static refcount_ptr<Component> Create();
+	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
 
 	/**
 	 * \brief Get attribute information about the CPUComponent class.
@@ -250,6 +250,7 @@ protected:
 protected:
 	// Variables common to all (or most) kinds of CPUs:
 	double			m_frequency;
+	bool			m_paused;
 	string			m_cpuArchitecture;
 	int			m_pageSize;
 	uint64_t		m_pc;

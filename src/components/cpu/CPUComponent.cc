@@ -38,6 +38,7 @@ CPUComponent::CPUComponent(const string& className, const string& cpuArchitectur
 					// visible class name, regardless of
 					// their actual class name
 	, m_frequency(33.0e6)
+	, m_paused(false)
 	, m_cpuArchitecture(cpuArchitecture)
 	, m_pageSize(0)
 	, m_pc(0)
@@ -54,11 +55,12 @@ CPUComponent::CPUComponent(const string& className, const string& cpuArchitectur
 	AddVariable("lastUnassembleVaddr", &m_lastUnassembleVaddr);
 	AddVariable("hasUsedUnassemble", &m_hasUsedUnassemble);
 	AddVariable("frequency", &m_frequency);
+	AddVariable("paused", &m_paused);
 	AddVariable("bigendian", &m_isBigEndian);
 }
 
 
-refcount_ptr<Component> CPUComponent::Create()
+refcount_ptr<Component> CPUComponent::Create(const ComponentCreateArgs& args)
 {
 	return NULL;
 }
