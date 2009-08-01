@@ -212,6 +212,11 @@ protected:
 	bool DyntransReadInstruction(uint32_t& iword);
 	void DyntransToBeTranslatedDone(struct DyntransIC*);
 
+	/**
+	 * \brief Calculate m_pc based on m_nextIC and m_ICpage.
+	 */
+	void DyntransResyncPC();
+
 private:
 	void DyntransInit();
 
@@ -225,12 +230,6 @@ private:
 	 */
 	void DyntransPCtoPointers();
 
-	/**
-	 * \brief Calculate m_pc based on m_nextIC and m_ICpage, after running
-	 *	the dyntrans core loop.
-	 */
-	void DyntransResyncPC();
-
 	bool LookupAddressDataBus(GXemul* gxemul = NULL);
 
 protected:
@@ -240,6 +239,7 @@ protected:
 	 */
 	DECLARE_DYNTRANS_INSTR(nop);
 	DECLARE_DYNTRANS_INSTR(abort);
+	DECLARE_DYNTRANS_INSTR(abort_in_delay_slot);
 	DECLARE_DYNTRANS_INSTR(endOfPage);
 	DECLARE_DYNTRANS_INSTR(endOfPage2);
 
@@ -260,6 +260,9 @@ protected:
 	DECLARE_DYNTRANS_INSTR(or_u64_u64_immu32);
 	DECLARE_DYNTRANS_INSTR(xor_u32_u32_u32);
 	DECLARE_DYNTRANS_INSTR(xor_u64_u64_immu32);
+	
+	// Shifts, rotates.
+	DECLARE_DYNTRANS_INSTR(shift_left_u64_u64_imm5_truncS32);
 
 protected:
 	// Variables common to all (or most) kinds of CPUs:
@@ -272,6 +275,8 @@ protected:
 	uint64_t		m_lastUnassembleVaddr;
 	bool			m_hasUsedUnassemble;
 	bool			m_isBigEndian;
+	bool			m_inDelaySlot;
+	uint64_t		m_delaySlotTarget;
 
 	// Cached/volatile state:
 	AddressDataBus *	m_addressDataBus;
@@ -282,6 +287,8 @@ protected:
 	int			m_dyntransICentriesPerPage;
 	int			m_dyntransICshift;
 	int			m_executedCycles;
+	int			m_nrOfCyclesToExecute;
+	bool			m_exceptionInDelaySlot;
 
 private:
 	SymbolRegistry		m_symbolRegistry;

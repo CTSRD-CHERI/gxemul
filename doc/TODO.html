@@ -97,16 +97,17 @@ MAIN GOAL for 0.6.0:
 
 		[/]  PC to pointers
 
-		[ ]  For risc archs with delay slots, this means that single-stepping
+		[/]  For risc archs with delay slots, this means that single-stepping
 		     should be able to go half-way through a delay slot combo.
+			[/] Single step vs Running for 1 instruction?
 
 		[ ]  Large chunks is safe vs "single stepping" dyntrans...
 
-		[ ]  Break-out-of-loop IC.
+		[/]  Break-out-of-loop IC.
 
-		[/]  Pointers back to PC. (I.e. "synch pc".)
+		[X]  Pointers back to PC. (I.e. "synch pc".)
 
-		[ ]  Unit tests.
+		[/]  Unit tests.
 
 	[ ]  Interrupts should be cycle accurate, and affect the cpu's
 	     m_nextIC (and other state, such as processor status registers)
@@ -504,6 +505,9 @@ MAIN GOAL for 0.6.0:
 	     be cool if hardware OpenGL works, for emulation of accelerated
 	     graphics.
 
+	[ ]  Other "plugins", like xterm windows showing registers all the
+	     time (with e.g. colored state changes), and disassembly "around"
+	     the current pc, for a cpu. And a stack trace. :-)
 
 -------------------------------------------------------------------------------
 

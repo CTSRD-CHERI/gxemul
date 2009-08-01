@@ -81,6 +81,9 @@ CPUComponent * CPUComponent::AsCPUComponent()
 void CPUComponent::ResetState()
 {
 	m_hasUsedUnassemble = false;
+	m_exceptionInDelaySlot = false;
+	m_inDelaySlot = false;
+	m_delaySlotTarget = 0;
 
 	m_symbolRegistry.Clear();
 
@@ -162,14 +165,6 @@ int CPUComponent::DyntransExecute(GXemul* gxemul, int nrOfCycles)
 		throw std::exception();
 	}
 
-	// TODO: Optimized calls if we're far enough away from a hazard,
-	// so that we can run e.g. instruction combinations
-
-	// TODO: Optimized loops of 120 IC calls...
-
-	// TODO: Possibility to break out. These should not count as
-	// executed cycles.
-
 /*
  * The normal instruction execution core: Get the instruction call pointer
  * (and move the nextIC to the following instruction in advance), then
@@ -177,18 +172,42 @@ int CPUComponent::DyntransExecute(GXemul* gxemul, int nrOfCycles)
  */
 #define IC	ic = m_nextIC ++; ic->f(this, ic);
 
-	m_executedCycles = nrOfCycles;
-	for (int i=0; i<nrOfCycles; i++) {
-		IC
+	m_executedCycles = 0;
+	m_nrOfCyclesToExecute = nrOfCycles;
+
+	// TODO: Optimized calls if we're far enough away from a hazard,
+	// so that we can run e.g. instruction combinations
+
+	// TODO: Optimized loops of 120 IC calls...
+
+	const int margin = 16384;
+	int goal = nrOfCycles - margin;
+	if (goal > 0) {
+		m_executedCycles = goal;
+		// Note that individual IC implementations may increase
+		// m_executedCycles more...
+
+		for (int i=0; i<goal; i++) {
+			IC
+		}
 	}
 
-	// TODO: ... then slowly execute the last few instructions.
+	// ... then slowly execute the last few instructions.
+	for (; m_executedCycles<nrOfCycles; m_executedCycles++) {
+		int old = m_executedCycles;
+		IC
+		if (m_executedCycles < old) {
+			m_executedCycles ++;
+			break;
+		}
+	}
 
 	DyntransResyncPC();
 
 	// If execution aborted, then reset the aborting instruction slot
 	// to the to-be-translated function:
-	if (m_nextIC->f == instr_abort)
+	if (m_nextIC->f == instr_abort ||
+	    m_nextIC->f == instr_abort_in_delay_slot)
 		m_nextIC->f = GetDyntransToBeTranslated();
 
 	return m_executedCycles;
@@ -334,7 +353,7 @@ bool CPUComponent::DyntransReadInstruction(uint32_t& iword)
 
 void CPUComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 {
-	if (ic->f == NULL) {
+	if (ic->f == NULL || ic->f == instr_abort_in_delay_slot) {
 		UI* ui = GetUI();
 		if (ui != NULL) {
 			bool isSingleStepping = GetRunningGXemulInstance()->GetRunState() == GXemul::SingleStepping;
@@ -355,12 +374,28 @@ void CPUComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 			ui->ShowDebugMessage(this, ss.str());
 		}
 
-		ic->f = instr_abort;
+		if (ic->f == NULL)
+			ic->f = instr_abort;
 	}
 
 	// Finally, execute the translated instruction.
+	bool ds = m_inDelaySlot;
+	bool dsException = m_exceptionInDelaySlot;
 	m_nextIC = ic + 1;
 	ic->f(this, ic);
+
+	// If this instruction was in the delay slot of another instruction,
+	// and we are running a single instruction, then manually branch to
+	// the branch target:
+	if (ds && !dsException) {
+		bool singleInstructionLeft = m_executedCycles == m_nrOfCyclesToExecute - 1;
+		if (singleInstructionLeft) {
+			m_pc = m_delaySlotTarget;
+			DyntransPCtoPointers();
+			m_inDelaySlot = false;
+			m_exceptionInDelaySlot = false;
+		}
+	}
 }
 
 
@@ -863,6 +898,22 @@ DYNTRANS_INSTR(CPUComponent,abort)
 }
 
 
+/*
+ * A break-out-of-dyntrans function, if a failure occurred in a delay-slot.
+ * Setting ic->f to this function will cause dyntrans execution to be aborted.
+ * The cycle counter will _not_ count this as executed cycles.
+ */
+DYNTRANS_INSTR(CPUComponent,abort_in_delay_slot)
+{
+	cpubase->m_exceptionInDelaySlot = true;
+
+	// Cycle reduction:
+	-- cpubase->m_executedCycles;
+
+	cpubase->m_nextIC = ic;
+}
+
+
 DYNTRANS_INSTR(CPUComponent,endOfPage)
 {
 	std::cerr << "TODO: endOfPage\n";
@@ -1042,6 +1093,20 @@ DYNTRANS_INSTR(CPUComponent,xor_u32_u32_u32)
 DYNTRANS_INSTR(CPUComponent,xor_u64_u64_immu32)
 {
 	REG64(ic->arg[0]) = REG64(ic->arg[1]) ^ (uint32_t)ic->arg[2];
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 5-bit immediate
+ *
+ * Left-shifts arg 1 the number of steps indicated by the immediate, storing
+ * the result in arg 0 truncated to a signed 32-bit value.
+ */
+DYNTRANS_INSTR(CPUComponent,shift_left_u64_u64_imm5_truncS32)
+{
+	REG64(ic->arg[0]) = (int32_t)(REG64(ic->arg[1]) << (ic->arg[2] & 0x1f));
 }
 
 

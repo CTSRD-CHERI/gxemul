@@ -3954,3 +3954,6 @@ Changelog for GXemul:
 20090801	Two MIPS16 instructions can be disassembled; disassembly
 		address is now not necessarily the same as m_pc (e.g. on
 		MIPS16, the lowest bit is cleared).
+		Beginning on implementing branches: the MIPS "b" instruction,
+		with delay slot (both continuous execution, and single-stepping
+		with pause in the middle of the branch, etc).

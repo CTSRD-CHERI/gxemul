@@ -191,6 +191,9 @@ private:
 	bool Is32Bit() const;
 
 private:
+	DECLARE_DYNTRANS_INSTR(branch_samepage_with_delayslot);
+	DECLARE_DYNTRANS_INSTR(branch_samepage_with_delayslot_singlestep);
+
 	void Translate(uint32_t iword, struct DyntransIC* ic);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated_MIPS16);
@@ -205,7 +208,7 @@ private:
 	uint64_t	m_lo;
 
 	/*
-	 * Cached other state:
+	 * Cached or volatile other state:
 	 */
 	mips_cpu_type_def	m_type;	// based on m_mips_type
 };

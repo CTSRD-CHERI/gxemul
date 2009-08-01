@@ -73,6 +73,9 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 
 	for (size_t i=0; i<N_MIPS_GPRS; i++)
 		AddVariable(regnames[i], &m_gpr[i]);
+
+	AddVariable("inDelaySlot", &m_inDelaySlot);
+	AddVariable("delaySlotTarget", &m_delaySlotTarget);
 }
 
 
@@ -334,9 +337,14 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		iword = LE32_TO_HOST(iword);
 
 	// ... and add it to the result:
-	char tmp[9];
-	snprintf(tmp, sizeof(tmp), "%08x", (int) iword);
-	result.push_back(tmp);
+	{
+		stringstream ss;
+		ss.flags(std::ios::hex);
+		ss << std::setfill('0') << std::setw(8) << (uint32_t) iword;
+		if (PCtoInstructionAddress(m_pc) == vaddr && m_inDelaySlot)
+			ss << " (delayslot)";
+		result.push_back(ss.str());
+	}
 
 	int hi6 = iword >> 26;
 	int rs = (iword >> 21) & 31;
@@ -810,8 +818,53 @@ string MIPS_CPUComponent::GetAttribute(const string& attributeName)
 /*****************************************************************************/
 
 
+DYNTRANS_INSTR(MIPS_CPUComponent,branch_samepage_with_delayslot_singlestep)
+{
+	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
+
+	// Prepare for the delayed branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+
+	cpu->m_nextIC = (struct DyntransIC *) ic->arg[2];
+	cpu->DyntransResyncPC();	// overwrite m_pc temporarily to get the target
+	cpu->m_delaySlotTarget = cpu->m_pc;
+
+	// m_nextIC should point to the next instruction:
+	cpu->m_nextIC = ic + 1;
+}
+
+
+DYNTRANS_INSTR(MIPS_CPUComponent,branch_samepage_with_delayslot)
+{
+	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
+
+	// Prepare for the branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+
+	// Execute the next instruction:
+	ic[1].f(cpu, ic+1);
+	cpu->m_executedCycles ++;
+
+	// If there was no exception, then branch:
+	if (!cpu->m_exceptionInDelaySlot) {
+		cpu->m_nextIC = (struct DyntransIC *) ic->arg[2];
+		cpu->m_inDelaySlot = false;
+	}
+
+	// The next instruction is now either the target of the branch
+	// instruction, or the first instruction of an exception handler.
+	cpu->m_exceptionInDelaySlot = false;
+}
+
+
+/*****************************************************************************/
+
+
 void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 {
+	bool singleInstructionLeft = (m_executedCycles == m_nrOfCyclesToExecute - 1);
 	UI* ui = GetUI();	// for debug messages
 	int requiredISA = 1;		// 1, 2, 3, 4, 32, or 64
 	int requiredISArevision = 1;	// 1 or 2 (for MIPS32/64)
@@ -819,13 +872,170 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 	int hi6 = iword >> 26;
 	int rs = (iword >> 21) & 31;
 	int rt = (iword >> 16) & 31;
-//	int rd = (iword >> 11) & 31;
-//	int sa = (iword >>  6) & 31;
+	int rd = (iword >> 11) & 31;
+	int sa = (iword >>  6) & 31;
 	int32_t imm = (int16_t)iword;
-//	s6 = iword & 63;
-//	s10 = (rs << 5) | sa;
+	int s6 = iword & 63;
+//	int s10 = (rs << 5) | sa;
 
 	switch (hi6) {
+
+	case HI6_SPECIAL:
+		switch (s6) {
+
+		case SPECIAL_SLL:
+/*		case SPECIAL_SLLV:
+		case SPECIAL_SRL:
+		case SPECIAL_SRLV:
+		case SPECIAL_SRA:
+		case SPECIAL_SRAV:
+		case SPECIAL_DSRL:
+		case SPECIAL_DSRLV:
+		case SPECIAL_DSRL32:
+		case SPECIAL_DSLL:
+		case SPECIAL_DSLLV:
+		case SPECIAL_DSLL32:
+		case SPECIAL_DSRA:
+		case SPECIAL_DSRAV:
+		case SPECIAL_DSRA32: */
+			switch (s6) {
+			case SPECIAL_SLL:  ic->f = instr_shift_left_u64_u64_imm5_truncS32; break;
+/*			case SPECIAL_SLLV: ic->f = instr(sllv); sa = -1; break;
+			case SPECIAL_SRL:  ic->f = instr(srl); break;
+			case SPECIAL_SRLV: ic->f = instr(srlv); sa = -1; break;
+			case SPECIAL_SRA:  ic->f = instr(sra); break;
+			case SPECIAL_SRAV: ic->f = instr(srav); sa = -1; break;
+			case SPECIAL_DSRL: ic->f = instr(dsrl); x64=1; break;
+			case SPECIAL_DSRLV:ic->f = instr(dsrlv);
+					   x64 = 1; sa = -1; break;
+			case SPECIAL_DSRL32:ic->f= instr(dsrl); x64=1;
+					   sa += 32; break;
+			case SPECIAL_DSLL: ic->f = instr(dsll); x64=1; break;
+			case SPECIAL_DSLLV:ic->f = instr(dsllv);
+					   x64 = 1; sa = -1; break;
+			case SPECIAL_DSLL32:ic->f= instr(dsll); x64=1;
+					   sa += 32; break;
+			case SPECIAL_DSRA: ic->f = instr(dsra); x64=1; break;
+			case SPECIAL_DSRAV:ic->f = instr(dsrav);
+					   x64 = 1; sa = -1; break;
+			case SPECIAL_DSRA32:ic->f = instr(dsra); x64=1;
+					   sa += 32; break; */
+			}
+
+			ic->arg[0] = (size_t)&m_gpr[rd];
+			ic->arg[1] = (size_t)&m_gpr[rt];
+			if (sa >= 0)
+				ic->arg[2] = sa;
+			else
+				ic->arg[2] = (size_t)&m_gpr[rs];
+
+			/*  Special checks for MIPS32/64 revision 2 opcodes,
+			    such as rotation instructions:  */
+//			if (sa >= 0 && rs != 0x00) {
+//				if (m_type.isa_level < 32 ||
+//				    m_type.isa_revision < 2) {
+//					static int warning_rotate = 0;
+//					if (!warning_rotate &&
+//					    !cpu->translation_readahead) {
+//						fatal("[ WARNING! MIPS32/64 "
+//						    "revision 2 rotate opcode"
+//						    " used, but the %s process"
+//						    "or does not implement "
+//						    "such instructions. Only "
+//						    "printing this "
+//						    "warning once. ]\n",
+//						    cpu->cd.mips.cpu_type.name);
+//						warning_rotate = 1;
+//					}
+//					ic->f = NULL; // TODO instr(reserved);
+//					break;
+//				}
+//
+//				switch (rs) {
+//				case 0x01:
+//					switch (s6) {
+//					case SPECIAL_SRL:	/*  ror  */
+//						ic->f = NULL; //TODO instr(ror);
+//						break;
+//					}
+//					break;
+//				}
+//			}
+
+//			if (sa < 0 && (s10 & 0x1f) != 0) {
+//				switch (s10 & 0x1f) {
+//				/*  TODO: [d]rorv, etc.  */
+//				}
+//			}
+
+			if (rd == MIPS_GPR_ZERO)
+				ic->f = instr_nop;
+
+			break;
+		}
+
+		break;
+
+	case HI6_BEQ:
+//	case HI6_BNE:
+//	case HI6_BEQL:
+//	case HI6_BNEL:
+//	case HI6_BLEZ:
+//	case HI6_BLEZL:
+//	case HI6_BGTZ:
+//	case HI6_BGTZL:
+		{
+			void (*f_singleStepping)(CPUComponent*, struct DyntransIC*) = NULL;
+			void (*samepage_function)(CPUComponent*, struct DyntransIC*) = NULL;
+			void (*samepage_function_singleStepping)(CPUComponent*, struct DyntransIC*) = NULL;
+
+			switch (hi6) {
+			case HI6_BEQ:
+				ic->f = NULL; // TODO instr(beq);
+				samepage_function = NULL; //TODO instr(beq_samepage);
+
+				/*  Special case: comparing a register with itself:  */
+				if (rs == rt) {
+					ic->f = NULL; //TODO instr(b);
+					f_singleStepping = NULL;
+					samepage_function = instr_branch_samepage_with_delayslot;
+					samepage_function_singleStepping = instr_branch_samepage_with_delayslot_singlestep;
+				}
+				break;
+			}
+
+			if (singleInstructionLeft) {
+				ic->f = f_singleStepping;
+				samepage_function = samepage_function_singleStepping;
+			}
+
+			uint32_t mask = m_dyntransPageMask & ~3;	// 0xffc for 4 KB pages
+
+			ic->arg[0] = (size_t)&m_gpr[rs];
+			ic->arg[1] = (size_t)&m_gpr[rt];
+			// TODO: MIPS16 offset?!
+			ic->arg[2] = (int32_t) ( (imm << m_dyntransICshift) +
+			    (m_pc & mask) + 4 );
+
+			// Is the offset from the start of the current page still
+			// within the same page? Then use the samepage_function:
+			if ((uint32_t)ic->arg[2] < (uint32_t)((m_dyntransICentriesPerPage - 1)
+			    << m_dyntransICshift) && (m_pc & mask) < mask) {
+				ic->arg[2] = (size_t) (m_ICpage +
+				    ((ic->arg[2] >> m_dyntransICshift)
+				    & (m_dyntransICentriesPerPage - 1)));
+				ic->f = samepage_function;
+			}
+
+			if (m_inDelaySlot) {
+				if (ui != NULL)
+					ui->ShowDebugMessage(this, "branch in delay slot?!"
+					    " TODO: How should this be handled?");
+
+				ic->f = NULL;
+			}
+		}
+		break;
 
 //	case HI6_ADDI:
 	case HI6_ADDIU:
@@ -942,6 +1152,9 @@ DYNTRANS_INSTR(MIPS_CPUComponent,ToBeTranslated)
 	if (cpu->DyntransReadInstruction(iword))
 		cpu->Translate(iword, ic);
 
+	if (cpu->m_inDelaySlot && ic->f == NULL)
+		ic->f = instr_abort_in_delay_slot;
+
 	cpu->DyntransToBeTranslatedDone(ic);
 }
 
@@ -1037,6 +1250,155 @@ static void Test_MIPS_CPUComponent_Disassembly_Basic()
 	UnitTest::Assert("disassembly result[2]", result[2], "sp,sp,-40");
 }
 
+static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testmips");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	uint32_t data32 = 0x10000111;	// b 0xffffffff80004448
+	bus->AddressSelect(0xffffffff80004000);
+	bus->WriteData(data32, BigEndian);
+
+	data32 = 0x27bdffd8; // Something valid, addiu sp,sp,-40
+	bus->AddressSelect(0xffffffff80004004);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "0xffffffff80004000");
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000);
+	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+
+	// This tests that execute 2 steps will execute both the delay branch
+	// and the delay slot instruction.
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(2);
+
+	UnitTest::Assert("pc should have changed", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448);
+	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8);
+}
+
+static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_SingleStepping()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testmips");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	uint32_t data32 = 0x10000111;	// b 0xffffffff80004448
+	bus->AddressSelect(0xffffffff80004000);
+	bus->WriteData(data32, BigEndian);
+
+	data32 = 0x27bdffd8; // Something valid, addiu sp,sp,-40
+	bus->AddressSelect(0xffffffff80004004);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "0xffffffff80004000");
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000);
+	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+
+	// This tests that execute 2 steps will execute both the delay branch
+	// and the delay slot instruction.
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute(1);
+
+	// Should now be in the delay slot.
+	UnitTest::Assert("pc should have changed 1", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004);
+	UnitTest::Assert("delay slot", cpu->GetVariable("inDelaySlot")->ToString(), "true");
+	UnitTest::Assert("sp should not yet have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute(1);
+
+	UnitTest::Assert("pc should have changed 2", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448);
+	UnitTest::Assert("delay slot after branch", cpu->GetVariable("inDelaySlot")->ToString(), "false");
+	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8);
+}
+
+static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_RunTwoTimes()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testmips");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	uint32_t data32 = 0x10000111;	// b 0xffffffff80004448
+	bus->AddressSelect(0xffffffff80004000);
+	bus->WriteData(data32, BigEndian);
+
+	data32 = 0x27bdffd8; // Something valid, addiu sp,sp,-40
+	bus->AddressSelect(0xffffffff80004004);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "0xffffffff80004000");
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000);
+	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+
+	// This tests that execute 1 step with normal running, two times, will
+	// execute both the delay branch and the delay slot instruction correctly.
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(1);
+
+	// Should now be in the delay slot.
+	UnitTest::Assert("pc should have changed 1", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004);
+	UnitTest::Assert("delay slot", cpu->GetVariable("inDelaySlot")->ToString(), "true");
+	UnitTest::Assert("sp should not yet have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(1);
+
+	UnitTest::Assert("pc should have changed 2", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448);
+	UnitTest::Assert("delay slot after branch", cpu->GetVariable("inDelaySlot")->ToString(), "false");
+	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8);
+}
+
+static void Test_MIPS_CPUComponent_Execute_DelayBranchWithFault()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testmips");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	uint32_t data32 = 0x10000111;	// b 0xffffffff80004048
+	bus->AddressSelect(0xffffffff80004000);
+	bus->WriteData(data32, BigEndian);
+
+	data32 = 0xffffffff; // Something invalid.
+	bus->AddressSelect(0xffffffff80004004);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "0xffffffff80004000");
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000);
+
+	// This tests that execute 100 steps will only execute 1, of the instruction
+	// in the delay slot fails.
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(100);
+
+	UnitTest::Assert("pc should have increased one step", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute(1);
+
+	UnitTest::Assert("pc should not have increased", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004);
+}
+
 UNITTESTS(MIPS_CPUComponent)
 {
 	UNITTEST(Test_MIPS_CPUComponent_IsStable);
@@ -1046,6 +1408,12 @@ UNITTESTS(MIPS_CPUComponent)
 
 	// Disassembly:
 	UNITTEST(Test_MIPS_CPUComponent_Disassembly_Basic);
+
+	// Dyntrans execution:
+	UNITTEST(Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction);
+	UNITTEST(Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_SingleStepping);
+	UNITTEST(Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_RunTwoTimes);
+	UNITTEST(Test_MIPS_CPUComponent_Execute_DelayBranchWithFault);
 }
 
 #endif
