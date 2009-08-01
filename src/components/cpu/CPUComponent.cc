@@ -179,6 +179,7 @@ int CPUComponent::DyntransExecute(GXemul* gxemul, int nrOfCycles)
 
 	// Starting inside a delay slot? Then execute it carefully:
 	if (m_inDelaySlot) {
+		m_nextIC->f = GetDyntransToBeTranslated();
 		m_executedCycles = m_nrOfCyclesToExecute - 1;
 		IC
 		m_executedCycles -= (m_nrOfCyclesToExecute - 1);
@@ -192,30 +193,48 @@ int CPUComponent::DyntransExecute(GXemul* gxemul, int nrOfCycles)
 		}
 	}
 
-	// TODO: Optimized calls if we're far enough away from a hazard,
-	// so that we can run e.g. instruction combinations
+	// If possible, do some optimized loops of multiple inlined IC calls...
+	const int ICsPerLoop = 60;
+	const int maxICcycles = 2;	// TODO: Longer when instr combos are reimplemented
+	if (nrOfCycles > ICsPerLoop * maxICcycles) {
+		int hazard = nrOfCycles - ICsPerLoop * maxICcycles;
 
-	// TODO: Optimized loops of 120 IC calls...
+		for (;;) {
+			IC IC IC IC IC   IC IC IC IC IC
+			IC IC IC IC IC   IC IC IC IC IC
+			IC IC IC IC IC   IC IC IC IC IC
 
-//	const int margin = 16384;
-//	int goal = nrOfCycles - margin;
-//	if (goal > 0) {
-//		m_executedCycles += goal;
-//		// Note that individual IC implementations may increase
-//		// m_executedCycles more...
-//
-//		for (int i=0; i<goal; i++) {
-//			IC
-//		}
-//	}
+			IC IC IC IC IC   IC IC IC IC IC
+			IC IC IC IC IC   IC IC IC IC IC
+			IC IC IC IC IC   IC IC IC IC IC
+
+			m_executedCycles += ICsPerLoop;
+			if (m_executedCycles >= hazard ||
+			    m_nextIC->f == instr_abort ||
+			    m_nextIC->f == instr_abort_in_delay_slot)
+				break;
+		}
+	}
 
 	// ... then slowly execute the last few instructions.
-	for (; m_executedCycles<nrOfCycles; ) {
+	// Note: -1, because the last thing we execute may be an instruction
+	// with a delay slot (which is automatically executed).
+	for (; m_executedCycles<nrOfCycles-1; ) {
 		int old = m_executedCycles;
 		IC
 		m_executedCycles ++;
 		if (m_executedCycles == old)
 			break;
+	}
+
+	// If there's one instruction left (and we're not aborted), then
+	// let's execute it:
+	if (m_executedCycles<nrOfCycles && !(
+	    m_nextIC->f == instr_abort ||
+	    m_nextIC->f == instr_abort_in_delay_slot)) {
+		m_nextIC->f = GetDyntransToBeTranslated();
+		IC
+		m_executedCycles ++;
 	}
 
 	DyntransResyncPC();
@@ -298,11 +317,8 @@ void CPUComponent::DyntransResyncPC()
 		throw std::exception();
 	}
 
-	// We can arrive here if m_nextIC pointed outside of the IC page.
-	// This is ok if m_nextIC is a "break out" instruction call, for
-	// early termination of the dyntrans core loop.
-
-	// TODO: Check to make sure that it is the break out ic!
+	std::cerr << "TODO: DyntransResyncPC: next ic outside of page?!\n";
+	throw std::exception();
 }
 
 

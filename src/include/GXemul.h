@@ -286,7 +286,10 @@ private:
 	// Runtime:
 	RunState		m_runState;
 	uint64_t		m_nrOfSingleStepsLeft;
-	struct timeval		m_lastSpeedOutput;
+
+	// Performance measurement:
+	struct timeval		m_lastOutputTime;
+	uint64_t		m_lastOutputStep;
 
 	// Model:
 	string			m_emulationFileName;

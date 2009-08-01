@@ -3957,3 +3957,5 @@ Changelog for GXemul:
 		Beginning on implementing branches: the MIPS "b" instruction,
 		with delay slot (both continuous execution, and single-stepping
 		with pause in the middle of the branch, etc).
+		Continuing on the dyntrans core loop (inlined instruction calls
+		first, then run a few remaining calls).

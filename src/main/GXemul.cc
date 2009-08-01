@@ -172,7 +172,8 @@ GXemul::GXemul()
 	, m_nrOfSingleStepsLeft(1)
 	, m_rootComponent(new RootComponent(this))
 {
-	gettimeofday(&m_lastSpeedOutput, NULL);
+	gettimeofday(&m_lastOutputTime, NULL);
+	m_lastOutputStep = 0;
 
 	ClearEmulation();
 }
@@ -956,9 +957,6 @@ void GXemul::Execute(const int longestTotalRun)
 			uint64_t step = GetStep();
 			uint64_t startingStep = step;
 
-			struct timeval tvstart;
-			gettimeofday(&tvstart, NULL);
-
 			// TODO: sloppy vs cycle accuracy.
 			if (GetRootComponent()->GetVariable("accuracy")->ToString() != "cycle") {
 				std::cerr << "GXemul::Execute(): TODO: Only "
@@ -1068,19 +1066,19 @@ void GXemul::Execute(const int longestTotalRun)
 				SetStep(step);
 			}
 
+			// Output nr of steps (and speed) every second:
 			struct timeval tvend;
 			gettimeofday(&tvend, NULL);
 
-			double secondsSinceLastOutput = ((double)tvend.tv_sec
-			    + tvend.tv_usec / 1000000.0)
-			    - ((double)m_lastSpeedOutput.tv_sec + m_lastSpeedOutput.tv_usec / 1000000.0);
+			double secondsSinceLastOutput =
+			    ((double)tvend.tv_sec + tvend.tv_usec / 1000000.0)
+			    - ((double)m_lastOutputTime.tv_sec + m_lastOutputTime.tv_usec / 1000000.0);
 
-			if (secondsSinceLastOutput > 2.0) {
-				m_lastSpeedOutput = tvend;
+			if (secondsSinceLastOutput > 1.0) {
+				m_lastOutputTime = tvend;
 
-				double seconds = ((double)tvend.tv_sec + tvend.tv_usec / 1000000.0)
-				    - ((double)tvstart.tv_sec + tvstart.tv_usec / 1000000.0);
-				int64_t stepsPerSecond = (step - startingStep) / seconds;
+				int64_t stepsPerSecond = (double)(step - m_lastOutputStep) / secondsSinceLastOutput;
+				m_lastOutputStep = step;
 
 				stringstream ss;
 				ss << step << " steps (" << stepsPerSecond << " steps/second)\n";

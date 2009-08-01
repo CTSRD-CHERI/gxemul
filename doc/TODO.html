@@ -97,13 +97,15 @@ MAIN GOAL for 0.6.0:
 
 		[/]  PC to pointers
 
-		[/]  For risc archs with delay slots, this means that single-stepping
+		[X]  For risc archs with delay slots, this means that single-stepping
 		     should be able to go half-way through a delay slot combo.
-			[/] Single step vs Running for 1 instruction?
+			[X] Single step vs Running for 1 instruction?
 
-		[ ]  Large chunks is safe vs "single stepping" dyntrans...
+		[/]  Large chunks is safe vs "single stepping" dyntrans...
+			[ ] Only "size 2" so far, i.e. delay slots. No support for
+			    longer instruction combos have been implemented yet.
 
-		[/]  Break-out-of-loop IC.
+		[X]  Break-out-of-loop IC.
 
 		[X]  Pointers back to PC. (I.e. "synch pc".)
 
