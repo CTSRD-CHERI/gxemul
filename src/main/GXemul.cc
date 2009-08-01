@@ -865,6 +865,8 @@ void GXemul::Execute(const int longestTotalRun)
 			fastestComponentIndex = i;
 		}
 
+	bool printEmptyLineBetweenSteps = false;
+
 	switch (GetRunState()) {
 
 	case SingleStepping:
@@ -875,6 +877,11 @@ void GXemul::Execute(const int longestTotalRun)
 		// decreasing nr of single steps left to 0, will break the loop.
 		while (m_nrOfSingleStepsLeft > 0 && GetRunState() == SingleStepping) {
 			uint64_t step = GetStep();
+
+			if (printEmptyLineBetweenSteps)
+				GetUI()->ShowDebugMessage("\n");
+			else
+				printEmptyLineBetweenSteps = true;
 
 			stringstream ss;
 			ss << "step " << step << ": ";
