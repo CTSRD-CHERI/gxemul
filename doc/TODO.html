@@ -296,7 +296,7 @@ MAIN GOAL for 0.6.0:
    [ ]  File loaders:
 	[ ]  symbol handling, line number info, data types?
 	[ ]  argument handling! (arg count, at least)
-	[ ]  all the others (macho, ecoff, srec, raw, ...)
+	[ ]  all the others (macho, ecoff, srec, ...)
 	[ ]  Disk images.
 		[ ]  r vs R modifier: read only disk images causes writes to
 		     fail, while R could create an implicit empty overlay
@@ -319,9 +319,8 @@ MAIN GOAL for 0.6.0:
 	     emulation should only break once the Count has reached a limit.
 	     (Usually 1, but should be possible to set to any positive value.)
 
-	[ ]  General for all components:
-	     Checked on device cycle execution, if necessary.
-	     
+	[ ]  Worst case: Checked on device cycle execution, if necessary.
+
 	[ ]  Per memory-mapped/addressable device
 	     Checked on load/store device access.
 
