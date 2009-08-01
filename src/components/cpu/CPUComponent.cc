@@ -148,7 +148,7 @@ int CPUComponent::DyntransExecute(GXemul* gxemul, int nrOfCycles)
 		}
 
 		stringstream disasm;
-		Unassemble(1, false, m_pc, disasm);
+		Unassemble(1, false, PCtoInstructionAddress(m_pc), disasm);
 		gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
 	}
 
@@ -286,11 +286,11 @@ void CPUComponent::DyntransToBeTranslatedBegin(struct DyntransIC* ic)
 }
 
 
-bool CPUComponent::DyntransReadInstruction(uint32_t& iword)
+bool CPUComponent::DyntransReadInstruction(uint16_t& iword)
 {
 	// TODO: Fast lookup.
 
-	AddressSelect(m_pc);
+	AddressSelect(PCtoInstructionAddress(m_pc));
 	bool readable = ReadData(iword, m_isBigEndian? BigEndian : LittleEndian);
 
 	if (!readable) {
@@ -298,7 +298,31 @@ bool CPUComponent::DyntransReadInstruction(uint32_t& iword)
 		if (ui != NULL) {
 			stringstream ss;
 			ss.flags(std::ios::hex);
-			ss << "instruction at 0x" << m_pc << " could not be read!";
+			ss << "instruction at 0x" << PCtoInstructionAddress(m_pc)
+			    << " could not be read!";
+			ui->ShowDebugMessage(this, ss.str());
+		}
+		return false;
+	}
+
+	return true;
+}
+
+
+bool CPUComponent::DyntransReadInstruction(uint32_t& iword)
+{
+	// TODO: Fast lookup.
+
+	AddressSelect(PCtoInstructionAddress(m_pc));
+	bool readable = ReadData(iword, m_isBigEndian? BigEndian : LittleEndian);
+
+	if (!readable) {
+		UI* ui = GetUI();
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "instruction at 0x" << PCtoInstructionAddress(m_pc)
+			    << " could not be read!";
 			ui->ShowDebugMessage(this, ss.str());
 		}
 		return false;
@@ -325,7 +349,7 @@ void CPUComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 			// it now:
 			if (!isSingleStepping) {
 				ss << " at:\n";
-				Unassemble(1, false, m_pc, ss);
+				Unassemble(1, false, PCtoInstructionAddress(m_pc), ss);
 			}
 
 			ui->ShowDebugMessage(this, ss.str());
@@ -454,7 +478,7 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 	if (methodName == "unassemble") {
 		uint64_t vaddr = m_lastUnassembleVaddr;
 		if (!m_hasUsedUnassemble)
-			vaddr = m_pc;
+			vaddr = PCtoInstructionAddress(m_pc);
 
 		if (arguments.size() > 1) {
 			gxemul->GetUI()->ShowDebugMessage("syntax: .unassemble [addr]\n");
@@ -515,7 +539,7 @@ uint64_t CPUComponent::Unassemble(int nRows, bool indicatePC, uint64_t vaddr, os
 		ss.flags(std::ios::hex | std::ios::showbase);
 		ss << vaddr;
 
-		if (indicatePC && m_pc == vaddr)
+		if (indicatePC && PCtoInstructionAddress(m_pc) == vaddr)
 			ss << " <- ";
 		else
 			ss << "    ";

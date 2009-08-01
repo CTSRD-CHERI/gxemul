@@ -215,7 +215,8 @@ int MIPS_CPUComponent::GetDyntransICshift() const
 
 void (*MIPS_CPUComponent::GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const
 {
-	return instr_ToBeTranslated;
+	bool mips16 = m_pc & 1? true : false;
+	return mips16? instr_ToBeTranslated_MIPS16 : instr_ToBeTranslated;
 }
 
 
@@ -243,6 +244,14 @@ bool MIPS_CPUComponent::VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 }
 
 
+uint64_t MIPS_CPUComponent::PCtoInstructionAddress(uint64_t pc)
+{
+	// MIPS16 has the lowest bit set, but the instruction is aligned as
+	// if the lowest bit was 0.
+	return pc & ~1;
+}
+
+
 size_t MIPS_CPUComponent::DisassembleInstructionMIPS16(uint64_t vaddr,
 	unsigned char *instruction, vector<string>& result)
 {
@@ -258,8 +267,45 @@ size_t MIPS_CPUComponent::DisassembleInstructionMIPS16(uint64_t vaddr,
 	snprintf(tmp, sizeof(tmp), "%04x", iword);
 	result.push_back(tmp);
 
-	// TODO
-	result.push_back("unimplemented MIPS16 instruction");
+	int hi5 = iword >> 11;
+	int rx = (iword >> 8) & 7;
+	int ry = (iword >> 5) & 7;
+//	int rz = (iword >> 2) & 7;
+	int imm5 = iword & 0x1f;
+
+	// Registers are: 16 17 2 3 4 5 6 7, and T(24) and SP(29).
+	if (rx <= 1)
+		rx += 16;
+	if (ry <= 1)
+		ry += 16;
+
+	switch (hi5) {
+
+	case 0x14:	/*  lbu y,5(x)  */
+	case 0x18:	/*  sb  y,5(x)  */
+		{
+			stringstream ss;
+			switch (hi5) {
+			case 0x14: result.push_back("lbu"); break;
+			case 0x18: result.push_back("sb"); break;
+			}
+
+			int ofs = imm5;	// TODO: scaling?
+
+			ss << regnames[ry] << "," << ofs << "(" << regnames[rx] << ")";
+			result.push_back(ss.str());
+		}
+		break;
+
+	default:
+		{
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "unimplemented MIPS16 opcode 0x" << hi5;
+			result.push_back(ss.str());
+		}
+		break;
+	}
 
 	return sizeof(uint16_t);
 }
@@ -268,7 +314,7 @@ size_t MIPS_CPUComponent::DisassembleInstructionMIPS16(uint64_t vaddr,
 size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	unsigned char *instruction, vector<string>& result)
 {
-	bool mips16 = vaddr & 1? true : false;
+	bool mips16 = m_pc & 1? true : false;
 	size_t instrSize = mips16? sizeof(uint16_t) : sizeof(uint32_t);
 
 	if (maxLen < instrSize) {
@@ -347,8 +393,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 					    regnames[rt] << "," << sa;
 					result.push_back(ss.str());
 					break;
-				default:ss << "unimplemented special, sub="
-					    << sub;
+				default:ss << "unimpl special, sub=" << sub;
 					result.push_back(ss.str());
 				}
 				break;
@@ -376,7 +421,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 					    regnames[rt] << "," << regnames[rs];
 					result.push_back(ss.str());
 					break;
-				default:ss << "unimplemented special, sub="
+				default:ss << "unimpl special, sub="
 					    << sub;
 					result.push_back(ss.str());
 				}
@@ -505,7 +550,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 				break;
 
 			default:
-				ss << "unimplemented instruction: " <<
+				ss << "unimplemented: " <<
 				    special_names[special6];
 				result.push_back(ss.str());
 				break;
@@ -729,7 +774,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 
 			default:
 				{
-					ss << "unimplemented instruction: " <<
+					ss << "unimplemented: " <<
 					    regimm_names[regimm5];
 					result.push_back(ss.str());
 				}
@@ -740,7 +785,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	default:
 		{
 			stringstream ss;
-			ss << "unimplemented instruction: " << hi6_names[hi6];
+			ss << "unimplemented: " << hi6_names[hi6];
 			result.push_back(ss.str());
 		}
 		break;
@@ -896,6 +941,30 @@ DYNTRANS_INSTR(MIPS_CPUComponent,ToBeTranslated)
 	uint32_t iword;
 	if (cpu->DyntransReadInstruction(iword))
 		cpu->Translate(iword, ic);
+
+	cpu->DyntransToBeTranslatedDone(ic);
+}
+
+
+DYNTRANS_INSTR(MIPS_CPUComponent,ToBeTranslated_MIPS16)
+{
+	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
+
+	cpu->DyntransToBeTranslatedBegin(ic);
+
+	uint16_t iword;
+	if (cpu->DyntransReadInstruction(iword)) {
+		// TODO: Recode
+		UI* ui = cpu->GetUI();
+		if (ui != NULL) {
+			stringstream ss;
+			ss.flags(std::ios::hex);
+			ss << "TODO: recode MIPS16 => regular MIPS instruction\n";
+			ui->ShowDebugMessage(cpu, ss.str());
+		}
+
+		//cpu->Translate(iword, ic);
+	}
 
 	cpu->DyntransToBeTranslatedDone(ic);
 }

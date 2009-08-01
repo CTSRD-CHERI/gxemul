@@ -232,29 +232,38 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 	messages << " 0x";
 	messages.flags(std::ios::hex);
 
-/*
-	// MIPS16 encoding (16-bit words) is indicated by the lowest bit of the PC.
-	if (e_machine == EM_MIPS && (eentry & 1)) {
-		TODO
-	}
-
-	// SH64 32-bit encoding is indicated by the lowest bit of the PC.
-	if (e_machine == EM_SH && (eentry & 1)) {
-		fatal("SH64: 32-bit instruction encoding: TODO\n");
-		//  m->cpus[0]->cd.sh.compact = 0;
-		m->cpus[0]->cd.sh.cpu_type.bits = 64;
-		exit(1);
-	}
-*/
-
 	// Special case for MIPS: 32-bit addresses are sign-extended.
 	if (e_machine == EM_MIPS && elf32)
 		e_entry = (int32_t) e_entry;
 
+	uint64_t display_entry_point = e_entry;
+
+	// MIPS16 encoding (16-bit words) is indicated by the lowest bit of the PC.
+	bool mips16 = false;
+	if (e_machine == EM_MIPS && (e_entry & 1)) {
+		display_entry_point &= ~1;
+		mips16 = true;
+	}
+
+	// SHmedia (SH64) 32-bit encoding is indicated by the lowest bit of the PC.
+	bool shmedia = false;
+	if (e_machine == EM_SH && (e_entry & 1)) {
+		display_entry_point &= ~1;
+		shmedia = true;
+	}
+
 	if (elf32)
-		messages << setw(8) << setfill('0') << (uint32_t) e_entry << "\n";
+		messages << setw(8) << setfill('0') << (uint32_t) display_entry_point;
 	else
-		messages << setw(16) << setfill('0') << (uint64_t) e_entry << "\n";
+		messages << setw(16) << setfill('0') << (uint64_t) display_entry_point;
+
+	if (mips16)
+		messages << " (MIPS16 encoding)";
+
+	if (shmedia)
+		messages << " (SHmedia encoding)";
+
+	messages << "\n";
 
 	// PROGRAM HEADERS
 	size_t i;

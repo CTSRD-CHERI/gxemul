@@ -190,11 +190,25 @@ protected:
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 					bool& writable) = 0;
 
+	/**
+	 * \brief Convert PC value to instuction address.
+	 *
+	 * Usually, this does not need to be overridden. However, some
+	 * architectures use e.g. the lowest bit of the PC register to indicate
+	 * a different encoding mode (MIPS16), but the instruction is still
+	 * aligned as if the lowest bit was 0.
+	 */
+	virtual uint64_t PCtoInstructionAddress(uint64_t pc)
+	{
+		return pc;
+	}
+
 	virtual int GetDyntransICshift() const;
 	virtual void (*GetDyntransToBeTranslated())(CPUComponent* cpu, DyntransIC* ic) const;
 
 	int DyntransExecute(GXemul* gxemul, int nrOfCycles);
 	void DyntransToBeTranslatedBegin(struct DyntransIC*);
+	bool DyntransReadInstruction(uint16_t& iword);
 	bool DyntransReadInstruction(uint32_t& iword);
 	void DyntransToBeTranslatedDone(struct DyntransIC*);
 

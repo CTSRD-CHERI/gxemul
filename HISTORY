@@ -3951,3 +3951,6 @@ Changelog for GXemul:
 		Arguments can now be passed during component creation, e.g.
 		nr CPUs, CPU model, or ram amount for a template machine.
 		Adding a 'raw' file loader, and a dummy SGI IP32 template.
+20090801	Two MIPS16 instructions can be disassembled; disassembly
+		address is now not necessarily the same as m_pc (e.g. on
+		MIPS16, the lowest bit is cleared).

@@ -177,6 +177,8 @@ protected:
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	    bool& writable);
 
+	virtual uint64_t PCtoInstructionAddress(uint64_t pc);
+
 	virtual int GetDyntransICshift() const;
 	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;
 
@@ -191,6 +193,7 @@ private:
 private:
 	void Translate(uint32_t iword, struct DyntransIC* ic);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated);
+	DECLARE_DYNTRANS_INSTR(ToBeTranslated_MIPS16);
 
 private:
 	/*

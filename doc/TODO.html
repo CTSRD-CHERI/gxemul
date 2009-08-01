@@ -92,11 +92,20 @@ MAIN GOAL for 0.6.0:
   [/]	NEW DYNTRANS IMPLEMENTATION, ...
 
 	[/]  Basic run loop.
+
 		[ ]  Dyntrans page allocation
+
 		[/]  PC to pointers
+
+		[ ]  For risc archs with delay slots, this means that single-stepping
+		     should be able to go half-way through a delay slot combo.
+
 		[ ]  Large chunks is safe vs "single stepping" dyntrans...
+
 		[ ]  Break-out-of-loop IC.
+
 		[/]  Pointers back to PC. (I.e. "synch pc".)
+
 		[ ]  Unit tests.
 
 	[ ]  Interrupts should be cycle accurate, and affect the cpu's
@@ -116,18 +125,32 @@ MAIN GOAL for 0.6.0:
 	     the original function call instead. This makes it possible to
 	     run fast, and then "break slowly" before a hazard.
 
-	[ ]  For risc archs with delay slots, this means that single-stepping
-	     should be able to go half-way through a delay slot combo.
-
 	[ ]  Try variable-length ISAs early on. Maybe amd64? Or AVR32?
 
 	[ ]  Multi-encoding ISAs, such as MIPS (MIPS16), ARM (Thumb), or
 	     amd64 (16/32/64-bit).
 
-	[ ]  Native code generation? (Not at first...)
+		[ ]  MIPS16 test:
+			mips64-unknown-elf-gcc-4.3.2 -mips16 -O3 urk.c -c
+			mips64-unknown-elf-ld urk.o -o urk -e f -Ttext 0xffffffff80004000
+		[X]  The lowest bit of the PC indicates MIPS16 mode, but
+		     the CPUComponent's dump code dumps m_pc directly. It should
+		     as the individual CPU what m_pc means in terms of virtual
+		     address for the instruction. Most cpus will return m_pc,
+		     but MIPS16 should return m_pc & ~1.
+
+	[ ]  Optional native code generation pass
 
 		[ ] Target amd64 and Alpha hosts first, if native generation is to be
 	    	attempted, since those are the only realistic ones I have for testing.
+
+		[ ] Similar in many ways to instruction combinations ala GXemul 0.4.x,
+		    but native code instead of C code.
+
+		[ ] Register allocator / liveness analysis of reads and writes.
+		    Requires a list of supported ic functions and their arguments,
+		    and what's being written.
+		    [ ] Not all backends may need to support all opcodes.
 
 		[ ] Ability to show disassembly of generated host
 		    instruction sequence!
@@ -139,7 +162,7 @@ MAIN GOAL for 0.6.0:
 
 		[ ] Exceptions from device access, or from load/store to
 		    unmapped pages/devices/handlers should break the
-		    native code execution.
+		    native code execution in a correct way.
 
 	[ ] Instruction cache emulation:  For each emulated
 	    instruction, call a stub handler with the current pc.
