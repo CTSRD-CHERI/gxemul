@@ -158,6 +158,7 @@
 #include <assert.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -171,6 +172,8 @@ GXemul::GXemul()
 	, m_nrOfSingleStepsLeft(1)
 	, m_rootComponent(new RootComponent(this))
 {
+	gettimeofday(&m_lastSpeedOutput, NULL);
+
 	ClearEmulation();
 }
 
@@ -953,6 +956,9 @@ void GXemul::Execute(const int longestTotalRun)
 			uint64_t step = GetStep();
 			uint64_t startingStep = step;
 
+			struct timeval tvstart;
+			gettimeofday(&tvstart, NULL);
+
 			// TODO: sloppy vs cycle accuracy.
 			if (GetRootComponent()->GetVariable("accuracy")->ToString() != "cycle") {
 				std::cerr << "GXemul::Execute(): TODO: Only "
@@ -1033,8 +1039,19 @@ void GXemul::Execute(const int longestTotalRun)
 					if (k == fastestComponentIndex)
 						maxExecuted = n;
 
-					if (n != toExecute)
+					if (n != toExecute) {
 						abort = true;
+
+						if (n > toExecute) {
+							std::cerr << "Internal error: " << n <<
+							    " steps executed, toExecute = " << toExecute << "\n";
+							throw std::exception();
+						}
+
+						stringstream ss;
+						ss << "only " << n << " steps of " << toExecute << " executed.";
+						GetUI()->ShowDebugMessage(componentsAndFrequencies[k].component, ss.str());
+					}
 				}
 
 				if (abort) {
@@ -1051,9 +1068,24 @@ void GXemul::Execute(const int longestTotalRun)
 				SetStep(step);
 			}
 
-			stringstream ss;
-			ss << step << " steps\n";
-			GetUI()->ShowDebugMessage(ss.str());
+			struct timeval tvend;
+			gettimeofday(&tvend, NULL);
+
+			double secondsSinceLastOutput = ((double)tvend.tv_sec
+			    + tvend.tv_usec / 1000000.0)
+			    - ((double)m_lastSpeedOutput.tv_sec + m_lastSpeedOutput.tv_usec / 1000000.0);
+
+			if (secondsSinceLastOutput > 2.0) {
+				m_lastSpeedOutput = tvend;
+
+				double seconds = ((double)tvend.tv_sec + tvend.tv_usec / 1000000.0)
+				    - ((double)tvstart.tv_sec + tvstart.tv_usec / 1000000.0);
+				int64_t stepsPerSecond = (step - startingStep) / seconds;
+
+				stringstream ss;
+				ss << step << " steps (" << stepsPerSecond << " steps/second)\n";
+				GetUI()->ShowDebugMessage(ss.str());
+			}
 		}
 		break;
 

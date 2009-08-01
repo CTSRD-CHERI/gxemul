@@ -143,18 +143,6 @@ void (*CPUComponent::GetDyntransToBeTranslated())(CPUComponent* cpu, DyntransIC*
  */
 int CPUComponent::DyntransExecute(GXemul* gxemul, int nrOfCycles)
 {
-	if (gxemul->GetRunState() == GXemul::SingleStepping) {
-		if (nrOfCycles != 1) {
-			std::cerr << "Internal error: Single stepping,"
-			    " but nrOfCycles = " << nrOfCycles << ".\n";
-			throw std::exception();
-		}
-
-		stringstream disasm;
-		Unassemble(1, false, PCtoInstructionAddress(m_pc), disasm);
-		gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
-	}
-
 	DyntransInit();
 
 	DyntransPCtoPointers();
@@ -165,41 +153,69 @@ int CPUComponent::DyntransExecute(GXemul* gxemul, int nrOfCycles)
 		throw std::exception();
 	}
 
-/*
- * The normal instruction execution core: Get the instruction call pointer
- * (and move the nextIC to the following instruction in advance), then
- * execute the instruction call by calling its f.
- */
+	if (gxemul->GetRunState() == GXemul::SingleStepping) {
+		if (nrOfCycles != 1) {
+			std::cerr << "Internal error: Single stepping,"
+			    " but nrOfCycles = " << nrOfCycles << ".\n";
+			throw std::exception();
+		}
+
+		stringstream disasm;
+		Unassemble(1, false, PCtoInstructionAddress(m_pc), disasm);
+		gxemul->GetUI()->ShowDebugMessage(this, disasm.str());
+
+		m_nextIC->f = GetDyntransToBeTranslated();
+	}
+
+	/*
+	 * The normal instruction execution core: Get the instruction call pointer
+	 * (and move the nextIC to the following instruction in advance), then
+	 * execute the instruction call by calling its f.
+	 */
 #define IC	ic = m_nextIC ++; ic->f(this, ic);
 
-	m_executedCycles = 0;
 	m_nrOfCyclesToExecute = nrOfCycles;
+	m_executedCycles = 0;
+
+	// Starting inside a delay slot? Then execute it carefully:
+	if (m_inDelaySlot) {
+		m_executedCycles = m_nrOfCyclesToExecute - 1;
+		IC
+		m_executedCycles -= (m_nrOfCyclesToExecute - 1);
+		m_executedCycles ++;
+
+		// Fault in delay slot: return immediately.
+		if (m_nextIC->f == instr_abort ||
+		    m_nextIC->f == instr_abort_in_delay_slot) {
+			m_nextIC->f = GetDyntransToBeTranslated();
+			return 0;
+		}
+	}
 
 	// TODO: Optimized calls if we're far enough away from a hazard,
 	// so that we can run e.g. instruction combinations
 
 	// TODO: Optimized loops of 120 IC calls...
 
-	const int margin = 16384;
-	int goal = nrOfCycles - margin;
-	if (goal > 0) {
-		m_executedCycles = goal;
-		// Note that individual IC implementations may increase
-		// m_executedCycles more...
-
-		for (int i=0; i<goal; i++) {
-			IC
-		}
-	}
+//	const int margin = 16384;
+//	int goal = nrOfCycles - margin;
+//	if (goal > 0) {
+//		m_executedCycles += goal;
+//		// Note that individual IC implementations may increase
+//		// m_executedCycles more...
+//
+//		for (int i=0; i<goal; i++) {
+//			IC
+//		}
+//	}
 
 	// ... then slowly execute the last few instructions.
-	for (; m_executedCycles<nrOfCycles; m_executedCycles++) {
+	for (; m_executedCycles<nrOfCycles; ) {
 		int old = m_executedCycles;
 		IC
-		if (m_executedCycles < old) {
-			m_executedCycles ++;
+		m_executedCycles ++;
+		if (m_executedCycles == old)
 			break;
-		}
 	}
 
 	DyntransResyncPC();
@@ -353,8 +369,12 @@ bool CPUComponent::DyntransReadInstruction(uint32_t& iword)
 
 void CPUComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 {
+	bool abort = false;
+
 	if (ic->f == NULL || ic->f == instr_abort_in_delay_slot) {
+		abort = true;
 		UI* ui = GetUI();
+
 		if (ui != NULL) {
 			bool isSingleStepping = GetRunningGXemulInstance()->GetRunState() == GXemul::SingleStepping;
 
@@ -381,20 +401,25 @@ void CPUComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 	// Finally, execute the translated instruction.
 	bool ds = m_inDelaySlot;
 	bool dsException = m_exceptionInDelaySlot;
+	bool singleInstructionLeft = m_executedCycles == m_nrOfCyclesToExecute - 1;
+
 	m_nextIC = ic + 1;
 	ic->f(this, ic);
 
-	// If this instruction was in the delay slot of another instruction,
-	// and we are running a single instruction, then manually branch to
-	// the branch target:
-	if (ds && !dsException) {
-		bool singleInstructionLeft = m_executedCycles == m_nrOfCyclesToExecute - 1;
-		if (singleInstructionLeft) {
+	if (singleInstructionLeft && !abort) {
+		// If this instruction was in the delay slot of another instruction,
+		// and we are running a single instruction, then manually branch to
+		// the branch target:
+		if (ds && !dsException) {
 			m_pc = m_delaySlotTarget;
 			DyntransPCtoPointers();
 			m_inDelaySlot = false;
 			m_exceptionInDelaySlot = false;
 		}
+
+		// Don't leave any "single instruction left" instructions
+		// in any of the slots:
+		ic->f = GetDyntransToBeTranslated();
 	}
 }
 

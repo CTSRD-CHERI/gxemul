@@ -488,12 +488,13 @@ MAIN GOAL for 0.6.0:
 	[ ]  ioctl emulation layer for all devices :-[
 	[ ]  struct conversions for many syscalls
 
-   [ ]	Output handlers:
+   [ ]	Output handlers / output hooks / statistics tools / display plugins:
 
 	[ ]  The output handlers should be connected to the specific devices
 	     that need to output!
 
-	[ ]  stdout/stdin, with CTRL-B sending CTRL-C to the emulated program,
+	[ ]  stdout/stdin (cooperating with ConsoleUI), with CTRL-B sending
+	     CTRL-C to the emulated program,
 	     just as before. Only one device at a time can connect to this
 	     output handler.
 	     
@@ -504,6 +505,8 @@ MAIN GOAL for 0.6.0:
 	[ ]  X-windows, or even SDL, for graphical output? Investigate. Would
 	     be cool if hardware OpenGL works, for emulation of accelerated
 	     graphics.
+
+	[ ]  Sound output (maybe SDL as well?)
 
 	[ ]  Other "plugins", like xterm windows showing registers all the
 	     time (with e.g. colored state changes), and disassembly "around"

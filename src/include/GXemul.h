@@ -229,7 +229,7 @@ public:
 	 *
 	 * @param longestTotalRun Maximum number of steps to execute.
 	 */
-	void Execute(const int longestTotalRun = 50000);
+	void Execute(const int longestTotalRun = 100000);
 
 	/**
 	 * \brief Dump a list to stdout with all available machine templates.
@@ -286,6 +286,7 @@ private:
 	// Runtime:
 	RunState		m_runState;
 	uint64_t		m_nrOfSingleStepsLeft;
+	struct timeval		m_lastSpeedOutput;
 
 	// Model:
 	string			m_emulationFileName;
