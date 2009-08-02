@@ -779,10 +779,6 @@ string GXemul::GetRunStateAsString() const
 		return "Single-stepping";
 	case Running:
 		return "Running";
-	case BackwardsSingleStepping:
-		return "Single-stepping backwards";
-	case BackwardsRunning:
-		return "Running backwards";
 	case Quitting:
 		return "Quitting";
 	}
@@ -946,12 +942,6 @@ void GXemul::Execute(const int longestTotalRun)
 		m_nrOfSingleStepsLeft = 0;
 		break;
 
-	case BackwardsSingleStepping:
-		std::cerr << "GXemul::Execute(): TODO: BackwardsSingleStepping\n";
-		throw std::exception();
-		// TODO
-		break;
-
 	case Running:
 		{
 			uint64_t step = GetStep();
@@ -1085,12 +1075,6 @@ void GXemul::Execute(const int longestTotalRun)
 				GetUI()->ShowDebugMessage(ss.str());
 			}
 		}
-		break;
-
-	case BackwardsRunning:
-		std::cerr << "GXemul::Execute(): TODO: BackwardsRunning\n";
-		throw std::exception();
-		// TODO
 		break;
 
 	default:

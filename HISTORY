@@ -3959,3 +3959,6 @@ Changelog for GXemul:
 		with pause in the middle of the branch, etc).
 		Continuing on the dyntrans core loop (inlined instruction calls
 		first, then run a few remaining calls).
+20090802	Implementing a skeleton implementation for the backward-step
+		command (but since variable write handlers aren't implemented
+		yet, it doesn't really work).

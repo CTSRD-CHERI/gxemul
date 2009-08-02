@@ -42,8 +42,8 @@ ContinueBackwardsCommand::~ContinueBackwardsCommand()
 
 bool ContinueBackwardsCommand::Execute(GXemul& gxemul, const vector<string>& arguments)
 {
-	gxemul.SetRunState(GXemul::BackwardsRunning);
-	return true;
+	gxemul.GetUI()->ShowDebugMessage("TODO\n");
+	return false;
 }
 
 
@@ -64,25 +64,14 @@ string ContinueBackwardsCommand::GetLongDescription() const
 
 #ifdef WITHUNITTESTS
 
-static void Test_ContinueBackwardsCommand_Affect_RunState()
+static void Test_ContinueBackwardsCommand_Test()
 {
-	refcount_ptr<Command> cmd = new ContinueBackwardsCommand;
-	vector<string> dummyArguments;
-	
-	GXemul gxemul;
-
-	UnitTest::Assert("the default GXemul instance should be Paused",
-	    gxemul.GetRunState() == GXemul::Paused);
-
-	cmd->Execute(gxemul, dummyArguments);
-
-	UnitTest::Assert("runstate should have been changed to BackwardsRunning",
-	    gxemul.GetRunState() == GXemul::BackwardsRunning);
+	// TODO
 }
 
 UNITTESTS(ContinueBackwardsCommand)
 {
-	UNITTEST(Test_ContinueBackwardsCommand_Affect_RunState);
+	UNITTEST(Test_ContinueBackwardsCommand_Test);
 }
 
 #endif

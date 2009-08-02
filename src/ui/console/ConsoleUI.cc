@@ -157,8 +157,7 @@ void ConsoleUI::ShowDebugMessage(const string& msg)
 	vector<string> lines = SplitIntoRows(msg, true);
 
 	for (size_t i=0; i<lines.size(); ++i) {
-		if (m_gxemul->GetRunState() == GXemul::Running ||
-		    m_gxemul->GetRunState() == GXemul::BackwardsRunning)
+		if (m_gxemul->GetRunState() == GXemul::Running)
 			std::cout << "[ " << m_indentationMsg << lines[i] << " ]\n";
 		else
 			std::cout << m_indentationMsg << lines[i] << "\n";
@@ -267,8 +266,6 @@ int ConsoleUI::MainLoop()
 
 		switch (runState) {
 
-		case GXemul::BackwardsSingleStepping:
-		case GXemul::BackwardsRunning:
 		case GXemul::SingleStepping:
 		case GXemul::Running:
 			// Switching from Paused state to running? Then

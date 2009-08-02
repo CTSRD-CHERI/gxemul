@@ -75,7 +75,7 @@ string StepCommand::GetShortDescription() const
 
 string StepCommand::GetLongDescription() const
 {
-	return "Runs one step in the emulation.\n"
+	return "Runs one step (or multiple single-steps) in the emulation.\n"
 	    "\n"
 	    "See also:  continue      (to continue without single-stepping)\n";
 }

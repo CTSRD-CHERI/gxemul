@@ -65,13 +65,14 @@ MAIN GOAL for 0.6.0:
 		     passes, with e.g. 10000 cycles per chunk, before the slow
 		     ones need to run at all. THEN they are interleaved in a
 		     single-cycle manner.
-
 		[ ]  In "sloppy" accuracy mode, then it will be possible to
 		     interleave with large chunks even when components "collide"
 		     in time. (This will cause reverse execution support to
 		     be turned off.)
 
 	[ ] Reverse execution/debugging:
+		[/]  backward-step command decreases root.step and prints state delta.
+			[ ]  Unit test, once write handlers have been implemented.
 		[ ]  Must be explicitly enabled, since it will slow down the emulator,
 		     use more memory, and require disk images to have overlays!
 		[ ]  Regular saving of state, and limiting the number of such
@@ -80,11 +81,14 @@ MAIN GOAL for 0.6.0:
 		[ ]  Disk image overlays!
 		[ ]  In addition to saving state, all modifications done to the
 		     component tree, and e.g. breakpoints, need to be stored
-		     together with their time stamp ("step"). I.e. if a USB
-		     storage device is connected as step 1000, and we're
-		     running in reverse to step 800 to check something, and
-		     then continue again, the default behaviour should be that
-		     at step 1000 the USB device is connected again.
+		     together with their time stamp ("step").
+		     * I.e. if a USB storage device is connected as step 1000, and we're
+		       running in reverse to step 800 to check something, and
+		       then continue again, the default behaviour should be that
+		       at step 1000 the USB device is connected again.
+		     * Or if we run 10 steps, change cpu0.pc, and run 10 more steps,
+		       then running backwards 10 steps could work, but not more?
+		       Think about this!
 		[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
 		[ ]  "c" = "continue", "backward-continue" commands
 		[ ]  Simulation across multiple hosts?

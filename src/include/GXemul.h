@@ -57,8 +57,6 @@ public:
 		Paused,
 		SingleStepping,			// Single-step execution
 		Running,			// Continuous execution
-		BackwardsSingleStepping,	// Single-step execution reverse
-		BackwardsRunning,		// Continuous execution reverse
 		Quitting
 	};
 
