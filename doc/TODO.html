@@ -171,6 +171,12 @@ MAIN GOAL for 0.6.0:
 		    unmapped pages/devices/handlers should break the
 		    native code execution in a correct way.
 
+		[ ] Unit tests -WW@U may run with native code generation, and
+			-WW@u without. If the emulator is built without
+			native code generation support, then one of those may
+			simply return 1 "all tests passed" immediately, and
+			the Makefile calls both.
+
 	[ ] Instruction cache emulation:  For each emulated
 	    instruction, call a stub handler with the current pc.
 	    It is responsible for updating statistics etc.

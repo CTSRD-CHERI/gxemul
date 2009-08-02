@@ -537,58 +537,7 @@ binary file which should be loaded at a specific virtual address.
 <p><br>
 <a name="promdump_o2"><h4>Dumping the PROM on a SGI O2:</h4></a>
 
-The general ideas in this section applies to using ROM images from other
-machines as well. I have also tried this on an SGI IP32 ("O2"), in addition
-to the DECstation.
-
-<p>For the O2, a suitable command to dump the prom memory range is
-<pre>
-	&gt;&gt; <b>dump -b 0xBFC00000:0xBFC80000</b>
-</pre>
-Make sure you capture all the output (via serial console) into a file,
-and then run <tt>experiments/sgiprom_to_bin</tt> on the captured file.
-
-<p>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="sgi-o2-real.jpg"><img src="sgi-o2-real_small.jpg"></a>
-&nbsp;&nbsp;&nbsp;
-<a href="20050817-sgi-o2-success-7.png"><img src="20050817-sgi-o2-success-7_small.png"></a>
-&nbsp;&nbsp;&nbsp;
-<a href="20050817-sgi-o2-success-8.png"><img src="20050817-sgi-o2-success-8_small.png"></a>
-
-<p>The photo on the left is from the real machine. The other two are
-screenshots of the PROM running experimentally in GXemul, using <tt>-Y2</tt>
-framebuffer scaledown.
-
-<p><font color="#ff0000">
-Note 2007-10-18: Running the O2 PROM image broke somewhere between release
-0.3.8 and 0.4.0. (Running with graphics broke between 0.3.7 and 0.3.8.)</font>
-
-<p>Normally during bootup, the IP32 PROM does a Power-On test which makes
-sure that the caches and other things are working properly. GXemul doesn't
-emulate all those things well enough for the tests to pass. The
-experimental screenshots above were taken with cache detection skipped
-manually.
-
-<p><font color="#ff0000">
-In other words: don't expect this to work out-of-the-box with GXemul right 
-now. It might work once I've added correct cache emulation.</font>
-
-<p>The command line used to start the emulator, once correct cache
-emulation has been implemented, would be something like <tt>gxemul -XQeo2
-0xbfc00000:prom.bin</tt>.
-
-<p>The same caution applies when dealing with SGI PROMs as with
-DECstation PROMs: GXemul doesn't really emulate the hardware, it only
-"fakes" devices well enough to fool some things, primarily NetBSD, that 
-it is emulating a real machine. ROM code is usually a <i>lot</i> more 
-picky about the details.
-
-<p>The graphics used in the O2 is (as far as I know) undocumented. Combining
-some traces of info from how Linux/O2 draws to the screen with some
-reverse-engineering of my own, I've implemented enough of the controller to
-let the PROM draw rectangles and bitmaps, but not much more. The SCSI
-controller is not implemented yet either.
+<a href="machines/machine_sgi_ip32.html">Moved here</a>.
 
 
 
