@@ -47,6 +47,7 @@ SUCH DAMAGE.
 <table border="0" width="99%"><tr><td valign="top" align="left">
 <ul>
   <li><a href="#overview">Overview</a>
+  <li><a href="#newvsold">New vs Old framework</a>
   <li><a href="#free">Is GXemul Free software?</a>
   <li><a href="#build">How to compile/build the emulator</a>
   <li><a href="#run">How to run the emulator</a>
@@ -82,8 +83,9 @@ various surrounding hardware components such as framebuffers, busses,
 interrupt controllers, ethernet controllers, disk controllers, and serial 
 port controllers.
 
-<p>GXemul, including the dynamic translation system, is implemented in
-portable C++ (although most parts are still legacy C code),
+<p>GXemul, including the <a href="translation.html">dynamic translation
+system</a>, is implemented in
+portable C++ (although most parts are still legacy C-style code),
 which means that the emulator will run on practically any 64-bit or 32-bit
 <a href="http://en.wikipedia.org/wiki/Unix-like">Unix-like</a> systems,
 with few or no modifications.
@@ -119,6 +121,114 @@ Mallett, Juan Romero Pardines, Carl van Schaik, Miod Vallat, Alec Voropay,
 Göran Weinholt, Alexander Yurchenko, and everyone else who has provided
 feedback on previous releases.
 
+
+
+
+<p><br>
+<a name="newvsold"></a>
+<h3>New vs Old framework:</h3>
+
+Starting with GXemul 0.6.0, a new emulation framework designed from scratch is
+included. So far, only <a href="machines.html">very few emulation modes</a> have
+been rewritten to use this new framework; almost all emulation modes use the old
+(legacy) framework, which was developed in a more ad-hoc manner. The long-term
+goal is to rewrite everything to use the new framework.
+
+<p>(The documentation still largely refers to how things worked in the old framework.)
+
+<p>The new framework emulates <a href="components.html"><i>components</i></a>.
+A component can have sub-components
+(children) and a parent, so the components make up a configuration tree:
+
+<p><center><img src="model.png"></center>
+
+<p>Each component has a <i>path</i>, e.g. <tt>root.machine1.mainbus0.cpu0</tt> for the
+CPU in the right-most machine in the example above. Often, shorter paths can
+be used, such as <tt>machine1</tt> instead of <tt>root.machine1</tt>, if there
+is no ambiguity.
+
+<p>Each component has a <i>state</i>, which is a collection of <i>variables</i>.
+For e.g. a CPU component, the state is usually a set of registers. Each component
+also has a set of <i>methods</i> which can be executed. A CPU may disassemble
+instructions using its <i>unassemble</i> method:
+
+<p><table border=0 width=100%><tr><td width=5%>&nbsp;</td><td><pre>
+GXemul> <b>root</b>
+  root
+  \-- machine0  [testmips]
+      \-- mainbus0
+          |-- ram0  (32 MB at offset 0)
+          |-- rom0  (16 MB at offset 0x1fc00000)
+          \-- cpu0  (5KE, 100 MHz)
+
+  accuracy = cycle
+  step     = 0
+GXemul> <b>cpu0.unassemble</b>
+&lt;f&gt;
+0xffffffff800100f8 &lt;- 27bdffd0   addiu   sp,sp,-48    
+0xffffffff800100fc    3c03cccc   lui     v1,0xcccc    
+0xffffffff80010100    3c028888   lui     v0,0x8888    
+0xffffffff80010104    8f8b8008   lw      t3,-32760(gp)
+0xffffffff80010108    8f8a8004   lw      t2,-32764(gp)
+0xffffffff8001010c    afb60028   sw      s6,40(sp)    
+0xffffffff80010110    afb50024   sw      s5,36(sp)    
+...
+</pre></td></tr></table>
+
+<p>When single-stepping, all state change is displayed. (In the old framework,
+it was up to individual device/component implementations to print debug
+messages.)
+
+<p><table border=0 width=100%><tr><td width=5%>&nbsp;</td><td><pre>
+GXemul&gt; <b>step</b>
+step 0: cpu0: &lt;f&gt;
+              0xffffffff800100f8    27bdffd0   addiu   sp,sp,-48
+        =&gt; cpu0.pc: 0xffffffff800100f8 -&gt; 0xffffffff800100fc
+        =&gt; cpu0.sp: 0xffffffffa0007f00 -&gt; 0xffffffffa0007ed0
+GXemul&gt; 
+step 1: cpu0: 0xffffffff800100fc    3c03cccc   lui   v1,0xcccc
+        =&gt; cpu0.pc: 0xffffffff800100fc -&gt; 0xffffffff80010100
+        =&gt; cpu0.v1: 0 -&gt; 0xffffffffcccc0000
+GXemul&gt; 
+</pre></td></tr></table>
+
+<p>The example above may not be that interesting, but imagine that the CPU
+reads from a device which has a zero-on-read status register. Then the
+output may look something like this: (this is a made-up example, for now)
+
+<p><table border=0 width=100%><tr><td width=5%>&nbsp;</td><td><pre>
+GXemul&gt; <b>step</b>
+step 2: cpu0: 0xffffffff800101f4    12345678   lw   t3,256(a1)
+        =&gt; cpu0.pc: 0xffffffff800101f4 -&gt; 0xffffffff800101f8
+        =&gt; cpu0.t3: 0 -&gt; 0x2200
+        =&gt; intcontroller.status: 0x2200 -&gt; 0
+GXemul&gt; 
+</pre></td></tr></table>
+
+<p>Components that have a <i>frequency</i> are executed in steps. Those that
+do not have a frequency only do things if triggered by some other means (i.e.
+another component). The components' relative frequencies determine how many
+steps they will run at a time. For example, if we have component A running at
+100 MHz, and component B running at 1 MHz, then in 100 steps A will be executing
+100 cycles and B only 1. The GXemul framework makes sure that the exact sequence
+of cycles is the same nomatter if the user is single-stepping, or running
+the simulation continuously.
+
+<p>The frequency mentioned above does not have anything at all to do with how
+fast a particular host executes the simulation. The frequencies are only relative
+to each other.
+
+<p>Is the new framework <i>cycle-accurate</i>? Both yes and no. The framework
+itself aims to be step/cycle accurate, but it is of course up to the
+implementation of individual components to also be cycle accurate. For example,
+the CPU components that are available out-of-the-box in GXemul do not
+try to simulate out-of-order execution, or pipe-line stalls, or other
+effects that happen in a real processor, so even though the aim is that the
+implementation should be cycle accurate, it does not simulate
+any <i>existing real-world</i> processor in a cycle-accurate manner.
+
+<p>(Is it theoretically <i>possible</i> to implement pipe-lined and/or
+out-of-order CPU models for GXemul's new framework? Maybe. But that has not been done.)
 
 
 
@@ -165,18 +275,28 @@ Uncompress the .tar.gz distribution file, and run
 	$ <b>make</b>
 </pre>
 
-<p>This should work on most Unix-like systems. GXemul does not require any 
-specific libraries to build, however, if you build on a system which does 
-not have X11 libraries installed, some functionality will be lost.
+<p>This should work on most Unix-like systems. GXemul does not <i>require</i> any 
+specific libraries to build, however, the following optional libraries or
+third-party software give additional functionality:
+<ul>
+	<li>X11 libraries: for legacy mode framebuffer emulation.
+	<li><a href="http://www.doxygen.org/">Doxygen</a>: if installed, source code documentation will be generated
+		when documentation is built.
+</ul>
 
-<p>The emulator's performance is highly dependent on both runtime settings 
+<p>The emulator's performance is dependent on both runtime settings 
 and on compiler settings, so you might want to experiment with using 
 different <tt>CXX</tt> and <tt>CXXFLAGS</tt> environment variable values when 
 running the <tt>configure</tt> script.
 
-<p>(During development of the emulator, <tt><b>configure --debug</b></tt> may be used
+<p>During development of the emulator, <tt><b>configure --debug</b></tt> may be used
 to enable some debugging aids and turn off optimizations. <tt><b>make test</b></tt>
-can be used to run unit tests.)
+can be used to run unit tests.
+
+<p>Running <tt><b>make install</b></tt> will install GXemul into <tt>/usr/local</tt>,
+or wherever the configure script detects that user software is installed on
+your system (may be overridden by setting the <tt>PREFIX</tt> environment variable before
+running <tt>configure</tt>).
 
 
 
@@ -190,19 +310,24 @@ Running <tt><b>gxemul</b></tt> without arguments (or with the
 <b><tt>-h</tt></b> or <b><tt>-H</tt></b> command line options) will
 display a help message.
 
+<p>Running <tt><b>gxemul -V</b></tt> will start GXemul in an "empty state"
+in the interactive debugger. You may then type <tt><b>help</b></tt> to see
+a list of available commands.
+
 <p>To get some ideas about what is possible to run in the emulator, please 
 read the section about <a href="guestoses.html">installing "guest" 
 operating systems</a>. The most straight forward guest operating system to 
-install is NetBSD/pmax; the instructions provided <a 
-href="guestoses.html#netbsdpmaxinstall">here</a> should let you install 
+install is <a href="http://www.netbsd.org/ports/pmax/">NetBSD/pmax</a>; the
+instructions provided <a href="guestoses.html#netbsdpmaxinstall">here</a> should let you install 
 NetBSD/pmax in a way very similar to how it is done on a real DECstation.
 
 <p>If you are interested in using the emulator to develop code on your 
 own, then you should also read the section about <a 
 href="experiments.html#hello">Hello World</a>.
 
-<p>To exit the emulator, type CTRL-C to enter the 
-single-step debugger, and then type <tt><b>quit</b></tt>.
+<p>To exit the emulator, type CTRL-C to show the 
+single-step debugger prompt (if it is not already displayed),
+and then type <tt><b>quit</b></tt>.
 
 <p>If you are starting an emulation by entering settings directly on the 
 command line, and you are not using the <tt><b>-x</b></tt> option, then 

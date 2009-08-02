@@ -3962,3 +3962,5 @@ Changelog for GXemul:
 20090802	Implementing a skeleton implementation for the backward-step
 		command (but since variable write handlers aren't implemented
 		yet, it doesn't really work).
+		Updating the Introduction chapter in the documentation with
+		a section about the New framework.
