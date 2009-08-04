@@ -365,8 +365,7 @@ void CPUComponent::DyntransPCtoPointers()
 
 void CPUComponent::DyntransResyncPC()
 {
-	ptrdiff_t diff = m_nextIC - m_ICpage;
-	int instructionIndex = (int) diff;
+	ptrdiff_t instructionIndex = m_nextIC - m_ICpage;
 
 	// On a page with e.g. 1024 instruction slots, instructionIndex is usually
 	// between 0 and 1023. This means that the PC points to within this
