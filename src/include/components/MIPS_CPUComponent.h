@@ -56,8 +56,9 @@
 /*
  *  These should all be 2 characters wide:
  *
- *  NOTE: These are for 32-bit ABIs. For the 64-bit ABI, registers 8..11
- *  are used to pass arguments and are then called "a4".."a7".
+ *  NOTE: These are for the old 32-bit ABIs. For the newer ABIs (n32 and 64-bit
+ *  ABIs), registers 8..11 are used to pass arguments and are then called
+ *  "a4".."a7".
  *
  *  TODO: Should there be two different variants of this? It's not really
  *  possible to figure out in some easy way if the code running was
@@ -178,6 +179,10 @@ protected:
 	    bool& writable);
 
 	virtual uint64_t PCtoInstructionAddress(uint64_t pc);
+
+	virtual int FunctionTraceArgumentCount();
+	virtual int64_t FunctionTraceArgument(int n);
+	virtual bool FunctionTraceReturnImpl(int64_t& retval);
 
 	virtual int GetDyntransICshift() const;
 	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;

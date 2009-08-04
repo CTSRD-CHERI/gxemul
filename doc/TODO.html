@@ -154,6 +154,9 @@ MAIN GOAL for 0.6.0:
 		[ ] Similar in many ways to instruction combinations ala GXemul 0.4.x,
 		    but native code instead of C code.
 
+		[ ] How/when to decide whether native generation is worth it?
+		    Using statistics of some sort?
+
 		[ ] Register allocator / liveness analysis of reads and writes.
 		    Requires a list of supported ic functions and their arguments,
 		    and what's being written.
@@ -212,6 +215,12 @@ MAIN GOAL for 0.6.0:
 	most likely others for "bank select" embedded archs/microcontrollers.
 
   [ ]	Memory/bus reads in "no exception" mode (for disasm and other things).
+
+  [ ]	-d command line option => on-reset command, which connects a disk image
+  	to a disk controller? But some machines have SCSI controllers, some have
+  	IDE, some have the fake testmips controller, and they all have different
+  	names. How to solve this? Maybe not use -d at all in the new framework,
+  	but some other form of disk:path:filename format?
 
   [/]	Symbol registry.
   	[X]  Add ELF symbols (see end of FileLoader_ELF.cc).
@@ -318,10 +327,14 @@ MAIN GOAL for 0.6.0:
 
    [ ]  Breakpoints
 
-	Breakpoint = some form of expression
+	Breakpoint = some form of expression, which will be evaluated
+	after (or before?) running each cycle. (*)
+	
+	(*) Implementation-wise, it may be optimized away, but the semantics
+	should be this.
 
-	"Any" state change in any component? (This includes physical memory
-	    reads and writes, registers in CPUs, etc.)
+	TODO: Any state variable change in any component? How about RAM/custom
+	changes? How about register _READS_ or custom reads.
 
 	All Load/stores to virtual addresses?
 
@@ -342,13 +355,28 @@ MAIN GOAL for 0.6.0:
 	     generation, except for stuff like "check if pc = xyz"-
 	     style breakpoints. Those can be embedded.
 
-   [ ]  Function call trace etc.
-	[ ]  Think about Verboseness. Is this per-component? How many levels?
-		E.g. a CPU can show state change in many ways:
-		o)  the instruction being executed
-		o)  the registers/state being changed
-		o)  function call trace (enter/leave function)
-
+   [/]  Function call trace etc.
+   	[ ]  string lookup for args
+   	[ ]  symbol lookup for args
+   	[ ]  Document in doc/components/component_cpu.html how to use
+   	     tracing, what the showFunction* state variables do, etc.
+   	[ ]  trace command (taking an argument: nr of calls, default is 1?)
+   		which is the same as setting a breakpoint for cpuX.nrOfFunctionCalls = Z
+   		where Z is one more than before than it was before running the command.
+   		And each function call increases that variable.
+   		trace then temporarily turns on showFunctionTraceCall and
+   		runs until the breakpoint hits (or CTRL-C), and then removes
+   		the breakpoint automatically (even if CTRL-C was hit), and
+   		restores showFunctionTraceCall.
+	     Variants:	trace on	turns on tracing for all CPUs (but doesn't
+	     				run anything)
+	     		trace off	turns off tracing for all CPUs
+	     		trace [n]	runs with trace enabled for n function calls,
+	     				n = 10 by default?
+	     showFunctionCallReturn should be false by default.
+	[ ]  MIPS ABI state variable (o32, n32, n64). o32 has 4 arg registers,
+	     the others have 8. (See MIPS_CPUComponent::FunctionTraceArgumentCount().)
+	
    [ ]  Stack dump (of the emulated machine)
    	[ ]  A method on CPU components?
 

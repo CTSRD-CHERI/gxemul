@@ -203,6 +203,15 @@ protected:
 		return pc;
 	}
 
+	// CPUComponent:
+	void FunctionTraceCall();
+	void FunctionTraceReturn();
+
+	// Overridden by each CPU architecture:
+	virtual int FunctionTraceArgumentCount() { return 0; }
+	virtual int64_t FunctionTraceArgument(int n) { return 0; }
+	virtual bool FunctionTraceReturnImpl(int64_t& retval) { return false; }
+
 	virtual int GetDyntransICshift() const;
 	virtual void (*GetDyntransToBeTranslated())(CPUComponent* cpu, DyntransIC* ic) const;
 
@@ -217,18 +226,17 @@ protected:
 	 */
 	void DyntransResyncPC();
 
-private:
-	void DyntransInit();
-
 	/**
-	 * \brief Calculate m_nextIC and m_ICpage, based on m_pc, before running
-	 *	the dyntrans core loop.
+	 * \brief Calculate m_nextIC and m_ICpage, based on m_pc.
 	 *
 	 * This function may return pointers to within an existing translation
 	 * page (hopefully the most common case, since it is the fastest), or
 	 * it may allocate a new empty page.
 	 */
 	void DyntransPCtoPointers();
+
+private:
+	void DyntransInit();
 
 	bool LookupAddressDataBus(GXemul* gxemul = NULL);
 
@@ -265,20 +273,43 @@ protected:
 	DECLARE_DYNTRANS_INSTR(shift_left_u64_u64_imm5_truncS32);
 
 protected:
-	// Variables common to all (or most) kinds of CPUs:
+	/*
+	 * Variables common to all (or most) kinds of CPUs:
+	 */
+
+	// Framework frequency/runability:
 	double			m_frequency;
 	bool			m_paused;
+
+	// Architecture fundamentals:
 	string			m_cpuArchitecture;
 	int			m_pageSize;
+
+	// Program counter:
 	uint64_t		m_pc;
+
+	// Memory dump and disassembly:
 	uint64_t		m_lastDumpAddr;
 	uint64_t		m_lastUnassembleVaddr;
 	bool			m_hasUsedUnassemble;
+
+	// Endianness:
 	bool			m_isBigEndian;
+
+	// Function call trace:
+	bool			m_showFunctionTraceCall;
+	bool			m_showFunctionTraceReturn;
+	int32_t			m_functionCallTraceDepth;
+	int64_t			m_nrOfTracedFunctionCalls;
+
+	// Delay slot related:
 	bool			m_inDelaySlot;
 	uint64_t		m_delaySlotTarget;
 
-	// Cached/volatile state:
+
+	/*
+	 * Cached/volatile state:
+	 */
 	AddressDataBus *	m_addressDataBus;
 	uint64_t		m_addressSelect;
 	struct DyntransIC *	m_ICpage;

@@ -256,12 +256,16 @@ struct m88k_cpu_type_def {
 #define	M88K_FPECR_FUNIMP		(1 << 6)
 /*  ... TODO: more  */
 
+// Dyntrans:
+#define	M88K_INSTR_ALIGNMENT_SHIFT	2
+#define	M88K_IC_ENTRIES_PER_PAGE	1024	// always 4 KB pages
 
+// M88K registers:
 #define	N_M88K_REGS		32
-
-/*  Register r0 is always zero, r1 is the return address on function calls.  */
-#define	M88K_ZERO_REG		0
-#define	M88K_RETURN_REG		1
+#define	M88K_ZERO_REG		0	// r0: always zero
+#define	M88K_RETURN_REG		1	// r1: the return address on function calls
+#define	M88K_RETURN_VALUE_REG	2	// r2: the return value, from function calls
+#define	M88K_FIRST_ARG_REG	2	// r2..r9: eight standard arguments to functions
 
 #define	M88K_CMP_HS	0x00000800
 #define	M88K_CMP_LO	0x00000400
@@ -356,13 +360,21 @@ protected:
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	    bool& writable);
 
+	virtual int FunctionTraceArgumentCount() { return 8; }
+	virtual int64_t FunctionTraceArgument(int n) { return m_r[M88K_FIRST_ARG_REG + n]; }
+	virtual bool FunctionTraceReturnImpl(int64_t& retval) { retval = m_r[M88K_RETURN_VALUE_REG]; return true; }
+
 	virtual int GetDyntransICshift() const;
 	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;
 
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
 
 private:
-	DECLARE_DYNTRANS_INSTR(todo); // placeholder for future instructions
+	DECLARE_DYNTRANS_INSTR(bsr_samepage);
+	DECLARE_DYNTRANS_INSTR(bsr_functioncalltrace);
+	DECLARE_DYNTRANS_INSTR(jmp_n);
+	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace);
+	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace_singlestep);
 
 	void Translate(uint32_t iword, struct DyntransIC* ic);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated);

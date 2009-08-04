@@ -98,6 +98,9 @@ M88K_CPUComponent::M88K_CPUComponent()
 		ss << "fcr" << i;
 		AddVariable(ss.str(), &m_fcr[i]);
 	}
+
+	AddVariable("inDelaySlot", &m_inDelaySlot);
+	AddVariable("delaySlotTarget", &m_delaySlotTarget);
 }
 
 
@@ -151,6 +154,18 @@ bool M88K_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 	if (m_r[0] != 0) {
 		gxemul->GetUI()->ShowDebugMessage(this, "the r0 register "
 		    "must contain the value 0.\n");
+		return false;
+	}
+
+	if (m_pc > (uint64_t)0xffffffff) {
+		gxemul->GetUI()->ShowDebugMessage(this, "the pc register "
+		    "must be a 32-bit value.\n");
+		return false;
+	}
+
+	if (m_pc & 0x2) {
+		gxemul->GetUI()->ShowDebugMessage(this, "the pc register must have"
+		    " its lower two bits clear!\n");
 		return false;
 	}
 
@@ -266,7 +281,7 @@ int M88K_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 int M88K_CPUComponent::GetDyntransICshift() const
 {
 	// 4 bytes per instruction, i.e. shift is 2 bits.
-	return 2;
+	return M88K_INSTR_ALIGNMENT_SHIFT;
 }
 
 
@@ -305,9 +320,14 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		iw = LE32_TO_HOST(iw);
 
 	// ... and add it to the result:
-	char tmp[9];
-	snprintf(tmp, sizeof(tmp), "%08x", (int) iw);
-	result.push_back(tmp);
+	{
+		stringstream ss;
+		ss.flags(std::ios::hex);
+		ss << std::setfill('0') << std::setw(8) << (uint32_t) iw;
+		if (m_pc == vaddr && m_inDelaySlot)
+			ss << " (delayslot)";
+		result.push_back(ss.str());
+	}
 
 	uint32_t op26   = (iw >> 26) & 0x3f;
 	uint32_t op11   = (iw >> 11) & 0x1f;
@@ -817,12 +837,59 @@ string M88K_CPUComponent::GetAttribute(const string& attributeName)
 /*****************************************************************************/
 
 
-DYNTRANS_INSTR(M88K_CPUComponent,todo)
+DYNTRANS_INSTR(M88K_CPUComponent,bsr_samepage)
 {
-// This is a placeholder for implementing 88k-specific instructions, that
-// are not generic enough to be placed in CPUComponent.
-//	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
-//	REG32(ic->arg[0]) = REG32(ic->arg[1]) + (uint32_t)ic->arg[2];
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	cpu->m_r[M88K_RETURN_REG] = (cpu->m_pc & ~((M88K_IC_ENTRIES_PER_PAGE-1)
+	    << M88K_INSTR_ALIGNMENT_SHIFT)) + ic->arg[2];
+	cpu->m_nextIC = (struct DyntransIC *) ic->arg[0];
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,bsr_functioncalltrace)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+	cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2];
+
+	cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1]);
+	cpu->FunctionTraceCall();
+	cpu->DyntransPCtoPointers();
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,jmp_n)
+{
+	std::cerr << "jmp_n when not single stepping: TODO\n";
+	throw std::exception();
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,jmp_n_functioncalltrace)
+{
+	std::cerr << "jmp_n with function call trace when not single stepping: TODO\n";
+	throw std::exception();
+}
+
+
+// Note: This IC function is used both when function call trace is enabled
+// and disabled. (Ok, since it is only used when singlestepping.)
+DYNTRANS_INSTR(M88K_CPUComponent,jmp_n_functioncalltrace_singlestep)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	if (cpu->m_showFunctionTraceCall && ic->arg[2] == (size_t)&cpu->m_r[M88K_RETURN_REG])
+		cpu->FunctionTraceReturn();
+
+	// Prepare for the delayed branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+
+	cpu->m_delaySlotTarget = REG32(ic->arg[2]);
+
+	// m_nextIC already points to the next instruction
 }
 
 
@@ -831,6 +898,7 @@ DYNTRANS_INSTR(M88K_CPUComponent,todo)
 
 void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 {
+	bool singleInstructionLeft = (m_executedCycles == m_nrOfCyclesToExecute - 1);
 	UI* ui = GetUI();	// for debug messages
 
 	uint32_t op26   = (iw >> 26) & 0x3f;
@@ -844,7 +912,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //	uint32_t w5     = (iw >>  5) & 0x1f;
 //	uint32_t cr6    = (iw >>  5) & 0x3f;
 //	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
-//	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
+	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
 
 	switch (op26) {
 
@@ -877,6 +945,56 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 			if (d == M88K_ZERO_REG)
 				ic->f = instr_nop;
+		}
+		break;
+
+//	case 0x30:	/*  br     */
+//	case 0x31:	/*  br.n   */
+	case 0x32:	/*  bsr    */
+//	case 0x33:	/*  bsr.n  */
+		{
+			void (*samepage_function)(CPUComponent*, struct DyntransIC*) = NULL;
+
+			switch (op26) {
+	//		case 0x30:
+	//			ic->f = instr(br);
+	//			samepage_function = instr(br_samepage);
+	//			if (cpu->translation_readahead > 1)
+	//				cpu->translation_readahead = 1;
+	//			break;
+	//		case 0x31:
+	//			ic->f = instr(br_n);
+	//			if (cpu->translation_readahead > 2)
+	//				cpu->translation_readahead = 2;
+	//			break;
+			case 0x32:
+				ic->f = NULL; // instr(bsr);
+				samepage_function = instr_bsr_samepage;
+				break;
+	//		case 0x33:
+	//			ic->f = instr(bsr_n);
+	//			break;
+			}
+
+			int offset = (m_pc & 0xffc) + d26;
+
+			/*  Prepare both samepage and offset style args.
+			    (Only one will be used in the actual instruction.)  */
+			ic->arg[0] = (size_t) ( m_ICpage + (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
+			ic->arg[1] = offset;
+			ic->arg[2] = (m_pc & 0xffc) + 4;    /*  Return offset
+								for bsr_samepage  */
+
+			if (offset >= 0 && offset <= 0xffc &&
+			    samepage_function != NULL)
+				ic->f = samepage_function;
+
+			if (m_showFunctionTraceCall) {
+				if (op26 == 0x32)
+					ic->f = instr_bsr_functioncalltrace;
+//				if (op26 == 0x33)
+//					ic->f = instr(bsr_n_trace);
+			}
 		}
 		break;
 
@@ -960,10 +1078,49 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			}
 			break;
 //		case 0xc0:	/*  jmp    */
-//		case 0xc4:	/*  jmp.n  */
+		case 0xc4:	/*  jmp.n  */
 //		case 0xc8:	/*  jsr    */
 //		case 0xcc:	/*  jsr.n  */
-			// TODO
+			{
+				void (*f_ss)(CPUComponent*, struct DyntransIC*) = NULL;
+
+				switch ((iw >> 8) & 0xff) {
+	//			case 0xc0: ic->f = instr(jmp); break;
+				case 0xc4: ic->f = instr_jmp_n; f_ss = instr_jmp_n_functioncalltrace_singlestep; break;
+	//			case 0xc8: ic->f = instr(jsr); break;
+	//			case 0xcc: ic->f = instr(jsr_n); break;
+				}
+
+				ic->arg[1] = (m_pc & 0xffc) + 4;
+				ic->arg[2] = (size_t) &m_r[s2];
+
+				if (((iw >> 8) & 0x04) == 0x04)
+					ic->arg[1] = (m_pc & 0xffc) + 8;
+
+				if (m_showFunctionTraceCall && s2 == M88K_RETURN_REG) {
+	//				if (ic->f == instr(jmp)) {
+	//					ic->f = instr(jmp_trace);
+	//					f_ss = NULL; //instr(jmp_trace);
+	//				}
+					if (ic->f == instr_jmp_n) {
+						ic->f = instr_jmp_n_functioncalltrace;
+						f_ss = instr_jmp_n_functioncalltrace_singlestep;
+					}
+				}
+
+	//			if (m_showFunctionTraceCall) {
+	//				if (ic->f == instr(jsr))
+	//					ic->f = instr(jsr_trace);
+	//					TODO f_ss
+	//				if (ic->f == instr(jsr_n))
+	//					ic->f = instr(jsr_n_trace);
+	//					TODO f_ss
+	//			}
+
+				if (singleInstructionLeft)
+					ic->f = f_ss;
+			}
+			break;
 //		case 0xe8:	/*  ff1  */
 //		case 0xec:      /*  ff0  */
 			// TODO

@@ -46,6 +46,10 @@ CPUComponent::CPUComponent(const string& className, const string& cpuArchitectur
 	, m_lastUnassembleVaddr(0)
 	, m_hasUsedUnassemble(false)
 	, m_isBigEndian(true)
+	, m_showFunctionTraceCall(false)
+	, m_showFunctionTraceReturn(false)
+	, m_functionCallTraceDepth(0)
+	, m_nrOfTracedFunctionCalls(0)
 	, m_addressDataBus(NULL)
 	, m_nextIC(NULL)
 {
@@ -57,6 +61,10 @@ CPUComponent::CPUComponent(const string& className, const string& cpuArchitectur
 	AddVariable("frequency", &m_frequency);
 	AddVariable("paused", &m_paused);
 	AddVariable("bigendian", &m_isBigEndian);
+	AddVariable("showFunctionTraceCall", &m_showFunctionTraceCall);
+	AddVariable("showFunctionTraceReturn", &m_showFunctionTraceReturn);
+	AddVariable("functionCallTraceDepth", &m_functionCallTraceDepth);
+	AddVariable("nrOfTracedFunctionCalls", &m_nrOfTracedFunctionCalls);
 }
 
 
@@ -85,9 +93,80 @@ void CPUComponent::ResetState()
 	m_inDelaySlot = false;
 	m_delaySlotTarget = 0;
 
+	// Don't reset m_showFunctionTraceCall and Return here?
+	m_functionCallTraceDepth = 0;
+	m_nrOfTracedFunctionCalls = 0;
+
 	m_symbolRegistry.Clear();
 
 	Component::ResetState();
+}
+
+
+void CPUComponent::FunctionTraceCall()
+{
+	stringstream ss;
+	for (int i=0; i<m_functionCallTraceDepth; ++i)
+		ss << "  ";
+
+	string symbol = GetSymbolRegistry().LookupAddress(PCtoInstructionAddress(m_pc), true);
+	if (symbol != "")
+		ss << symbol;
+
+	ss << "(";
+	int n = FunctionTraceArgumentCount();
+	for (int i=0; i<n; ++i) {
+		int64_t arg = FunctionTraceArgument(i);
+
+		if (arg > -1000 && arg < 1000) {
+			ss << arg;
+		} else {
+			ss.flags(std::ios::hex);
+			ss << "0x" << (uint64_t)arg;
+		}
+
+		// TODO: String and/or symbol lookup!
+
+		ss << ",";
+	}
+	ss << "...)\n";
+
+	GetUI()->ShowDebugMessage(this, ss.str());
+
+	++ m_nrOfTracedFunctionCalls;
+
+	++ m_functionCallTraceDepth;
+	if (m_functionCallTraceDepth > 100)
+		m_functionCallTraceDepth = 100;
+}
+
+
+void CPUComponent::FunctionTraceReturn()
+{
+	-- m_functionCallTraceDepth;
+	if (m_functionCallTraceDepth < 0)
+		m_functionCallTraceDepth = 0;
+
+	if (m_showFunctionTraceReturn) {
+		int64_t retval;
+		bool traceReturnValid = FunctionTraceReturnImpl(retval);
+		if (traceReturnValid) {
+			stringstream ss;
+			for (int i=0; i<m_functionCallTraceDepth; ++i)
+				ss << "  ";
+
+			if (retval > -1000 && retval < 1000) {
+				ss << "= " << retval;
+			} else {
+				ss.flags(std::ios::hex);
+				ss << "= 0x" << (uint64_t)retval;
+			}
+
+			// TODO: String and/or symbol lookup!
+
+			GetUI()->ShowDebugMessage(this, ss.str());
+		}
+	}
 }
 
 
@@ -403,7 +482,15 @@ void CPUComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 			// running in continuous mode, then we need to display
 			// it now:
 			if (!isSingleStepping) {
-				ss << " at:\n";
+				ss << " at";
+
+				string symbol = GetSymbolRegistry().LookupAddress(
+				    PCtoInstructionAddress(m_pc), true);
+				if (symbol != "")
+					ss << " " << symbol;
+
+				ss << ":\n";
+
 				Unassemble(1, false, PCtoInstructionAddress(m_pc), ss);
 			}
 

@@ -126,6 +126,33 @@ bool MIPS_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 		return false;
 	}
 
+	if (m_pc & 0x2) {
+		gxemul->GetUI()->ShowDebugMessage(this, "the pc register"
+		    " can not have bit 1 set!\n");
+		return false;
+	}
+
+	if (Is32Bit()) {
+		// All registers must be sign-extended correctly.
+		if ((int64_t)m_pc != (int64_t)(int32_t)m_pc) {
+			gxemul->GetUI()->ShowDebugMessage(this, "The emulated "
+			    "CPU is 32-bit, but the pc register is not"
+			    " a correctly sign-extended 32-bit value!\n");
+			return false;
+		}
+
+		for (size_t i=1; i<N_MIPS_GPRS; i++) {
+			if ((int64_t)m_gpr[i] != (int64_t)(int32_t)m_gpr[i]) {
+				gxemul->GetUI()->ShowDebugMessage(this, (string)"The emulated "
+				    "CPU is 32-bit, but the " + regnames[i] + " register is not"
+				    " a correctly sign-extended 32-bit value!\n");
+				return false;
+			}
+		}
+
+		// TODO: Some more registers?
+	}
+
 	return CPUComponent::PreRunCheckForComponent(gxemul);
 }
 
@@ -203,6 +230,33 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 int MIPS_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
 {
 	return DyntransExecute(gxemul, nrOfCycles);
+}
+
+
+int MIPS_CPUComponent::FunctionTraceArgumentCount()
+{
+	// On old 32-bit ABIs, registers 4..7 (a0..a3) are used. On newer
+	// ABIs (both 32-bit and 64-bit), registers 4..11 are used (a0..a7).
+
+	return 4;	// TODO: 8. How to detect ABI?
+}
+
+
+int64_t MIPS_CPUComponent::FunctionTraceArgument(int n)
+{
+	// See comment for FunctionTraceArgumentCount above.
+	return m_gpr[MIPS_GPR_A0 + n];
+}
+
+
+bool MIPS_CPUComponent::FunctionTraceReturnImpl(int64_t& retval)
+{
+	// v0 and v1 may hold return values. However, v1 is only used for
+	// returning 64-bit values on old 32-bit ABIs, and 128-bit values
+	// on newer ABIs, so for now I'll ignore it.
+
+	retval = m_gpr[MIPS_GPR_V0];
+	return true;
 }
 
 

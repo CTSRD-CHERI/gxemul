@@ -1064,14 +1064,17 @@ void GXemul::Execute(const int longestTotalRun)
 			    ((double)tvend.tv_sec + tvend.tv_usec / 1000000.0)
 			    - ((double)m_lastOutputTime.tv_sec + m_lastOutputTime.tv_usec / 1000000.0);
 
-			if (secondsSinceLastOutput > 1.0) {
+			if (secondsSinceLastOutput > 1.0 && (step - m_lastOutputStep) > 10000) {
 				m_lastOutputTime = tvend;
 
 				int64_t stepsPerSecond = (double)(step - m_lastOutputStep) / secondsSinceLastOutput;
 				m_lastOutputStep = step;
 
 				stringstream ss;
-				ss << step << " steps (" << stepsPerSecond << " steps/second)\n";
+				ss << step << " steps";
+				if (stepsPerSecond > 0)
+					ss << " (" << stepsPerSecond << " steps/second)";
+
 				GetUI()->ShowDebugMessage(ss.str());
 			}
 		}

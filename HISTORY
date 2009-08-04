@@ -3964,3 +3964,6 @@ Changelog for GXemul:
 		yet, it doesn't really work).
 		Updating the Introduction chapter in the documentation with
 		a section about the New framework.
+		Beginning on M88K bsr and jmp.n instruction implementations,
+		function call trace support, etc.
+20090803	Continuing on function call trace support.
