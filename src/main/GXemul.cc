@@ -895,7 +895,7 @@ void GXemul::Execute(const int longestTotalRun)
 			// nstepsX = steps * fX / fastestFrequency  nr of steps.
 			for (size_t k=0; k<componentsAndFrequencies.size(); ++k) {
 				uint64_t nsteps = (k == fastestComponentIndex ? step
-				    : step * componentsAndFrequencies[k].frequency / fastestFrequency);
+				    : (uint64_t) (step * componentsAndFrequencies[k].frequency / fastestFrequency));
 
 				uint64_t stepsExecutedSoFar = componentsAndFrequencies[k].step->ToInteger();
 
@@ -981,7 +981,7 @@ void GXemul::Execute(const int longestTotalRun)
 						    : fastestFrequency / componentsAndFrequencies[k].frequency);
 
 						double c = (componentsAndFrequencies[k].step->ToInteger()+1) * q;
-						componentsAndFrequencies[k].nextTimeToExecute = ceil(c) - 1;
+						componentsAndFrequencies[k].nextTimeToExecute = (uint64_t) ceil(c) - 1;
 					}
 
 					// std::cerr << "step " << step << " debug:\n";
@@ -1067,7 +1067,8 @@ void GXemul::Execute(const int longestTotalRun)
 			if (secondsSinceLastOutput > 1.0 && (step - m_lastOutputStep) > 10000) {
 				m_lastOutputTime = tvend;
 
-				int64_t stepsPerSecond = (double)(step - m_lastOutputStep) / secondsSinceLastOutput;
+				int64_t stepsPerSecond = (int64_t)
+				    ( (double)(step - m_lastOutputStep) / secondsSinceLastOutput );
 				m_lastOutputStep = step;
 
 				stringstream ss;
