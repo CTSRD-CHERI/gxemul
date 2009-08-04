@@ -3967,3 +3967,6 @@ Changelog for GXemul:
 		Beginning on M88K bsr and jmp.n instruction implementations,
 		function call trace support, etc.
 20090803	Continuing on function call trace support.
+20090804	Using anonymous unions and ptrdiff_t, to avoid overloading
+		pointers and size_t members unsafely, and other size_t usage.
+		(Thanks to Weinholt for commenting on this.)

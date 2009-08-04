@@ -365,8 +365,8 @@ void CPUComponent::DyntransPCtoPointers()
 
 void CPUComponent::DyntransResyncPC()
 {
-	int offsetWithinICpage = (size_t)m_nextIC - (size_t)m_ICpage;
-	int instructionIndex = offsetWithinICpage / sizeof(struct DyntransIC);
+	ptrdiff_t diff = m_nextIC - m_ICpage;
+	int instructionIndex = (int) diff;
 
 	// On a page with e.g. 1024 instruction slots, instructionIndex is usually
 	// between 0 and 1023. This means that the PC points to within this
@@ -1064,7 +1064,7 @@ DYNTRANS_INSTR(CPUComponent,endOfPage2)
  */
 DYNTRANS_INSTR(CPUComponent,set_u64_imms32)
 {
-	REG64(ic->arg[0]) = (int32_t) ic->arg[1];
+	REG64(ic->arg[0]) = (int32_t) ic->arg[1].u32;
 }
 
 
@@ -1077,7 +1077,7 @@ DYNTRANS_INSTR(CPUComponent,set_u64_imms32)
  */
 DYNTRANS_INSTR(CPUComponent,add_u32_u32_immu32)
 {
-	REG32(ic->arg[0]) = REG32(ic->arg[1]) + (uint32_t)ic->arg[2];
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) + (uint32_t)ic->arg[2].u32;
 }
 
 
@@ -1104,7 +1104,7 @@ DYNTRANS_INSTR(CPUComponent,add_u32_u32_u32)
  */
 DYNTRANS_INSTR(CPUComponent,add_u64_u64_imms32_truncS32)
 {
-	REG64(ic->arg[0]) = (int32_t) (REG64(ic->arg[1]) + (int32_t)ic->arg[2]);
+	REG64(ic->arg[0]) = (int32_t) (REG64(ic->arg[1]) + (int32_t)ic->arg[2].u32);
 }
 
 
@@ -1117,7 +1117,7 @@ DYNTRANS_INSTR(CPUComponent,add_u64_u64_imms32_truncS32)
  */
 DYNTRANS_INSTR(CPUComponent,add_u64_u64_imms32)
 {
-	REG64(ic->arg[0]) = REG64(ic->arg[1]) + (int64_t)(int32_t)ic->arg[2];
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) + (int64_t)(int32_t)ic->arg[2].u32;
 }
 
 
@@ -1130,7 +1130,7 @@ DYNTRANS_INSTR(CPUComponent,add_u64_u64_imms32)
  */
 DYNTRANS_INSTR(CPUComponent,sub_u32_u32_immu32)
 {
-	REG32(ic->arg[0]) = REG32(ic->arg[1]) - (uint32_t)ic->arg[2];
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) - (uint32_t)ic->arg[2].u32;
 }
 
 
@@ -1160,7 +1160,7 @@ DYNTRANS_INSTR(CPUComponent,sub_u32_u32_u32)
  */
 DYNTRANS_INSTR(CPUComponent,and_u64_u64_immu32)
 {
-	REG64(ic->arg[0]) = REG64(ic->arg[1]) & (uint32_t)ic->arg[2];
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) & (uint32_t)ic->arg[2].u32;
 }
 
 
@@ -1190,7 +1190,7 @@ DYNTRANS_INSTR(CPUComponent,or_u32_u32_u32)
  */
 DYNTRANS_INSTR(CPUComponent,or_u64_u64_immu32)
 {
-	REG64(ic->arg[0]) = REG64(ic->arg[1]) | (uint32_t)ic->arg[2];
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) | (uint32_t)ic->arg[2].u32;
 }
 
 
@@ -1220,7 +1220,7 @@ DYNTRANS_INSTR(CPUComponent,xor_u32_u32_u32)
  */
 DYNTRANS_INSTR(CPUComponent,xor_u64_u64_immu32)
 {
-	REG64(ic->arg[0]) = REG64(ic->arg[1]) ^ (uint32_t)ic->arg[2];
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) ^ (uint32_t)ic->arg[2].u32;
 }
 
 
@@ -1234,7 +1234,7 @@ DYNTRANS_INSTR(CPUComponent,xor_u64_u64_immu32)
  */
 DYNTRANS_INSTR(CPUComponent,shift_left_u64_u64_imm5_truncS32)
 {
-	REG64(ic->arg[0]) = (int32_t)(REG64(ic->arg[1]) << (ic->arg[2] & 0x1f));
+	REG64(ic->arg[0]) = (int32_t)(REG64(ic->arg[1]) << (ic->arg[2].u32 & 0x1f));
 }
 
 
@@ -1306,10 +1306,7 @@ static void Test_CPUComponent_ResetSteps()
 
 static void Test_CPUComponent_Dyntrans_PreReq()
 {
-	struct DyntransIC ic;
-
 	UnitTest::Assert("nr of dyntrans args too few", N_DYNTRANS_IC_ARGS >= 3);
-	UnitTest::Assert("size of dyntrans args to small", sizeof(ic.arg[0]) >= sizeof(uint32_t));
 }
 
 UNITTESTS(CPUComponent)

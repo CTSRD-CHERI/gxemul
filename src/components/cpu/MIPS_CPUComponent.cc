@@ -880,7 +880,7 @@ DYNTRANS_INSTR(MIPS_CPUComponent,branch_samepage_with_delayslot_singlestep)
 	cpu->m_inDelaySlot = true;
 	cpu->m_exceptionInDelaySlot = false;
 
-	cpu->m_nextIC = (struct DyntransIC *) ic->arg[2];
+	cpu->m_nextIC = (struct DyntransIC *) ic->arg[2].p;
 	cpu->DyntransResyncPC();	// overwrite m_pc temporarily to get the target
 	cpu->m_delaySlotTarget = cpu->m_pc;
 
@@ -903,7 +903,7 @@ DYNTRANS_INSTR(MIPS_CPUComponent,branch_samepage_with_delayslot)
 
 	// If there was no exception, then branch:
 	if (!cpu->m_exceptionInDelaySlot) {
-		cpu->m_nextIC = (struct DyntransIC *) ic->arg[2];
+		cpu->m_nextIC = (struct DyntransIC *) ic->arg[2].p;
 		cpu->m_inDelaySlot = false;
 	}
 
@@ -976,12 +976,12 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 					   sa += 32; break; */
 			}
 
-			ic->arg[0] = (size_t)&m_gpr[rd];
-			ic->arg[1] = (size_t)&m_gpr[rt];
+			ic->arg[0].p = &m_gpr[rd];
+			ic->arg[1].p = &m_gpr[rt];
 			if (sa >= 0)
-				ic->arg[2] = sa;
+				ic->arg[2].u32 = sa;
 			else
-				ic->arg[2] = (size_t)&m_gpr[rs];
+				ic->arg[2].p = &m_gpr[rs];
 
 			/*  Special checks for MIPS32/64 revision 2 opcodes,
 			    such as rotation instructions:  */
@@ -1065,18 +1065,18 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 
 			uint32_t mask = m_dyntransPageMask & ~3;	// 0xffc for 4 KB pages
 
-			ic->arg[0] = (size_t)&m_gpr[rs];
-			ic->arg[1] = (size_t)&m_gpr[rt];
+			ic->arg[0].p = &m_gpr[rs];
+			ic->arg[1].p = &m_gpr[rt];
 			// TODO: MIPS16 offset?!
-			ic->arg[2] = (int32_t) ( (imm << m_dyntransICshift) +
+			ic->arg[2].u32 = (int32_t) ( (imm << m_dyntransICshift) +
 			    (m_pc & mask) + 4 );
 
 			// Is the offset from the start of the current page still
 			// within the same page? Then use the samepage_function:
-			if ((uint32_t)ic->arg[2] < (uint32_t)((m_dyntransICentriesPerPage - 1)
+			if (ic->arg[2].u32 < (uint32_t)((m_dyntransICentriesPerPage - 1)
 			    << m_dyntransICshift) && (m_pc & mask) < mask) {
-				ic->arg[2] = (size_t) (m_ICpage +
-				    ((ic->arg[2] >> m_dyntransICshift)
+				ic->arg[2].p = (m_ICpage +
+				    ((ic->arg[2].u32 >> m_dyntransICshift)
 				    & (m_dyntransICentriesPerPage - 1)));
 				ic->f = samepage_function;
 			}
@@ -1100,14 +1100,14 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 	case HI6_ANDI:
 	case HI6_ORI:
 	case HI6_XORI:
-		ic->arg[0] = (size_t)&m_gpr[rt];
-		ic->arg[1] = (size_t)&m_gpr[rs];
+		ic->arg[0].p = &m_gpr[rt];
+		ic->arg[1].p = &m_gpr[rs];
 		if (hi6 == HI6_ADDI || hi6 == HI6_ADDIU ||
 		    hi6 == HI6_SLTI || hi6 == HI6_SLTIU ||
 		    hi6 == HI6_DADDI || hi6 == HI6_DADDIU)
-			ic->arg[2] = (int16_t)iword;
+			ic->arg[2].u32 = (int16_t)iword;
 		else
-			ic->arg[2] = (uint16_t)iword;
+			ic->arg[2].u32 = (uint16_t)iword;
 
 		switch (hi6) {
 //		case HI6_ADDI:    ic->f = instr(addi); break;
@@ -1127,8 +1127,8 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 
 	case HI6_LUI:
 		ic->f = instr_set_u64_imms32;
-		ic->arg[0] = (size_t)&m_gpr[rt];
-		ic->arg[1] = (int32_t) (imm << 16);
+		ic->arg[0].p = &m_gpr[rt];
+		ic->arg[1].u32 = (int32_t) (imm << 16);
 
 		if (rt == MIPS_GPR_ZERO)
 			ic->f = instr_nop;

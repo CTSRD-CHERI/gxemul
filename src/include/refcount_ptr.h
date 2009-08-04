@@ -230,7 +230,8 @@ public:
 	 */
 	bool operator < (const refcount_ptr& other) const
 	{
-		return (size_t)m_p < (size_t)other.m_p;
+		ptrdiff_t diff = m_p - other.m_p;
+		return diff < 0;
 	}
 
 	/**

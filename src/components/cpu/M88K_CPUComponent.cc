@@ -842,8 +842,8 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_samepage)
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
 	cpu->m_r[M88K_RETURN_REG] = (cpu->m_pc & ~((M88K_IC_ENTRIES_PER_PAGE-1)
-	    << M88K_INSTR_ALIGNMENT_SHIFT)) + ic->arg[2];
-	cpu->m_nextIC = (struct DyntransIC *) ic->arg[0];
+	    << M88K_INSTR_ALIGNMENT_SHIFT)) + ic->arg[2].u32;
+	cpu->m_nextIC = (struct DyntransIC *) ic->arg[0].p;
 }
 
 
@@ -852,9 +852,9 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_functioncalltrace)
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
 	cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
-	cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2];
+	cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2].u32;
 
-	cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1]);
+	cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1].u32);
 	cpu->FunctionTraceCall();
 	cpu->DyntransPCtoPointers();
 }
@@ -880,7 +880,7 @@ DYNTRANS_INSTR(M88K_CPUComponent,jmp_n_functioncalltrace_singlestep)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
-	if (cpu->m_showFunctionTraceCall && ic->arg[2] == (size_t)&cpu->m_r[M88K_RETURN_REG])
+	if (cpu->m_showFunctionTraceCall && ic->arg[2].p == &cpu->m_r[M88K_RETURN_REG])
 		cpu->FunctionTraceReturn();
 
 	// Prepare for the delayed branch.
@@ -939,9 +939,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			case 0x1f: ic->f = instr(cmp_imm); break;*/
 			}
 
-			ic->arg[0] = (size_t) &m_r[d];
-			ic->arg[1] = (size_t) &m_r[s1];
-			ic->arg[2] = imm16 << shift;
+			ic->arg[0].p = &m_r[d];
+			ic->arg[1].p = &m_r[s1];
+			ic->arg[2].u32 = imm16 << shift;
 
 			if (d == M88K_ZERO_REG)
 				ic->f = instr_nop;
@@ -980,9 +980,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 			/*  Prepare both samepage and offset style args.
 			    (Only one will be used in the actual instruction.)  */
-			ic->arg[0] = (size_t) ( m_ICpage + (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
-			ic->arg[1] = offset;
-			ic->arg[2] = (m_pc & 0xffc) + 4;    /*  Return offset
+			ic->arg[0].p = ( m_ICpage + (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
+			ic->arg[1].u32 = offset;
+			ic->arg[2].u32 = (m_pc & 0xffc) + 4;    /*  Return offset
 								for bsr_samepage  */
 
 			if (offset >= 0 && offset <= 0xffc &&
@@ -1026,9 +1026,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //		case 0x98:	/*  extu   */
 //		case 0xa0:	/*  mak    */
 //		case 0xa8:	/*  rot    */
-			ic->arg[0] = (size_t) &m_r[d];
-			ic->arg[1] = (size_t) &m_r[s1];
-			ic->arg[2] = (size_t) &m_r[s2];
+			ic->arg[0].p = &m_r[d];
+			ic->arg[1].p = &m_r[s1];
+			ic->arg[2].p = &m_r[s2];
 
 			switch ((iw >> 8) & 0xff) {
 //			case 0x40: ic->f = instr(and);   break;
@@ -1073,8 +1073,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				    opc != 0x75 && opc != 0x77)
 					ic->f = instr_nop;
 				else
-					ic->arg[0] = (size_t)
-					    &m_zero_scratch;
+					ic->arg[0].p = &m_zero_scratch;
 			}
 			break;
 //		case 0xc0:	/*  jmp    */
@@ -1091,11 +1090,11 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	//			case 0xcc: ic->f = instr(jsr_n); break;
 				}
 
-				ic->arg[1] = (m_pc & 0xffc) + 4;
-				ic->arg[2] = (size_t) &m_r[s2];
+				ic->arg[1].u32 = (m_pc & 0xffc) + 4;
+				ic->arg[2].p = &m_r[s2];
 
 				if (((iw >> 8) & 0x04) == 0x04)
-					ic->arg[1] = (m_pc & 0xffc) + 8;
+					ic->arg[1].u32 = (m_pc & 0xffc) + 8;
 
 				if (m_showFunctionTraceCall && s2 == M88K_RETURN_REG) {
 	//				if (ic->f == instr(jmp)) {

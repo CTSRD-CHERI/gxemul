@@ -44,16 +44,16 @@ class AddressDataBus;
  * \brief A dyntrans instruction call.
  *
  * f points to a function to be executed.
- * arg[] contains arguments, such as pointers to registers.
- *
- * The type of arg is size_t, so that it can hold a host pointer; otherwise
- * the requirement is that arg can hold at least an uint32_t. (uint64_t is
- * not required.)
+ * arg[] contains arguments, such as pointers to registers, or immediate values.
  */
 struct DyntransIC
 {
 	void (*f)(CPUComponent*, DyntransIC*);
-	size_t arg[N_DYNTRANS_IC_ARGS];
+
+	union {
+		void* p;
+		uint32_t u32;
+	} arg[N_DYNTRANS_IC_ARGS];
 };
 
 
@@ -64,8 +64,8 @@ struct DyntransIC
 #define DYNTRANS_INSTR(class,name) void class::instr_##name(CPUComponent* cpubase, DyntransIC* ic)
 #define DYNTRANS_INSTR_HEAD(class)  class* cpu = (class*) cpubase;
 
-#define REG32(arg)	(*((uint32_t*)arg))
-#define REG64(arg)	(*((uint64_t*)arg))
+#define REG32(arg)	(*((uint32_t*)((arg).p)))
+#define REG64(arg)	(*((uint64_t*)((arg).p)))
 
 
 /**
