@@ -96,6 +96,14 @@ MAIN GOAL for 0.6.0:
 		[ ]  "c" = "continue", "backward-continue" commands
 		[ ]  Simulation across multiple hosts?
 
+	[ ]  Cycle accurate slowdown? E.g. when simulating a 1 MHz microcontroller,
+		and a TV display, maybe the host is much faster than what is
+		required. The gxemul process could then yield some of its CPU time,
+		just about enough to make the process run at real-time speed.
+		(With warnings printed whenever real-time is not possible, because
+		the host is too slow.) This would be useful for some simulations
+		involving real-world Sound producing devices.
+
   [/]	NEW DYNTRANS IMPLEMENTATION, ...
 
 	[/]  Basic run loop.
@@ -335,6 +343,16 @@ MAIN GOAL for 0.6.0:
 	
 	(*) Implementation-wise, it may be optimized away, but the semantics
 	should be this.
+
+	NOTE: It will not be possible to break INSIDE a component's step,
+	but only before or after all components within that step have
+	executed. I.e.:
+	o) when single-stepping, the breakpoint may simply set a flag during
+	   execution, and when all components within that step have executed,
+	   the resulting triggered breakpoints may be displayed.
+	o) when running continuously, the breakpoint may still not break immediately
+	   (?) because components may be mixed within the last step? TODO: Think
+	   about this.
 
 	TODO: Any state variable change in any component? How about RAM/custom
 	changes? How about register _READS_ or custom reads.

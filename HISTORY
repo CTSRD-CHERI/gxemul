@@ -3970,3 +3970,8 @@ Changelog for GXemul:
 20090804	Using anonymous unions and ptrdiff_t, to avoid overloading
 		pointers and size_t members unsafely, and other size_t usage.
 		(Thanks to Weinholt for commenting on this.)
+20090807	Getting rid of the last 'delete' call (in MainbusComponent,
+		there was a _pointer_ to a memory map, instead of just a
+		memory map). The new GXemul framework is thus completely free
+		of malloc/free and manual delete. (mmap/munmap are, for natural
+		reasons, used though by the RAMComponent.)

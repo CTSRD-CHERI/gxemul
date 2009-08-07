@@ -109,8 +109,9 @@ private:
 	};
 
 	typedef vector<MemoryMapEntry> MemoryMap;
-
-	MemoryMap	*m_memoryMap;
+	MemoryMap			m_memoryMap;
+	bool				m_memoryMapFailed;
+	bool				m_memoryMapValid;
 
 	// For the currently selected address:
 	AddressDataBus *	m_currentAddressDataBus;

@@ -31,7 +31,8 @@
 
 MainbusComponent::MainbusComponent()
 	: Component("mainbus", "mainbus")
-	, m_memoryMap(NULL)
+	, m_memoryMapFailed(false)
+	, m_memoryMapValid(false)
 	, m_currentAddressDataBus(NULL)
 {
 }
@@ -39,10 +40,6 @@ MainbusComponent::MainbusComponent()
 
 MainbusComponent::~MainbusComponent()
 {
-	if (m_memoryMap != NULL) {
-		delete m_memoryMap;
-		m_memoryMap = NULL;
-	}
 }
 
 
@@ -66,10 +63,9 @@ string MainbusComponent::GetAttribute(const string& attributeName)
 
 void MainbusComponent::FlushCachedStateForComponent()
 {
-	if (m_memoryMap != NULL) {
-		delete m_memoryMap;
-		m_memoryMap = NULL;
-	}
+	m_memoryMap.clear();
+	m_memoryMapValid = false;
+	m_memoryMapFailed = false;
 
 	m_currentAddressDataBus = NULL;
 }
@@ -89,10 +85,16 @@ bool MainbusComponent::PreRunCheckForComponent(GXemul* gxemul)
 
 bool MainbusComponent::MakeSureMemoryMapExists(GXemul* gxemul)
 {
-	if (m_memoryMap != NULL)
+	if (m_memoryMapFailed)
+		return false;
+
+	if (m_memoryMapValid)
 		return true;
 
-	m_memoryMap = new MemoryMap;
+	m_memoryMap.clear();
+
+	m_memoryMapValid = true;
+	m_memoryMapFailed = false;
 
 	// Build a memory map of all immediate children who implement the
 	// AddressDataBus interface:
@@ -138,12 +140,12 @@ bool MainbusComponent::MakeSureMemoryMapExists(GXemul* gxemul)
 		// (Note: Current implementation results in O(n^2) time,
 		// but if the number of memory-mapped immediate childs are
 		// few, then this should not be a big problem.)
-		for (size_t j=0; j<m_memoryMap->size(); ++j) {
-			if (mmEntry.base+mmEntry.size <= (*m_memoryMap)[j].base)
+		for (size_t j=0; j<m_memoryMap.size(); ++j) {
+			if (mmEntry.base+mmEntry.size <= m_memoryMap[j].base)
 				continue;
 
-			if (mmEntry.base >= (*m_memoryMap)[j].base +
-			    (*m_memoryMap)[j].size)
+			if (mmEntry.base >= m_memoryMap[j].base +
+			    m_memoryMap[j].size)
 				continue;
 		
 			// There is overlap!
@@ -154,13 +156,14 @@ bool MainbusComponent::MakeSureMemoryMapExists(GXemul* gxemul)
 				    " conflicts with another memory mapped "
 				    "component on this bus.\n");
 
-			delete m_memoryMap;
-			m_memoryMap = NULL;
+			m_memoryMap.clear();
+			m_memoryMapValid = false;
+			m_memoryMapFailed = true;
 			return false;
 		}
 
 		// Finally add the new mapping entry.
-		m_memoryMap->push_back(mmEntry);
+		m_memoryMap.push_back(mmEntry);
 	}
 
 	return true;
@@ -179,7 +182,7 @@ void MainbusComponent::AddressSelect(uint64_t address)
 
 	m_currentAddressDataBus = NULL;
 
-	if (m_memoryMap == NULL)
+	if (!m_memoryMapValid)
 		return;
 
 	// Note: This is a linear O(n) scan of the list of memory-mapped
@@ -189,8 +192,8 @@ void MainbusComponent::AddressSelect(uint64_t address)
 	// using direct-mapped pages anyway, so this should not be that much
 	// of a problem.
 
-	for (size_t i=0; i<m_memoryMap->size(); ++i) {
-		MemoryMapEntry& mmEntry = (*m_memoryMap)[i];
+	for (size_t i=0; i<m_memoryMap.size(); ++i) {
+		MemoryMapEntry& mmEntry = m_memoryMap[i];
 
 		// If this memory map entry contains the address we wish to
 		// select, then...
