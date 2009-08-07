@@ -28,7 +28,7 @@
  *  SUCH DAMAGE.
  */
 
-// COMPONENT(cpu)
+// Note: Not included in the component registry.
 
 
 #include "AddressDataBus.h"
@@ -36,40 +36,9 @@
 #include "SymbolRegistry.h"
 #include "UnitTest.h"
 
-class AddressDataBus;
-
-
-#define N_DYNTRANS_IC_ARGS	3
-/**
- * \brief A dyntrans instruction call.
- *
- * f points to a function to be executed.
- * arg[] contains arguments, such as pointers to registers, or immediate values.
- */
-struct DyntransIC
-{
-	void (*f)(CPUComponent*, DyntransIC*);
-
-	union {
-		void* p;
-		uint32_t u32;
-	} arg[N_DYNTRANS_IC_ARGS];
-};
-
-
-/*
- * Some helpers for implementing dyntrans instructions.
- */
-#define DECLARE_DYNTRANS_INSTR(name) static void instr_##name(CPUComponent* cpubase, DyntransIC* ic);
-#define DYNTRANS_INSTR(class,name) void class::instr_##name(CPUComponent* cpubase, DyntransIC* ic)
-#define DYNTRANS_INSTR_HEAD(class)  class* cpu = (class*) cpubase;
-
-#define REG32(arg)	(*((uint32_t*)((arg).p)))
-#define REG64(arg)	(*((uint64_t*)((arg).p)))
-
 
 /**
- * \brief A Component base-class for processors.
+ * \brief A base-class for processors Component implementations.
  */
 class CPUComponent
 	: public Component
@@ -85,19 +54,6 @@ public:
 	 *	MIPS R4400 processor.
 	 */
 	CPUComponent(const string& className, const string& cpuKind);
-
-	/**
-	 * \brief Creates a CPUComponent.
-	 */
-	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
-
-	/**
-	 * \brief Get attribute information about the CPUComponent class.
-	 *
-	 * @param attributeName The attribute name.
-	 * @return A string representing the attribute value.
-	 */
-	static string GetAttribute(const string& attributeName);
 
 	/**
 	 * \brief Gets a reference to the CPU's symbol registry.
@@ -212,65 +168,8 @@ protected:
 	virtual int64_t FunctionTraceArgument(int n) { return 0; }
 	virtual bool FunctionTraceReturnImpl(int64_t& retval) { return false; }
 
-	virtual int GetDyntransICshift() const;
-	virtual void (*GetDyntransToBeTranslated())(CPUComponent* cpu, DyntransIC* ic) const;
-
-	int DyntransExecute(GXemul* gxemul, int nrOfCycles);
-	void DyntransToBeTranslatedBegin(struct DyntransIC*);
-	bool DyntransReadInstruction(uint16_t& iword);
-	bool DyntransReadInstruction(uint32_t& iword);
-	void DyntransToBeTranslatedDone(struct DyntransIC*);
-
-	/**
-	 * \brief Calculate m_pc based on m_nextIC and m_ICpage.
-	 */
-	void DyntransResyncPC();
-
-	/**
-	 * \brief Calculate m_nextIC and m_ICpage, based on m_pc.
-	 *
-	 * This function may return pointers to within an existing translation
-	 * page (hopefully the most common case, since it is the fastest), or
-	 * it may allocate a new empty page.
-	 */
-	void DyntransPCtoPointers();
-
 private:
-	void DyntransInit();
-
 	bool LookupAddressDataBus(GXemul* gxemul = NULL);
-
-protected:
-	/*
-	 * Generic dyntrans instruction implementations, that may be used by
-	 * several different cpu architectures.
-	 */
-	DECLARE_DYNTRANS_INSTR(nop);
-	DECLARE_DYNTRANS_INSTR(abort);
-	DECLARE_DYNTRANS_INSTR(abort_in_delay_slot);
-	DECLARE_DYNTRANS_INSTR(endOfPage);
-	DECLARE_DYNTRANS_INSTR(endOfPage2);
-
-	// Data movement.
-	DECLARE_DYNTRANS_INSTR(set_u64_imms32);
-
-	// Arithmetic.
-	DECLARE_DYNTRANS_INSTR(add_u32_u32_immu32);
-	DECLARE_DYNTRANS_INSTR(add_u32_u32_u32);
-	DECLARE_DYNTRANS_INSTR(add_u64_u64_imms32_truncS32);
-	DECLARE_DYNTRANS_INSTR(add_u64_u64_imms32);
-	DECLARE_DYNTRANS_INSTR(sub_u32_u32_immu32);
-	DECLARE_DYNTRANS_INSTR(sub_u32_u32_u32);
-
-	// Logic.
-	DECLARE_DYNTRANS_INSTR(and_u64_u64_immu32);
-	DECLARE_DYNTRANS_INSTR(or_u32_u32_u32);
-	DECLARE_DYNTRANS_INSTR(or_u64_u64_immu32);
-	DECLARE_DYNTRANS_INSTR(xor_u32_u32_u32);
-	DECLARE_DYNTRANS_INSTR(xor_u64_u64_immu32);
-	
-	// Shifts, rotates.
-	DECLARE_DYNTRANS_INSTR(shift_left_u64_u64_imm5_truncS32);
 
 protected:
 	/*
@@ -312,21 +211,10 @@ protected:
 	 */
 	AddressDataBus *	m_addressDataBus;
 	uint64_t		m_addressSelect;
-	struct DyntransIC *	m_ICpage;
-	struct DyntransIC *	m_nextIC;
-	int			m_dyntransPageMask;
-	int			m_dyntransICentriesPerPage;
-	int			m_dyntransICshift;
-	int			m_executedCycles;
-	int			m_nrOfCyclesToExecute;
 	bool			m_exceptionInDelaySlot;
 
 private:
 	SymbolRegistry		m_symbolRegistry;
-
-	// DUMMY/TEST
-	vector< struct DyntransIC > m_dummyICpage;
-	uint32_t		m_dyntransTestVariable;
 };
 
 

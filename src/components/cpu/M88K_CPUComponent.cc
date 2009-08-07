@@ -58,7 +58,7 @@ static const char *m88k_cr_name(int i)
 
 
 M88K_CPUComponent::M88K_CPUComponent()
-	: CPUComponent("m88k_cpu", "Motorola 88000")
+	: CPUDyntransComponent("m88k_cpu", "Motorola 88000")
 	, m_m88k_type("88100")
 {
 	m_frequency = 50e6;	// 50 MHz
@@ -145,7 +145,7 @@ void M88K_CPUComponent::ResetState()
 	if (!m_isBigEndian)
 		m_cr[M88K_CR_PSR] |= M88K_PSR_BO;
 
-	CPUComponent::ResetState();
+	CPUDyntransComponent::ResetState();
 }
 
 
@@ -176,7 +176,7 @@ bool M88K_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 		return false;
 	}
 
-	return CPUComponent::PreRunCheckForComponent(gxemul);
+	return CPUDyntransComponent::PreRunCheckForComponent(gxemul);
 }
 
 
@@ -272,12 +272,6 @@ void M88K_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 }
 
 
-int M88K_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
-{
-	return DyntransExecute(gxemul, nrOfCycles);
-}
-
-
 int M88K_CPUComponent::GetDyntransICshift() const
 {
 	// 4 bytes per instruction, i.e. shift is 2 bits.
@@ -285,7 +279,7 @@ int M88K_CPUComponent::GetDyntransICshift() const
 }
 
 
-void (*M88K_CPUComponent::GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const
+void (*M88K_CPUComponent::GetDyntransToBeTranslated())(CPUDyntransComponent*, DyntransIC*) const
 {
 	return instr_ToBeTranslated;
 }
@@ -953,7 +947,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	case 0x32:	/*  bsr    */
 //	case 0x33:	/*  bsr.n  */
 		{
-			void (*samepage_function)(CPUComponent*, struct DyntransIC*) = NULL;
+			void (*samepage_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 
 			switch (op26) {
 	//		case 0x30:
@@ -1081,7 +1075,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //		case 0xc8:	/*  jsr    */
 //		case 0xcc:	/*  jsr.n  */
 			{
-				void (*f_ss)(CPUComponent*, struct DyntransIC*) = NULL;
+				void (*f_ss)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 
 				switch ((iw >> 8) & 0xff) {
 	//			case 0xc0: ic->f = instr(jmp); break;

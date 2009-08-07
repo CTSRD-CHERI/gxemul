@@ -3975,3 +3975,6 @@ Changelog for GXemul:
 		memory map). The new GXemul framework is thus completely free
 		of malloc/free and manual delete. (mmap/munmap are, for natural
 		reasons, used though by the RAMComponent.)
+		Separating out the dyntrans specific parts of CPUComponent into
+		another base class, CPUDyntransComponent, so that it in theory
+		is possible to implement non-dyntrans CPUs.

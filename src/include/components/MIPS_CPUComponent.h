@@ -31,7 +31,7 @@
 // COMPONENT(mips_cpu)
 
 
-#include "CPUComponent.h"
+#include "CPUDyntransComponent.h"
 
 
 /***********************************************************************/
@@ -56,17 +56,17 @@
 /*
  *  These should all be 2 characters wide:
  *
- *  NOTE: These are for the old 32-bit ABIs. For the newer ABIs (n32 and 64-bit
- *  ABIs), registers 8..11 are used to pass arguments and are then called
- *  "a4".."a7".
- *
- *  TODO: Should there be two different variants of this? It's not really
- *  possible to figure out in some easy way if the code running was
- *  written for a 32-bit or 64-bit ABI.
+ *  NOTE: For the newer ABIs (n32 and 64-bit ABIs), registers 8..11 are used
+ *  to pass arguments and are then called "a4".."a7".
  */
-#define MIPS_REGISTER_NAMES	{ \
+#define MIPS_OLDABI_REGISTER_NAMES	{ \
 	"zr", "at", "v0", "v1", "a0", "a1", "a2", "a3", \
 	"t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7", \
+	"s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", \
+	"t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra"  }
+#define MIPS_REGISTER_NAMES	{ \
+	"zr", "at", "v0", "v1", "a0", "a1", "a2", "a3", \
+	"a4", "a5", "a6", "a7", "t4", "t5", "t6", "t7", \
 	"s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", \
 	"t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra"  }
 
@@ -145,7 +145,7 @@ struct mips_cpu_type_def {
  * \brief A Component representing a MIPS processor.
  */
 class MIPS_CPUComponent
-	: public CPUComponent
+	: public CPUDyntransComponent
 {
 public:
 	/**
@@ -163,8 +163,6 @@ public:
 	virtual void ResetState();
 
 	virtual bool PreRunCheckForComponent(GXemul* gxemul);
-
-	virtual int Execute(GXemul* gxemul, int nrOfCycles);
 
 	virtual size_t DisassembleInstruction(uint64_t vaddr, size_t maxlen,
 		unsigned char *instruction, vector<string>& result);
@@ -185,7 +183,7 @@ protected:
 	virtual bool FunctionTraceReturnImpl(int64_t& retval);
 
 	virtual int GetDyntransICshift() const;
-	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;
+	virtual void (*GetDyntransToBeTranslated())(CPUDyntransComponent*, DyntransIC*) const;
 
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
 

@@ -5,7 +5,8 @@
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(CPEDANTIC) $(INCLUDE2)
 LIBS=$(OTHERLIBS)
 
-OBJS=CPUComponent.o M88K_CPUComponent.o MIPS_CPUComponent.o
+OBJS=CPUComponent.o CPUDyntransComponent.o M88K_CPUComponent.o \
+	MIPS_CPUComponent.o
 
 all: $(OBJS)
 

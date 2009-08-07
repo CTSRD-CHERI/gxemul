@@ -68,6 +68,8 @@ void MainbusComponent::FlushCachedStateForComponent()
 	m_memoryMapFailed = false;
 
 	m_currentAddressDataBus = NULL;
+	
+	Component::FlushCachedStateForComponent();
 }
 
 

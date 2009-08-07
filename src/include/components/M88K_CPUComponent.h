@@ -31,7 +31,7 @@
 // COMPONENT(m88k_cpu)
 
 
-#include "CPUComponent.h"
+#include "CPUDyntransComponent.h"
 
 #include "thirdparty/m88k_psl.h"
 
@@ -327,7 +327,7 @@ struct m8820x_cmmu {
  * 88100 and 88110. GXemul only supports 88100 emulation so far.
  */
 class M88K_CPUComponent
-	: public CPUComponent
+	: public CPUDyntransComponent
 {
 public:
 	/**
@@ -343,8 +343,6 @@ public:
 	static string GetAttribute(const string& attributeName);
 
 	virtual void ResetState();
-
-	virtual int Execute(GXemul* gxemul, int nrOfCycles);
 
 	virtual bool PreRunCheckForComponent(GXemul* gxemul);
 
@@ -365,7 +363,7 @@ protected:
 	virtual bool FunctionTraceReturnImpl(int64_t& retval) { retval = m_r[M88K_RETURN_VALUE_REG]; return true; }
 
 	virtual int GetDyntransICshift() const;
-	virtual void (*GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const;
+	virtual void (*GetDyntransToBeTranslated())(CPUDyntransComponent*, DyntransIC*) const;
 
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
 

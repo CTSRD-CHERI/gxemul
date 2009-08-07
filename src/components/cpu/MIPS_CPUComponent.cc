@@ -45,7 +45,7 @@ static mips_cpu_type_def cpu_type_defs[] = MIPS_CPU_TYPE_DEFS;
 
 
 MIPS_CPUComponent::MIPS_CPUComponent()
-	: CPUComponent("mips_cpu", "MIPS")
+	: CPUDyntransComponent("mips_cpu", "MIPS")
 	, m_mips_type("5KE")	// defaults to a MIPS64 rev 2 cpu
 {
 	m_frequency = 100e6;
@@ -114,7 +114,7 @@ void MIPS_CPUComponent::ResetState()
 	// Reasonable initial stack pointer.
 	m_gpr[MIPS_GPR_SP] = MIPS_INITIAL_STACK_POINTER;
 
-	CPUComponent::ResetState();
+	CPUDyntransComponent::ResetState();
 }
 
 
@@ -153,7 +153,7 @@ bool MIPS_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 		// TODO: Some more registers?
 	}
 
-	return CPUComponent::PreRunCheckForComponent(gxemul);
+	return CPUDyntransComponent::PreRunCheckForComponent(gxemul);
 }
 
 
@@ -227,12 +227,6 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 }
 
 
-int MIPS_CPUComponent::Execute(GXemul* gxemul, int nrOfCycles)
-{
-	return DyntransExecute(gxemul, nrOfCycles);
-}
-
-
 int MIPS_CPUComponent::FunctionTraceArgumentCount()
 {
 	// On old 32-bit ABIs, registers 4..7 (a0..a3) are used. On newer
@@ -270,7 +264,7 @@ int MIPS_CPUComponent::GetDyntransICshift() const
 }
 
 
-void (*MIPS_CPUComponent::GetDyntransToBeTranslated())(CPUComponent*, DyntransIC*) const
+void (*MIPS_CPUComponent::GetDyntransToBeTranslated())(CPUDyntransComponent*, DyntransIC*) const
 {
 	bool mips16 = m_pc & 1? true : false;
 	return mips16? instr_ToBeTranslated_MIPS16 : instr_ToBeTranslated;
@@ -1039,9 +1033,9 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 //	case HI6_BGTZ:
 //	case HI6_BGTZL:
 		{
-			void (*f_singleStepping)(CPUComponent*, struct DyntransIC*) = NULL;
-			void (*samepage_function)(CPUComponent*, struct DyntransIC*) = NULL;
-			void (*samepage_function_singleStepping)(CPUComponent*, struct DyntransIC*) = NULL;
+			void (*f_singleStepping)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+			void (*samepage_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+			void (*samepage_function_singleStepping)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 
 			switch (hi6) {
 			case HI6_BEQ:
