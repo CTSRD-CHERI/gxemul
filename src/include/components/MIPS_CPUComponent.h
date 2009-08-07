@@ -206,6 +206,7 @@ private:
 	 * State:
 	 */
 	string		m_mips_type;		// E.g. "R4400"
+	string		m_abi;			// "o32", "n32", or "n64"
 	uint64_t	m_gpr[N_MIPS_GPRS];
 	uint64_t	m_hi;
 	uint64_t	m_lo;

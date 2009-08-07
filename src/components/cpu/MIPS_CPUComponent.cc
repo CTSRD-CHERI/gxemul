@@ -37,6 +37,7 @@
 #include "opcodes_mips.h"
 
 static const char* hi6_names[] = HI6_NAMES;
+static const char* regnames_old[] = MIPS_OLDABI_REGISTER_NAMES;
 static const char* regnames[] = MIPS_REGISTER_NAMES;
 static const char* special_names[] = SPECIAL_NAMES;
 static const char* special_rot_names[] = SPECIAL_ROT_NAMES;
@@ -44,9 +45,19 @@ static const char* regimm_names[] = REGIMM_NAMES;
 static mips_cpu_type_def cpu_type_defs[] = MIPS_CPU_TYPE_DEFS;
 
 
+static const char* regname(int i, const string& abi)
+{
+	if (abi == "o32")
+		return regnames_old[i];
+	else
+		return regnames[i];
+}
+
+
 MIPS_CPUComponent::MIPS_CPUComponent()
 	: CPUDyntransComponent("mips_cpu", "MIPS")
 	, m_mips_type("5KE")	// defaults to a MIPS64 rev 2 cpu
+	, m_abi("n64")
 {
 	m_frequency = 100e6;
 
@@ -67,12 +78,15 @@ MIPS_CPUComponent::MIPS_CPUComponent()
 	ResetState();
 
 	AddVariable("model", &m_mips_type);
+	AddVariable("abi", &m_abi);
 
 	AddVariable("hi", &m_hi);
 	AddVariable("lo", &m_lo);
 
+	// TODO: This only registers using the new ABI names. How should
+	// this be handled? Custom "aliasing" variables?
 	for (size_t i=0; i<N_MIPS_GPRS; i++)
-		AddVariable(regnames[i], &m_gpr[i]);
+		AddVariable(regname(i, m_abi), &m_gpr[i]);
 
 	AddVariable("inDelaySlot", &m_inDelaySlot);
 	AddVariable("delaySlotTarget", &m_delaySlotTarget);
@@ -144,7 +158,7 @@ bool MIPS_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 		for (size_t i=1; i<N_MIPS_GPRS; i++) {
 			if ((int64_t)m_gpr[i] != (int64_t)(int32_t)m_gpr[i]) {
 				gxemul->GetUI()->ShowDebugMessage(this, (string)"The emulated "
-				    "CPU is 32-bit, but the " + regnames[i] + " register is not"
+				    "CPU is 32-bit, but the " + regname(i, m_abi) + " register is not"
 				    " a correctly sign-extended 32-bit value!\n");
 				return false;
 			}
@@ -211,7 +225,7 @@ void MIPS_CPUComponent::ShowRegisters(GXemul* gxemul, const vector<string>& argu
 	ss << Trunc3264(m_lo, is32bit) << "\n";
 
 	for (size_t i=0; i<N_MIPS_GPRS; i++) {
-		ss << regnames[i] << "=";
+		ss << regname(i, m_abi) << "=";
 		if (is32bit)
 			ss << std::setw(8);
 		else
@@ -343,7 +357,7 @@ size_t MIPS_CPUComponent::DisassembleInstructionMIPS16(uint64_t vaddr,
 
 			int ofs = imm5;	// TODO: scaling?
 
-			ss << regnames[ry] << "," << ofs << "(" << regnames[rx] << ")";
+			ss << regname(ry, m_abi) << "," << ofs << "(" << regname(rx, m_abi) << ")";
 			result.push_back(ss.str());
 		}
 		break;
@@ -438,15 +452,15 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 				case 0x00:
 					result.push_back(
 					    special_names[special6]);
-					ss << regnames[rd] << "," <<
-					    regnames[rt] << "," << sa;
+					ss << regname(rd, m_abi) << "," <<
+					    regname(rt, m_abi) << "," << sa;
 					result.push_back(ss.str());
 					break;
 				case 0x01:
 					result.push_back(
 					    special_rot_names[special6]);
-					ss << regnames[rd] << "," <<
-					    regnames[rt] << "," << sa;
+					ss << regname(rd, m_abi) << "," <<
+					    regname(rt, m_abi) << "," << sa;
 					result.push_back(ss.str());
 					break;
 				default:ss << "unimpl special, sub=" << sub;
@@ -466,15 +480,17 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 				case 0x00:
 					result.push_back(
 					    special_names[special6]);
-					ss << regnames[rd] << "," <<
-					    regnames[rt] << "," << regnames[rs];
+					ss << regname(rd, m_abi) << "," <<
+					    regname(rt, m_abi) << "," <<
+					    regname(rs, m_abi);
 					result.push_back(ss.str());
 					break;
 				case 0x01:
 					result.push_back(
 					    special_rot_names[special6]);
-					ss << regnames[rd] << "," <<
-					    regnames[rt] << "," << regnames[rs];
+					ss << regname(rd, m_abi) << "," <<
+					    regname(rt, m_abi) << "," <<
+					    regname(rs, m_abi);
 					result.push_back(ss.str());
 					break;
 				default:ss << "unimpl special, sub="
@@ -490,7 +506,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 					result.push_back("jr.hb");
 				else
 					result.push_back("jr");
-				ss << regnames[rs];
+				ss << regname(rs, m_abi);
 				result.push_back(ss.str());
 				break;
 				
@@ -501,20 +517,20 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 					result.push_back("jalr.hb");
 				else
 					result.push_back("jalr");
-				ss << regnames[rd] << "," << regnames[rs];
+				ss << regname(rd, m_abi) << "," << regname(rs, m_abi);
 				result.push_back(ss.str());
 				break;
 
 			case SPECIAL_MFHI:
 			case SPECIAL_MFLO:
 				result.push_back(special_names[special6]);
-				result.push_back(regnames[rd]);
+				result.push_back(regname(rd, m_abi));
 				break;
 
 			case SPECIAL_MTLO:
 			case SPECIAL_MTHI:
 				result.push_back(special_names[special6]);
-				result.push_back(regnames[rs]);
+				result.push_back(regname(rs, m_abi));
 				break;
 
 			case SPECIAL_ADD:
@@ -534,8 +550,8 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			case SPECIAL_MOVZ:
 			case SPECIAL_MOVN:
 				result.push_back(special_names[special6]);
-				ss << regnames[rd] << "," <<
-				    regnames[rs] << "," << regnames[rt];
+				ss << regname(rd, m_abi) << "," <<
+				    regname(rs, m_abi) << "," << regname(rt, m_abi);
 				result.push_back(ss.str());
 				break;
 
@@ -558,7 +574,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 					if (m_type.rev == MIPS_R5900) {
 						if (special6 == SPECIAL_MULT ||
 						    special6 == SPECIAL_MULTU)
-							ss << regnames[rd]<<",";
+							ss << regname(rd, m_abi)<<",";
 						else
 							ss << "WEIRD_R5900_RD,";
 					} else {
@@ -566,7 +582,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 					}
 				}
 
-				ss << regnames[rs] << "," << regnames[rt];
+				ss << regname(rs, m_abi) << "," << regname(rt, m_abi);
 				result.push_back(ss.str());
 				break;
 
@@ -588,7 +604,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			case SPECIAL_MFSA:
 				if (m_type.rev == MIPS_R5900) {
 					result.push_back("mfsa");
-					result.push_back(regnames[rd]);
+					result.push_back(regname(rd, m_abi));
 				} else {
 					result.push_back(
 					    "unimplemented special 0x28");
@@ -598,7 +614,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			case SPECIAL_MTSA:
 				if (m_type.rev == MIPS_R5900) {
 					result.push_back("mtsa");
-					result.push_back(regnames[rs]);
+					result.push_back(regname(rs, m_abi));
 				} else {
 					result.push_back(
 					    "unimplemented special 0x29");
@@ -639,10 +655,10 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 				case HI6_BEQL:
 				case HI6_BNE:
 				case HI6_BNEL:
-					ss << regnames[rt] << ",";
+					ss << regname(rt, m_abi) << ",";
 				}
 
-				ss << regnames[rs] << ",";
+				ss << regname(rs, m_abi) << ",";
 			}
 
 			ss.flags(std::ios::hex | std::ios::showbase);
@@ -668,7 +684,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			result.push_back(hi6_names[hi6]);
 
 			stringstream ss;
-			ss << regnames[rt] << "," << regnames[rs] << ",";
+			ss << regname(rt, m_abi) << "," << regname(rs, m_abi) << ",";
 			if (hi6 == HI6_ANDI || hi6 == HI6_ORI ||
 			    hi6 == HI6_XORI) {
 				ss.flags(std::ios::hex | std::ios::showbase);
@@ -685,7 +701,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			result.push_back(hi6_names[hi6]);
 
 			stringstream ss;
-			ss << regnames[rt] << ",";
+			ss << regname(rt, m_abi) << ",";
 			ss.flags(std::ios::hex | std::ios::showbase);
 			ss << (uint16_t) iword;
 			result.push_back(ss.str());
@@ -747,7 +763,7 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 				result.push_back("pref");
 
 				ss << rt << "," << imm <<
-				    "(" << regnames[rs] << ")";
+				    "(" << regname(rs, m_abi) << ")";
 				result.push_back(ss.str());
 				break;
 			}
@@ -762,9 +778,9 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			    hi6 == HI6_LDC1 || hi6 == HI6_LDC2)
 				ss << "r" << rt;
 			else
-				ss << regnames[rt];
+				ss << regname(rt, m_abi);
 
-			ss << "," << imm << "(" << regnames[rs] << ")";
+			ss << "," << imm << "(" << regname(rs, m_abi) << ")";
 
 			result.push_back(ss.str());
 
@@ -817,14 +833,14 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			case REGIMM_BGEZALL:
 				result.push_back(regimm_names[regimm5]);
 
-				ss << regnames[rs] << "," << addr;
+				ss << regname(rs, m_abi) << "," << addr;
 				result.push_back(ss.str());
 				break;
 
 			case REGIMM_SYNCI:
 				result.push_back(regimm_names[regimm5]);
 
-				ss << imm << "(" << regnames[rs] << ")";
+				ss << imm << "(" << regname(rs, m_abi) << ")";
 				result.push_back(ss.str());
 				break;
 

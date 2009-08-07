@@ -3978,3 +3978,5 @@ Changelog for GXemul:
 		Separating out the dyntrans specific parts of CPUComponent into
 		another base class, CPUDyntransComponent, so that it in theory
 		is possible to implement non-dyntrans CPUs.
+		Partial support for choosing MIPS ABI (affects disassembly and
+		register dumps, mostly).

@@ -317,6 +317,9 @@ MAIN GOAL for 0.6.0:
         [ ]  Read-only state variables, or special handlers! Even better.
 	     I.e. warn about (or refuse) to write to unimplemented bits
 	     of control registers.
+	[ ]  MIPS ABI selection now works (cpu.abi="o32" vs n32 and n64). Howver,
+	     only the NEW names are registered as state variable names! How should
+	     this be handled? Custom "aliasing" variables?
 	[ ]  Custom ToString variants? Useful for bit fields, control
 	     registers, etc. "Verbose tostring"?
 	[ ]  Loaded files should be part of state/model! But not part
