@@ -40,9 +40,6 @@ MAIN GOAL for 0.6.0:
 
 -------------------------------------------------------------------------------
 
-   [ ]	Merge in the old C++ HISTORY entries into the main tree (for
-   	history preservation).
-
    [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
 	[ ] When a component is added to the tree, recalculate its nr of steps!
@@ -135,9 +132,6 @@ MAIN GOAL for 0.6.0:
 		pc to dyntrans page lookups? 32-bit and 64-bit
 		memory to direct host page lookups, TLB-entry based
 
-	[ ]  Guarantee that single-stepping and bulk execution end up with
-	     _EXACTLY_ the same state!
-
 	[ ]  For instruction combination implementations, the first thing
 	     checked is whether instr combos is allowed, if not then call
 	     the original function call instead. This makes it possible to
@@ -160,30 +154,34 @@ MAIN GOAL for 0.6.0:
 	[ ]  Optional native code generation pass
 
 		[ ] Target amd64 and Alpha hosts first, if native generation is to be
-	    	attempted, since those are the only realistic ones I have for testing.
+	    	    attempted, since those are the only realistic ones I have for testing.
 
 		[ ] Similar in many ways to instruction combinations ala GXemul 0.4.x,
 		    but native code instead of C code.
 
 		[ ] How/when to decide whether native generation is worth it?
-		    Using statistics of some sort?
+		    Using statistics of some sort? During development, it will be useful
+		    to get statistics about all common sequences of dyntrans "f" values
+		    (like in the old framework, but less hardcoded).
 
-		[ ] Register allocator / liveness analysis of reads and writes.
-		    Requires a list of supported ic functions and their arguments,
-		    and what's being written.
-		    [ ] Not all backends may need to support all opcodes.
+		[ ] Simple approach: Each native code generator backend registers a
+		    list of the instr_* calls it supports, and when called, it is
+		    assumed that it will be able to convert a sequence of such
+		    dyntrans instructions into a native code equivalent. Actual
+		    code output is probably best done using a simple form of
+		    register allocation/liveness analysis.
 
 		[ ] Ability to show disassembly of generated host
-		    instruction sequence!
-
-		[ ] Try to make the generated code as linear and branch
-		    free as possible. Experiment with making e.g. all
-		    "exceptional" branches go away to some place outside
-		    the basic block? If it is worth it.
+		    instruction sequence?
 
 		[ ] Exceptions from device access, or from load/store to
 		    unmapped pages/devices/handlers should break the
 		    native code execution in a correct way.
+
+		[ ] Later: Try to make the generated code as linear and branch
+		    free as possible. Experiment with making e.g. all
+		    "exceptional" branches go away to some place outside
+		    the basic block? If it is worth it.
 
 		[ ] Unit tests -WW@U may run with native code generation, and
 			-WW@u without. If the emulator is built without
