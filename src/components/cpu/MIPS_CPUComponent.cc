@@ -183,6 +183,33 @@ bool MIPS_CPUComponent::CheckVariableWrite(StateVariable& var)
 		return false;
 	}
 
+	if (m_mips_type != m_type.name) {
+		bool found = false;
+		for (size_t j=0; cpu_type_defs[j].name != NULL; j++) {
+			if (m_mips_type == cpu_type_defs[j].name) {
+				m_type = cpu_type_defs[j];
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			if (ui != NULL) {
+				stringstream ss;
+				ss << "Unknown model \"" + m_mips_type + "\". Available types are:\n";
+				for (size_t j=0; cpu_type_defs[j].name != NULL; j++) {
+					if ((j % 6) != 0)
+						ss << "\t";
+					ss << cpu_type_defs[j].name;
+					if ((j % 6) == 5)
+						ss << "\n";
+				}
+				ui->ShowDebugMessage(this, ss.str());
+			}
+			return false;
+		}
+	}
+
 	return CPUDyntransComponent::CheckVariableWrite(var);
 }
 
@@ -1305,6 +1332,20 @@ static void Test_MIPS_CPUComponent_DefaultModel()
 	    cpu->GetVariable("model")->ToString(), "5KE");
 }
 
+static void Test_MIPS_CPUComponent_ModelChange()
+{
+	refcount_ptr<Component> cpu =
+	    ComponentFactory::CreateComponent("mips_cpu");
+
+	cpu->SetVariableValue("model", "\"R2000\"");
+	UnitTest::Assert("model change was not applied",
+	    cpu->GetVariable("model")->ToString(), "R2000");
+
+	cpu->SetVariableValue("model", "\"R1000\"");
+	UnitTest::Assert("model change was applied when it should NOT have been",
+	    cpu->GetVariable("model")->ToString(), "R2000");
+}
+
 static void Test_MIPS_CPUComponent_Disassembly_Basic()
 {
 	refcount_ptr<Component> mips_cpu =
@@ -1485,6 +1526,7 @@ UNITTESTS(MIPS_CPUComponent)
 	UNITTEST(Test_MIPS_CPUComponent_Create);
 	UNITTEST(Test_MIPS_CPUComponent_IsCPU);
 	UNITTEST(Test_MIPS_CPUComponent_DefaultModel);
+	UNITTEST(Test_MIPS_CPUComponent_ModelChange);
 
 	// Disassembly:
 	UNITTEST(Test_MIPS_CPUComponent_Disassembly_Basic);

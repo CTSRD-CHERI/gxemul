@@ -289,10 +289,18 @@ MAIN GOAL for 0.6.0:
    [/]  State/model:
         [X]  Variable write handlers.
              [ ] root.step to move to a certain execution step!
-	     [ ] cpu.model = "R4000"   <==  assigning to the "model" variable should:
-	  	[ ]  handle writes specifically
-	  	[ ]  lookup if R4000 is a valid model for the cpu architecture
-	  	[ ]  change internal state, and then call ResetState().
+             	 [ ] Change backward-step to use root.step = root.step - 1 or similar.
+             	 [ ] Only allow decreasing root.step if snapshots are enabled.
+             	 [ ] Allow increasing root.step always: it means to continue until
+             	     the number of steps have been executed (a kind of specia breakpoint!)
+             	 [ ] Do not allow writes to *.step for non-root components!
+             	 NOTE: Deserializing *.step should be allowed though!
+	     [X] cpu.model = "R4000"   <==  assigning to the "model" variable should:
+	  	[X]  handle writes specifically
+	  	[X]  lookup if R4000 is a valid model for the cpu architecture
+	  	[ ]  Better error reporting when supplying model using e.g.
+	  	     the command line   -e "testmips(cpu=R1000)"  should show
+	  	     the same error message as when running cpu.model="R1000".
 	[ ]  MIPS ABI selection now works (cpu.abi="o32" vs n32 and n64). However,
 	     only the NEW names are registered as state variable names! How should
 	     this be handled? Custom "aliasing" variables?
