@@ -151,7 +151,7 @@ void M88K_CPUComponent::ResetState()
 
 bool M88K_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 {
-	if (m_r[0] != 0) {
+	if (m_r[M88K_ZERO_REG] != 0) {
 		gxemul->GetUI()->ShowDebugMessage(this, "the r0 register "
 		    "must contain the value 0.\n");
 		return false;
@@ -177,6 +177,49 @@ bool M88K_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 	}
 
 	return CPUDyntransComponent::PreRunCheckForComponent(gxemul);
+}
+
+
+bool M88K_CPUComponent::CheckVariableWrite(StateVariable& var)
+{
+	UI* ui = GetUI();
+
+	if (m_r[M88K_ZERO_REG] != 0) {
+		if (ui != NULL) {
+			ui->ShowDebugMessage(this, "the zero register (r0) "
+			    "must contain the value 0.\n");
+		}
+		return false;
+	}
+
+	if (m_m88k_type != m_type.name) {
+		bool found = false;
+		for (size_t j=0; cpu_type_defs[j].name != NULL; j++) {
+			if (m_m88k_type == cpu_type_defs[j].name) {
+				m_type = cpu_type_defs[j];
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			if (ui != NULL) {
+				stringstream ss;
+				ss << "Unknown model \"" + m_m88k_type + "\". Available types are:\n";
+				for (size_t j=0; cpu_type_defs[j].name != NULL; j++) {
+					if ((j % 6) != 0)
+						ss << "\t";
+					ss << cpu_type_defs[j].name;
+					if ((j % 6) == 5)
+						ss << "\n";
+				}
+				ui->ShowDebugMessage(this, ss.str());
+			}
+			return false;
+		}
+	}
+
+	return CPUDyntransComponent::CheckVariableWrite(var);
 }
 
 
