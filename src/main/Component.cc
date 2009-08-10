@@ -970,13 +970,59 @@ const StateVariable* Component::GetVariable(const string& name) const
 }
 
 
+bool Component::CheckVariableWrite(StateVariable& var)
+{
+	UI* ui = GetUI();
+	const string& name = var.GetName();
+	
+	if (name == "step") {
+		if (ui != NULL)
+			ui->ShowDebugMessage("TODO: writes to 'step'.\n");
+
+		return false;
+	}
+
+	return true;
+}
+
+
 bool Component::SetVariableValue(const string& name, const string& expression)
 {
-	StateVariableMap::iterator it = m_stateVariables.find(name);
-	if (it == m_stateVariables.end())
-		return false;
+	UI* ui = GetUI();
 
-	return (it->second).SetValue(expression);
+	StateVariableMap::iterator it = m_stateVariables.find(name);
+	if (it == m_stateVariables.end()) {
+		if (ui != NULL)
+			ui->ShowDebugMessage((string) name + ": no such variable\n");
+		return false;
+	}
+
+	StateVariable& var = it->second;
+	
+	stringstream oldValue;
+	var.SerializeValue(oldValue);
+
+	bool success = var.SetValue(expression);
+	if (!success) {
+		if (ui != NULL)
+			ui->ShowDebugMessage((string) name + ": expression could"
+			    " not be assigned; type mismatch?\n");
+		return false;
+	}
+
+	stringstream newValue;
+	var.SerializeValue(newValue);
+
+	if (oldValue.str() != newValue.str()) {
+		success = CheckVariableWrite(var);
+		if (!success) {
+			// Revert to the previous:
+			var.SetValue(oldValue.str());
+			return false;
+		}
+	}
+
+	return true;
 }
 
 
@@ -989,7 +1035,7 @@ void Component::Serialize(ostream& ss, SerializationContext& context) const
 	    
 	for (StateVariableMap::const_iterator it = m_stateVariables.begin();
 	    it != m_stateVariables.end(); ++it)
-		ss << (it->second).Serialize(subContext);
+		(it->second).Serialize(ss, subContext);
 
 	for (size_t i = 0, n = m_childComponents.size(); i < n; ++ i)
 		m_childComponents[i]->Serialize(ss, subContext);
@@ -1180,7 +1226,10 @@ void Component::AddChecksum(Checksum& checksum) const
 	    it != m_stateVariables.end();
 	    ++ it) {
 		checksum.Add(((uint64_t) 0x019fb879 << 32) | 0x25addae1);
-		checksum.Add((it->second).Serialize(dummyContext));
+
+		stringstream ss;
+		(it->second).Serialize(ss, dummyContext);
+		checksum.Add(ss.str());
 	}
 	
 	// Add all child components.

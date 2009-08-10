@@ -418,11 +418,8 @@ double StateVariable::ToDouble() const
 }
 
 
-string StateVariable::Serialize(SerializationContext& context) const
+void StateVariable::SerializeValue(ostream& ss) const
 {
-	stringstream ss;
-	ss << context.Tabs() << GetTypeString() << " " << m_name + " ";
-
 	switch (m_type) {
 
 	case String:
@@ -439,9 +436,14 @@ string StateVariable::Serialize(SerializationContext& context) const
 	default:
 		ss << ToString();
 	}
+}
 
+
+void StateVariable::Serialize(ostream& ss, SerializationContext& context) const
+{
+	ss << context.Tabs() << GetTypeString() << " " << m_name + " ";
+	SerializeValue(ss);
 	ss << "\n";
-	return ss.str();
 }
 
 
@@ -753,9 +755,11 @@ static void Test_StateVariable_String_Serialize()
 	StateVariable var("hello", &hi);
 
 	SerializationContext dummyContext;
+	stringstream ss;
 
+	var.Serialize(ss, dummyContext);
 	UnitTest::Assert("variable serialization mismatch?",
-	    var.Serialize(dummyContext), "string hello \"value world\"\n");
+	    ss.str(), "string hello \"value world\"\n");
 }
 
 static void Test_StateVariable_String_Serialize_WithEscapes()
@@ -764,9 +768,11 @@ static void Test_StateVariable_String_Serialize_WithEscapes()
 	StateVariable var("hello", &s);
 
 	SerializationContext dummyContext;
-
+	stringstream ss;
+	
+	var.Serialize(ss, dummyContext);
 	UnitTest::Assert("variable serialization mismatch?",
-	    var.Serialize(dummyContext) ==
+	    ss.str(),
 	    "string hello " + EscapedString(s).Generate() + "\n");
 }
 
@@ -848,14 +854,18 @@ static void Test_StateVariable_Bool_Serialize()
 	StateVariable var("hello", &myBool);
 
 	SerializationContext dummyContext;
-
+	stringstream ss;
+	
+	var.Serialize(ss, dummyContext);
 	UnitTest::Assert("variable serialization mismatch (1)",
-	    var.Serialize(dummyContext), "bool hello true\n");
+	    ss.str(), "bool hello true\n");
 	
 	myBool = false;
+	stringstream ss2;
+	var.Serialize(ss2, dummyContext);
 
 	UnitTest::Assert("variable serialization mismatch (2)",
-	    var.Serialize(dummyContext), "bool hello false\n");
+	    ss2.str(), "bool hello false\n");
 }
 
 static void Test_StateVariable_Numeric_Construct()

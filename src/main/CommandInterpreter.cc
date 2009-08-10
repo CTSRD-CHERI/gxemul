@@ -729,8 +729,8 @@ void CommandInterpreter::VariableAssignment(const string& componentPath,
 	    m_GXemul->GetRootComponent()->LightClone();
 
 	// Attempt to assign the expression to the variable:
-	if (!var->SetValue(expression))
-		m_GXemul->GetUI()->ShowDebugMessage("Assignment failed. (Wrong type?)\n");
+	if (!component->SetVariableValue(variableName, expression))
+		m_GXemul->GetUI()->ShowDebugMessage("Assignment failed.\n");
 
 	// ... and print all state change (in case a write to a variable had
 	// side effects, then this makes sure that the user sees all such side
@@ -740,7 +740,7 @@ void CommandInterpreter::VariableAssignment(const string& componentPath,
 
 	string msg = changeMessages.str();
 	if (msg == "")
-		msg = "No state change.\n";
+		msg = "(No state change.)\n";
 
 	m_GXemul->GetUI()->ShowDebugMessage(msg);
 }

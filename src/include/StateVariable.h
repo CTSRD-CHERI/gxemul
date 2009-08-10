@@ -204,11 +204,23 @@ public:
 	enum Type GetType() const;
 
 	/**
+	 * \brief Serializes the variable value into a string.
+	 *
+	 * Strings are serialized as quoted strings; most other types without
+	 * quoting.
+	 *
+	 * @param ss A stream where the variable value will be appended.
+	 */
+	void SerializeValue(ostream& ss) const;
+
+	/**
 	 * \brief Serializes the variable into a string.
 	 *
-	 * @return A string, representing the variable.
+	 * @param ss A stream where the variable (type, name, and value)
+	 *	will be appended.
+	 * @param context Serialization context (tab indentation, etc).
 	 */
-	string Serialize(SerializationContext& context) const;
+	void Serialize(ostream& ss, SerializationContext& context) const;
 
 	/**
 	 * \brief Copy the value from another variable into this variable.

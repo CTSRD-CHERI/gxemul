@@ -142,14 +142,9 @@ MAIN GOAL for 0.6.0:
 	[ ]  Multi-encoding ISAs, such as MIPS (MIPS16), ARM (Thumb), or
 	     amd64 (16/32/64-bit).
 
-		[ ]  MIPS16 test:
-			mips64-unknown-elf-gcc-4.3.2 -mips16 -O3 urk.c -c
-			mips64-unknown-elf-ld urk.o -o urk -e f -Ttext 0xffffffff80004000
-		[X]  The lowest bit of the PC indicates MIPS16 mode, but
-		     the CPUComponent's dump code dumps m_pc directly. It should
-		     as the individual CPU what m_pc means in terms of virtual
-		     address for the instruction. Most cpus will return m_pc,
-		     but MIPS16 should return m_pc & ~1.
+		Commands used to compile MIPS16 test programs:
+		mips64-unknown-elf-gcc-4.3.2 -mips16 -O3 urk.c -c
+		mips64-unknown-elf-ld urk.o -o urk -e f -Ttext 0xffffffff80004000
 
 	[ ]  Optional native code generation pass
 
@@ -255,26 +250,6 @@ MAIN GOAL for 0.6.0:
 
   [ ]	Cache short path names if evaluation/generation of them becomes too heavy.
 
-  [ ]	cpu.model = "R4000"   <==  assigning to the "model" variable should:
-  	[ ]  handle writes specifically
-  	[ ]  lookup if R4000 is a valid model for the cpu architecture
-  	[ ]  change internal state, and then call ResetState().
-
-  [X]	Ability to send arguments during component creation? E.g.:
-  		add mips_cpu(model=R3000)
-  	instead of
-  		add mips_cpu
-  		cpu.model = "R3000"
-  	Also useful for e.g. selecting nr of CPUs or memory amount on the
-  	command line (sending args to template machines!)
-
-		gxemul -e testmips kernel
-		gxemul -e testmips(cpu=R4400) kernel
-		gxemul -e testmips(cpu=R4400,ncpus=4) kernel
-
-	the arguments would be given as a list of (key,value), and given
-	to the component's Create function.
-
   [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
 	first thing to implement, without breaking other architectures.
 
@@ -311,11 +286,14 @@ MAIN GOAL for 0.6.0:
 	     or much less than one host second to execute.
 	     ("Cycle accurate" mode.)
 
-   [ ]  State/model:
-        [ ]  Read-only state variables, or special handlers! Even better.
-	     I.e. warn about (or refuse) to write to unimplemented bits
-	     of control registers.
-	[ ]  MIPS ABI selection now works (cpu.abi="o32" vs n32 and n64). Howver,
+   [/]  State/model:
+        [X]  Variable write handlers.
+             [ ] root.step to move to a certain execution step!
+	     [ ] cpu.model = "R4000"   <==  assigning to the "model" variable should:
+	  	[ ]  handle writes specifically
+	  	[ ]  lookup if R4000 is a valid model for the cpu architecture
+	  	[ ]  change internal state, and then call ResetState().
+	[ ]  MIPS ABI selection now works (cpu.abi="o32" vs n32 and n64). However,
 	     only the NEW names are registered as state variable names! How should
 	     this be handled? Custom "aliasing" variables?
 	[ ]  Custom ToString variants? Useful for bit fields, control
@@ -328,6 +306,7 @@ MAIN GOAL for 0.6.0:
 	     enabled.
 
    [ ]  File loaders:
+   	[ ]  automagic .gz (and .bz2) file extraction into /tmp or $TMP or such.
 	[ ]  symbol handling, line number info, data types?
 	[ ]  argument handling! (arg count, at least)
 	[ ]  all the others (macho, ecoff, srec, ...)

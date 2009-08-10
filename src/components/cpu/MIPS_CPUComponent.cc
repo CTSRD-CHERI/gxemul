@@ -171,6 +171,22 @@ bool MIPS_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 }
 
 
+bool MIPS_CPUComponent::CheckVariableWrite(StateVariable& var)
+{
+	UI* ui = GetUI();
+
+	if (m_gpr[MIPS_GPR_ZERO] != 0) {
+		if (ui != NULL) {
+			ui->ShowDebugMessage(this, "the zero register (zr) "
+			    "must contain the value 0.\n");
+		}
+		return false;
+	}
+
+	return CPUDyntransComponent::CheckVariableWrite(var);
+}
+
+
 bool MIPS_CPUComponent::Is32Bit() const
 {
 	return m_type.isa_level == 32 || m_type.isa_level <= 2;

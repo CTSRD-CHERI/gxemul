@@ -586,6 +586,25 @@ protected:
 	}
 
 	/**
+	 * \brief Checks whether a write to a variable is OK.
+	 *
+	 * This function is called <i>after</i> the variable has been written.
+	 * By returning false, the component indicates that the value which
+	 * was written is invalid, and the write will be undone.
+	 *
+	 * An implementation should first check variables defined for the
+	 * implementation class, and then call its base class' function.
+	 *
+	 * The implementation in the base Component class handles the variables
+	 * that are defined for all components, and returns true for anything
+	 * else.
+	 *
+	 * @param var The variable to check.
+	 * @return true if the write was ok, false otherwise.
+	 */
+	virtual bool CheckVariableWrite(StateVariable& var);
+
+	/**
 	 * \brief Resets the state variables of this component.
 	 *
 	 * Note 1: This function is not recursive, so children should not be

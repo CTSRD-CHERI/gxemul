@@ -44,7 +44,7 @@ RootComponent::RootComponent(GXemul* owner)
 bool RootComponent::PreRunCheckForComponent(GXemul* gxemul)
 {
 	if (m_accuracy != "cycle" && m_accuracy != "sloppy") {
-		gxemul->GetUI()->ShowDebugMessage(this, "accuracy must be \"cycle\" or \"sloppy\"\n");		
+		gxemul->GetUI()->ShowDebugMessage(this, "accuracy must be \"cycle\" or \"sloppy\".\n");		
 		return false;
 	}
 
@@ -55,6 +55,24 @@ bool RootComponent::PreRunCheckForComponent(GXemul* gxemul)
 void RootComponent::SetOwner(GXemul* owner)
 {
 	m_gxemul = owner;
+}
+
+
+bool RootComponent::CheckVariableWrite(StateVariable& var)
+{
+	UI* ui = GetUI();
+	const string& name = var.GetName();
+
+	if (name == "accuracy") {
+		if (var.ToString() != "cycle" && var.ToString() != "sloppy") {
+			if (ui != NULL)
+				ui->ShowDebugMessage(this, "accuracy must be \"cycle\" or \"sloppy\".\n");
+
+			return false;
+		}
+	}
+
+	return Component::CheckVariableWrite(var);
 }
 
 

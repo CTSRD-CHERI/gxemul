@@ -83,6 +83,9 @@ public:
 public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
+protected:
+	virtual bool CheckVariableWrite(StateVariable& var);
+
 private:
 	// Pointer to owner (may be NULL):
 	GXemul*		m_gxemul;

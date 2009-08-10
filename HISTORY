@@ -4401,3 +4401,4 @@ Changelog for GXemul:
 		is possible to implement non-dyntrans CPUs.
 		Partial support for choosing MIPS ABI (affects disassembly and
 		register dumps, mostly).
+20090810	Beginning on variable write handlers.
