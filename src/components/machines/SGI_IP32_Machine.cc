@@ -58,7 +58,7 @@ refcount_ptr<Component> SGI_IP32_Machine::Create(const ComponentCreateArgs& args
 	if (ram.IsNULL())
 		return NULL;
 
-	ram->SetVariableValue("memoryMappedBase", "0");		// TODO?
+	ram->SetVariableValue("memoryMappedBase", "0");
 	ram->SetVariableValue("memoryMappedSize", settings["ram"]);
 	mainbus->AddChild(ram);
 
