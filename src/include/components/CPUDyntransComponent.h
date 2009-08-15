@@ -66,6 +66,8 @@ struct DyntransIC
 #define REG32(arg)	(*((uint32_t*)((arg).p)))
 #define REG64(arg)	(*((uint64_t*)((arg).p)))
 
+#define DYNTRANS_SYNCH_PC	cpu->m_nextIC = ic; cpu->DyntransResyncPC()
+
 
 /**
  * \brief A base-class for processors Component implementations that

@@ -339,6 +339,13 @@ bool M88K_CPUComponent::VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 }
 
 
+void M88K_CPUComponent::Exception(int vector, int is_trap)
+{
+	std::cerr << "TODO: M88K exception\n";
+	throw std::exception();
+}
+
+
 size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	unsigned char *instruction, vector<string>& result)
 {
@@ -953,6 +960,27 @@ DYNTRANS_INSTR(M88K_CPUComponent,mak_imm)
 }
 
 
+/*
+ *  mulu_imm:  d = s1 * immediate
+ *
+ *  arg[0] = pointer to register d
+ *  arg[1] = pointer to register s1
+ *  arg[2] = immediate.
+ */
+DYNTRANS_INSTR(M88K_CPUComponent,mulu_imm)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	if (cpu->m_cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		DYNTRANS_SYNCH_PC;
+		cpu->m_fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		cpu->Exception(M88K_EXCEPTION_SFU1_PRECISE, 0);
+	} else {
+		REG32(ic->arg[0]) = REG32(ic->arg[1]) * ic->arg[2].u32;
+	}
+}
+
+
 DYNTRANS_INSTR(M88K_CPUComponent,bsr_samepage)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
@@ -1041,8 +1069,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	case 0x16:	/*  or     immu32  */
 	case 0x17:	/*  or.u   immu32  */
 	case 0x18:	/*  addu   immu32  */
-	case 0x19:	/*  subu   immu32   */
-	case 0x1f:	/*  cmp    immu32   */
+	case 0x19:	/*  subu   immu32  */
+	case 0x1b:	/*  mulu   immu32  */
+	case 0x1f:	/*  cmp    immu32  */
 		{
 			int shift = 0;
 			switch (op26) {
@@ -1056,11 +1085,11 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			case 0x17: ic->f = instr_or_u32_u32_immu32; shift = 16; break;
 			case 0x18: ic->f = instr_add_u32_u32_immu32; break;
 			case 0x19: ic->f = instr_sub_u32_u32_immu32; break;
-	/*		case 0x1a: ic->f = instr(divu_imm); break;
-			case 0x1b: ic->f = instr(mulu_imm); break;
-			case 0x1c: ic->f = instr(add_imm); break;
-			case 0x1d: ic->f = instr(sub_imm); break;
-			case 0x1e: ic->f = instr(div_imm); break;*/
+	//		case 0x1a: ic->f = instr(divu_imm); break;
+			case 0x1b: ic->f = instr_mulu_imm; break;
+	//		case 0x1c: ic->f = instr(add_imm); break;
+	//		case 0x1d: ic->f = instr(sub_imm); break;
+	//		case 0x1e: ic->f = instr(div_imm); break;
 			case 0x1f: ic->f = instr_cmp_imm; break;
 			}
 
