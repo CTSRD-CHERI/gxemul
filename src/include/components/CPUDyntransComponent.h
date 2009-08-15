@@ -129,6 +129,9 @@ protected:
 	DECLARE_DYNTRANS_INSTR(endOfPage);
 	DECLARE_DYNTRANS_INSTR(endOfPage2);
 
+	// Branches.
+	DECLARE_DYNTRANS_INSTR(branch_samepage);
+
 	// Data movement.
 	DECLARE_DYNTRANS_INSTR(set_u64_imms32);
 
@@ -142,6 +145,7 @@ protected:
 
 	// Logic.
 	DECLARE_DYNTRANS_INSTR(and_u64_u64_immu32);
+	DECLARE_DYNTRANS_INSTR(or_u32_u32_immu32);
 	DECLARE_DYNTRANS_INSTR(or_u32_u32_u32);
 	DECLARE_DYNTRANS_INSTR(or_u64_u64_immu32);
 	DECLARE_DYNTRANS_INSTR(xor_u32_u32_u32);

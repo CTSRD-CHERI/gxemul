@@ -953,6 +953,8 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 	switch (op26) {
 
+	case 0x16:	/*  or   immu32  */
+	case 0x17:	/*  or.u immu32  */
 	case 0x18:	/*  addu immu32  */
 	case 0x19:	/*  subu immu32   */
 		{
@@ -963,9 +965,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			case 0x12: ic->f = instr(mask_imm); break;
 			case 0x13: ic->f = instr(mask_imm); shift = 16; break;
 			case 0x14: ic->f = instr(xor_imm); break;
-			case 0x15: ic->f = instr(xor_imm); shift = 16; break;
-			case 0x16: ic->f = instr(or_imm); break;
-			case 0x17: ic->f = instr(or_imm); shift = 16; break; */
+			case 0x15: ic->f = instr(xor_imm); shift = 16; break; */
+			case 0x16: ic->f = instr_or_u32_u32_immu32; break;
+			case 0x17: ic->f = instr_or_u32_u32_immu32; shift = 16; break;
 			case 0x18: ic->f = instr_add_u32_u32_immu32; break;
 			case 0x19: ic->f = instr_sub_u32_u32_immu32; break;
 	/*		case 0x1a: ic->f = instr(divu_imm); break;
@@ -985,7 +987,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 		}
 		break;
 
-//	case 0x30:	/*  br     */
+	case 0x30:	/*  br     */
 //	case 0x31:	/*  br.n   */
 	case 0x32:	/*  bsr    */
 //	case 0x33:	/*  bsr.n  */
@@ -993,12 +995,10 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			void (*samepage_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 
 			switch (op26) {
-	//		case 0x30:
-	//			ic->f = instr(br);
-	//			samepage_function = instr(br_samepage);
-	//			if (cpu->translation_readahead > 1)
-	//				cpu->translation_readahead = 1;
-	//			break;
+			case 0x30:
+				ic->f = NULL; // instr(br);
+				samepage_function = instr_branch_samepage;
+				break;
 	//		case 0x31:
 	//			ic->f = instr(br_n);
 	//			if (cpu->translation_readahead > 2)
