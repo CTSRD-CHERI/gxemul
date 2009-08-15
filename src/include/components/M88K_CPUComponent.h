@@ -371,9 +371,12 @@ protected:
 
 private:
 	void m88k_cmp(struct DyntransIC *ic, uint32_t y);
+	void m88k_mak(struct DyntransIC *ic, int w, int o);
 
 	DECLARE_DYNTRANS_INSTR(cmp);
 	DECLARE_DYNTRANS_INSTR(cmp_imm);
+	DECLARE_DYNTRANS_INSTR(mak);
+	DECLARE_DYNTRANS_INSTR(mak_imm);
 	DECLARE_DYNTRANS_INSTR(bsr_samepage);
 	DECLARE_DYNTRANS_INSTR(bsr_functioncalltrace);
 	DECLARE_DYNTRANS_INSTR(jmp_n);

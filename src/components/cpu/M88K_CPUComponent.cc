@@ -919,6 +919,40 @@ DYNTRANS_INSTR(M88K_CPUComponent,cmp_imm)
 }
 
 
+/*
+ *  mak:      Make bit field, W<O> taken from register s2.
+ *  mak_imm:  Make bit field, immediate W<O>.
+ *
+ *  arg[0] = pointer to register d
+ *  arg[1] = pointer to register s1
+ *  arg[2] = pointer to register s2 or immediate.
+ */
+void M88K_CPUComponent::m88k_mak(struct DyntransIC *ic, int w, int o)
+{
+	uint32_t x = REG32(ic->arg[1]);
+	if (w != 0) {
+		x <<= (32-w);
+		x >>= (32-w);
+	}
+
+	REG32(ic->arg[0]) = x << o;
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,mak)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	cpu->m88k_mak(ic, (REG32(ic->arg[2]) >> 5) & 0x1f, REG32(ic->arg[2]) & 0x1f);
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,mak_imm)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	cpu->m88k_mak(ic, ic->arg[2].u32 >> 5, ic->arg[2].u32 & 0x1f);
+}
+
+
 DYNTRANS_INSTR(M88K_CPUComponent,bsr_samepage)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
@@ -985,7 +1019,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 	uint32_t op26   = (iw >> 26) & 0x3f;
 //	uint32_t op11   = (iw >> 11) & 0x1f;
-//	uint32_t op10   = (iw >> 10) & 0x3f;
+	uint32_t op10   = (iw >> 10) & 0x3f;
 	uint32_t d      = (iw >> 21) & 0x1f;
 	uint32_t s1     = (iw >> 16) & 0x1f;
 	uint32_t s2     =  iw        & 0x1f;
@@ -1095,6 +1129,61 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 		}
 		break;
 
+	case 0x3c:
+		switch (op10) {
+
+//		case 0x20:	/*  clr  */
+//		case 0x22:	/*  set  */
+//		case 0x24:	/*  ext  */
+//		case 0x26:	/*  extu  */
+		case 0x28:	/*  mak  */
+			ic->arg[0].p = &m_r[d];
+			ic->arg[1].p = &m_r[s1];
+			ic->arg[2].u32 = iw & 0x3ff;
+
+			switch (op10) {
+//			case 0x20: ic->f = instr(mask_imm);
+//				   {
+//					int w = ic->arg[2] >> 5;
+//					int o = ic->arg[2] & 0x1f;
+//					uint32_t x = w == 0? 0xffffffff
+//					    : ((uint32_t)1 << w) - 1;
+//					x <<= o;
+//					ic->arg[2] = ~x;
+//				   }
+//				   break;
+//			case 0x22: ic->f = instr(or_imm);
+//				   {
+//					int w = ic->arg[2] >> 5;
+//					int o = ic->arg[2] & 0x1f;
+//					uint32_t x = w == 0? 0xffffffff
+//					    : ((uint32_t)1 << w) - 1;
+//					x <<= o;
+//					ic->arg[2] = x;
+//				   }
+//				   break;
+//			case 0x24: ic->f = instr(ext_imm); break;
+//			case 0x26: ic->f = instr(extu_imm); break;
+			case 0x28: ic->f = instr_mak_imm; break;
+			}
+
+			if (d == M88K_ZERO_REG)
+				ic->f = instr_nop;
+			break;
+
+//		case 0x34:	/*  tb0  */
+//		case 0x36:	/*  tb1  */
+//			ic->arg[0] = 1 << d;
+//			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
+//			ic->arg[2] = iword & 0x1ff;
+//			switch (op10) {
+//			case 0x34: ic->f = instr(tb0); break;
+//			case 0x36: ic->f = instr(tb1); break;
+//			}
+//			break;
+		}
+		break;
+
 	case 0x3d:
 		if ((iw & 0xf000) <= 0x3fff ) {
 			// Load, Store, xmem, and lda:
@@ -1121,7 +1210,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //		case 0x88:	/*  set    */
 //		case 0x90:	/*  ext    */
 //		case 0x98:	/*  extu   */
-//		case 0xa0:	/*  mak    */
+		case 0xa0:	/*  mak    */
 //		case 0xa8:	/*  rot    */
 			ic->arg[0].p = &m_r[d];
 			ic->arg[1].p = &m_r[s1];
@@ -1149,7 +1238,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //			case 0x88: ic->f = instr(set);   break;
 //			case 0x90: ic->f = instr(ext);   break;
 //			case 0x98: ic->f = instr(extu);  break;
-//			case 0xa0: ic->f = instr(mak);   break;
+			case 0xa0: ic->f = instr_mak; break;
 //			case 0xa8: ic->f = instr(rot);   break;
 			}
 
