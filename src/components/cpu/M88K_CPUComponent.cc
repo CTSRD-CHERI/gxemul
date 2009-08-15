@@ -874,6 +874,51 @@ string M88K_CPUComponent::GetAttribute(const string& attributeName)
 /*****************************************************************************/
 
 
+/*
+ *  cmp_imm:  Compare S1 with immediate value.
+ *  cmp:      Compare S1 with S2.
+ *
+ *  arg[0] = pointer to register d
+ *  arg[1] = pointer to register s1
+ *  arg[2] = pointer to register s2 or imm
+ */
+void M88K_CPUComponent::m88k_cmp(struct DyntransIC *ic, uint32_t y)
+{
+	uint32_t x = REG32(ic->arg[1]);
+	uint32_t r;
+
+	if (x == y) {
+		r = M88K_CMP_HS | M88K_CMP_LS | M88K_CMP_GE
+		  | M88K_CMP_LE | M88K_CMP_EQ;
+	} else {
+		if (x > y)
+			r = M88K_CMP_NE | M88K_CMP_HS | M88K_CMP_HI;
+		else
+			r = M88K_CMP_NE | M88K_CMP_LO | M88K_CMP_LS;
+		if ((int32_t)x > (int32_t)y)
+			r |= M88K_CMP_GE | M88K_CMP_GT;
+		else
+			r |= M88K_CMP_LT | M88K_CMP_LE;
+	}
+
+	REG32(ic->arg[0]) = r;
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,cmp)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	cpu->m88k_cmp(ic, REG32(ic->arg[2]));
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,cmp_imm)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	cpu->m88k_cmp(ic, ic->arg[2].u32);
+}
+
+
 DYNTRANS_INSTR(M88K_CPUComponent,bsr_samepage)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
@@ -957,6 +1002,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	case 0x17:	/*  or.u immu32  */
 	case 0x18:	/*  addu immu32  */
 	case 0x19:	/*  subu immu32   */
+	case 0x1f:	/*  cmp  immu32   */
 		{
 			int shift = 0;
 			switch (op26) {
@@ -974,8 +1020,8 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			case 0x1b: ic->f = instr(mulu_imm); break;
 			case 0x1c: ic->f = instr(add_imm); break;
 			case 0x1d: ic->f = instr(sub_imm); break;
-			case 0x1e: ic->f = instr(div_imm); break;
-			case 0x1f: ic->f = instr(cmp_imm); break;*/
+			case 0x1e: ic->f = instr(div_imm); break;*/
+			case 0x1f: ic->f = instr_cmp_imm; break;
 			}
 
 			ic->arg[0].p = &m_r[d];
@@ -1056,7 +1102,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //		case 0x6c:	/*  mul    */
 //		case 0x70:	/*  add    */
 //		case 0x78:	/*  div    */
-//		case 0x7c:	/*  cmp    */
+		case 0x7c:	/*  cmp    */
 //		case 0x80:	/*  clr    */
 //		case 0x88:	/*  set    */
 //		case 0x90:	/*  ext    */
@@ -1084,7 +1130,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //			case 0x6c: ic->f = instr(mul);   break;
 //			case 0x70: ic->f = instr(add);   break;
 //			case 0x78: ic->f = instr(div);   break;
-//			case 0x7c: ic->f = instr(cmp);   break;
+			case 0x7c: ic->f = instr_cmp; break;
 //			case 0x80: ic->f = instr(clr);   break;
 //			case 0x88: ic->f = instr(set);   break;
 //			case 0x90: ic->f = instr(ext);   break;

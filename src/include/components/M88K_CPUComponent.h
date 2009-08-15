@@ -370,6 +370,10 @@ protected:
 	virtual void ShowRegisters(GXemul* gxemul, const vector<string>& arguments) const;
 
 private:
+	void m88k_cmp(struct DyntransIC *ic, uint32_t y);
+
+	DECLARE_DYNTRANS_INSTR(cmp);
+	DECLARE_DYNTRANS_INSTR(cmp_imm);
 	DECLARE_DYNTRANS_INSTR(bsr_samepage);
 	DECLARE_DYNTRANS_INSTR(bsr_functioncalltrace);
 	DECLARE_DYNTRANS_INSTR(jmp_n);
