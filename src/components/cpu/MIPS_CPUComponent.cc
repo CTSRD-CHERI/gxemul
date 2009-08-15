@@ -335,15 +335,15 @@ bool MIPS_CPUComponent::VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 		vaddr = (int32_t)vaddr;
 
 	// TODO. For now, just return the lowest 29 bits.
-	if (vaddr >= 0xffffffff80000000 && vaddr < 0xffffffffc0000000) {
+	if (vaddr >= 0xffffffff80000000ULL && vaddr < 0xffffffffc0000000ULL) {
 		paddr = vaddr & 0x1fffffff;
 		writable = true;
 		return true;
 	}
 
 	// TODO  ... or the lowest 44.
-	if (vaddr >= 0xa800000000000000 && vaddr < 0xa8000fffffffffff) {
-		paddr = vaddr & 0xfffffffffff;
+	if (vaddr >= 0xa800000000000000ULL && vaddr < 0xa8000fffffffffffULL) {
+		paddr = vaddr & 0xfffffffffffULL;
 		writable = true;
 		return true;
 	}
@@ -1383,24 +1383,24 @@ static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction()
 	UnitTest::Assert("cpu should be addressable", bus != NULL);
 
 	uint32_t data32 = 0x10000111;	// b 0xffffffff80004448
-	bus->AddressSelect(0xffffffff80004000);
+	bus->AddressSelect(0xffffffff80004000ULL);
 	bus->WriteData(data32, BigEndian);
 
 	data32 = 0x27bdffd8; // Something valid, addiu sp,sp,-40
-	bus->AddressSelect(0xffffffff80004004);
+	bus->AddressSelect(0xffffffff80004004ULL);
 	bus->WriteData(data32, BigEndian);
 
 	cpu->SetVariableValue("pc", "0xffffffff80004000");
-	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000);
-	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000ULL);
+	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00ULL);
 
 	// This tests that execute 2 steps will execute both the delay branch
 	// and the delay slot instruction.
 	gxemul.SetRunState(GXemul::Running);
 	gxemul.Execute(2);
 
-	UnitTest::Assert("pc should have changed", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448);
-	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8);
+	UnitTest::Assert("pc should have changed", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448ULL);
+	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8ULL);
 }
 
 static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_SingleStepping()
@@ -1415,16 +1415,16 @@ static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_Singl
 	UnitTest::Assert("cpu should be addressable", bus != NULL);
 
 	uint32_t data32 = 0x10000111;	// b 0xffffffff80004448
-	bus->AddressSelect(0xffffffff80004000);
+	bus->AddressSelect(0xffffffff80004000ULL);
 	bus->WriteData(data32, BigEndian);
 
 	data32 = 0x27bdffd8; // Something valid, addiu sp,sp,-40
-	bus->AddressSelect(0xffffffff80004004);
+	bus->AddressSelect(0xffffffff80004004ULL);
 	bus->WriteData(data32, BigEndian);
 
 	cpu->SetVariableValue("pc", "0xffffffff80004000");
-	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000);
-	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000ULL);
+	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00ULL);
 
 	// This tests that execute 2 steps will execute both the delay branch
 	// and the delay slot instruction.
@@ -1432,16 +1432,16 @@ static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_Singl
 	gxemul.Execute(1);
 
 	// Should now be in the delay slot.
-	UnitTest::Assert("pc should have changed 1", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004);
+	UnitTest::Assert("pc should have changed 1", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004ULL);
 	UnitTest::Assert("delay slot", cpu->GetVariable("inDelaySlot")->ToString(), "true");
-	UnitTest::Assert("sp should not yet have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+	UnitTest::Assert("sp should not yet have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00ULL);
 
 	gxemul.SetRunState(GXemul::SingleStepping);
 	gxemul.Execute(1);
 
-	UnitTest::Assert("pc should have changed 2", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448);
+	UnitTest::Assert("pc should have changed 2", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448ULL);
 	UnitTest::Assert("delay slot after branch", cpu->GetVariable("inDelaySlot")->ToString(), "false");
-	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8);
+	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8ULL);
 }
 
 static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_RunTwoTimes()
@@ -1456,16 +1456,16 @@ static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_RunTw
 	UnitTest::Assert("cpu should be addressable", bus != NULL);
 
 	uint32_t data32 = 0x10000111;	// b 0xffffffff80004448
-	bus->AddressSelect(0xffffffff80004000);
+	bus->AddressSelect(0xffffffff80004000ULL);
 	bus->WriteData(data32, BigEndian);
 
 	data32 = 0x27bdffd8; // Something valid, addiu sp,sp,-40
-	bus->AddressSelect(0xffffffff80004004);
+	bus->AddressSelect(0xffffffff80004004ULL);
 	bus->WriteData(data32, BigEndian);
 
 	cpu->SetVariableValue("pc", "0xffffffff80004000");
-	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000);
-	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000ULL);
+	UnitTest::Assert("sp before execute", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00ULL);
 
 	// This tests that execute 1 step with normal running, two times, will
 	// execute both the delay branch and the delay slot instruction correctly.
@@ -1473,16 +1473,16 @@ static void Test_MIPS_CPUComponent_Execute_DelayBranchWithValidInstruction_RunTw
 	gxemul.Execute(1);
 
 	// Should now be in the delay slot.
-	UnitTest::Assert("pc should have changed 1", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004);
+	UnitTest::Assert("pc should have changed 1", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004ULL);
 	UnitTest::Assert("delay slot", cpu->GetVariable("inDelaySlot")->ToString(), "true");
-	UnitTest::Assert("sp should not yet have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00);
+	UnitTest::Assert("sp should not yet have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007f00ULL);
 
 	gxemul.SetRunState(GXemul::Running);
 	gxemul.Execute(1);
 
-	UnitTest::Assert("pc should have changed 2", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448);
+	UnitTest::Assert("pc should have changed 2", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004448ULL);
 	UnitTest::Assert("delay slot after branch", cpu->GetVariable("inDelaySlot")->ToString(), "false");
-	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8);
+	UnitTest::Assert("sp should have changed", cpu->GetVariable("sp")->ToInteger(), 0xffffffffa0007ed8ULL);
 }
 
 static void Test_MIPS_CPUComponent_Execute_DelayBranchWithFault()
@@ -1497,27 +1497,27 @@ static void Test_MIPS_CPUComponent_Execute_DelayBranchWithFault()
 	UnitTest::Assert("cpu should be addressable", bus != NULL);
 
 	uint32_t data32 = 0x10000111;	// b 0xffffffff80004048
-	bus->AddressSelect(0xffffffff80004000);
+	bus->AddressSelect(0xffffffff80004000ULL);
 	bus->WriteData(data32, BigEndian);
 
 	data32 = 0xffffffff; // Something invalid.
-	bus->AddressSelect(0xffffffff80004004);
+	bus->AddressSelect(0xffffffff80004004ULL);
 	bus->WriteData(data32, BigEndian);
 
 	cpu->SetVariableValue("pc", "0xffffffff80004000");
-	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000);
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000ULL);
 
 	// This tests that execute 100 steps will only execute 1, of the instruction
 	// in the delay slot fails.
 	gxemul.SetRunState(GXemul::Running);
 	gxemul.Execute(100);
 
-	UnitTest::Assert("pc should have increased one step", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004);
+	UnitTest::Assert("pc should have increased one step", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004ULL);
 
 	gxemul.SetRunState(GXemul::SingleStepping);
 	gxemul.Execute(1);
 
-	UnitTest::Assert("pc should not have increased", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004);
+	UnitTest::Assert("pc should not have increased", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004ULL);
 }
 
 UNITTESTS(MIPS_CPUComponent)
