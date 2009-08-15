@@ -38,6 +38,59 @@
 #include "GXemul.h"
 
 
+/*****************************************************************************/
+
+
+// This is basically strtoull(), but it needs to be explicitly implemented
+// since some systems lack it. (Also, compiling with GNU C++ in ANSI mode
+// does not work with strtoull.)
+static uint64_t parse_number(const char* str, bool& error)
+{
+	int base = 10;
+	uint64_t result = 0;
+	bool negative = false;
+
+	error = false;
+
+	if (str == NULL)
+		return 0;
+
+	while (*str == ' ')
+		++str;
+
+	if (*str == '-') {
+		negative = true;
+		++str;
+	}
+
+	while ((*str == 'x' || *str == 'X') || (*str >= '0' && *str <= '9')
+	    || (*str >= 'a' && *str <= 'f') || (*str >= 'A' && *str <= 'F')) {
+		if (*str == 'x' || *str == 'X') {
+			base = 16;
+		} else {
+			int n = *str - '0';
+			if (*str >= 'a' && *str <= 'f')
+				n = *str - 'a' + 10;
+			if (*str >= 'A' && *str <= 'F')
+				n = *str - 'A' + 10;
+			result = result * base + n;
+		}
+		++str;
+	}
+
+	if (*str)
+		error = true;
+
+	if (negative)
+		return -result;
+	else
+		return result;
+}
+
+
+/*****************************************************************************/
+
+
 Component::Component(const string& className, const string& visibleClassName)
 	: m_parentComponent(NULL)
 	, m_className(className)
@@ -970,16 +1023,61 @@ const StateVariable* Component::GetVariable(const string& name) const
 }
 
 
-bool Component::CheckVariableWrite(StateVariable& var)
+bool Component::CheckVariableWrite(StateVariable& var, const string& oldValue)
 {
+	GXemul* gxemul = GetRunningGXemulInstance();
 	UI* ui = GetUI();
-	const string& name = var.GetName();
-	
-	if (name == "step") {
-		if (ui != NULL)
-			ui->ShowDebugMessage("TODO: writes to 'step'.\n");
 
-		return false;
+	if (gxemul != NULL) {
+		const string& name = var.GetName();
+
+		if (name == "step") {
+			// If we are the root component, then writing to step
+			// has special meaning:
+			if (GetParent() == NULL) {
+				bool error = false;
+				int64_t oldStep = parse_number(oldValue.c_str(), error);
+				int64_t newStep = var.ToInteger();
+
+				// 0. Value is the same as before. Simply return.
+				if (newStep == oldStep)
+					return true;
+
+				// 1. The new value is too low (less than 0).
+				if (newStep < 0) {
+					if (ui != NULL)
+						ui->ShowDebugMessage("root.step can"
+						    " not be set to lower than zero.\n");
+					return false;
+				}
+
+				// 2. The value is lower; run backwards if possible.
+				if (newStep < oldStep) {
+					if (!gxemul->GetSnapshottingEnabled()) {
+						if (ui != NULL)
+							ui->ShowDebugMessage("root.step can"
+							    " not be decreased; snapshotting"
+							    " was not enabled prior to\nstarting"
+							    " the emulation. (-B command line"
+							    " option.)\n");
+						return false;
+					}
+
+					return gxemul->ModifyStep(oldStep, newStep);
+				}
+
+				// 3. The value is higher; run forwards.
+				return gxemul->ModifyStep(oldStep, newStep);
+			} else {
+				// We are not the root component. Direct (interactive)
+				// writes to the step variable is not allowed.
+				if (ui != NULL)
+					ui->ShowDebugMessage("The step variable of "
+					    "this component cannot be set manually.\n");
+			}
+
+			return false;
+		}
 	}
 
 	return true;
@@ -1014,7 +1112,7 @@ bool Component::SetVariableValue(const string& name, const string& expression)
 	var.SerializeValue(newValue);
 
 	if (oldValue.str() != newValue.str()) {
-		success = CheckVariableWrite(var);
+		success = CheckVariableWrite(var, oldValue.str());
 		if (!success) {
 			// Revert to the previous:
 			var.SetValue(oldValue.str());

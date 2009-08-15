@@ -29,7 +29,7 @@
 .\"
 .\"     groff -man -Tascii gxemul.1    or    nroff -man gxemul.1
 .\"
-.Dd JULY 2009
+.Dd AUGUST 2009
 .Dt GXEMUL 1
 .Os
 .Sh NAME
@@ -37,9 +37,9 @@
 .Nd an experimental framework for full-system machine emulation
 .Sh SYNOPSIS
 .Nm
+.Op options
 .Fl e
 .Ar name
-.Op options
 .Op file Ar ...
 .Nm
 .Op options
@@ -72,6 +72,8 @@ emulation framework introduced in version 0.6.0, so there are two different
 ways to use the emulator. The options available for the new framework are:
 .Pp
 .Bl -tag -width Ds
+.It Fl B
+Enables snapshotting (required for reverse execution/stepping).
 .It Fl H
 Display a list of available machine templates.
 .It Fl e Ar name

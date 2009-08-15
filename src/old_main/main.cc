@@ -215,7 +215,7 @@ static void usage(int longusage)
 	printf("Read the source code and/or documentation for "
 	    "other Copyright messages.\n");
 
-	printf("\nUsage: %s -e name [options] [file [...]]\n", progname);
+	printf("\nUsage: %s [options] -e name [file [...]]\n", progname);
 	printf("   or  %s [options] configfile\n", progname);
 	printf("   or  %s -V\n", progname);
 
@@ -230,6 +230,7 @@ static void usage(int longusage)
 	}
 
 	printf("\n");
+	printf("  -B           Enable snapshotting (reverse stepping support).\n");
 	printf("  -H           Display a list of available machine templates.\n");
 	printf("  -e name      Start with a machine based on template 'name'.\n");
 	printf("  -q           Quiet mode (suppress debug messages).\n");
@@ -366,13 +367,14 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 {
 	int ch, res, using_switch_d = 0, using_switch_Z = 0;
 	int using_switch_e = 0, using_switch_E = 0;
+	bool using_switch_B = false;
 	char *type = NULL, *subtype = NULL;
 	int n_cpus_set = 0;
 	int msopts = 0;		/*  Machine-specific options used  */
 	struct machine *m = emul_add_machine(emul, NULL);
 
 	const char *opts =
-	    "C:c:Dd:E:e:HhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUVvW:"
+	    "BC:c:Dd:E:e:HhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUVvW:"
 #ifdef WITH_X11
 	    "XxY:"
 #endif
@@ -380,6 +382,9 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 	while ((ch = getopt(argc, argv, opts)) != -1) {
 		switch (ch) {
+		case 'B':
+			using_switch_B = true;
+			break;
 		case 'C':
 			CHECK_ALLOCATION(m->cpu_name = strdup(optarg));
 			msopts = 1;
@@ -587,6 +592,8 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 			else
 				gxemul.SetRunState(GXemul::Running);
 
+			gxemul.SetSnapshottingEnabled(using_switch_B);
+
 			if (quiet_mode)
 				gxemul.SetQuietMode(true);
 
@@ -619,6 +626,8 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 					gxemul.SetRunState(GXemul::Paused);
 				else
 					gxemul.SetRunState(GXemul::Running);
+
+				gxemul.SetSnapshottingEnabled(using_switch_B);
 
 				if (quiet_mode)
 					gxemul.SetQuietMode(true);

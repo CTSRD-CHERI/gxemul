@@ -355,7 +355,7 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 protected:
-	virtual bool CheckVariableWrite(StateVariable& var);
+	virtual bool CheckVariableWrite(StateVariable& var, const string& oldValue);
 
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	    bool& writable);

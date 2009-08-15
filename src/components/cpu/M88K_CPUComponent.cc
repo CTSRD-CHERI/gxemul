@@ -180,7 +180,7 @@ bool M88K_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 }
 
 
-bool M88K_CPUComponent::CheckVariableWrite(StateVariable& var)
+bool M88K_CPUComponent::CheckVariableWrite(StateVariable& var, const string& oldValue)
 {
 	UI* ui = GetUI();
 
@@ -219,7 +219,7 @@ bool M88K_CPUComponent::CheckVariableWrite(StateVariable& var)
 		}
 	}
 
-	return CPUDyntransComponent::CheckVariableWrite(var);
+	return CPUDyntransComponent::CheckVariableWrite(var, oldValue);
 }
 
 

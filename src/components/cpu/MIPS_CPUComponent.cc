@@ -171,7 +171,7 @@ bool MIPS_CPUComponent::PreRunCheckForComponent(GXemul* gxemul)
 }
 
 
-bool MIPS_CPUComponent::CheckVariableWrite(StateVariable& var)
+bool MIPS_CPUComponent::CheckVariableWrite(StateVariable& var, const string& oldValue)
 {
 	UI* ui = GetUI();
 
@@ -210,7 +210,7 @@ bool MIPS_CPUComponent::CheckVariableWrite(StateVariable& var)
 		}
 	}
 
-	return CPUDyntransComponent::CheckVariableWrite(var);
+	return CPUDyntransComponent::CheckVariableWrite(var, oldValue);
 }
 
 

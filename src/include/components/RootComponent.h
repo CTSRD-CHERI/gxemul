@@ -84,7 +84,7 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 protected:
-	virtual bool CheckVariableWrite(StateVariable& var);
+	virtual bool CheckVariableWrite(StateVariable& var, const string& oldValue);
 
 private:
 	// Pointer to owner (may be NULL):

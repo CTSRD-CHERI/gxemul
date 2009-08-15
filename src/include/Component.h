@@ -600,9 +600,10 @@ protected:
 	 * else.
 	 *
 	 * @param var The variable to check.
+	 * @param oldValue The serialized previous value.
 	 * @return true if the write was ok, false otherwise.
 	 */
-	virtual bool CheckVariableWrite(StateVariable& var);
+	virtual bool CheckVariableWrite(StateVariable& var, const string& oldValue);
 
 	/**
 	 * \brief Resets the state variables of this component.

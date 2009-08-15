@@ -190,6 +190,20 @@ public:
 	uint64_t GetStep() const;
 
 	/**
+	 * \brief Checks whether snapshots are currently enabled or not.
+	 *
+	 * @return True if running in quiet mode, false for normal operation.
+	 */
+	bool GetSnapshottingEnabled() const;
+
+	/**
+	 * \brief Sets whether or not to use snapshots.
+	 *
+	 * @param enabled true to enable snapshotting, false to disable it.
+	 */
+	void SetSnapshottingEnabled(bool enabled);
+
+	/**
 	 * \brief Gets the current quiet mode setting.
 	 *
 	 * @return True if running in quiet mode, false for normal operation.
@@ -209,6 +223,15 @@ public:
 	 * @param steps The number of steps, at least 1.
 	 */
 	void SetNrOfSingleStepsInARow(uint64_t steps);
+
+	/**
+	 * \brief Change step either forwards or backwards.
+	 *
+	 * @param oldStep The old step count.
+	 * @param newStep The new step count.
+	 * @return True if changing step worked, false if there was a failure.
+	 */
+	bool ModifyStep(int64_t oldStep, int64_t newStep);
 
 	/**
 	 * \brief Run the emulation for "a while".
@@ -256,11 +279,8 @@ private:
 
 	/**
 	 * \brief Prints help message to std::cout.
-	 *
-	 * @param longUsage True if the long help message should be printed,
-	 *		false to only print a short message.
 	 */
-	void PrintUsage(bool longUsage) const;
+	void PrintUsage() const;
 
 	/**
 	 * \brief Sets the current step of the emulation.
@@ -268,6 +288,11 @@ private:
 	 * @param step The number of steps.
 	 */
 	void SetStep(uint64_t step);
+
+	/**
+	 * \brief Takes a snapshot of the full emulation state.
+	 */
+	void TakeSnapshot();
 
 
 	/********************************************************************/
@@ -292,6 +317,10 @@ private:
 	// Model:
 	string			m_emulationFileName;
 	refcount_ptr<Component>	m_rootComponent;
+
+	// Snapshotting:   TODO: Multiple snapshots!
+	bool			m_snapshottingEnabled;
+	refcount_ptr<Component>	m_snapshot;
 };
 
 #endif	// GXEMUL_H

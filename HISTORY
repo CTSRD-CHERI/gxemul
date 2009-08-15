@@ -4404,3 +4404,7 @@ Changelog for GXemul:
 20090810	Beginning on variable write handlers: MIPS zr register is
 		read-only, MIPS' model can now be changed correctly, and
 		root.accuracy can only be assigned "cycle" or "sloppy".
+20090814	Continuing on write handlers for variables (root.step),
+		beginning on component tree snapshotting (using Clone). The
+		backward-step command now works reasonably well (but the only
+		snapshot taken so far is at step=0).

@@ -58,7 +58,7 @@ void RootComponent::SetOwner(GXemul* owner)
 }
 
 
-bool RootComponent::CheckVariableWrite(StateVariable& var)
+bool RootComponent::CheckVariableWrite(StateVariable& var, const string& oldValue)
 {
 	UI* ui = GetUI();
 	const string& name = var.GetName();
@@ -72,7 +72,7 @@ bool RootComponent::CheckVariableWrite(StateVariable& var)
 		}
 	}
 
-	return Component::CheckVariableWrite(var);
+	return Component::CheckVariableWrite(var, oldValue);
 }
 
 

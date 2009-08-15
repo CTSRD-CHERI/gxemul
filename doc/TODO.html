@@ -70,18 +70,19 @@ MAIN GOAL for 0.6.0:
 		     in time. (This will cause reverse execution support to
 		     be turned off.)
 
-	[ ] Reverse execution/debugging:
-		[/]  backward-step command decreases root.step and prints state delta.
-			[ ]  Unit test, once write handlers have been implemented.
-		[ ]  Must be explicitly enabled, since it will slow down the emulator,
-		     use more memory, and require disk images to have overlays!
+	[/] Reverse execution/debugging:
+		[X]  backward-step command decreases root.step and prints state delta.
+			[X]  Unit test, once write handlers have been implemented.
+			[ ]  When running in reverse, debug output should be disabled.
+		[X]  Save snapshot at step 0!
 		[ ]  Regular saving of state, and limiting the number of such
 		     saves by logarithmic removal.
-		[ ]  Deltas for memories? Or complete memories?
 		[ ]  Disk image overlays!
+			[ ]  Unit tests.
 		[ ]  In addition to saving state, all modifications done to the
 		     component tree, and e.g. breakpoints, need to be stored
-		     together with their time stamp ("step").
+		     together with their time stamp ("step"). And also all
+		     "external events", of course.
 		     * I.e. if a USB storage device is connected as step 1000, and we're
 		       running in reverse to step 800 to check something, and
 		       then continue again, the default behaviour should be that
@@ -89,8 +90,6 @@ MAIN GOAL for 0.6.0:
 		     * Or if we run 10 steps, change cpu0.pc, and run 10 more steps,
 		       then running backwards 10 steps could work, but not more?
 		       Think about this!
-		[ ]  "s" = "single-step", "b" = "backward-step" commands (?)
-		[ ]  "c" = "continue", "backward-continue" commands
 		[ ]  Simulation across multiple hosts?
 
 	[ ]  Cycle accurate slowdown? E.g. when simulating a 1 MHz microcontroller,
@@ -162,12 +161,59 @@ MAIN GOAL for 0.6.0:
 		[ ] Simple approach: Each native code generator backend registers a
 		    list of the instr_* calls it supports, and when called, it is
 		    assumed that it will be able to convert a sequence of such
-		    dyntrans instructions into a native code equivalent. Actual
-		    code output is probably best done using a simple form of
-		    register allocation/liveness analysis.
+		    dyntrans instructions into a native code equivalent.
+
+		    Simple register-based allocator, which can hopefully be reused
+		    for multiple host backends:
+
+			RequestHostRegisterForReading(wordlength, cpu-offset)
+			RequestHostRegisterForWriting(wordlength, cpu-offset)
+			RequestTemporaryHostRegister()
+			FlushHostRegisters()
+
+			Host registers may be in one of these states:
+				unused
+				mapped to variable in the cpu struct (wordlength, offset)
+					if mapped, the register can be dirty or non-dirty.
+				temporary
+				constant (?)
+
+			Registers should also be reused in a least-recently-used
+			fashion, so every usage should update the last-used time
+			stamp.
+
+			code sequence in the simlpe case:
+			  o) prelude (which checks that it will be safe to run
+			  	X instructions; if not, jump directly to the
+			  	OLD ic->f function)
+			 	[maybe also push callee save registers, to
+			 	have more registers available to the register
+			 	allocator?]
+			  o) 2 or more ICs translated
+			  o) flush registers back to cpu struct
+			  o) postlude [pop callee save registers?], return
+
+			Hm: How about  mul r1,r2,r3  ?
+
+				rA = reserve for writing r1 later on
+				rB = load r2
+				rC = load r3
+			    RISC:
+				mul rA,rB,rC
+			    amd64:
+				/* Will destroy edx */
+				eax = rB
+				edx = rC
+				mul eax, edx
+				rA = eax
+
+			Think about the case above, where some host architecture
+			isn't orthogonal when it comes to register choices for
+			specific instructions.
 
 		[ ] Ability to show disassembly of generated host
-		    instruction sequence?
+		    instruction sequence? (emulated and generated instructions
+		    side by side)
 
 		[ ] Exceptions from device access, or from load/store to
 		    unmapped pages/devices/handlers should break the
@@ -181,8 +227,12 @@ MAIN GOAL for 0.6.0:
 		[ ] Unit tests -WW@U may run with native code generation, and
 			-WW@u without. If the emulator is built without
 			native code generation support, then one of those may
-			simply return 1 "all tests passed" immediately, and
+			simply return 0 ("all tests passed") immediately, and
 			the Makefile calls both.
+		    Especially test:
+		    	Cycle/step count accuracy
+		    	Border cases for register values (high bits, low bits,
+		    	carry bits, shift amounts, 32/64-bit stuff, ...)
 
 	[ ] Instruction cache emulation:  For each emulated
 	    instruction, call a stub handler with the current pc.
@@ -289,12 +339,12 @@ MAIN GOAL for 0.6.0:
    [/]  State/model:
         [X]  Variable write handlers.
              [ ] root.step to move to a certain execution step!
-             	 [ ] Change backward-step to use root.step = root.step - 1 or similar.
+             	 [X] Change backward-step to set root.step = root.step - 1.
              	 [ ] Only allow decreasing root.step if snapshots are enabled.
              	 [ ] Allow increasing root.step always: it means to continue until
              	     the number of steps have been executed (a kind of specia breakpoint!)
-             	 [ ] Do not allow writes to *.step for non-root components!
-             	 NOTE: Deserializing *.step should be allowed though!
+             	 [X] Do not allow writes to *.step for non-root components!
+             	 [X] Do not check writes to *.step during deserialization!
 	     [X] cpu.model = "R4000"   <==  assigning to the "model" variable should:
 	  	[X]  handle writes specifically
 	  	[X]  lookup if R4000 is a valid model for the cpu architecture

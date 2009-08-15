@@ -51,27 +51,19 @@ bool BackwardStepCommand::Execute(GXemul& gxemul, const vector<string>& argument
 		return false;
 	}
 
-	-- step;
+	stringstream stepss;
+	stepss << (step - 1);
 
 	const refcount_ptr<Component> lightClone = gxemul.GetRootComponent()->LightClone();
 
-	if (!stepvar->SetValue(step)) {
+	if (!gxemul.GetRootComponent()->SetVariableValue("step", stepss.str())) {
 		gxemul.GetUI()->ShowDebugMessage("Failed to set root.step.\n");
 		return false;
 	}
 
-
-// NOTE/TODO: This hack should be removed once a root.step write handler
-// has been implemented, which does all the magic!
-gxemul.Reset();
-gxemul.SetRunState(GXemul::Running);
-gxemul.Execute(step);
-gxemul.SetRunState(GXemul::Paused);
-
-
-	// Indent all debug output with message header "step X+1 -> step X: ":
+	// Indent all debug output with message header "step X -> step X-1: ":
 	stringstream ss;
-	ss << "step " << (step+1) << " -> " << step <<  ": ";
+	ss << "step " << step << " -> " << (step-1) <<  ": ";
 	UI::SetIndentationMessageHelper indentationHelper(gxemul.GetUI(), ss.str());
 
 	// Compare the clone of the component tree before changing the step
@@ -104,7 +96,10 @@ string BackwardStepCommand::GetLongDescription() const
 	    "\n"
 	    "> backward-step\n"
 	    "step 3 -> 2: => cpu0.a1: 0 -> 0x2a\n"
-	    "             => cpu0.pc: 0xffffffffbfc0004c -> 0xffffffffbfc00048\n";
+	    "             => cpu0.pc: 0xffffffffbfc0004c -> 0xffffffffbfc00048\n"
+	    "\n"
+	    "This command requires that snapshotting support is enabled (using the\n"
+	    "-B command line option).\n";
 }
 
 
@@ -127,6 +122,36 @@ static void Test_BackwardStepCommand_AlreadyAtStep0()
 	UnitTest::Assert("root.step should still be zero", gxemul.GetStep(), 0);
 }
 
+static void Test_BackwardStepCommand_NotWhenSnapshotsAreDisabled()
+{
+	refcount_ptr<Command> cmd = new BackwardStepCommand;
+	vector<string> dummyArguments;
+	
+	GXemul gxemul;
+
+	char filename[] = "test/FileLoader_ELF_MIPS";
+	char *filenames[] = { filename };
+	gxemul.ParseFilenames("testmips", 1, filenames);
+	gxemul.Reset();
+
+	gxemul.SetSnapshottingEnabled(false);
+
+	gxemul.GetCommandInterpreter().RunCommand("step 3");
+	gxemul.Execute();
+
+	UnitTest::Assert("root.step should initially be 3", gxemul.GetStep(), 3);
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
+	UnitTest::Assert("3: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff80010104");
+	UnitTest::Assert("3: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007ed0");
+	UnitTest::Assert("3: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0xffffffff88880000");
+	UnitTest::Assert("3: cpu0.v1", cpu->GetVariable("v1")->ToString(), "0xffffffffcccc0000");
+
+	// This execute should FAIL, because snapshotting is disabled.
+	cmd->Execute(gxemul, dummyArguments);
+	UnitTest::Assert("root.step should still be 3", gxemul.GetStep(), 3);
+}
+
 static void Test_BackwardStepCommand_Basic()
 {
 	refcount_ptr<Command> cmd = new BackwardStepCommand;
@@ -139,6 +164,8 @@ static void Test_BackwardStepCommand_Basic()
 	gxemul.ParseFilenames("testmips", 1, filenames);
 	gxemul.Reset();
 
+	gxemul.SetSnapshottingEnabled(true);
+
 	gxemul.GetCommandInterpreter().RunCommand("step 3");
 	gxemul.Execute();
 
@@ -152,6 +179,7 @@ static void Test_BackwardStepCommand_Basic()
 
 	cmd->Execute(gxemul, dummyArguments);
 	UnitTest::Assert("root.step should be 2", gxemul.GetStep(), 2);
+	cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
 	UnitTest::Assert("2: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff80010100");
 	UnitTest::Assert("2: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007ed0");
 	UnitTest::Assert("2: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0");
@@ -159,6 +187,7 @@ static void Test_BackwardStepCommand_Basic()
 
 	cmd->Execute(gxemul, dummyArguments);
 	UnitTest::Assert("root.step should be 1", gxemul.GetStep(), 1);
+	cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
 	UnitTest::Assert("1: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff800100fc");
 	UnitTest::Assert("1: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007ed0");
 	UnitTest::Assert("1: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0");
@@ -166,6 +195,7 @@ static void Test_BackwardStepCommand_Basic()
 
 	cmd->Execute(gxemul, dummyArguments);
 	UnitTest::Assert("root.step should be 0", gxemul.GetStep(), 0);
+	cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
 	UnitTest::Assert("0: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff800100f8");
 	UnitTest::Assert("0: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007f00");
 	UnitTest::Assert("0: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0");
@@ -173,17 +203,14 @@ static void Test_BackwardStepCommand_Basic()
 
 	cmd->Execute(gxemul, dummyArguments);
 	UnitTest::Assert("root.step should still be 0", gxemul.GetStep(), 0);
+	cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
 	UnitTest::Assert("X: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff800100f8");
 	UnitTest::Assert("X: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007f00");
 	UnitTest::Assert("X: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0");
 	UnitTest::Assert("X: cpu0.v1", cpu->GetVariable("v1")->ToString(), "0");
 }
 
-#if 0
-// NOT YET
 // Reset resets the component tree, but does not load back the binary!
-// This will work when snapshots have been implemented, and the root.step
-// write handler is in place.
 static void Test_BackwardStepCommand_ManualAddAndLoad()
 {
 	refcount_ptr<Command> cmd = new BackwardStepCommand;
@@ -193,7 +220,7 @@ static void Test_BackwardStepCommand_ManualAddAndLoad()
 
 	gxemul.GetCommandInterpreter().RunCommand("add testmips");
 	gxemul.GetCommandInterpreter().RunCommand("load test/FileLoader_ELF_MIPS cpu0");
-
+	gxemul.SetSnapshottingEnabled(true);
 	gxemul.GetCommandInterpreter().RunCommand("step 3");
 	gxemul.Execute();
 
@@ -207,6 +234,7 @@ static void Test_BackwardStepCommand_ManualAddAndLoad()
 
 	cmd->Execute(gxemul, dummyArguments);
 	UnitTest::Assert("root.step should be 2", gxemul.GetStep(), 2);
+	cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
 	UnitTest::Assert("2: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff80010100");
 	UnitTest::Assert("2: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007ed0");
 	UnitTest::Assert("2: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0");
@@ -214,6 +242,7 @@ static void Test_BackwardStepCommand_ManualAddAndLoad()
 
 	cmd->Execute(gxemul, dummyArguments);
 	UnitTest::Assert("root.step should be 1", gxemul.GetStep(), 1);
+	cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
 	UnitTest::Assert("1: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff800100fc");
 	UnitTest::Assert("1: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007ed0");
 	UnitTest::Assert("1: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0");
@@ -221,6 +250,7 @@ static void Test_BackwardStepCommand_ManualAddAndLoad()
 
 	cmd->Execute(gxemul, dummyArguments);
 	UnitTest::Assert("root.step should be 0", gxemul.GetStep(), 0);
+	cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
 	UnitTest::Assert("0: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff800100f8");
 	UnitTest::Assert("0: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007f00");
 	UnitTest::Assert("0: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0");
@@ -228,18 +258,19 @@ static void Test_BackwardStepCommand_ManualAddAndLoad()
 
 	cmd->Execute(gxemul, dummyArguments);
 	UnitTest::Assert("root.step should still be 0", gxemul.GetStep(), 0);
+	cpu = gxemul.GetRootComponent()->LookupPath("cpu0");
 	UnitTest::Assert("X: cpu0.pc", cpu->GetVariable("pc")->ToString(), "0xffffffff800100f8");
 	UnitTest::Assert("X: cpu0.sp", cpu->GetVariable("sp")->ToString(), "0xffffffffa0007f00");
 	UnitTest::Assert("X: cpu0.v0", cpu->GetVariable("v0")->ToString(), "0");
 	UnitTest::Assert("X: cpu0.v1", cpu->GetVariable("v1")->ToString(), "0");
 }
-#endif
 
 UNITTESTS(BackwardStepCommand)
 {
 	UNITTEST(Test_BackwardStepCommand_AlreadyAtStep0);
+	UNITTEST(Test_BackwardStepCommand_NotWhenSnapshotsAreDisabled);
 	UNITTEST(Test_BackwardStepCommand_Basic);
-//	UNITTEST(Test_BackwardStepCommand_ManualAddAndLoad);
+	UNITTEST(Test_BackwardStepCommand_ManualAddAndLoad);
 }
 
 #endif

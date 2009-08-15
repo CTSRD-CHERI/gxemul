@@ -171,6 +171,7 @@ GXemul::GXemul()
 	, m_runState(Paused)
 	, m_nrOfSingleStepsLeft(1)
 	, m_rootComponent(new RootComponent(this))
+	, m_snapshottingEnabled(false)
 {
 	gettimeofday(&m_lastOutputTime, NULL);
 	m_lastOutputStep = 0;
@@ -492,7 +493,7 @@ bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *fil
 			return false;
 		}
 		
-		PrintUsage(false);
+		PrintUsage();
 		return false;
 	}
 }
@@ -513,63 +514,24 @@ string GXemul::Version()
 }
 
 
-void GXemul::PrintUsage(bool longUsage) const
+void GXemul::PrintUsage() const
 {
 	std::cout << Version() << "\n";
 
-	if (!longUsage) {
-		std::cout << "Insufficient command line arguments given to"
-		    " start an emulation. You have\n"
-		    "the following alternatives:\n" <<
-		    "\n" <<
-		    "  1. Run  gxemul  with the machine selection option "
-		    "(-e), which creates\n"
-		    "     a default emulation from a template machine.\n\n"
-		    "  2. Run  gxemul  with a configuration file (.gxemul).\n"
-		    "     This is useful for more complicated setups.\n\n"
-		    "  3. Run  gxemul -V  with no other options, which causes"
-		    " gxemul to be started\n"
-		    "     with no emulation loaded at all.\n\n" <<
-		    "\n" <<
-		    "Run  gxemul -h  for help on command line options.\n\n";
-		return;
-	}
-
-	std::cout << "Usage:" << "\n"
-	    << "  gxemul [general options] [configfile]\n"
-	    << "  gxemul [general options] [machine selection options] binary"
-	    << " [...]\n\n";
-
-	// When changing command line options, REMEMBER to keep the following
-	// things in synch:
-	//
-	//	1. The help message.
-	//	2. The option parsing in ParseOptions.
-	//	3. The man page.
-
-	std::cout <<
-		"Machine selection options:\n"
-		"  -e t     Starts an emulation based on template t."
-			" (Use -H to get a list.)\n"
-		// -E is deprecated.
-		"\n"
-		"General options:\n"
-		"  -H       Displays a list of all machine"
-			" templates (for use with -e).\n"
-		"  -h       Displays this help message.\n"
-		"  -q       Quiet mode. (Supresses startup banner and "
-			"some debug output.)\n"
-		"  -V       Starts in the Paused state. (Can also be used"
-			" to start gxemul\n"
-		"           without loading an emulation at all.)\n"
-		// -W is undocumented. It is only used internally.
-		"\n"
-		"An emulation setup created by either supplying machine "
-			"selection options\n"
-		"directly on the command line, or by supplying a configuration"
-			" file (with\n"
-		"the .gxemul extension).\n"
-		"\n";
+	std::cout << "Insufficient command line arguments given to"
+	    " start an emulation. You have\n"
+	    "the following alternatives:\n" <<
+	    "\n" <<
+	    "  1. Run  gxemul  with the machine selection option "
+	    "(-e), which creates\n"
+	    "     a default emulation from a template machine.\n\n"
+	    "  2. Run  gxemul  with a configuration file (.gxemul).\n"
+	    "     This is useful for more complicated setups.\n\n"
+	    "  3. Run  gxemul -V  with no other options, which causes"
+	    " gxemul to be started\n"
+	    "     with no emulation loaded at all.\n\n" <<
+	    "\n" <<
+	    "Run  gxemul -h  for help on command line options.\n\n";
 }
 
 
@@ -787,6 +749,22 @@ string GXemul::GetRunStateAsString() const
 }
 
 
+bool GXemul::GetSnapshottingEnabled() const
+{
+	return m_snapshottingEnabled;
+}
+
+
+void GXemul::SetSnapshottingEnabled(bool enabled)
+{
+	if (enabled)
+		GetUI()->ShowDebugMessage("(Enabling "
+		    "snapshotting/reverse execution support.)\n");
+
+	m_snapshottingEnabled = enabled;
+}
+
+
 bool GXemul::GetQuietMode() const
 {
 	return m_quietMode;
@@ -805,6 +783,55 @@ void GXemul::SetNrOfSingleStepsInARow(uint64_t steps)
 		steps = 1;
 
 	m_nrOfSingleStepsLeft = steps;
+}
+
+
+bool GXemul::ModifyStep(int64_t oldStep, int64_t newStep)
+{
+	if (!GetSnapshottingEnabled())
+		return false;
+
+	if (oldStep == newStep)
+		return true;
+
+	if (newStep < oldStep) {
+		// Run in reverse, by running forward from the most suitable
+		// snapshot.
+
+		// TODO: Multiple snapshots!
+		refcount_ptr<Component> newRoot = m_snapshot->Clone();
+		SetRootComponent(newRoot);
+
+		// GetStep will now return the step count for the new root.
+		int64_t nrOfStepsToRunFromSnapshot = newStep - GetStep();
+
+		RunState oldRunState = GetRunState();
+		SetRunState(Running);
+
+		Execute(nrOfStepsToRunFromSnapshot);
+
+		SetRunState(oldRunState);
+	} else {
+		// Run forward, by setting a step breakpoint.
+		GetUI()->ShowDebugMessage("TODO: run forward by setting a step breakpoint!\n");
+		return false;
+	}
+
+	return true;
+}
+
+
+void GXemul::TakeSnapshot()
+{
+	// TODO: Multiple snapshots!
+
+	if (m_snapshot.IsNULL()) {
+		stringstream ss;
+		ss << "(snapshot at step " << GetStep() << ")\n";
+		GetUI()->ShowDebugMessage(ss.str());
+
+		m_snapshot = GetRootComponent()->Clone();
+	}
 }
 
 
@@ -855,6 +882,10 @@ void GXemul::Execute(const int longestTotalRun)
 		SetRunState(Paused);
 		return;
 	}
+
+	// Take an initial snapshot at step 0, if snapshotting is enabled:
+	if (m_snapshottingEnabled && GetStep() == 0)
+		TakeSnapshot();
 
 	// Find the fastest component:
 	double fastestFrequency = componentsAndFrequencies[0].frequency;
