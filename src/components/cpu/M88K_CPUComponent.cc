@@ -998,20 +998,26 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 	switch (op26) {
 
-	case 0x16:	/*  or   immu32  */
-	case 0x17:	/*  or.u immu32  */
-	case 0x18:	/*  addu immu32  */
-	case 0x19:	/*  subu immu32   */
-	case 0x1f:	/*  cmp  immu32   */
+	case 0x10:	/*  and    immu32  */
+	case 0x11:	/*  and.u  immu32  */
+	case 0x12:	/*  mask   immu32  */
+	case 0x13:	/*  mask.u immu32  */
+	case 0x14:	/*  xor    immu32  */
+	case 0x15:	/*  xor.u  immu32  */
+	case 0x16:	/*  or     immu32  */
+	case 0x17:	/*  or.u   immu32  */
+	case 0x18:	/*  addu   immu32  */
+	case 0x19:	/*  subu   immu32   */
+	case 0x1f:	/*  cmp    immu32   */
 		{
 			int shift = 0;
 			switch (op26) {
-	/*		case 0x10: ic->f = instr(and_imm); break;
-			case 0x11: ic->f = instr(and_u_imm); shift = 16; break;
-			case 0x12: ic->f = instr(mask_imm); break;
-			case 0x13: ic->f = instr(mask_imm); shift = 16; break;
-			case 0x14: ic->f = instr(xor_imm); break;
-			case 0x15: ic->f = instr(xor_imm); shift = 16; break; */
+			case 0x10: ic->f = instr_and_u32_u32_immu32; break; // Note (see below): and only ands upper or lower part!
+			case 0x11: ic->f = instr_and_u32_u32_immu32; shift = 16; break;
+			case 0x12: ic->f = instr_and_u32_u32_immu32; break; // Note: mask is implemented using and
+			case 0x13: ic->f = instr_and_u32_u32_immu32; shift = 16; break;
+			case 0x14: ic->f = instr_xor_u32_u32_immu32; break;
+			case 0x15: ic->f = instr_xor_u32_u32_immu32; shift = 16; break;
 			case 0x16: ic->f = instr_or_u32_u32_immu32; break;
 			case 0x17: ic->f = instr_or_u32_u32_immu32; shift = 16; break;
 			case 0x18: ic->f = instr_add_u32_u32_immu32; break;
@@ -1027,6 +1033,14 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			ic->arg[0].p = &m_r[d];
 			ic->arg[1].p = &m_r[s1];
 			ic->arg[2].u32 = imm16 << shift;
+
+			// The 'and' instruction only ands bits in the upper or
+			// lower parts of the word; the 'mask' instruction works
+			// on the whole register.
+			if (op26 == 0x10)
+				ic->arg[2].u32 |= 0xffff0000;
+			if (op26 == 0x11)
+				ic->arg[2].u32 |= 0x0000ffff;
 
 			if (d == M88K_ZERO_REG)
 				ic->f = instr_nop;

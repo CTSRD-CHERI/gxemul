@@ -553,6 +553,19 @@ DYNTRANS_INSTR(CPUDyntransComponent,sub_u32_u32_u32)
 
 
 /*
+ * arg 0: 32-bit register
+ * arg 1: 32-bit register
+ * arg 2: 32-bit unsigned immediate
+ *
+ * ANDs the 32-bit immediate into arg 1, storing the result in arg 0.
+ */
+DYNTRANS_INSTR(CPUDyntransComponent,and_u32_u32_immu32)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) & ic->arg[2].u32;
+}
+
+
+/*
  * arg 0: 64-bit register
  * arg 1: 64-bit register
  * arg 2: 32-bit unsigned immediate
@@ -609,6 +622,19 @@ DYNTRANS_INSTR(CPUDyntransComponent,or_u32_u32_u32)
 DYNTRANS_INSTR(CPUDyntransComponent,or_u64_u64_immu32)
 {
 	REG64(ic->arg[0]) = REG64(ic->arg[1]) | (uint32_t)ic->arg[2].u32;
+}
+
+
+/*
+ * arg 0: 32-bit register
+ * arg 1: 32-bit register
+ * arg 2: 32-bit unsigned immediate
+ *
+ * XORs arg 1 and arg 2, and stores the result in arg 0.
+ */
+DYNTRANS_INSTR(CPUDyntransComponent,xor_u32_u32_immu32)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) ^ ic->arg[2].u32;
 }
 
 
