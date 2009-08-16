@@ -55,22 +55,6 @@ refcount_ptr<Component> TestM88KMachine::Create(const ComponentCreateArgs& args)
 
 	machine->AddChild(mainbus);
 
-	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
-	if (ram.IsNULL())
-		return NULL;
-
-	ram->SetVariableValue("memoryMappedSize", settings["ram"]);
-	mainbus->AddChild(ram);
-
-	refcount_ptr<Component> rom = ComponentFactory::CreateComponent("ram");
-	if (rom.IsNULL())
-		return NULL;
-
-	rom->SetVariableValue("name", "\"rom0\"");
-	rom->SetVariableValue("memoryMappedBase", "0xff800000");
-	rom->SetVariableValue("memoryMappedSize",   "0x400000");
-	rom->SetVariableValue("writeProtect", "true");
-	mainbus->AddChild(rom);
 
 	int ncpus;
 	stringstream tmpss3;
@@ -98,6 +82,36 @@ refcount_ptr<Component> TestM88KMachine::Create(const ComponentCreateArgs& args)
 
 		mainbus->AddChild(cpu);
 	}
+
+
+	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
+	if (ram.IsNULL())
+		return NULL;
+
+	ram->SetVariableValue("memoryMappedSize", settings["ram"]);
+	mainbus->AddChild(ram);
+
+
+	refcount_ptr<Component> fb_videoram = ComponentFactory::CreateComponent("ram");
+	if (fb_videoram.IsNULL())
+		return NULL;
+
+	fb_videoram->SetVariableValue("name", "\"fb_videoram0\"");
+	fb_videoram->SetVariableValue("memoryMappedBase", "0x12000000");
+	fb_videoram->SetVariableValue("memoryMappedSize",   "0xf00000");
+	mainbus->AddChild(fb_videoram);
+
+
+	refcount_ptr<Component> rom = ComponentFactory::CreateComponent("ram");
+	if (rom.IsNULL())
+		return NULL;
+
+	rom->SetVariableValue("name", "\"rom0\"");
+	rom->SetVariableValue("memoryMappedBase", "0xff800000");
+	rom->SetVariableValue("memoryMappedSize",   "0x400000");
+	rom->SetVariableValue("writeProtect", "true");
+	mainbus->AddChild(rom);
+
 
 	return machine;
 }

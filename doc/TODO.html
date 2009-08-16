@@ -364,6 +364,79 @@ MAIN GOAL for 0.6.0:
 	     enabled.
 
    [ ]  File loaders:
+	[ ]  CONSISTENT and extensible way of supplying files, disk images,
+		raw files, ... to various controllers and cpus on the command line,
+		e.g.:
+			[component:]filename
+
+		where cpu0 would be the default component. This would make it
+		look nice when adding disk images, like wd0:netbsd.img
+
+		How about arguments to the loader?
+
+			[component:][loader([args]):]filename
+
+		e.g. loader could be raw(vaddr[,skiplen[,entry]])
+
+		so,	monkey:filename		would load into component monkey
+		but	monkey():filename	would load into the default comonent
+						using the monkey loader.
+		and	a:b(c):filename		would load into component a using
+						the b loader, with args c
+
+		[ ]  The set of loaders to ask could be different depending on
+		     which interfaces the component supports. For AddressDataBus,
+		     it would be the regular file loaders (ELF, raw, a.out, ...).
+
+		     For block devices (disks, e.g. wd0, sd0), it would be a
+		     disk image mapper.
+
+	[ ] Extension idea: If this is about "connecting" components to
+		loaders, then why not allow connections to other things than just
+		loaders? Connecting wd0 to a disk image file is natural, but so
+		is connecting a framebuffer/video card component to a X11/SDL
+		window. Or connecting a CPU cache to a cache statistics viewer.
+
+		Think more about this!
+		----------------------
+
+			netbsd-GENERIC.gz			(load a basic file into cpu0)
+			cpu1:netbsd-GENERIC.gz			(load into a specific cpu)
+			wd0:netbsd.img				(disk image file mapper)
+			wd0:image(readonly):netbsd.img			(mapper with arguments!)
+			cpu0.dcache:cachestatisticsviewer
+			vga0:sdl
+			vga0:sdl(DISPLAY=othermachine:1.0)	(sdl on remote display)
+			com0:stdio		(default stdio)
+			com0:xterm		(new xterm)
+			...
+
+	   [ ]	Output handlers / output hooks / statistics tools / display plugins:
+
+		[ ]  The output handlers should be connected to the specific devices
+		     that need to output!
+
+		[ ]  stdout/stdin (cooperating with ConsoleUI), with CTRL-B sending
+		     CTRL-C to the emulated program,
+		     just as before. Only one device at a time can connect to this
+		     output handler.
+		     
+		[ ]  redirect to other file/tty/whatever
+	
+		[ ]  xterm/whatever (similar to before)
+	
+		[ ]  X-windows, or even SDL, for graphical output? Investigate. Would
+		     be cool if hardware OpenGL works, for emulation of accelerated
+		     graphics.
+
+		[ ]  Sound output (maybe SDL as well?)
+
+		[ ]  Other "plugins", like xterm windows showing registers all the
+		     time (with e.g. colored state changes), and disassembly "around"
+		     the current pc, for a cpu. And a stack trace. :-)
+
+		[ ]  Call graph gatherers, valgrind-like functionality, etc.
+
    	[ ]  automagic .gz (and .bz2) file extraction into /tmp or $TMP or such.
 	[ ]  symbol handling, line number info, data types?
 	[ ]  argument handling! (arg count, at least)
@@ -433,8 +506,6 @@ MAIN GOAL for 0.6.0:
 	     		trace [n]	runs with trace enabled for n function calls,
 	     				n = 10 by default?
 	     showFunctionCallReturn should be false by default.
-	[ ]  MIPS ABI state variable (o32, n32, n64). o32 has 4 arg registers,
-	     the others have 8. (See MIPS_CPUComponent::FunctionTraceArgumentCount().)
 	
    [ ]  Stack dump (of the emulated machine)
    	[ ]  A method on CPU components?
@@ -537,11 +608,6 @@ MAIN GOAL for 0.6.0:
 			variable, so debug output should indicate which variables
 			were set and which were not set.
 
-	[X]	reset		Resets the emulation. (Reloads files, clears RAM, etc.)
-				step = 0.
-
-	[X]	step		single-step (Paused)
-
    [/]	RAM component:
 	[ ]  Make the save/load of state more efficient. Right now, it's a hex dump! Yuck.
 	[ ]  methods for searching for values (strings, words, etc?)
@@ -587,31 +653,6 @@ MAIN GOAL for 0.6.0:
 	[ ]  ioctl emulation layer for all devices :-[
 	[ ]  struct conversions for many syscalls
 
-   [ ]	Output handlers / output hooks / statistics tools / display plugins:
-
-	[ ]  The output handlers should be connected to the specific devices
-	     that need to output!
-
-	[ ]  stdout/stdin (cooperating with ConsoleUI), with CTRL-B sending
-	     CTRL-C to the emulated program,
-	     just as before. Only one device at a time can connect to this
-	     output handler.
-	     
-	[ ]  redirect to other file/tty/whatever
-	
-	[ ]  xterm/whatever (similar to before)
-	
-	[ ]  X-windows, or even SDL, for graphical output? Investigate. Would
-	     be cool if hardware OpenGL works, for emulation of accelerated
-	     graphics.
-
-	[ ]  Sound output (maybe SDL as well?)
-
-	[ ]  Other "plugins", like xterm windows showing registers all the
-	     time (with e.g. colored state changes), and disassembly "around"
-	     the current pc, for a cpu. And a stack trace. :-)
-
-	[ ]  Call graph gatherers, valgrind-like functionality, etc.
 
 -------------------------------------------------------------------------------
 

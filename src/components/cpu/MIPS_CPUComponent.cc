@@ -113,7 +113,9 @@ refcount_ptr<Component> MIPS_CPUComponent::Create(const ComponentCreateArgs& arg
 void MIPS_CPUComponent::ResetState()
 {
 	// Most MIPS CPUs use 4 KB native page size.
-	// TODO: A few use 1 KB pages; this should be supported as well.
+	// However, a few use 1 KB pages; this should be supported as well.
+	// TODO: Always use 1024 (worst case) on those CPUs? Or switch during
+	// runtime from 4096 to 1024? (More complicated...)
 	m_pageSize = 4096;
 
 	m_hi = 0;
@@ -289,7 +291,10 @@ int MIPS_CPUComponent::FunctionTraceArgumentCount()
 	// On old 32-bit ABIs, registers 4..7 (a0..a3) are used. On newer
 	// ABIs (both 32-bit and 64-bit), registers 4..11 are used (a0..a7).
 
-	return 4;	// TODO: 8. How to detect ABI?
+	if (m_abi == "o32")
+		return 4;
+
+	return 8;
 }
 
 
@@ -826,8 +831,6 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			ss << "," << imm << "(" << regname(rs, m_abi) << ")";
 
 			result.push_back(ss.str());
-
-			// TODO: Symbol lookup, if running.
 		}
 		break;
 
