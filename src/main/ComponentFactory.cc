@@ -89,7 +89,8 @@ static vector<string> SplitStringIntoVector(const string &str, const char splitt
 		}
 	}
 
-	strings.push_back(word);
+	if (word != "")
+		strings.push_back(word);
 
 	return strings;
 }
