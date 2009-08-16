@@ -217,7 +217,18 @@ static void usage(int longusage)
 
 	printf("\nUsage: %s [options] -e name [file [...]]\n", progname);
 	printf("   or  %s [options] configfile\n", progname);
+	printf("   or  %s -H\n", progname);
 	printf("   or  %s -V\n", progname);
+
+	if (longusage) {
+		printf("\nOptions:\n");
+		printf("  -B           Enable snapshotting (reverse stepping support).\n");
+		printf("  -H           Display a list of available machine templates.\n");
+		printf("  -e name      Start with a machine based on template 'name'.\n");
+		printf("  -q           Quiet mode (suppress debug messages).\n");
+		printf("  -V           Start up in interactive mode, paused.\n");
+		printf("\n");
+	}
 
 	printf("\nLegacy usage: %s [machine, other, and general options] [file "
 	    "[...]]\n", progname);
@@ -228,13 +239,6 @@ static void usage(int longusage)
 		    progname);
 		return;
 	}
-
-	printf("\n");
-	printf("  -B           Enable snapshotting (reverse stepping support).\n");
-	printf("  -H           Display a list of available machine templates.\n");
-	printf("  -e name      Start with a machine based on template 'name'.\n");
-	printf("  -q           Quiet mode (suppress debug messages).\n");
-	printf("  -V           Start up in interactive mode, paused.\n");
 
 	printf("\n--------------------- The following are LEGACY options: ---------------------\n");
 
