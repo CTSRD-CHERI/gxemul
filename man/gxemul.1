@@ -46,6 +46,8 @@
 .Ar configfile
 .Nm
 .Fl V
+.Nm
+.Fl H
 .Sh SYNOPSIS (LEGACY)
 .Nm
 .Op machine, other, and general options
@@ -67,17 +69,23 @@ surrounding hardware components such as framebuffers, busses, interrupt
 controllers, ethernet controllers, disk controllers, and serial port
 controllers.
 .Pp
-Note: Only a few emulated machine modes have been rewritten to use the new
+Note: Only very few emulated machine modes have been rewritten to use the new
 emulation framework introduced in version 0.6.0, so there are two different
-ways to use the emulator. The options available for the new framework are:
+ways to use the emulator. (Most emulation modes and machines are only valid
+in the old framework.) The options available for the new framework are:
 .Pp
 .Bl -tag -width Ds
 .It Fl B
 Enables snapshotting (required for reverse execution/stepping).
+.It Fl e Ar name
+Start with a machine based on template 'name'. The name may be followed by
+optional arguments in parentheses, e.g.
+.Pp
+.Dl "gxemul -V -e 'testmips(cpu=R4400)'"
+.Pp
+Remember to use quotes if your shell gives special meaning to parentheses.
 .It Fl H
 Display a list of available machine templates.
-.It Fl e Ar name
-Start with a machine based on template 'name'.
 .It Fl q
 Quiet mode (suppress debug messages).
 .It Fl V
@@ -96,7 +104,8 @@ the emulator using the 'save' command.
 .Pp
 Starting the emulator with the
 .Fl V
-switch will bring you to the interactive debugger environment.
+switch will bring you to the interactive debugger environment, without
+starting the emulation.
 .Sh RUNNING GUEST OPERATING SYSTEMS
 Please read the HTML documentation for more details on how to run complete
 guest operating systems in the emulator.
@@ -455,7 +464,7 @@ For more information, please read the HTML documentation in the doc/
 subdirectory of the
 .Nm
 distribution.
-.Sh EXAMPLES
+.Sh LEGACY EXAMPLES
 The following command will start NetBSD/pmax on an emulated DECstation 
 5000/200 (3MAX):
 .Pp
