@@ -4411,3 +4411,4 @@ Changelog for GXemul:
 20090815	Reimplementing the M88K br, or_imm, or.u_imm, cmp, cmp_imm,
 		and_imm, and.u_imm, mask_imm, mask.u_imm, mak, mak_imm,
 		mulu_imm, xor_imm, and xor.u_imm instructions.
+20090819	Base OTHERLIBS in configure on LDFLAGS.

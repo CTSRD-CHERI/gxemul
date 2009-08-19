@@ -83,6 +83,7 @@ else
 	fi
 fi
 
+OTHERLIBS="$LDFLAGS"
 
 UNITTESTS=YES
 
