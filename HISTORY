@@ -4412,3 +4412,5 @@ Changelog for GXemul:
 		and_imm, and.u_imm, mask_imm, mask.u_imm, mak, mak_imm,
 		mulu_imm, xor_imm, and xor.u_imm instructions.
 20090819	Base OTHERLIBS in configure on LDFLAGS.
+20090821	Updating the TODO with thoughts/plans for the "plugin" part
+		of the new framework.

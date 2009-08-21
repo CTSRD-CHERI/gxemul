@@ -363,9 +363,57 @@ MAIN GOAL for 0.6.0:
 	     i.e. overlays must be used if reverse execution support is
 	     enabled.
 
-   [ ]  File loaders:
+  [ ] Move the description of the new framework to a separate html page,
+  	framework.html! ("Description of the GXemul framework")
+
+  [ ] Serialize symbols
+
+  [ ] Serialize breakpoints
+
+  [ ] Plugin framework
+  	Note: The term "Plugin" does not mean dynamically loaded. It simply is a
+  	generalization of "something" which is the common base for file loaders,
+  	framebuffers, statistics viewers, etc.
+	[ ] src/plugins/
+	[ ] Base class for plugins.
+	[ ] Plugin registry.
+	[ ] Move FileLoaders to plugins!
+	[ ] On-reset commands should be _PER COMPONENT_ instead of per GXemul
+		instance (will likely be good for testm88k-reset, stack pointer etc.)
+		[ ] Serialize the on-reset command list (per component) 
+	[ ] Plugins may be attached to component paths!
+		[ ] Multiple components to one plugin (e.g. keyboard + framebuffer to one plugin)
+		[ ] Multiple plugins monitoring the same component.
+	[ ] Think about the "load" command. Load vs attach?
+	[ ] What should a plugin be able to do?
+		[ ] Attach/load
+		[ ] On-reset
+		[ ] Detach
+		[ ] Monitor changes in component(s)' state
+		[ ] Periodical updates (e.g. framebuffers)
+		[ ] Run in a different thread (pthread multithreading?)
+		[ ] Insert stuff into the event queue (e.g. keyboard keypresses
+			from a framebuffer/keyboard plugin)
+	[ ] The Snapshots (the clones) release the plugin connection; the plugins only
+		work on the main tree.
+	[ ] Plugins have to be compatible with replaying during reverse execution!
+		(Maybe they should be disconnected while re-executing?)
+	[ ] Think about how events should contain changes such as breakpoints,
+		added/removed plugins, etc.
+	[ ] Example plugins:
+		[ ] File loaders
+		[ ] Disk image mappers
+		[ ] Framebuffer displays
+			[ ] Think about VGA (charcell AND video framebuffer, being able
+				to switch live)
+		[ ] Keyboards (host -> emulated)
+		[ ] Serial controller -> scrollback buffer -> xterm / other window
+			or even connected to stdin/stdout or files or terminals.
+		[ ] Audio (emulated -> host)
+		[ ] Cache statistics viewer.
+
 	[ ]  CONSISTENT and extensible way of supplying files, disk images,
-		raw files, ... to various controllers and cpus on the command line,
+		raw files, ... to various plugins on the command line,
 		e.g.:
 			[component:]filename
 
@@ -391,12 +439,6 @@ MAIN GOAL for 0.6.0:
 		     For block devices (disks, e.g. wd0, sd0), it would be a
 		     disk image mapper.
 
-	[ ] Extension idea: If this is about "connecting" components to
-		loaders, then why not allow connections to other things than just
-		loaders? Connecting wd0 to a disk image file is natural, but so
-		is connecting a framebuffer/video card component to a X11/SDL
-		window. Or connecting a CPU cache to a cache statistics viewer.
-
 		Think more about this!
 		----------------------
 
@@ -411,32 +453,7 @@ MAIN GOAL for 0.6.0:
 			com0:xterm		(new xterm)
 			...
 
-	   [ ]	Output handlers / output hooks / statistics tools / display plugins:
-
-		[ ]  The output handlers should be connected to the specific devices
-		     that need to output!
-
-		[ ]  stdout/stdin (cooperating with ConsoleUI), with CTRL-B sending
-		     CTRL-C to the emulated program,
-		     just as before. Only one device at a time can connect to this
-		     output handler.
-		     
-		[ ]  redirect to other file/tty/whatever
-	
-		[ ]  xterm/whatever (similar to before)
-	
-		[ ]  X-windows, or even SDL, for graphical output? Investigate. Would
-		     be cool if hardware OpenGL works, for emulation of accelerated
-		     graphics.
-
-		[ ]  Sound output (maybe SDL as well?)
-
-		[ ]  Other "plugins", like xterm windows showing registers all the
-		     time (with e.g. colored state changes), and disassembly "around"
-		     the current pc, for a cpu. And a stack trace. :-)
-
-		[ ]  Call graph gatherers, valgrind-like functionality, etc.
-
+   [ ]  File loaders:
    	[ ]  automagic .gz (and .bz2) file extraction into /tmp or $TMP or such.
 	[ ]  symbol handling, line number info, data types?
 	[ ]  argument handling! (arg count, at least)
