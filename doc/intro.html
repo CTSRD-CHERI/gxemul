@@ -275,9 +275,15 @@ Uncompress the .tar.gz distribution file, and run
 	$ <b>make</b>
 </pre>
 
-<p>This should work on most Unix-like systems. GXemul does not <i>require</i> any 
-specific libraries to build, however, the following optional libraries or
-third-party software give additional functionality:
+<p>This should work on most Unix-like systems, with few or no modifications
+to the source code. Requirements are:
+<ul>
+	<li>A reasonably modern C++ compiler environment, including STL.
+</ul>
+
+<p>GXemul does not <i>require</i> any additional third-party libraries to build,
+however, the following optional libraries or third-party software give
+additional functionality:
 <ul>
 	<li>X11 libraries: for legacy mode framebuffer emulation.
 	<li><a href="http://www.doxygen.org/">Doxygen</a>: if installed, source code documentation will be generated
@@ -286,12 +292,14 @@ third-party software give additional functionality:
 
 <p>The emulator's performance is dependent on both runtime settings 
 and on compiler settings, so you might want to experiment with using 
-different <tt>CXX</tt> and <tt>CXXFLAGS</tt> environment variable values when 
-running the <tt>configure</tt> script.
+different <tt>CXX</tt>, <tt>CXXFLAGS</tt>, and <tt>LDFLAGS</tt> environment
+variable values when running the <tt>configure</tt> script.
 
-<p>During development of the emulator, <tt><b>configure --debug</b></tt> may be used
+<p>During development of the emulator: <tt><b>configure --debug</b></tt> may be used
 to enable some debugging aids and turn off optimizations. <tt><b>make test</b></tt>
-can be used to run unit tests.
+can be used to run unit tests. If you often recompile the whole tree (<tt>make clean_all</tt>,
+followed by <tt>configure</tt> and <tt>make</tt> again), then using
+<a href="http://ccache.samba.org/">ccache</a> is recommended.
 
 <p>Running <tt><b>make install</b></tt> will install GXemul into <tt>/usr/local</tt>,
 or wherever the configure script detects that user software is installed on
