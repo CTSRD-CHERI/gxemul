@@ -4414,3 +4414,5 @@ Changelog for GXemul:
 20090819	Base OTHERLIBS in configure on LDFLAGS.
 20090821	Updating the TODO with thoughts/plans for the "plugin" part
 		of the new framework.
+20090822	Beginning on a doc/framework.html, describing the new
+		framework concepts to end-users.
