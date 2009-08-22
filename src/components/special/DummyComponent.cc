@@ -868,7 +868,7 @@ static void Test_DummyComponent_Execute_Continuous_TwoComponentsSameSpeed()
 	// for cycle accurate emulation. They have to be interleaved one
 	// cycle at a time.
 	gxemul.SetRunState(GXemul::Running);
-	gxemul.Execute();
+	gxemul.Execute(10000);
 
 	// Step n:
 	int n = gxemul.GetStep();
@@ -916,7 +916,7 @@ static void Test_DummyComponent_Execute_Continuous_TwoComponentsDifferentSpeed()
 	// Step 1: B
 	// Step 2: A and B
 	gxemul.SetRunState(GXemul::Running);
-	gxemul.Execute();
+	gxemul.Execute(1000);
 
 	// Step n: B should have executed 1 per cycle
 	// but A only 1/3 of the cycles.
@@ -963,10 +963,10 @@ static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed
 	counterC->SetVariableValue("frequency", "100");
 
 	gxemul.SetRunState(GXemul::Running);
-	gxemul.Execute();
+	gxemul.Execute(22000);
 
 	int n = gxemul.GetStep();
-	UnitTest::Assert("n very low?", n > 20000);
+	UnitTest::Assert("n very low?", n >= 22000);
 
 	int a = counterA->GetVariable("counter")->ToInteger();
 	UnitTest::Assert("counter A should now be approximately n / 10000",
@@ -1034,10 +1034,10 @@ static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed
 	counterC->SetVariableValue("frequency", "181");
 
 	gxemul.SetRunState(GXemul::Running);
-	gxemul.Execute();
+	gxemul.Execute(20000);
 
 	int n = gxemul.GetStep();
-	UnitTest::Assert("n very low?", n > 20000);
+	UnitTest::Assert("n very low?", n >= 20000);
 
 	// Compare with single-step stream:
 	{
@@ -1093,10 +1093,10 @@ static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed
 	counterC->SetVariableValue("frequency", "1904");
 
 	gxemul.SetRunState(GXemul::Running);
-	gxemul.Execute();
+	gxemul.Execute(10000);
 
 	int n = gxemul.GetStep();
-	UnitTest::Assert("n very low?", n > 20000);
+	UnitTest::Assert("n very low?", n >= 10000);
 
 	// Compare with single-step stream:
 	{
