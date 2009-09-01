@@ -42,39 +42,28 @@ MAIN GOAL for 0.6.0:
 
    [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
-	[ ] When a component is added to the tree, recalculate its nr of steps!
-	[/] "paused" cpu state, in SMP machines during bootup. (Non-executing components.)
-	    [ ] When a component changes state from paused = true to false,
-	        recalculate its number of steps!
-	[ ] Removing components (at least if the Fastest one is removed) should
-	    also trigger recalculation.
-	[ ] When a component's frequency is changed, recalculate its nr of steps!
-	    (This requires variable write handlers, including inheritance!)
-	    Frequency changes are tricky, especially when it comes to reverse
-	    execution, so think CAREFULLY about this!
-
-	[X] Single-stepping forward.
-
 	[/] Continuous execution forward.
-		[X]  Base framework in GXemul::Execute.
-		[/]  Focus on the 88100 CPU implementation, dyntrans etc.
-		[X]  Scheduling:
-		     If ONE component is "fast" (say, 100 MHz), and one or more
-		     are slow (say, 100 Hz). The difference is 1 M times, so the
-		     fast component could run lots of chunk-wise execution
-		     passes, with e.g. 10000 cycles per chunk, before the slow
-		     ones need to run at all. THEN they are interleaved in a
-		     single-cycle manner.
-		[ ]  In "sloppy" accuracy mode, then it will be possible to
-		     interleave with large chunks even when components "collide"
+		[ ]  "Sloppy" accuracy mode: it could be possible to
+		     interleave large chunks even when components "collide"
 		     in time. (This will cause reverse execution support to
 		     be turned off.)
 
+	[ ] step recalculation:
+		[ ] When a component is added to the tree, recalculate its nr of steps!
+		[/] "paused" cpu state, in SMP machines during bootup. (Non-executing components.)
+		    [ ] When a component changes state from paused = true to false,
+		        recalculate its number of steps!
+		[ ] Removing components (at least if the Fastest one is removed) should
+		    also trigger recalculation.
+		[ ] When a component's frequency is changed, recalculate its nr of steps!
+		    (This requires variable write handlers, including inheritance!)
+		    Frequency changes are tricky, especially when it comes to reverse
+		    execution, so think CAREFULLY about this!
+
 	[/] Reverse execution/debugging:
-		[X]  backward-step command decreases root.step and prints state delta.
-			[X]  Unit test, once write handlers have been implemented.
-			[ ]  When running in reverse, debug output should be disabled.
-		[X]  Save snapshot at step 0!
+		[ ]  When running in reverse, debug output should be disabled!
+			(Also, update calls to plugins (e.g. framebuffers) should
+			be disabled, until the target step is reached.)
 		[ ]  Regular saving of state, and limiting the number of such
 		     saves by logarithmic removal.
 		[ ]  Disk image overlays!
@@ -103,23 +92,11 @@ MAIN GOAL for 0.6.0:
   [/]	NEW DYNTRANS IMPLEMENTATION, ...
 
 	[/]  Basic run loop.
-
-		[ ]  Dyntrans page allocation
-
 		[/]  PC to pointers
-
-		[X]  For risc archs with delay slots, this means that single-stepping
-		     should be able to go half-way through a delay slot combo.
-			[X] Single step vs Running for 1 instruction?
-
+			[ ]  Dyntrans page allocation
 		[/]  Large chunks is safe vs "single stepping" dyntrans...
 			[ ] Only "size 2" so far, i.e. delay slots. No support for
 			    longer instruction combos have been implemented yet.
-
-		[X]  Break-out-of-loop IC.
-
-		[X]  Pointers back to PC. (I.e. "synch pc".)
-
 		[/]  Unit tests.
 
 	[ ]  Interrupts should be cycle accurate, and affect the cpu's
@@ -145,99 +122,17 @@ MAIN GOAL for 0.6.0:
 		mips64-unknown-elf-gcc-4.3.2 -mips16 -O3 urk.c -c
 		mips64-unknown-elf-ld urk.o -o urk -e f -Ttext 0xffffffff80004000
 
-	[ ]  Optional native code generation pass
+	[ ]  Optional native code generation: Probably don't have time to
+		implement this in the near future; everything else also needs
+		to be prioritized against this feature, so...
 
-		[ ] Target amd64 and Alpha hosts first, if native generation is to be
-	    	    attempted, since those are the only realistic ones I have for testing.
-
-		[ ] Similar in many ways to instruction combinations ala GXemul 0.4.x,
-		    but native code instead of C code.
-
-		[ ] How/when to decide whether native generation is worth it?
-		    Using statistics of some sort? During development, it will be useful
-		    to get statistics about all common sequences of dyntrans "f" values
-		    (like in the old framework, but less hardcoded).
-
-		[ ] Simple approach: Each native code generator backend registers a
-		    list of the instr_* calls it supports, and when called, it is
-		    assumed that it will be able to convert a sequence of such
-		    dyntrans instructions into a native code equivalent.
-
-		    Simple register-based allocator, which can hopefully be reused
-		    for multiple host backends:
-
-			RequestHostRegisterForReading(wordlength, cpu-offset)
-			RequestHostRegisterForWriting(wordlength, cpu-offset)
-			RequestTemporaryHostRegister()
-			FlushHostRegisters()
-
-			Host registers may be in one of these states:
-				unused
-				mapped to variable in the cpu struct (wordlength, offset)
-					if mapped, the register can be dirty or non-dirty.
-				temporary
-				constant (?)
-
-			Registers should also be reused in a least-recently-used
-			fashion, so every usage should update the last-used time
-			stamp.
-
-			code sequence in the simlpe case:
-			  o) prelude (which checks that it will be safe to run
-			  	X instructions; if not, jump directly to the
-			  	OLD ic->f function)
-			 	[maybe also push callee save registers, to
-			 	have more registers available to the register
-			 	allocator?]
-			  o) 2 or more ICs translated
-			  o) flush registers back to cpu struct
-			  o) postlude [pop callee save registers?], return
-
-			Hm: How about  mul r1,r2,r3  ?
-
-				rA = reserve for writing r1 later on
-				rB = load r2
-				rC = load r3
-			    RISC:
-				mul rA,rB,rC
-			    amd64:
-				/* Will destroy edx */
-				eax = rB
-				edx = rC
-				mul eax, edx
-				rA = eax
-
-			Think about the case above, where some host architecture
-			isn't orthogonal when it comes to register choices for
-			specific instructions.
-
-		[ ] Ability to show disassembly of generated host
-		    instruction sequence? (emulated and generated instructions
-		    side by side)
-
-		[ ] Exceptions from device access, or from load/store to
-		    unmapped pages/devices/handlers should break the
-		    native code execution in a correct way.
-
-		[ ] Later: Try to make the generated code as linear and branch
-		    free as possible. Experiment with making e.g. all
-		    "exceptional" branches go away to some place outside
-		    the basic block? If it is worth it.
-
-		[ ] Unit tests -WW@U may run with native code generation, and
-			-WW@u without. If the emulator is built without
-			native code generation support, then one of those may
-			simply return 0 ("all tests passed") immediately, and
-			the Makefile calls both.
-		    Especially test:
-		    	Cycle/step count accuracy
-		    	Border cases for register values (high bits, low bits,
-		    	carry bits, shift amounts, 32/64-bit stuff, ...)
-
-	[ ] Instruction cache emulation:  For each emulated
-	    instruction, call a stub handler with the current pc.
-	    It is responsible for updating statistics etc.
-	    Should not be enabled by default (i.e. if there is no instruction cache).
+	[ ] Instruction cache emulation
+		[ ]  cache component on cpus
+		[ ]  For each emulated instruction, call a stub handler with
+		     the current pc. It is responsible for updating statistics etc.
+		     (Only for cycle accurate emulation, not for sloppy emulation?)
+		     (Or should there be a separate setting for cache vs non-cache
+		     emulation?)
 
 	[ ] Generic bus load/store access:
 		[ ] Pointers to host memory pages, for fast loads and stores:
@@ -259,10 +154,6 @@ MAIN GOAL for 0.6.0:
 	[ ] Conditional breakpoints before AND after CPU instruction
 	    execution (somewhat different from generic device access).
 
-	[ ] Unit tests! When executed on a host which has native code generation,
-	    try both with and without native code generation, and with and without
-	    other instruction combinations.
-
   [ ]	Address formats?
   	"xxxx:yyyy", "xxxx:yyyyyyyy", "zzzzzzzzzzzzzzzz" for amd64, plus i/o ports
   	"uxxxxxxxx" vs "sxxxxxxxx" for M88K
@@ -282,8 +173,9 @@ MAIN GOAL for 0.6.0:
   	[ ]  Cloning a CPUComponent should also clone its symbol registry!
   	     Think about serializing symbols...
 
-  [ ]	Refactor: move SplitStringIntoVector implementation somewhere.
-  [ ]   Refactor: parse_number
+  [ ]	Refactor/move helper functions into some helper module:
+	[ ]  SplitStringIntoVector
+	[ ]  parse_number
 
   [ ]   Make sure that BOTH old and new configuration files work!
 
@@ -527,7 +419,9 @@ MAIN GOAL for 0.6.0:
    [ ]	Components (general):
 	[ ]  "help" about components could show a file:/// link to
 	     the installed documentation about that component or
-	     machine! (If it exists.)
+	     machine! (If it exists.) Fallback: refer to the machine or
+	     component on gxemul.sourceforge.net (but warn about
+	     versions).
 	[ ]  Limit where components can be added. Like "drop targets"?
 		E.g. a machine can be added at the root, but a machine can not
 		be added on a pcibus. Similarly, a pcibus can not be added
