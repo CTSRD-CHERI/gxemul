@@ -30,6 +30,8 @@
 
 #include "misc.h"
 
+#include <sys/time.h>
+
 #include "CommandInterpreter.h"
 #include "Component.h"
 #include "UI.h"
