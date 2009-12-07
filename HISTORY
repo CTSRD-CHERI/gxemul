@@ -4416,3 +4416,5 @@ Changelog for GXemul:
 		of the new framework.
 20090822	Beginning on a doc/framework.html, describing the new
 		framework concepts to end-users.
+20090905	Continuing on the dyntrans core: page allocation.
+20091207	The dev_ether MAC address can now be read.

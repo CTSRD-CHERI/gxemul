@@ -16,6 +16,7 @@
 #define	    DEV_ETHER_STATUS		    0x4000
 #define	    DEV_ETHER_PACKETLENGTH	    0x4010
 #define	    DEV_ETHER_COMMAND		    0x4020
+#define	    DEV_ETHER_MAC		    0x4040
 
 /*  Status bits:  */
 #define	DEV_ETHER_STATUS_PACKET_RECEIVED		1

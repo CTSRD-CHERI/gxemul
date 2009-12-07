@@ -179,6 +179,16 @@ DEVICE_ACCESS(ether)
 		}
 		break;
 
+	case DEV_ETHER_MAC:
+		if (writeflag == MEM_READ) {
+			fatal("[ ether: read of MAC is not allowed! ]\n");
+		} else {
+			// Write out the MAC address to the address given.
+			cpu->memory_rw(cpu, cpu->mem, idata, d->mac,
+			    6, MEM_WRITE, CACHE_NONE);
+		}
+		break;
+
 	default:if (writeflag == MEM_WRITE) {
 			fatal("[ ether: unimplemented write to "
 			    "offset 0x%x: data=0x%x ]\n", (int)
