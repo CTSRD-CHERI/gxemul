@@ -55,6 +55,13 @@ struct DyntransIC
 	} arg[N_DYNTRANS_IC_ARGS];
 };
 
+/*
+ * A dyntrans page contains DyntransIC calls for each instruction slot, followed
+ * by some special entries, which handle execution going over the end of a page
+ * (by changing the PC to the start of the next virtual page).
+ */
+#define	DYNTRANS_PAGE_NSPECIALENTRIES	2
+
 
 /*
  * Some helpers for implementing dyntrans instructions.
@@ -94,9 +101,9 @@ public:
 	static void RunUnitTests(int& nSucceeded, int& nFailures);
 
 protected:
-	// Dyntrans specific:
-	virtual int GetDyntransICshift() const;
-	virtual void (*GetDyntransToBeTranslated())(CPUDyntransComponent* cpu, DyntransIC* ic) const;
+	// Implemented by specific CPU families:
+	virtual int GetDyntransICshift() const = 0;
+	virtual void (*GetDyntransToBeTranslated())(CPUDyntransComponent* cpu, DyntransIC* ic) const = 0;
 
 	void DyntransToBeTranslatedBegin(struct DyntransIC*);
 	bool DyntransReadInstruction(uint16_t& iword);
@@ -119,6 +126,8 @@ protected:
 
 private:
 	void DyntransInit();
+	struct DyntransIC* DyntransGetICPage(uint64_t addr);
+	void DyntransClearICPage(struct DyntransIC* icpage);
 
 protected:
 	/*
@@ -169,11 +178,6 @@ protected:
 	int			m_dyntransICshift;
 	int			m_executedCycles;
 	int			m_nrOfCyclesToExecute;
-
-private:
-	// DUMMY/TEST
-	vector< struct DyntransIC > m_dummyICpage;
-	uint32_t		m_dyntransTestVariable;
 };
 
 

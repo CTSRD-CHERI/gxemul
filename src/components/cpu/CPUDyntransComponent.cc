@@ -51,22 +51,6 @@ void CPUDyntransComponent::DyntransInit()
 }
 
 
-int CPUDyntransComponent::GetDyntransICshift() const
-{
-	std::cerr << "CPUDyntransComponent::GetDyntransICshift() must be overridden"
-	    " by the specific CPU implementation.\n";
-	throw std::exception();
-}
-
-
-void (*CPUDyntransComponent::GetDyntransToBeTranslated())(CPUDyntransComponent* cpu, DyntransIC* ic) const
-{
-	std::cerr << "CPUDyntransComponent::GetDyntransToBeTranslated() must be overridden"
-	    " by the specific CPU implementation.\n";
-	throw std::exception();
-}
-
-
 /*
  * Dynamic translation core
  * ------------------------
@@ -197,33 +181,51 @@ int CPUDyntransComponent::Execute(GXemul* gxemul, int nrOfCycles)
 }
 
 
-void CPUDyntransComponent::DyntransPCtoPointers()
+void CPUDyntransComponent::DyntransClearICPage(struct DyntransIC* icpage)
 {
-	// TODO. Page lookup.
-	
-	// TODO. If page lookup failed: allocate new page.
+	// Fill the page with "to be translated" entries, which when executed
+	// will read the instruction from memory, attempt to translate it, and
+	// then execute it.
+	void (*f)(CPUDyntransComponent*, DyntransIC*) = GetDyntransToBeTranslated();
 
-	// TODO: Move this to a helper function.
-	// Fill the newly allocated page with suitable function pointers.
-	if (m_dummyICpage.size() == 0) {
-		m_dummyICpage.resize(m_dyntransICentriesPerPage + 2);
+	for (int i=0; i<m_dyntransICentriesPerPage; ++i)
+		icpage[i].f = f;
 
-		// Fill the page with "to be translated" entries, which when
-		// executed will read the instruction from memory, attempt to
-		// translate it, and then execute it.
-		void (*f)(CPUDyntransComponent*, DyntransIC*) = GetDyntransToBeTranslated();
-		for (size_t i=0; i<m_dummyICpage.size(); ++i) {
-			m_dummyICpage[i].f = f;
-		}
+	// ... and set the entries after the last instruction slot to
+	// special "end of page" handlers.
+	icpage[m_dyntransICentriesPerPage + 0].f = CPUDyntransComponent::instr_endOfPage;
+	icpage[m_dyntransICentriesPerPage + 1].f = CPUDyntransComponent::instr_endOfPage2;
+}
 
-		// ... and set the entries after the last instruction slot to
-		// special "end of page" handlers.
-		m_dummyICpage[m_dyntransICentriesPerPage + 0].f = CPUDyntransComponent::instr_endOfPage;
-		m_dummyICpage[m_dyntransICentriesPerPage + 1].f = CPUDyntransComponent::instr_endOfPage2;
+
+struct DyntransIC *CPUDyntransComponent::DyntransGetICPage(uint64_t addr)
+{
+	struct DyntransIC *icpage = NULL;
+
+	addr &= (m_pageSize - 1);
+
+	// Find a page for addr.
+
+	// If page lookup failed: allocate new page.
+	// TODO
+	vector< struct DyntransIC > * tmp = new vector< struct DyntransIC >();
+	tmp->resize(m_dyntransICentriesPerPage + DYNTRANS_PAGE_NSPECIALENTRIES);
+	icpage = &((*tmp)[0]);
+
+	{
+		// Fill the newly allocated page with suitable function pointers.
+		DyntransClearICPage(icpage);
 	}
 
-	// TODO: m_dummyICpage, change to whatever was returned from the code above.
-	m_ICpage = &m_dummyICpage[0];
+	return icpage;
+}
+
+
+void CPUDyntransComponent::DyntransPCtoPointers()
+{
+	m_ICpage = DyntransGetICPage(m_pc);
+
+	assert(m_ICpage != NULL);
 
 	// Here, m_ICpage points to a valid page. Calculate m_nextIC from
 	// the low bits of m_pc:
