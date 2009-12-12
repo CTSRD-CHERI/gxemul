@@ -4418,3 +4418,5 @@ Changelog for GXemul:
 		framework concepts to end-users.
 20090905	Continuing on the dyntrans core: page allocation.
 20091207	The dev_ether MAC address can now be read.
+20091212	Updating the OpenBSD/landisk install instructions in
+		guestoses.html from OpenBSD 4.5 to 4.6.
