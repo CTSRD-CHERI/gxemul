@@ -14,7 +14,9 @@ do_src:
 	cd src; $(MAKE)
 
 test: build
-	./$(BIN) -WW@U
+	@rm -f tmp_valgrind.out
+	$(VALGRIND) ./$(BIN) -WW@U
+	@if [ -s tmp_valgrind.out ]; then cat tmp_valgrind.out; false; fi
 
 documentation: build
 	sed s/PAGETITLE/Machines/g < doc/head.html > doc/machines.html
@@ -42,7 +44,7 @@ uninstall:
 	rm -rf $(PREFIX)/share/doc/gxemul
 
 clean:
-	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out
+	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out tmp_valgrind.out
 	rm -f unittest*.h components*.h commands*.h
 	rm -rf doc/doxygen
 	cd src; $(MAKE) clean

@@ -104,12 +104,16 @@ if [ z"$*" != z ]; then
 			NOX11=YES
 		else if [ z$a = z--without-unittests ]; then
 			UNITTESTS=NO
+		else if [ z$a = z--disable-valgrind ]; then
+			DISABLEVALGRIND=YES
 		else if [ z$a = z--debug ]; then
 			DEBUG=YES
 		else if [ z$a = z--help ]; then
 			printf "usage: $0 [options]\n\n"
 			echo "  --disable-x           don't include X11 support,"\
 			    "even if the host supports it"
+			echo "  --disable-valgrind    don't use valgrind, even"\
+			    "if it is installed"
 			echo "  --without-unittests   don't include unit tests"
 			echo "  --debug               configure for a" \
 				"debug build (turn off optimizations)"
@@ -124,7 +128,7 @@ if [ z"$*" != z ]; then
 			echo "Run  $0 --help  to get a list of" \
 			    "available options."
 			exit
-		fi; fi; fi; fi
+		fi; fi; fi; fi; fi
 	done
 fi
 
@@ -954,12 +958,29 @@ rm -f _test_end*
 
 printf "checking for Doxygen... "
 
-if (doxygen --version > /dev/null); then
-	echo found
+if (doxygen --version); then
+	# Version is printed, if found.
 	DOXYGEN=doxygen
 else
 	# Not found is already printed, if doxygen is not found.
 	DOXYGEN="\#"
+fi
+
+
+###############################################################################
+
+printf "checking for valgrind... "
+
+if [ z$DISABLEVALGRIND = zYES ]; then
+	echo skipped
+else
+	if (valgrind --version); then
+		# Version is printed, if found.
+		VALGRIND="valgrind -q --log-file=tmp_valgrind.out"
+	else
+		# Not found is already printed, if valgrind is not found.
+		VALGRIND=""
+	fi
 fi
 
 
@@ -991,6 +1012,7 @@ echo "OTHERLIBS=$OTHERLIBS" >> _Makefile.header
 echo "CPU_ARCHS=$CPU_ARCHS" >> _Makefile.header
 echo "CPU_TOOLS=$CPU_TOOLS" >> _Makefile.header
 echo "DOXYGEN=$DOXYGEN" >> _Makefile.header
+echo "VALGRIND=$VALGRIND" >> _Makefile.header
 echo "PREFIX=$PREFIX" >> _Makefile.header
 echo "" >> _Makefile.header
 

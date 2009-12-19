@@ -470,6 +470,8 @@ public:
 		AddVariable("m_sint64", &m_sint64);
 		// TODO: Custom
 		// TODO: Bool
+
+		ResetState();
 	}
 
 	virtual void ResetState()
