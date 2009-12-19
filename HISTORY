@@ -4420,3 +4420,5 @@ Changelog for GXemul:
 20091207	The dev_ether MAC address can now be read.
 20091212	Updating the OpenBSD/landisk install instructions in
 		guestoses.html from OpenBSD 4.5 to 4.6.
+20091219	Include _GLIBCXX_DEBUG and _GLIBCXX_DEBUG_PEDANTIC defines in
+		debug builds, to potentially catch some STL misuses.

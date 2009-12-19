@@ -164,6 +164,7 @@ fi
 
 if [ z"$DEBUG" = zYES ]; then
 	echo "Building a debug version!"
+	CXXFLAGS="-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC $CXXFLAGS"
 else
 	CXXFLAGS="-DNDEBUG $CXXFLAGS"
 fi
