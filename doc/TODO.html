@@ -5,7 +5,7 @@
   <title>GXemul: TODO list</title>
   <meta name="robots" content="noarchive,nofollow,noindex">
 </head>
-<body>
+<body style="font-family : sans-serif;">
 
 <!-- 10 lines header.  -->
 
@@ -14,7 +14,29 @@
 
 <a href="./">Back to the index.</a>
 
-<pre>
+
+<h3>MAIN GOALS for 0.6.0</h3>
+
+<ul>
+	<li>Release 0.6.0 when <i>something</i> in the new framework works
+		well enough to be released
+		(hopefully some time during Summer 2010).
+	<li>The primary goal is [a subset of] <a href="machines/machine_testm88k.html">testm88k</a>.
+	<li>Most other machine modes will use the old framework.
+</ul>
+
+<p>Because of severe lack of spare time that can be allocated to the GXemul
+project, the 0.6.0 release will most likely not be very meaningful to end-users,
+since almost all old features will be deprecated/legacy features, and the new
+features will only work with <tt>testm88k</tt> (which most users will not care about).
+Still, it feels like the way to go forward.
+
+<p>(The name "0.5.x" will be skipped. This was the C++ version that was supposed
+to be a complete rewrite from scratch. There was not enough spare time.)
+
+
+<p><pre>
+
 Some things, in no specific order, that I'd like to fix:
 (Some items in this list are perhaps already fixed.)
 
@@ -25,20 +47,6 @@ Some things, in no specific order, that I'd like to fix:
 [X] = done  (but usually these entries are removed from the TODO list)
 </i>
 
--------------------------------------------------------------------------------
-
-MAIN GOAL for 0.6.0:
-
-	Release 0.6.0 (hopefully some time during Summer 2010) when
-	_something_ in the new framework works well enough to be released.
-
-	The primary goal is testm88k.
-
-	(The name "0.5.x" will be skipped. This was the C++ version that was
-	supposed to be a complete rewrite from scratch. There was not enough
-	spare time.)
-
--------------------------------------------------------------------------------
 
    [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
