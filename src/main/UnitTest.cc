@@ -61,10 +61,19 @@ void UnitTest::Assert(const string& strFailMessage,
 void UnitTest::Assert(const string& strFailMessage,
 	const string& actualValue, const string& expectedValue)
 {
-	if (actualValue != expectedValue)
-		Fail(strFailMessage +
+	if (actualValue != expectedValue) {
+		size_t pos;
+		for (pos = 0; pos < actualValue.length() && pos < expectedValue.length(); pos++)
+			if (actualValue[pos] != expectedValue[pos])
+				break;
+
+		stringstream mismatchPosition;
+		mismatchPosition << "\n\tMismatch at position " << pos;
+
+		Fail(strFailMessage + mismatchPosition.str() +
 		    "\n\tExpected: \"" + expectedValue + "\"" +
 		    "\n\tbut was:  \"" + actualValue + "\"");
+	}
 }
 
 
