@@ -208,9 +208,8 @@ struct DyntransIC *CPUDyntransComponent::DyntransGetICPage(uint64_t addr)
 
 	// If page lookup failed: allocate new page.
 	// TODO
-	vector< struct DyntransIC > * tmp = new vector< struct DyntransIC >();
-	tmp->resize(m_dyntransICentriesPerPage + DYNTRANS_PAGE_NSPECIALENTRIES);
-	icpage = &((*tmp)[0]);
+	m_dummyTestPage.resize(m_dyntransICentriesPerPage + DYNTRANS_PAGE_NSPECIALENTRIES);
+	icpage = &(m_dummyTestPage[0]);
 
 	{
 		// Fill the newly allocated page with suitable function pointers.

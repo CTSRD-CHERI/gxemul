@@ -178,6 +178,9 @@ protected:
 	int			m_dyntransICshift;
 	int			m_executedCycles;
 	int			m_nrOfCyclesToExecute;
+
+	// TODO:
+	vector< struct DyntransIC > m_dummyTestPage;
 };
 
 
