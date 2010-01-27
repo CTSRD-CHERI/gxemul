@@ -4426,3 +4426,5 @@ Changelog for GXemul:
 		running 'make test'. If there is any output from valgrind -q
 		(i.e. errors), then make test fails.
 20100127	Patch from Tassilo Philipp to enable PPC's fabs instruction.
+		Patch from Yana to use return value from net_ethernet_rx()
+		correctly in dev_ether.c.

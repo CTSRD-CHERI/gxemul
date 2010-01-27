@@ -146,9 +146,8 @@ DEVICE_ACCESS(ether)
 				fatal("[ ether: RECEIVE but no net? ]\n");
 			else {
 				d->status &= ~DEV_ETHER_STATUS_PACKET_RECEIVED;
-				net_ethernet_rx(cpu->machine->emul->net,
-				    d, &incoming_ptr, &incoming_len);
-				if (incoming_ptr != NULL) {
+				if (net_ethernet_rx(cpu->machine->emul->net,
+				    d, &incoming_ptr, &incoming_len)) {
 					d->status |=
 					    DEV_ETHER_STATUS_PACKET_RECEIVED;
 					if (incoming_len>DEV_ETHER_BUFFER_SIZE)
