@@ -894,6 +894,21 @@ X(fmr)
 
 
 /*
+ *  fabs:  Floating-point Absulute Value
+ *
+ *  arg[0] = ptr to frb
+ *  arg[1] = ptr to frt
+ */
+X(fabs)
+{
+	uint64_t v;
+	CHECK_FOR_FPU_EXCEPTION;
+	v = *(uint64_t *)ic->arg[0];
+	*(uint64_t *)ic->arg[1] = v & 0x7fffffffffffffffULL;
+}
+
+
+/*
  *  fneg:  Floating-point Negate
  *
  *  arg[0] = ptr to frb
@@ -3846,11 +3861,13 @@ X(to_be_translated)
 			case PPC_63_FRSP:
 			case PPC_63_FCTIWZ:
 			case PPC_63_FNEG:
+			case PPC_63_FABS:
 			case PPC_63_FMR:
 				switch (xo) {
 				case PPC_63_FRSP:   ic->f = instr(frsp); break;
 				case PPC_63_FCTIWZ: ic->f = instr(fctiwz);break;
 				case PPC_63_FNEG:   ic->f = instr(fneg); break;
+				case PPC_63_FABS:   ic->f = instr(fabs); break;
 				case PPC_63_FMR:    ic->f = instr(fmr); break;
 				}
 				ic->arg[0] = (size_t)(&cpu->cd.ppc.fpr[rb]);

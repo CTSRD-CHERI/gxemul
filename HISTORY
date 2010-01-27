@@ -4425,4 +4425,4 @@ Changelog for GXemul:
 		If valgrind is found by the configure script, it is used when
 		running 'make test'. If there is any output from valgrind -q
 		(i.e. errors), then make test fails.
-
+20100127	Patch from Tassilo Philipp to enable PPC's fabs instruction.
