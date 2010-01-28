@@ -202,12 +202,22 @@ struct DyntransIC *CPUDyntransComponent::DyntransGetICPage(uint64_t addr)
 {
 	struct DyntransIC *icpage = NULL;
 
-	addr &= (m_pageSize - 1);
+	addr &= ~(m_pageSize - 1);
 
 	// Find a page for addr.
 
 	// If page lookup failed: allocate new page.
 	// TODO
+	if (m_dummyTestPage.size() == 0) {
+		// std::cerr << "Setting addr to " << addr << "\n";
+		m_dummyTestPageBase = addr;
+	} else {
+		if (m_dummyTestPageBase != addr) {
+			// std::cerr << "Addr failing: " << addr << "\n";
+			throw std::exception();
+		}
+	}
+	
 	m_dummyTestPage.resize(m_dyntransICentriesPerPage + DYNTRANS_PAGE_NSPECIALENTRIES);
 	icpage = &(m_dummyTestPage[0]);
 

@@ -181,6 +181,7 @@ protected:
 
 	// TODO:
 	vector< struct DyntransIC > m_dummyTestPage;
+	uint64_t		m_dummyTestPageBase;
 };
 
 
