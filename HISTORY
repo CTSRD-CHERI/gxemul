@@ -4428,3 +4428,5 @@ Changelog for GXemul:
 20100127	Patch from Tassilo Philipp to enable PPC's fabs instruction.
 		Patch from Yana to use return value from net_ethernet_rx()
 		correctly in dev_ether.c.
+20100128	Adding a check (for "make test") to see that delete isn't
+		used. Only a few exceptions are allowed.
