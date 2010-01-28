@@ -1,3 +1,4 @@
+./HISTORY
 ./src/debugger/debugger.cc
 ./src/debugger/debugger_cmds.cc
 ./src/include/refcount_ptr.h
