@@ -34,6 +34,8 @@
 #include "CPUComponent.h"
 #include "UnitTest.h"
 
+#include <assert.h>
+
 
 class CPUDyntransComponent;
 
@@ -211,6 +213,11 @@ private:
 			size_t approximateSizePerPage = sizeof(struct DyntransIC) * nICentriesPerpage + 64;
 			size_t nrOfPages = approximateSize / approximateSizePerPage;
 
+			if (nrOfPages < 2) {
+				std::cerr << "Too small translation cache!\n";
+				throw std::exception();
+			}
+
 			if (nICentriesPerpage == m_nICentriesPerpage &&
 			    nrOfPages == m_pageCache.size() &&
 			    pageShift == m_pageShift)
@@ -368,12 +375,59 @@ private:
 
 		void FreeLeastRecentlyUsedPage()
 		{
+			// This function should only be called if it is really necessary to
+			// free a page, i.e. if there is no free page at all.
 			assert(m_firstFree < 0);
 
-			// TODO
+			if (m_firstMRU == m_lastMRU) {
+				std::cerr << "Attempt to free a page, but there's only one page in the MRU list. Too small!\n";
+				throw std::exception();
+			}
 
-			std::cerr << "FreeLeastRecentlyUsedPage: TODO\n";
-			throw std::exception();
+			// This is the one we will free.
+			int index = m_lastMRU;
+			assert(m_pageCache[index].m_prev >= 0);
+			assert(m_pageCache[index].m_next < 0);
+
+			// Disconnect it from the MRU list...
+			m_lastMRU = m_pageCache[index].m_prev;
+			m_pageCache[m_lastMRU].m_next = -1;
+
+			// ... and add it first in the free-list:
+			if (m_firstFree < 0) {
+				// In fact, the free-list was empty.
+				m_firstFree = m_lastFree = index;
+				m_pageCache[index].m_prev = -1;
+				m_pageCache[index].m_next = -1;
+			} else {
+				m_pageCache[index].m_prev = -1;
+				m_pageCache[index].m_next = m_firstFree;
+				m_pageCache[m_firstFree].m_prev = index;
+				m_firstFree = index;
+			}
+
+			// Remove from the quick lookup chain:
+			uint64_t physPageNumber = m_pageCache[index].m_addr >> m_pageShift;
+			int quickLookupIndex = physPageNumber & (m_addrToFirstPageIndex.size() - 1);
+			int pageIndex = m_addrToFirstPageIndex[quickLookupIndex];
+			if (pageIndex == index) {
+				// Direct hit? Then remove from the base quick look up table...
+				m_addrToFirstPageIndex[quickLookupIndex] = m_pageCache[index].m_nextCacheEntryForAddr;
+			} else {
+				// ... otherwise traverse the chain until the next entry is the one we are removing.
+				while (true) {
+					if (m_pageCache[pageIndex].m_nextCacheEntryForAddr == index) {
+						m_pageCache[pageIndex].m_nextCacheEntryForAddr = m_pageCache[index].m_nextCacheEntryForAddr;
+						break;
+					}
+
+					pageIndex = m_pageCache[pageIndex].m_nextCacheEntryForAddr;
+				}
+			}
+
+			m_pageCache[index].m_nextCacheEntryForAddr = -1;
+
+			ValidateConsistency();
 		}
 
 		struct DyntransIC *AllocateNewPage(uint64_t addr)
@@ -472,6 +526,16 @@ private:
 					m_pageCache[pageIndex].m_next = m_firstMRU;
 					m_firstMRU = pageIndex;
 				}
+
+				// TODO: Hm... also move to front of the Quick Lookup chain?
+				// Only necessary if more memory is used/emulated than the
+				// size of the quick lookup table, e.g. if 2 GB ram are used,
+				// and the size of the lookup table is 1 GB, and pages
+				// at exactly 0 GB and 1 GB are used in this order:
+				// 1 0 1 1 1 1 1 1 1 1 1 1 1
+				// then 1 would first be placed in the chain, then 0 (which
+				// would insert it first in the chain). But all lookups after
+				// that would have to search the whole chain (0, 1) to find 1.
 
 				ValidateConsistency();
 

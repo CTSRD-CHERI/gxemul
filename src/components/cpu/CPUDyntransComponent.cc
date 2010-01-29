@@ -58,7 +58,7 @@ void CPUDyntransComponent::DyntransInit()
 		throw std::exception();
 	}
 
-	// 32 MB translation cache:
+	// 32 MB translation cache (per emulated CPU):
 	m_translationCache.Reinit(32 * 1024 * 1024, m_dyntransICentriesPerPage + DYNTRANS_PAGE_NSPECIALENTRIES, pageShift);
 }
 

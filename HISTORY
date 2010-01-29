@@ -4431,6 +4431,6 @@ Changelog for GXemul:
 20100128	Adding a check (for "make test") to see that delete isn't
 		used. Only a few exceptions are allowed.
 20100129	Reimplementing the (non-specialized) M88K bsr instruction.
-		Continuing on the dyntrans core: page allocation. Hopefully
-		most of the page allocation code (except for Least-Recently-
-		Used page deallocation) has been implemented now.
+		Continuing on the dyntrans core: page allocation. The basics
+		(page allocation and LRU deallocation) have been implemented,
+		but not really tested in practice yet.
