@@ -42,12 +42,24 @@ CPUDyntransComponent::CPUDyntransComponent(const string& className, const string
 void CPUDyntransComponent::DyntransInit()
 {
 	m_nextIC = NULL;
-	m_ICpage = NULL;
+	m_firstIConPage = NULL;
 
 	m_dyntransICshift = GetDyntransICshift();
 
 	m_dyntransICentriesPerPage = m_pageSize >> m_dyntransICshift;
 	m_dyntransPageMask = (m_pageSize - 1) - ((1 << m_dyntransICshift) - 1);
+
+	int pageShift = 0;
+	while (pageShift < 32 && (1 << pageShift) != m_pageSize)
+		pageShift ++;
+
+	if (pageShift >= 32) {
+		std::cerr << "Non-power-of-2 page size?\n";
+		throw std::exception();
+	}
+
+	// 32 MB translation cache:
+	m_translationCache.Reinit(32 * 1024 * 1024, m_dyntransICentriesPerPage + DYNTRANS_PAGE_NSPECIALENTRIES, pageShift);
 }
 
 
@@ -68,7 +80,7 @@ void CPUDyntransComponent::DyntransInit()
  * During the loop, the pc value is _not_ necessarily updated for each
  * instruction call. Instead, the low bits of the pc value should be considered
  * meaningless, and the offset of the m_nextIC pointer within the current
- * code page (pointed to by m_ICpage) defines the lowest pc bits.
+ * code page (pointed to by m_firstIConPage) defines the lowest pc bits.
  *
  * After completing the main loop, the pc value is resynched by calling
  * DyntransResyncPC().
@@ -80,8 +92,8 @@ int CPUDyntransComponent::Execute(GXemul* gxemul, int nrOfCycles)
 	DyntransPCtoPointers();
 
 	struct DyntransIC *ic = m_nextIC;
-	if (m_nextIC == NULL || m_ICpage == NULL) {
-		std::cerr << "Internal error: m_nextIC or m_ICpage is NULL.\n";
+	if (m_nextIC == NULL || m_firstIConPage == NULL) {
+		std::cerr << "Internal error: m_nextIC or m_firstIConPage is NULL.\n";
 		throw std::exception();
 	}
 
@@ -200,29 +212,12 @@ void CPUDyntransComponent::DyntransClearICPage(struct DyntransIC* icpage)
 
 struct DyntransIC *CPUDyntransComponent::DyntransGetICPage(uint64_t addr)
 {
-	struct DyntransIC *icpage = NULL;
+	bool clear = false;
+	struct DyntransIC *icpage = m_translationCache.GetICPage(addr, clear);
 
-	addr &= ~(m_pageSize - 1);
-
-	// Find a page for addr.
-
-	// If page lookup failed: allocate new page.
-	// TODO
-	if (m_dummyTestPage.size() == 0) {
-		// std::cerr << "Setting addr to " << addr << "\n";
-		m_dummyTestPageBase = addr;
-	} else {
-		if (m_dummyTestPageBase != addr) {
-			// std::cerr << "Addr failing: " << addr << "\n";
-			throw std::exception();
-		}
-	}
-	
-	m_dummyTestPage.resize(m_dyntransICentriesPerPage + DYNTRANS_PAGE_NSPECIALENTRIES);
-	icpage = &(m_dummyTestPage[0]);
-
-	{
-		// Fill the newly allocated page with suitable function pointers.
+	if (clear) {
+		// This is a newly allocated page. Let's fill the page with
+		// suitable to-be-translated function pointers.
 		DyntransClearICPage(icpage);
 	}
 
@@ -232,20 +227,20 @@ struct DyntransIC *CPUDyntransComponent::DyntransGetICPage(uint64_t addr)
 
 void CPUDyntransComponent::DyntransPCtoPointers()
 {
-	m_ICpage = DyntransGetICPage(m_pc);
+	m_firstIConPage = DyntransGetICPage(m_pc);
 
-	assert(m_ICpage != NULL);
+	assert(m_firstIConPage != NULL);
 
-	// Here, m_ICpage points to a valid page. Calculate m_nextIC from
+	// Here, m_firstIConPage points to a valid page. Calculate m_nextIC from
 	// the low bits of m_pc:
 	int offsetWithinPage = (m_pc & m_dyntransPageMask) >> m_dyntransICshift;
-	m_nextIC = m_ICpage + offsetWithinPage;
+	m_nextIC = m_firstIConPage + offsetWithinPage;
 }
 
 
 void CPUDyntransComponent::DyntransResyncPC()
 {
-	ptrdiff_t instructionIndex = m_nextIC - m_ICpage;
+	ptrdiff_t instructionIndex = m_nextIC - m_firstIConPage;
 
 	// On a page with e.g. 1024 instruction slots, instructionIndex is usually
 	// between 0 and 1023. This means that the PC points to within this
@@ -311,6 +306,7 @@ bool CPUDyntransComponent::DyntransReadInstruction(uint16_t& iword)
 			    << " could not be read!";
 			ui->ShowDebugMessage(this, ss.str());
 		}
+
 		return false;
 	}
 

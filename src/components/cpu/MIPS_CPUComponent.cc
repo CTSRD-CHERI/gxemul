@@ -1131,7 +1131,7 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 			// within the same page? Then use the samepage_function:
 			if (ic->arg[2].u32 < (uint32_t)((m_dyntransICentriesPerPage - 1)
 			    << m_dyntransICshift) && (m_pc & mask) < mask) {
-				ic->arg[2].p = (m_ICpage +
+				ic->arg[2].p = (m_firstIConPage +
 				    ((ic->arg[2].u32 >> m_dyntransICshift)
 				    & (m_dyntransICentriesPerPage - 1)));
 				ic->f = samepage_function;

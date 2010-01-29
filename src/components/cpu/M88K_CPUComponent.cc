@@ -981,6 +981,18 @@ DYNTRANS_INSTR(M88K_CPUComponent,mulu_imm)
 }
 
 
+DYNTRANS_INSTR(M88K_CPUComponent,bsr)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+	cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2].u32;
+
+	cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1].u32);
+	cpu->DyntransPCtoPointers();
+}
+
+
 DYNTRANS_INSTR(M88K_CPUComponent,bsr_samepage)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
@@ -1128,7 +1140,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	//				cpu->translation_readahead = 2;
 	//			break;
 			case 0x32:
-				ic->f = NULL; // instr(bsr);
+				ic->f = instr_bsr;
 				samepage_function = instr_bsr_samepage;
 				break;
 	//		case 0x33:
@@ -1140,10 +1152,11 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 			/*  Prepare both samepage and offset style args.
 			    (Only one will be used in the actual instruction.)  */
-			ic->arg[0].p = ( m_ICpage + (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
+			ic->arg[0].p = ( m_firstIConPage + (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
 			ic->arg[1].u32 = offset;
-			ic->arg[2].u32 = (m_pc & 0xffc) + 4;    /*  Return offset
-								for bsr_samepage  */
+
+			/*  Return offset for bsr (stored in m_r[M88K_RETURN_REG]):  */
+			ic->arg[2].u32 = (m_pc & 0xffc) + 4;
 
 			if (offset >= 0 && offset <= 0xffc &&
 			    samepage_function != NULL)

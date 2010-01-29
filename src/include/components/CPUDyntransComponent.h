@@ -111,12 +111,12 @@ protected:
 	void DyntransToBeTranslatedDone(struct DyntransIC*);
 
 	/**
-	 * \brief Calculate m_pc based on m_nextIC and m_ICpage.
+	 * \brief Calculate m_pc based on m_nextIC and m_firstIConPage.
 	 */
 	void DyntransResyncPC();
 
 	/**
-	 * \brief Calculate m_nextIC and m_ICpage, based on m_pc.
+	 * \brief Calculate m_nextIC and m_firstIConPage, based on m_pc.
 	 *
 	 * This function may return pointers to within an existing translation
 	 * page (hopefully the most common case, since it is the fastest), or
@@ -167,11 +167,356 @@ protected:
 	// Shifts, rotates.
 	DECLARE_DYNTRANS_INSTR(shift_left_u64_u64_imm5_truncS32);
 
+private:
+	class DyntransTranslationPage
+	{
+	public:
+		DyntransTranslationPage(int nICentriesPerpage)
+			: m_prev(-1)
+			, m_next(-1)
+			, m_nextCacheEntryForAddr(-1)
+			, m_addr(0)
+		{
+			m_ic.resize(nICentriesPerpage);
+		}
+
+	public:
+		// Linked list: Freelist or MRU list
+		int				m_prev;
+		int				m_next;
+
+		// Address match:
+		int				m_nextCacheEntryForAddr;
+		uint64_t			m_addr;
+
+		// Translated instructions:
+		vector< struct DyntransIC >	m_ic;
+	};
+
+	class DyntransTranslationCache
+	{
+	public:
+		DyntransTranslationCache()
+			: m_nICentriesPerpage(0)
+			, m_pageShift(0)
+			, m_firstFree(-1)
+			, m_lastFree(-1)
+			, m_firstMRU(-1)
+			, m_lastMRU(-1)
+		{
+		}
+
+		void Reinit(size_t approximateSize, int nICentriesPerpage, int pageShift)
+		{
+			size_t approximateSizePerPage = sizeof(struct DyntransIC) * nICentriesPerpage + 64;
+			size_t nrOfPages = approximateSize / approximateSizePerPage;
+
+			if (nICentriesPerpage == m_nICentriesPerpage &&
+			    nrOfPages == m_pageCache.size() &&
+			    pageShift == m_pageShift)
+				return;
+
+			m_nICentriesPerpage = nICentriesPerpage;
+			m_pageShift = pageShift;
+
+			// Generate empty pages:
+			m_pageCache.clear();
+			m_pageCache.resize(nrOfPages, DyntransTranslationPage(nICentriesPerpage));
+
+			// Set up the free-list to connect all pages:
+			m_firstFree = 0;
+			m_lastFree = nrOfPages - 1;
+			for (int i=m_firstFree; i<=m_lastFree; i++) {
+				m_pageCache[i].m_prev = i-1;	// note: i=0 (first page)
+								// results in prev = -1.
+
+				if (i == m_lastFree)
+					m_pageCache[i].m_next = -1;
+				else
+					m_pageCache[i].m_next = i+1;
+			}
+
+			// No pages in use yet, so nothing on the MRU list:
+			m_firstMRU = m_lastMRU = -1;
+
+			// Reset the quick lookup table:
+			// (Currently hardcoded to allow the first 1 GB of emulated physical memory
+			// to be looked up with 1 call, if more than 1 GB of RAM is used, the
+			// m_nextCacheEntryForAddr chain must be traversed...)
+			m_addrToFirstPageIndex.resize(1024 * 1048576 >> m_pageShift);
+			for (size_t i=0; i<m_addrToFirstPageIndex.size(); ++i)
+				m_addrToFirstPageIndex[i] = -1;
+
+			ValidateConsistency();
+		}
+
+		void ValidateConsistency()
+		{
+			vector<bool> pageIsInMRUList;
+			vector<bool> pageIsInFreeList;
+			vector<bool> pageIsInMRUListReverse;
+			vector<bool> pageIsInFreeListReverse;
+
+			pageIsInMRUList.resize(m_pageCache.size(), false);
+			pageIsInFreeList.resize(m_pageCache.size(), false);
+			pageIsInMRUListReverse.resize(m_pageCache.size(), false);
+			pageIsInFreeListReverse.resize(m_pageCache.size(), false);
+
+			// Follow free-list forward:
+			int i = m_firstFree;
+			while (i >= 0) {
+				pageIsInFreeList[i] = true;
+				i = m_pageCache[i].m_next;
+			}
+
+			// Follow free-list backwards:
+			i = m_lastFree;
+			while (i >= 0) {
+				pageIsInFreeListReverse[i] = true;
+				i = m_pageCache[i].m_prev;
+			}
+
+			// Follow MRU-list forward:
+			i = m_firstMRU;
+			while (i >= 0) {
+				pageIsInMRUList[i] = true;
+				i = m_pageCache[i].m_next;
+			}
+
+			// Follow MRU-list backwards:
+			i = m_lastMRU;
+			while (i >= 0) {
+				pageIsInMRUListReverse[i] = true;
+				i = m_pageCache[i].m_prev;
+			}
+
+			// The forward and reverse sets should match:
+			for (size_t j=0; j<m_pageCache.size(); ++j) {
+				if (pageIsInFreeList[j] != pageIsInFreeListReverse[j]) {
+					std::cerr << "Forward and reverse Free-list iteration mismatch, position " << j << "!\n";
+					throw std::exception();
+				}
+
+				if (pageIsInMRUList[j] != pageIsInMRUListReverse[j]) {
+					std::cerr << "Forward and reverse MRU-list iteration mismatch, position " << j << "!\n";
+					throw std::exception();
+				}
+
+				if ((pageIsInMRUList[j] ^ pageIsInFreeList[j]) == false) {
+					std::cerr << "Each page should be in exactly ONE of the two lists, position " << j << "!\n";
+					throw std::exception();
+				}
+			}
+
+			vector<bool> pageIsPointedToByQuickLookupTable;
+			vector<bool> pageIsPointedToByQLTChain;
+			pageIsPointedToByQuickLookupTable.resize(m_pageCache.size(), false);
+			pageIsPointedToByQLTChain.resize(m_pageCache.size(), false);
+
+			for (size_t k=0; k<m_addrToFirstPageIndex.size(); ++k)
+				if (m_addrToFirstPageIndex[k] >= 0)
+					pageIsPointedToByQuickLookupTable[m_addrToFirstPageIndex[k]] = true;
+
+			for (size_t k=0; k<m_pageCache.size(); ++k) {
+				int index = m_pageCache[k].m_nextCacheEntryForAddr;
+				if (index >= 0)
+					pageIsPointedToByQLTChain[index] = true;
+			}
+
+			for (size_t k=0; k<pageIsInFreeList.size(); ++k) {
+				if (!pageIsInFreeList[k])
+					continue;
+
+				if (m_pageCache[k].m_nextCacheEntryForAddr >= 0) {
+					std::cerr << "Pages on the free-list should not have m_nextCacheEntryForAddr set!\n";
+					throw std::exception();
+				}
+
+				if (pageIsPointedToByQuickLookupTable[k]) {
+					std::cerr << "Pages on the free-list should not be pointed to by the quick lookup table!\n";
+					throw std::exception();
+				}
+
+				if (pageIsPointedToByQLTChain[k]) {
+					std::cerr << "Pages on the free-list should not be in the quick lookup table chain!\n";
+					throw std::exception();
+				}
+			}
+
+			for (size_t k=0; k<pageIsInMRUList.size(); ++k) {
+				if (!pageIsInMRUList[k])
+					continue;
+
+				uint64_t addr = m_pageCache[k].m_addr;
+				uint64_t physPageNumber = addr >> m_pageShift;
+				int quickLookupIndex = physPageNumber & (m_addrToFirstPageIndex.size() - 1);
+				int pageIndex = m_addrToFirstPageIndex[quickLookupIndex];
+
+				while (pageIndex >= 0) {
+					if (m_pageCache[pageIndex].m_addr == addr)
+						break;
+
+					pageIndex = m_pageCache[pageIndex].m_nextCacheEntryForAddr;
+				}
+
+				if (pageIndex < 0) {
+					std::cerr << "Pages in the MRU list must be reachable from the quick lookup table!\n";
+					throw std::exception();
+				}
+			}
+		}
+
+		void FreeLeastRecentlyUsedPage()
+		{
+			assert(m_firstFree < 0);
+
+			// TODO
+
+			std::cerr << "FreeLeastRecentlyUsedPage: TODO\n";
+			throw std::exception();
+		}
+
+		struct DyntransIC *AllocateNewPage(uint64_t addr)
+		{
+			int index = m_firstFree;
+			assert(index >= 0);
+
+			// Let's grab this index for ourselves...
+
+			// Was this the only free page?
+			if (index == m_lastFree) {
+				// Then there will be no more free pages.
+				m_firstFree = m_lastFree = -1;
+			} else {
+				// No, just update the chain:
+				m_firstFree = m_pageCache[index].m_next;
+				m_pageCache[m_firstFree].m_prev = -1;
+			}
+
+			// The page's prev and next fields should be updated to
+			// be part of the MRU list now.
+
+			// Is there nothing in the MRU list?
+			if (m_firstMRU == -1) {
+				// Then we are the only one.
+				m_firstMRU = m_lastMRU = index;
+				m_pageCache[index].m_next = m_pageCache[index].m_prev = -1;
+			} else {
+				// Then we place ourselves first:
+				m_pageCache[m_firstMRU].m_prev = index;
+				m_pageCache[index].m_next = m_firstMRU;
+				m_firstMRU = index;
+				m_pageCache[index].m_prev = -1;
+			}
+
+			m_pageCache[index].m_addr = addr;
+
+			// Insert into quick lookup table:
+			uint64_t physPageNumber = addr >> m_pageShift;
+			int quickLookupIndex = physPageNumber & (m_addrToFirstPageIndex.size() - 1);
+
+			// Are we the only one? (I.e. the first page for this quick lookup index.)
+			if (m_addrToFirstPageIndex[quickLookupIndex] < 0) {
+				m_addrToFirstPageIndex[quickLookupIndex] = index;
+				m_pageCache[index].m_nextCacheEntryForAddr = -1;
+			} else {
+				// No. Let's add ourselves first in the chain:
+				m_pageCache[index].m_nextCacheEntryForAddr = m_addrToFirstPageIndex[quickLookupIndex];
+				m_addrToFirstPageIndex[quickLookupIndex] = index;
+			}
+
+			ValidateConsistency();
+
+			return &(m_pageCache[index].m_ic[0]);
+		}
+
+		struct DyntransIC *GetICPage(uint64_t addr, bool& clear)
+		{
+			clear = false;
+
+			// Strip of the low bits:
+			addr >>= m_pageShift;
+			uint64_t physPageNumber = addr;
+			addr <<= m_pageShift;
+
+			int quickLookupIndex = physPageNumber & (m_addrToFirstPageIndex.size() - 1);
+			int pageIndex = m_addrToFirstPageIndex[quickLookupIndex];
+
+			// std::cerr << "addr " << addr << ", physPageNumber " << physPageNumber << ", quickLookupIndex " << quickLookupIndex << ", pageIndex " << pageIndex << "\n";
+
+			// If pageIndex >= 0, then pageIndex points to a page which _may_ be for this addr.
+			while (pageIndex >= 0) {
+				if (m_pageCache[pageIndex].m_addr == addr)
+					break;
+
+				// If the page for pageIndex was for some other address, then
+				// let's continue searching the chain...
+				pageIndex = m_pageCache[pageIndex].m_nextCacheEntryForAddr;
+			}
+
+			// If we have a definite page index, then return a pointer that page's ICs:
+			if (pageIndex >= 0) {
+				// Update the MRU list, unless this page was already first,
+				// so that m_firstMRU points to the page.
+				if (m_firstMRU != pageIndex) {
+					// Disconnect from previous place...
+					int prev = m_pageCache[pageIndex].m_prev;
+					int next = m_pageCache[pageIndex].m_next;
+					if (prev >= 0)
+						m_pageCache[prev].m_next = next;
+					if (next >= 0)
+						m_pageCache[next].m_prev = prev;
+
+					// ... and insert first in list:
+					m_pageCache[pageIndex].m_prev = -1;
+					m_pageCache[pageIndex].m_next = m_firstMRU;
+					m_firstMRU = pageIndex;
+				}
+
+				ValidateConsistency();
+
+				return &(m_pageCache[pageIndex].m_ic[0]);
+			}
+
+			// The address was NOT in the translation cache at all. So we have
+			// to create a new page.
+
+			// If the free-list is all used up, that means we have to free something
+			// before we can allocate a new page...
+			if (m_firstFree < 0)
+				FreeLeastRecentlyUsedPage();
+
+			// ... and then finally allocate a new page:
+			clear = true;
+			return AllocateNewPage(addr);
+		}
+
+	private:
+		// Number of translated instructions per page, and number of bits
+		// to shift to convert address to page number:
+		int				m_nICentriesPerpage;
+		int				m_pageShift;
+
+		// Free-list of pages:
+		int				m_firstFree;
+		int				m_lastFree;
+
+		// Most-Recently-Used list of pages:
+		int				m_firstMRU;
+		int				m_lastMRU;
+
+		// "Usually" quick lookup table, address to page index:
+		vector<int>			m_addrToFirstPageIndex;
+
+		// The actual pages:
+		vector<DyntransTranslationPage>	m_pageCache;
+	};
+
 protected:
 	/*
 	 * Volatile state:
 	 */
-	struct DyntransIC *	m_ICpage;
+	struct DyntransIC *	m_firstIConPage;
 	struct DyntransIC *	m_nextIC;
 	int			m_dyntransPageMask;
 	int			m_dyntransICentriesPerPage;
@@ -179,9 +524,10 @@ protected:
 	int			m_executedCycles;
 	int			m_nrOfCyclesToExecute;
 
-	// TODO:
-	vector< struct DyntransIC > m_dummyTestPage;
-	uint64_t		m_dummyTestPageBase;
+	/*
+	 * Translation cache:
+	 */
+	DyntransTranslationCache	m_translationCache;
 };
 
 
