@@ -48,7 +48,7 @@ SUCH DAMAGE.
   <li><a href="#generalnotes">General notes on running "guest OSes"</a>
   <li><a href="#legacy">Legacy emulation modes</a>
   <li><a href="#netbsdpmaxinstall">NetBSD/pmax 5.0.1</a>
-  <li><a href="#netbsdarcinstall">NetBSD/arc 5.0</a>
+  <li><a href="#netbsdarcinstall">NetBSD/arc 5.0.1</a>
   <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 4.0.1</a>
   <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0</a>
   <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0</a>
@@ -233,13 +233,13 @@ harddisk image, follow these instructions:
 
 </pre>
   <li>Download a NetBSD/arc CDROM image, and the generic + ramdisk NetBSD/arc kernels:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0/arccd-5.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0/arccd-5.0.iso</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/arc/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/arc/binary/kernel/netbsd-GENERIC.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/arc/binary/kernel/netbsd-RAMDISK.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/arc/binary/kernel/netbsd-RAMDISK.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0.1/arccd-5.0.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0.1/arccd-5.0.1.iso</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.1/arc/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.1/arc/binary/kernel/netbsd-GENERIC.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.1/arc/binary/kernel/netbsd-RAMDISK.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.1/arc/binary/kernel/netbsd-RAMDISK.gz</a>
 
 </pre>
   <li>Start the emulator using this command line:<pre>
-	<b>gxemul -x -e pica -d nbsd_arc.img -d b:arccd-5.0.iso netbsd-RAMDISK.gz</b>
+	<b>gxemul -x -e pica -d nbsd_arc.img -d b:arccd-5.0.1.iso netbsd-RAMDISK.gz</b>
 
 </pre>
 	and proceed like you would do if you were installing NetBSD on a real
@@ -786,7 +786,7 @@ To install NetBSD/cats onto a disk image, follow these instructions:
 <p>Note that there are <i>long</i> delays during bootup.
 
 <p>Alternatively, to install from FTP, you can skip downloading the ISO,
-and start the install without <tt>-d catscd-4.0.1.iso</tt>. Suitable network 
+and start the install without <tt>-d catscd-5.0.iso</tt>. Suitable network 
 settings are IP 10.0.0.1, gateway/default route 10.0.0.254, netmask 
 255.0.0.0, nameserver 10.0.0.254.
 

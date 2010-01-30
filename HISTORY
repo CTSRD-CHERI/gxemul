@@ -4437,4 +4437,4 @@ Changelog for GXemul:
 20100130	Reimplementing the M88K ldcr instruction, and a slow version
 		of the st instruction (store 32-bit word).
 		Updating guest OS documentation (NetBSD/landisk 4.0.1 to
-		5.0.1, NetBSD/pmax 5.0 to 5.0.1).
+		5.0.1, NetBSD/pmax 5.0 to 5.0.1, NetBSD/arc 5.0 to 5.0.1).
