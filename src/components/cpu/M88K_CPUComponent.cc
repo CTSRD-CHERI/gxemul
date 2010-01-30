@@ -1069,6 +1069,36 @@ DYNTRANS_INSTR(M88K_CPUComponent,ldcr)
 }
 
 
+/*
+ *  st:   Store word.
+ *
+ *  arg[0] = pointer to register d
+ *  arg[1] = pointer to register s1
+ *  arg[2] = uint16_t offset
+ */
+DYNTRANS_INSTR(M88K_CPUComponent,st)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	uint32_t data = REG32(ic->arg[0]);
+	uint32_t addr = REG32(ic->arg[1]) + ic->arg[2].u32;
+
+	if (addr & 3) {
+		DYNTRANS_SYNCH_PC;
+		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
+		return;
+	}
+
+	cpu->AddressSelect(addr);
+
+	if (!cpu->WriteData(data, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+		// TODO: bus error exception?
+//		DYNTRANS_SYNCH_PC;
+//		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
+	}
+}
+
+
 /*****************************************************************************/
 
 
@@ -1091,6 +1121,50 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
 
 	switch (op26) {
+
+//	case 0x02:	/*  ld.hu  */
+//	case 0x03:	/*  ld.bu  */
+//	case 0x04:	/*  ld.d   */
+//	case 0x05:	/*  ld     */
+//	case 0x06:	/*  ld.h   */
+//	case 0x07:	/*  ld.b   */
+//	case 0x08:	/*  st.d   */
+	case 0x09:	/*  st     */
+//	case 0x0a:	/*  st.h   */
+//	case 0x0b:	/*  st.b   */
+		{
+			int store = 0, opsize = 0; // signedness = 0
+
+			ic->arg[0].p = &m_r[d];
+			ic->arg[1].p = &m_r[s1];
+			ic->arg[2].u32 = imm16;
+
+			switch (op26) {
+//			case 0x02: opsize = 1; break;
+//			case 0x03: opsize = 0; break;
+//			case 0x04: opsize = 3; break;
+//			case 0x05: opsize = 2; break;
+//			case 0x06: opsize = 1; signedness = 1; break;
+//			case 0x07: opsize = 0; signedness = 1; break;
+//			case 0x08: store = 1; opsize = 3; break;
+			case 0x09: ic->f = instr_st; store = 1; opsize = 2; break;
+//			case 0x0a: store = 1; opsize = 1; break;
+//			case 0x0b: store = 1; opsize = 0; break;
+			}
+
+			if (opsize == 3 && d == 31) {
+				// m88k load/store of register pair r31/r0 is not yet implemented
+				ic->f = NULL;
+				break;
+			}
+
+			// ic->f = m88k_loadstore[ opsize
+			//     + (store? M88K_LOADSTORE_STORE : 0)
+			//     + (signedness? M88K_LOADSTORE_SIGNEDNESS:0)
+			//     + (cpu->byte_order == EMUL_BIG_ENDIAN?
+			//        M88K_LOADSTORE_ENDIANNESS : 0) ];
+		}
+		break;
 
 	case 0x10:	/*  and    immu32  */
 	case 0x11:	/*  and.u  immu32  */
