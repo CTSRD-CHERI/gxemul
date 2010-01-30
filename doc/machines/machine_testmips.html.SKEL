@@ -1,0 +1,10 @@
+<p>The <tt>testmips</tt> machine is a GXemul-specific machine used for simple
+tests. It is based around a
+<a href="../components/component_mips_cpu.html">MIPS CPU</a>,
+and some simple devices.
+
+<p>TODO.
+
+<p><br><hr>
+</body>
+</html>

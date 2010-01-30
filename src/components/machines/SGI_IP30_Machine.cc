@@ -113,7 +113,7 @@ string SGI_IP30_Machine::GetAttribute(const string& attributeName)
 	//	return "yes";
 
 	if (attributeName == "comments")
-		return "For experiments with NetBSD/sgimips, and possibly"
+		return "For experiments with <a href=\"http://www.netbsd.org/ports/sgimips/\">NetBSD/sgimips</a>, and possibly"
 		    " also Linux for SGI Octane in the future.";
 
 	if (attributeName == "description")

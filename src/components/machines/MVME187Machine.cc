@@ -95,7 +95,7 @@ string MVME187Machine::GetAttribute(const string& attributeName)
 		return "MVME187 machine.";
 
 	if (attributeName == "comments")
-		return "For experiments with OpenBSD/mvme88k.";
+		return "For experiments with <a href=\"http://www.openbsd.org/mvme88k.html\">OpenBSD/mvme88k</a>.";
 
 	return "";
 }

@@ -1920,7 +1920,7 @@ from within the guest OS.
 <p>[Note: This is a <a href="#legacy"><font color="#dd2222"><b>LEGACY MODE</b></font></a>.]
 
 <p><a href="http://www.helenos.org/">HelenOS</a> can run in GXemul's
-<tt>testarm</tt> and <tt>testmips</tt> machine modes.
+<tt>testarm</tt> and <tt>oldtestmips</tt> machine modes.
 
 <p>To run HelenOS for ARM in GXemul:
 <ol>
@@ -1938,11 +1938,11 @@ from within the guest OS.
 	<a href="http://www.helenos.org/releases/HelenOS-0.4.0-mips32-gxemul.boot">http://www.helenos.org/releases/HelenOS-0.4.0-mips32-gxemul.boot</a>
   </pre>
   <li>Start GXemul using the following command line:<pre>
-  	<b>gxemul -X -E testmips -C 5Kc HelenOS-0.4.0-mips32-gxemul.boot</b>
+  	<b>gxemul -X -E oldtestmips -C 5Kc HelenOS-0.4.0-mips32-gxemul.boot</b>
   </pre>
 	(Note the <tt>-C 5Kc</tt> option. HelenOS depends on the fact that
 	the MIPS rdhwr instruction should trigger an 'invalid opcode'
-	exception, and the default testmips CPU (5KE) does not treat this
+	exception, and the default oldtestmips CPU (5KE) does not treat this
 	as an invalid opcode. It is valid, but not yet implemented.)
 </ol>
 

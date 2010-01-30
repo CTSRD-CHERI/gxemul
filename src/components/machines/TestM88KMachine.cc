@@ -41,12 +41,14 @@ refcount_ptr<Component> TestM88KMachine::Create(const ComponentCreateArgs& args)
 	if (!ComponentFactory::GetCreationArgOverrides(settings, args))
 		return NULL;
 
+
 	refcount_ptr<Component> machine =
 	    ComponentFactory::CreateComponent("machine");
 	if (machine.IsNULL())
 		return NULL;
 
 	machine->SetVariableValue("template", "\"testm88k\"");
+
 
 	refcount_ptr<Component> mainbus =
 	    ComponentFactory::CreateComponent("mainbus");

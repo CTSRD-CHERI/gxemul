@@ -202,7 +202,7 @@ MACHINE_SETUP(barem88k)
 }
 
 
-MACHINE_SETUP(testm88k)
+MACHINE_SETUP(oldtestm88k)
 {
 	machine->machine_name = strdup("M88K test machine");
 
@@ -216,7 +216,7 @@ MACHINE_DEFAULT_CPU(barem88k)
 }
 
 
-MACHINE_DEFAULT_CPU(testm88k)
+MACHINE_DEFAULT_CPU(oldtestm88k)
 {
 	machine->cpu_name = strdup("88110");
 }
@@ -231,12 +231,12 @@ MACHINE_REGISTER(barem88k)
 }
 
 
-MACHINE_REGISTER(testm88k)
+MACHINE_REGISTER(oldtestm88k)
 {
-	MR_DEFAULT(testm88k, "Test-machine for M88K",
+	MR_DEFAULT(oldtestm88k, "Test-machine for M88K",
 	    ARCH_M88K, MACHINE_TESTM88K);
 
-	machine_entry_add_alias(me, "testm88k");
+	machine_entry_add_alias(me, "oldtestm88k");
 }
 
 
@@ -247,7 +247,7 @@ MACHINE_SETUP(baremips)
 }
 
 
-MACHINE_SETUP(testmips)
+MACHINE_SETUP(oldtestmips)
 {
 	/*
 	 *  A MIPS test machine. Originally, this was created as a way for
@@ -304,7 +304,7 @@ MACHINE_DEFAULT_CPU(baremips)
 }
 
 
-MACHINE_DEFAULT_CPU(testmips)
+MACHINE_DEFAULT_CPU(oldtestmips)
 {
 	machine->cpu_name = strdup("5KE");
 }
@@ -319,12 +319,12 @@ MACHINE_REGISTER(baremips)
 }
 
 
-MACHINE_REGISTER(testmips)
+MACHINE_REGISTER(oldtestmips)
 {
-	MR_DEFAULT(testmips, "Test-machine for MIPS",
+	MR_DEFAULT(oldtestmips, "Test-machine for MIPS",
 	    ARCH_MIPS, MACHINE_TESTMIPS);
 
-	machine_entry_add_alias(me, "testmips");
+	machine_entry_add_alias(me, "oldtestmips");
 }
 
 

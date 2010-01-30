@@ -58,7 +58,9 @@ SUCH DAMAGE.
 <a name="hello"></a>
 <h3>Hello world:</h3>
 
-You might want to use the emulator to develop programs on your own,
+<p>[ Note: This page is about the <font color="#dd2222"><b>LEGACY MODES</b></font> of GXemul. ]
+
+<p>You might want to use the emulator to develop programs on your own,
 not just run precompiled kernels such as NetBSD. To get started, I recommend
 that you do two things:
 
@@ -81,7 +83,7 @@ examples of how the demo programs can be built.
 
 <p>Once you have tried running the Hello World program from the command 
 line, e.g.<pre>
-	<b>gxemul -E testmips hello_mips</b>
+	<b>gxemul -E oldtestmips hello_mips</b>
 </pre>
 you can experiment with adding one or more of the following command line 
 options:
@@ -120,7 +122,7 @@ It can either run in "bare" mode, where no devices are included by default
 (just the CPU), or in a "test" mode where some simple devices are 
 emulated.
 
-<p>The test machines (<tt>testmips</tt>, <tt>testppc</tt>, etc) have the
+<p>The test machines (<tt>oldtestmips</tt>, <tt>testppc</tt>, etc) have the
 following experimental devices:
 
 <p>
@@ -541,7 +543,7 @@ what kind of IPI it was.
 <p><center>
 <table border="1">
 	<tr><td align="center">
-		<b><tt>testmips</tt></b> (as native MIPS interrupts)
+		<b><tt>oldtestmips</tt></b> (as native MIPS interrupts)
 	</td></tr>
 	<tr><td>
 		<table border="0">

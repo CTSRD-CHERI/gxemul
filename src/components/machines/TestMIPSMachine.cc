@@ -41,12 +41,14 @@ refcount_ptr<Component> TestMIPSMachine::Create(const ComponentCreateArgs& args)
 	if (!ComponentFactory::GetCreationArgOverrides(settings, args))
 		return NULL;
 
+
 	refcount_ptr<Component> machine =
 	    ComponentFactory::CreateComponent("machine");
 	if (machine.IsNULL())
 		return NULL;
 
 	machine->SetVariableValue("template", "\"testmips\"");
+
 
 	refcount_ptr<Component> mainbus =
 	    ComponentFactory::CreateComponent("mainbus");
@@ -55,12 +57,14 @@ refcount_ptr<Component> TestMIPSMachine::Create(const ComponentCreateArgs& args)
 
 	machine->AddChild(mainbus);
 
+
 	refcount_ptr<Component> ram = ComponentFactory::CreateComponent("ram");
 	if (ram.IsNULL())
 		return NULL;
 
 	ram->SetVariableValue("memoryMappedSize", settings["ram"]);
 	mainbus->AddChild(ram);
+
 
 	refcount_ptr<Component> rom = ComponentFactory::CreateComponent("ram");
 	if (rom.IsNULL())
@@ -73,6 +77,17 @@ refcount_ptr<Component> TestMIPSMachine::Create(const ComponentCreateArgs& args)
 	rom->SetVariableValue("memoryMappedSize", tmpss2.str());
 	rom->SetVariableValue("writeProtect", "true");
 	mainbus->AddChild(rom);
+
+
+	refcount_ptr<Component> fb_videoram = ComponentFactory::CreateComponent("ram");
+	if (fb_videoram.IsNULL())
+		return NULL;
+
+	fb_videoram->SetVariableValue("name", "\"fb_videoram0\"");
+	fb_videoram->SetVariableValue("memoryMappedBase", "0x12000000");
+	fb_videoram->SetVariableValue("memoryMappedSize",   "0xf00000");
+	mainbus->AddChild(fb_videoram);
+
 
 	int ncpus;
 	stringstream tmpss3;

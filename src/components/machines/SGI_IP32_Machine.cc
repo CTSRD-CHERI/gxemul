@@ -95,9 +95,10 @@ string SGI_IP32_Machine::GetAttribute(const string& attributeName)
 	//	return "yes";
 
 	if (attributeName == "comments")
-		return "For experiments with NetBSD/sgimips, OpenBSD/sgi, "
-		    "Linux for O2, and possibly also SGI O2 PROMs and/or"
-		    " IRIX in the future.";
+		return "For experiments with <a href=\"http://www.netbsd.org/ports/sgimips/\">NetBSD/sgimips</a>,"
+		    " <a href=\"http://www.openbsd.org/sgi.html\">OpenBSD/sgi</a>, "
+		    "Linux for O2, and possibly also <a href=\"http://en.wikipedia.org/wiki/SGI_O2\">SGI O2</a> PROMs and/or"
+		    " <a href=\"http://en.wikipedia.org/wiki/IRIX\">IRIX</a> in the future.";
 
 	if (attributeName == "description")
 		return "SGI IP32 (O2) machine.";
