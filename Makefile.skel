@@ -45,7 +45,7 @@ uninstall:
 	rm -rf $(PREFIX)/share/doc/gxemul
 
 clean:
-	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out tmp_*.out
+	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out tmp_*.out*
 	rm -f unittest*.h components*.h commands*.h
 	rm -rf doc/doxygen
 	cd src; $(MAKE) clean
