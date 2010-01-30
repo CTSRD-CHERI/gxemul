@@ -28,32 +28,35 @@ controllers.
 <p>The <a href="index.html">documentation</a> lists the machines and
 guest operating systems that 
 can be regarded as "working" in GXemul. The best working guest operating 
-systems are <a href="guestoses.html#netbsdpmaxinstall">NetBSD/pmax</a>
-and <a href="guestoses.html#netbsdcatsinstall">NetBSD/cats</a>.
+system is <a href="guestoses.html#netbsdpmaxinstall">NetBSD/pmax</a>.
 
 
-<p><br>The changes between release 0.4.7.2 and 0.6.0 are:
+<p><br>The main change between release 0.4.7.2 and 0.6.0 is:
+
+<ul>
+  <li>A new emulation framework, written from scratch (in C++), is now
+  	beginning to take shape. So far, <i>only the
+	<a href="machines/machine_testm88k.html">testm88k</a> machine mode</i>
+	has been rewritten to use the new framework, all other machine modes
+	run in legacy mode using the old framework.
+	<p>The new <tt>testm88k</tt> mode is much less complete than the old
+	<tt>testm88k</tt>; the reason for concentrating on this mode is to be able
+	to make an initial release of the new framework within a reasonable
+	time frame.
+</ul>
+
+<p>In addition to the new framework, a couple of other changes are worth
+mentioning:
 
 <ul>
 
-  <li>The beginnings of a completely new emulation framework, written
-  	in C++, is now in place.
-
-	<p>Note: So far, <i>only the
-	<a href="machines/machine_testm88k.html">testm88k</a> machine mode</i>
-	has been rewritten to use
-	the new framework, all other machine modes run in legacy mode using
-	the old framework.
-
-  <p>
   <li>Many unused, rarely used, and bogus emulation modes and features
   	were removed, to reduce the maintenance burden.
 
   <p>
-  <li>Unit tests for newly written (C++) code.
-
-  <p>
-  <li>Source code is <a href="doxygen/html/index.html">documented using Doxygen comments</a>.
+  <li>New source code (but not the legacy part) is
+  	<a href="doxygen/html/index.html">documented using Doxygen comments</a>,
+  	and there is a unit testing framework in place.
 
   <p>
   <li>There is now finally an <tt>install</tt> Makefile target, and
@@ -83,11 +86,12 @@ and <a href="guestoses.html#netbsdcatsinstall">NetBSD/cats</a>.
 in pre-0.6.0 releases.
 
 <p>To build the emulator, run the <tt>configure</tt> script, and then run 
-<tt>make</tt>. This should work on most Unix-like systems, with few or no 
-modifications to the source code.
+<tt>make</tt>. This should hopefully work on most Unix-like systems, with few
+or no modifications to the source code.
 
 <p>Regarding files in the <tt>src/include/</tt> directory: only some of 
-these are written by me, the rest are from other sources (such as NetBSD). 
+these are written by me, the rest are from other sources
+(such as <a href="http://www.netbsd.org/">NetBSD</a>).
 The license text says that "All advertising materials mentioning features 
 or use of this software" must display acknowledgements. Even though I do 
 <i>not</i> feel that I mention features or use of the header files (the 
