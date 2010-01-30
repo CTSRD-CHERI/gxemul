@@ -23,13 +23,14 @@ controllers, ethernet controllers, disk controllers, and serial port
 controllers.
 
 GXemul, including the dynamic translation system, is implemented in portable
-C++, which means that the emulator will run on practically any modern host
-architecture and unix-like operating system, for which a C++ compiler is
-available.
+C++, which means that the emulator will (at least in theory) run on
+practically any modern host architecture and unix-like operating system, for
+which a C++ compiler is available.
 
-The documentation lists the machines and guest operating systems that can
-be regarded as "working" in GXemul. The best working guest operating
-systems are probably NetBSD/pmax and NetBSD/cats.
+The documentation lists the machines and specific guest operating systems
+that can be regarded as "working" in GXemul. The guest operating system
+that works best in GXemul is NetBSD/pmax.
+
 
 Possible uses of GXemul include:
 

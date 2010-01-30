@@ -1,7 +1,7 @@
 #!/usr/local/bin/expect
 
 set timeout 4000
-spawn ./gxemul -e3max -q -d nbsd_pmax.img -d bc:../../emul/mips/pmaxcd-5.0.iso
+spawn ./gxemul -e3max -q -d nbsd_pmax.img -d bc:../../emul/mips/pmaxcd-5.0.1.iso
 
 expect "Terminal type"
 send "vt100\r"
