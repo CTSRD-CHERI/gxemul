@@ -50,7 +50,7 @@ SUCH DAMAGE.
   <li><a href="#netbsdpmaxinstall">NetBSD/pmax 5.0.1</a>
   <li><a href="#netbsdarcinstall">NetBSD/arc 5.0.1</a>
   <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 4.0.1</a>
-  <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0</a>
+  <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0.1</a>
   <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0</a>
   <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
   <li><a href="#netbsdsgimips">NetBSD/sgimips 5.0</a>
@@ -357,12 +357,12 @@ image:
 
 </pre>
   <li>Download the generic kernel for Cobalt and the ISO image:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/cobalt/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/cobalt/binary/kernel/netbsd-GENERIC.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0/cobaltcd-5.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0/cobaltcd-5.0.iso</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.1/cobalt/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.1/cobalt/binary/kernel/netbsd-GENERIC.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0.1/cobaltcd-5.0.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0.1/cobaltcd-5.0.1.iso</a>
 
 </pre>
   <li>Start the installation like this:<pre>
-  	<b>gxemul -x -E cobalt -d nbsd_cobalt.img -d bd:cobaltcd-5.0.iso -j cobalt/binary/kernel/netbsd-RAMDISK</b>
+  	<b>gxemul -x -E cobalt -d nbsd_cobalt.img -d bd:cobaltcd-5.0.1.iso -j cobalt/binary/kernel/netbsd-RAMDISK</b>
 
 </pre>
 	and proceed like you would do if you were installing NetBSD on a real
