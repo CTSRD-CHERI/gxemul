@@ -4434,3 +4434,4 @@ Changelog for GXemul:
 		Continuing on the dyntrans core: page allocation. The basics
 		(page allocation and LRU deallocation) have been implemented,
 		but not really tested in practice yet.
+20100130	Reimplementing the M88K ldcr instruction.

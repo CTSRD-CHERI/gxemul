@@ -386,6 +386,7 @@ private:
 	DECLARE_DYNTRANS_INSTR(jmp_n);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace_singlestep);
+	DECLARE_DYNTRANS_INSTR(ldcr);
 
 	void Translate(uint32_t iword, struct DyntransIC* ic);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated);

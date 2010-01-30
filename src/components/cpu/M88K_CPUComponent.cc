@@ -1049,6 +1049,26 @@ DYNTRANS_INSTR(M88K_CPUComponent,jmp_n_functioncalltrace_singlestep)
 }
 
 
+/*
+ *  ldcr:   Load value from a control register, store in register d.
+ *
+ *  arg[0] = pointer to register d
+ *  arg[1] = 6-bit control register number
+ */
+DYNTRANS_INSTR(M88K_CPUComponent,ldcr)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	if (cpu->m_cr[M88K_CR_PSR] & M88K_PSR_MODE) {
+		int cr = ic->arg[1].u32;
+		REG32(ic->arg[0]) = cpu->m_cr[cr];
+	} else {
+		DYNTRANS_SYNCH_PC;
+		cpu->Exception(M88K_EXCEPTION_PRIVILEGE_VIOLATION, 0);
+	}
+}
+
+
 /*****************************************************************************/
 
 
@@ -1066,7 +1086,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //	uint32_t op3d   = (iw >>  8) & 0xff;
 	uint32_t imm16  = iw & 0xffff;
 //	uint32_t w5     = (iw >>  5) & 0x1f;
-//	uint32_t cr6    = (iw >>  5) & 0x3f;
+	uint32_t cr6    = (iw >>  5) & 0x3f;
 //	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
 	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
 
@@ -1121,6 +1141,45 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				ic->f = instr_nop;
 		}
 		break;
+
+	case 0x20:
+		if ((iw & 0x001ff81f) == 0x00004000) {
+			ic->f = instr_ldcr;
+			ic->arg[0].p = &m_r[d];
+			ic->arg[1].u32 = cr6;
+			if (d == M88K_ZERO_REG)
+				ic->arg[0].p = &m_zero_scratch;
+		}
+//		} else if ((iword & 0x001ff81f) == 0x00004800) {
+//			ic->f = instr(fldcr);
+//			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+//			ic->arg[1] = cr6;
+//			if (d == M88K_ZERO_REG)
+//				ic->arg[0] = (size_t)
+//				    &cpu->cd.m88k.zero_scratch;
+//		} else if ((iword & 0x03e0f800) == 0x00008000) {
+//			ic->f = instr(stcr);
+//			ic->arg[0] = (size_t) &cpu->cd.m88k.r[s1];
+//			ic->arg[1] = cr6;
+//			if (s1 != s2)
+//				goto bad;
+//		} else if ((iword & 0x03e0f800) == 0x00008800) {
+//			ic->f = instr(fstcr);
+//			ic->arg[0] = (size_t) &cpu->cd.m88k.r[s1];
+//			ic->arg[1] = cr6;
+//			if (s1 != s2)
+//				goto bad;
+//		} else if ((iword & 0x0000f800) == 0x0000c000) {
+//			ic->f = instr(xcr);
+//			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
+//			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
+//			ic->arg[2] = cr6;
+//			if (s1 != s2)
+//				goto bad;
+//		} else
+//			goto bad;
+		break;
+
 
 	case 0x30:	/*  br     */
 //	case 0x31:	/*  br.n   */
