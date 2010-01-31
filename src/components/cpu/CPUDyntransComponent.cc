@@ -343,8 +343,14 @@ void CPUDyntransComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 
 	if (ic->f == NULL || ic->f == instr_abort_in_delay_slot) {
 		abort = true;
-		UI* ui = GetUI();
 
+		// Instruction translation failed. If we were running in
+		// quiet mode, then simply dropping into the GXemul> prompt
+		// with no good explanation would be bad, so we always turn
+		// off quiet mode on Aborts:
+		GetRunningGXemulInstance()->SetQuietMode(false);
+
+		UI* ui = GetUI();
 		if (ui != NULL) {
 			bool isSingleStepping = GetRunningGXemulInstance()->GetRunState() == GXemul::SingleStepping;
 

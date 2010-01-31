@@ -584,6 +584,10 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 	extra_argc = argc;
 	extra_argv = argv;
 
+	// If -V is used, -q is ignored.
+	if (single_step == ENTER_SINGLE_STEPPING)
+		quiet_mode = 0;
+
 	if (type == NULL && subtype == NULL &&
 	    (single_step == ENTER_SINGLE_STEPPING || argc > 0)) {
 		int res = 0;

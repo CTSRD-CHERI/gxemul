@@ -87,9 +87,13 @@ Remember to use quotes if your shell gives special meaning to parentheses.
 .It Fl H
 Display a list of available machine templates.
 .It Fl q
-Quiet mode (suppress debug messages).
+Start up in Quiet mode (i.e. suppress debug messages). If an error occurs
+during emulation which stops execution and drops the user into the debugger,
+quiet mode is turned off.
 .It Fl V
-Start up in interactive mode, paused.
+Start up in interactive mode, paused. If this option is used,
+.Fl q
+is ignored.
 .El
 .Pp
 Any files supplied on the command line when using the
@@ -447,7 +451,9 @@ Force the single-step debugger to be entered at the end of a simulation.
 .It Fl q
 Quiet mode; this suppresses startup messages.
 .It Fl V
-Start up in the single-step debugger, paused.
+Start up in the single-step debugger, paused. If this option is used,
+.Fl q
+is ignored.
 .It Fl v
 Increase verbosity (show more debug messages). This option can be used
 multiple times.

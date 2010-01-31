@@ -4442,3 +4442,5 @@ Changelog for GXemul:
 		Renaming old testmips to oldtestmips, so that the name
 		testmips can be used by the new framework.
 20100131	Reimplementing a slow version of the st.d M88K instruction.
+		"Quiet mode" is now turned off, if dropping into the debugger,
+		both by using -V and by triggering unimplemented instructions.
