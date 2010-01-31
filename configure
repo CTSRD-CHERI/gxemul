@@ -468,7 +468,7 @@ if [ ! z"$DEBUG" = zYES ]; then
 	printf "checking whether -Wstrict-aliasing can be used... "
 	$CXX $CXXFLAGS -Wstrict-aliasing _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
 	cat _testprog.stdout >> _testprog.error
-	if grep frame _testprog.error > /dev/null 2>&1; then
+	if grep strict _testprog.error > /dev/null 2>&1; then
 		printf "no\n"
 	else
 		if [ -x _testprog ]; then
@@ -542,11 +542,30 @@ if [ ! z"$DEBUG" = zYES ]; then
 	$CXX $CXXFLAGS -fstrict-aliasing _testprog.cc -o \
 	    _testprog 1> _testprog.stdout 2>&1
 	cat _testprog.stdout >> _testprog.error
-	if grep frame _testprog.error > /dev/null 2>&1; then
+	if grep strict _testprog.error > /dev/null 2>&1; then
 		printf "no\n"
 	else
 		if [ -x _testprog ]; then
 			CXXFLAGS="-fstrict-aliasing $CXXFLAGS"
+			printf "yes\n"
+		else
+			printf "no\n"
+		fi
+	fi
+	rm -f _testprog _testprog.error _testprog.stdout
+fi
+
+
+#  -fno-rtti
+if [ ! z"$DEBUG" = zYES ]; then
+	printf "checking whether -fno-rtti can be used... "
+	$CXX $CXXFLAGS -fno-rtti _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
+	cat _testprog.stdout >> _testprog.error
+	if grep rtti _testprog.error > /dev/null 2>&1; then
+		printf "no\n"
+	else
+		if [ -x _testprog ]; then
+			CXXFLAGS="-fno-rtti $CXXFLAGS"
 			printf "yes\n"
 		else
 			printf "no\n"
@@ -1082,8 +1101,8 @@ done
 #  Tail of config.h:
 printf "\n#endif  /*  CONFIG_H  */\n" >> config.h
 
-#  Remove temporary Makefile header:
-rm -f _Makefile.header
+#  Remove temporary Makefile header, etc.:
+rm -f _Makefile.header _test*
 
 echo Configured. You may now run make to build gxemul.
 
