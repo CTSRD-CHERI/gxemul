@@ -176,6 +176,7 @@ static void Test_MoveComponentCommand_Move()
 	//       \-- mainbus0
 	//           |-- ram0  (32 MB at offset 0)
 	//           |-- rom0  (16 MB at offset 0x1fc00000)
+	//           |-- fb_videoram0  (15 MB at offset 0x12000000)
 	//           |-- cpu0  (MIPS, 100 MHz)
 	//           \-- ram1  (0 bytes at offset 0)
 
@@ -189,8 +190,8 @@ static void Test_MoveComponentCommand_Move()
 
 	refcount_ptr<Component> mainbus0 = machine0->GetChildren()[0];
 
-	UnitTest::Assert("there should be 4 components on mainbus0",
-	    mainbus0->GetChildren().size(), 4);
+	UnitTest::Assert("there should be 5 components on mainbus0",
+	    mainbus0->GetChildren().size(), 5);
 }
 
 UNITTESTS(MoveComponentCommand)
