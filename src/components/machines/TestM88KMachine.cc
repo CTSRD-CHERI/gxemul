@@ -70,17 +70,12 @@ refcount_ptr<Component> TestM88KMachine::Create(const ComponentCreateArgs& args)
 
 	for (int i=0; i<ncpus; ++i) {
 		refcount_ptr<Component> cpu =
-		    ComponentFactory::CreateComponent("m88k_cpu(model=" + settings["cpu"] + ")");
+		    ComponentFactory::CreateComponent("m88k_cpu(r31=0xff0,model=" + settings["cpu"] + ")");
 		if (cpu.IsNULL())
 			return NULL;
 
 		if (i > 0)
 			cpu->SetVariableValue("paused", "true");
-
-		// TODO: Some kind of on-reset command, like:
-		//	cpu0.r31 = ram0.memoryMappedSize - 256
-		// to initialize the stack pointer correctly.
-		// But this will require cpu0 and ram0 to be unique...
 
 		mainbus->AddChild(cpu);
 	}

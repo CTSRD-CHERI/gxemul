@@ -266,6 +266,7 @@ struct m88k_cpu_type_def {
 #define	M88K_RETURN_REG		1	// r1: the return address on function calls
 #define	M88K_RETURN_VALUE_REG	2	// r2: the return value, from function calls
 #define	M88K_FIRST_ARG_REG	2	// r2..r9: eight standard arguments to functions
+#define	M88K_STACKPOINTER_REG	31	// r31: commonly used as stack pointer
 
 #define	M88K_CMP_HS	0x00000800
 #define	M88K_CMP_LO	0x00000400
@@ -398,6 +399,7 @@ private:
 	 * State:
 	 */
 	string			m_m88k_type;	// E.g. "88100"
+	uint32_t		m_initial_r31;	// Initial stack pointer.
 
 	// General-Purpose Registers:
 	//

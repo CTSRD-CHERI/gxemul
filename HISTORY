@@ -4444,3 +4444,6 @@ Changelog for GXemul:
 20100131	Reimplementing a slow version of the st.d M88K instruction.
 		"Quiet mode" is now turned off, if dropping into the debugger,
 		both by using -V and by triggering unimplemented instructions.
+		The m88k_cpu now takes a creation argument called r31, for the
+		initial stack pointer value. (Needed to run the rectangle
+		drawing demo, which assumes a valid r31 on startup.)

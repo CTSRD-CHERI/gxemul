@@ -77,8 +77,6 @@ M88K_CPUComponent::M88K_CPUComponent()
 		throw std::exception();
 	}
 
-	ResetState();
-
 	AddVariable("model", &m_m88k_type);
 
 	for (size_t i=0; i<N_M88K_REGS; i++) {
@@ -99,8 +97,13 @@ M88K_CPUComponent::M88K_CPUComponent()
 		AddVariable(ss.str(), &m_fcr[i]);
 	}
 
+	m_initial_r31 = 0x00000000;
+	AddVariable("initial_r31", &m_initial_r31);
+
 	AddVariable("inDelaySlot", &m_inDelaySlot);
 	AddVariable("delaySlotTarget", &m_delaySlotTarget);
+
+	ResetState();
 }
 
 
@@ -109,12 +112,21 @@ refcount_ptr<Component> M88K_CPUComponent::Create(const ComponentCreateArgs& arg
 	// Defaults:
 	ComponentCreationSettings settings;
 	settings["model"] = "88100";
+	settings["r31"] = "0x00000000";
 
 	if (!ComponentFactory::GetCreationArgOverrides(settings, args))
 		return NULL;
 
+	// Create the CPU...
 	refcount_ptr<Component> cpu = new M88K_CPUComponent();
+
+	// ... and apply settings:
 	if (!cpu->SetVariableValue("model", "\"" + settings["model"] + "\""))
+		return NULL;
+
+	if (!cpu->SetVariableValue("initial_r31", settings["r31"]))
+		return NULL;
+	if (!cpu->SetVariableValue("r31", settings["r31"]))
 		return NULL;
 
 	return cpu;
@@ -128,6 +140,9 @@ void M88K_CPUComponent::ResetState()
 	// r0 .. r31 and the extra "r32/r0" zero register:
 	for (size_t i=0; i<N_M88K_REGS+1; i++)
 		m_r[i] = 0;
+
+	// ... but change r31 to the initial stack pointer value:
+	m_r[M88K_STACKPOINTER_REG] = m_initial_r31;
 
 	for (size_t i=0; i<N_M88K_CONTROL_REGS; i++)
 		m_cr[i] = 0;
@@ -1566,6 +1581,35 @@ static void Test_M88K_CPUComponent_Create()
 	const StateVariable * p = cpu->GetVariable("pc");
 	UnitTest::Assert("cpu has no pc state variable?", p != NULL);
 	UnitTest::Assert("initial pc", p->ToString(), "0");
+
+	const StateVariable * r31 = cpu->GetVariable("r31");
+	UnitTest::Assert("cpu has no r31 state variable?", r31 != NULL);
+	UnitTest::Assert("initial r31", r31->ToString(), "0");
+}
+
+static void Test_M88K_CPUComponent_Create_with_r31()
+{
+	refcount_ptr<Component> cpu =
+	    ComponentFactory::CreateComponent("m88k_cpu(r31=0x12345678)");
+	UnitTest::Assert("component was not created?", !cpu.IsNULL());
+
+	const StateVariable * p = cpu->GetVariable("pc");
+	UnitTest::Assert("cpu has no pc state variable?", p != NULL);
+	UnitTest::Assert("initial pc", p->ToString(), "0");
+
+	const StateVariable * r31 = cpu->GetVariable("r31");
+	UnitTest::Assert("cpu has no r31 state variable?", r31 != NULL);
+	UnitTest::Assert("initial r31", r31->ToString(), "0x12345678");
+
+	cpu->SetVariableValue("r31", "0xf00");
+
+	const StateVariable * r31_updated = cpu->GetVariable("r31");
+	UnitTest::Assert("could not update r31?", r31_updated->ToString(), "0xf00");
+
+	cpu->Reset();
+
+	const StateVariable * r31_after_reset = cpu->GetVariable("r31");
+	UnitTest::Assert("r31 after reset should have been reset", r31_after_reset->ToString(), "0x12345678");
 }
 
 static void Test_M88K_CPUComponent_IsCPU()
@@ -1658,6 +1702,7 @@ UNITTESTS(M88K_CPUComponent)
 {
 	UNITTEST(Test_M88K_CPUComponent_IsStable);
 	UNITTEST(Test_M88K_CPUComponent_Create);
+	UNITTEST(Test_M88K_CPUComponent_Create_with_r31);
 	UNITTEST(Test_M88K_CPUComponent_IsCPU);
 	UNITTEST(Test_M88K_CPUComponent_DefaultModel);
 
