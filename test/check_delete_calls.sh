@@ -1,7 +1,7 @@
 #!/bin/sh
 
 rm -f tmp_delete.out
-grep -R "delete " .|grep -v \\.svn|cut -d \: -f 1|sort|uniq |grep -v "inary file" > tmp_delete.out 2> /dev/null
+grep -R "delete " src|grep -v \\.svn|cut -d \: -f 1|sort|uniq |grep -v "inary file" > tmp_delete.out 2> /dev/null
 
 ANYERRORS=0
 
