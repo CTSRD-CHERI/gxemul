@@ -4447,3 +4447,5 @@ Changelog for GXemul:
 		The m88k_cpu now takes a creation argument called r31, for the
 		initial stack pointer value. (Needed to run the rectangle
 		drawing demo, which assumes a valid r31 on startup.)
+		Reimplementing the M88K bsr.n instruction, including single-
+		stepping scenarios.

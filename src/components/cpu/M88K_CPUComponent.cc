@@ -1031,6 +1031,90 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_functioncalltrace)
 }
 
 
+DYNTRANS_INSTR(M88K_CPUComponent,bsr_n)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	// Prepare for the branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+
+	// Execute the next instruction:
+	ic[1].f(cpu, ic+1);
+	cpu->m_executedCycles ++;
+
+	// If there was no exception, then branch:
+	if (!cpu->m_exceptionInDelaySlot) {
+		cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+		cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2].u32;
+
+		cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1].u32);
+		cpu->DyntransPCtoPointers();
+
+		cpu->m_inDelaySlot = false;
+	}
+
+	// The next instruction is now either the target of the branch
+	// instruction, or the first instruction of an exception handler.
+	cpu->m_exceptionInDelaySlot = false;
+}
+
+
+DYNTRANS_INSTR(M88K_CPUComponent,bsr_n_functioncalltrace)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	// Prepare for the branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+
+	// Execute the next instruction:
+	ic[1].f(cpu, ic+1);
+	cpu->m_executedCycles ++;
+
+	// If there was no exception, then branch:
+	if (!cpu->m_exceptionInDelaySlot) {
+		cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+		cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2].u32;
+
+		cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1].u32);
+		cpu->FunctionTraceCall();
+		cpu->DyntransPCtoPointers();
+
+		cpu->m_inDelaySlot = false;
+	}
+
+	// The next instruction is now either the target of the branch
+	// instruction, or the first instruction of an exception handler.
+	cpu->m_exceptionInDelaySlot = false;
+}
+
+
+// Note: This IC function is used both when function call trace is enabled
+// and disabled. (Ok, since it is only used when singlestepping.)
+DYNTRANS_INSTR(M88K_CPUComponent,bsr_n_functioncalltrace_singlestep)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	// Prepare for the delayed branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+
+	cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+	cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2].u32;
+
+	cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1].u32);
+
+	if (cpu->m_showFunctionTraceCall)
+		cpu->FunctionTraceCall();
+
+	cpu->m_delaySlotTarget = cpu->m_pc;
+
+	// m_nextIC should point to the next instruction:
+	cpu->m_nextIC = ic + 1;
+}
+
+
 DYNTRANS_INSTR(M88K_CPUComponent,jmp_n)
 {
 	std::cerr << "jmp_n when not single stepping: TODO\n";
@@ -1303,8 +1387,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	case 0x30:	/*  br     */
 //	case 0x31:	/*  br.n   */
 	case 0x32:	/*  bsr    */
-//	case 0x33:	/*  bsr.n  */
+	case 0x33:	/*  bsr.n  */
 		{
+			void (*f_singleStepping)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 			void (*samepage_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 
 			switch (op26) {
@@ -1321,9 +1406,16 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				ic->f = instr_bsr;
 				samepage_function = instr_bsr_samepage;
 				break;
-	//		case 0x33:
-	//			ic->f = instr(bsr_n);
-	//			break;
+			case 0x33:
+				ic->f = instr_bsr_n;
+				// TODO samepage_function = instr_bsr_samepage;
+				f_singleStepping = instr_bsr_n_functioncalltrace_singlestep;
+				break;
+			}
+
+			if (singleInstructionLeft && (op26 == 0x31 || op26 == 0x33)) {
+				ic->f = f_singleStepping;
+				samepage_function = NULL;
 			}
 
 			int offset = (m_pc & 0xffc) + d26;
@@ -1343,8 +1435,12 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			if (m_showFunctionTraceCall) {
 				if (op26 == 0x32)
 					ic->f = instr_bsr_functioncalltrace;
-//				if (op26 == 0x33)
-//					ic->f = instr(bsr_n_trace);
+				if (op26 == 0x33) {
+					if (singleInstructionLeft)
+						ic->f = instr_bsr_n_functioncalltrace_singlestep;
+					else
+						ic->f = instr_bsr_n_functioncalltrace;
+				}
 			}
 		}
 		break;
@@ -1555,6 +1651,9 @@ DYNTRANS_INSTR(M88K_CPUComponent,ToBeTranslated)
 	if (cpu->DyntransReadInstruction(iword))
 		cpu->Translate(iword, ic);
 
+	if (cpu->m_inDelaySlot && ic->f == NULL)
+		ic->f = instr_abort_in_delay_slot;
+
 	cpu->DyntransToBeTranslatedDone(ic);
 }
 
@@ -1698,6 +1797,168 @@ static void Test_M88K_CPUComponent_Execute_Basic()
 	UnitTest::Assert("r30 should have been modified again", cpu->GetVariable("r30")->ToInteger(), 1111 + 0x10);
 }
 
+static void Test_M88K_CPUComponent_Execute_DelayBranchWithValidInstruction()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testm88k");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	uint32_t data32 = 0xcc000010;	// bsr.n 0x1000 + 10*4, i.e. 0x1040
+	bus->AddressSelect(0x1000ULL);
+	bus->WriteData(data32, BigEndian);
+
+	data32 = 0x63df0010; // Something valid, addu r30, r31, 0x10
+	bus->AddressSelect(0x1004ULL);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "0x1000");
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0x1000);
+	UnitTest::Assert("r30 before execute", cpu->GetVariable("r30")->ToInteger(), 0);
+	UnitTest::Assert("r31 before execute", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+
+	// This tests that execute 2 steps will execute both the delay branch
+	// and the delay slot instruction.
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(2);
+
+	UnitTest::Assert("pc should have changed", cpu->GetVariable("pc")->ToInteger(), 0x1040);
+	UnitTest::Assert("delay slot after execute", cpu->GetVariable("inDelaySlot")->ToString(), "false");
+	UnitTest::Assert("r30 after execute", cpu->GetVariable("r30")->ToInteger(), 0x1000);
+	UnitTest::Assert("r31 after execute", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+}
+
+static void Test_M88K_CPUComponent_Execute_DelayBranchWithValidInstruction_SingleStepping()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testm88k");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	uint32_t data32 = 0xcc000010;	// bsr.n 0x1000 + 10*4, i.e. 0x1040
+	bus->AddressSelect(0x1000ULL);
+	bus->WriteData(data32, BigEndian);
+
+	data32 = 0x63df0010; // Something valid, addu r30, r31, 0x10
+	bus->AddressSelect(0x1004ULL);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "0x1000");
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0x1000);
+	UnitTest::Assert("r30 before execute", cpu->GetVariable("r30")->ToInteger(), 0);
+	UnitTest::Assert("r31 before execute", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+
+	// This tests that execute 2 steps (using single-stepping) will execute both
+	// the delay branch and the delay slot instruction.
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute(1);
+
+	// Should now be in the delay slot.
+	UnitTest::Assert("pc should have changed 1", cpu->GetVariable("pc")->ToInteger(), 0x1004);
+	UnitTest::Assert("delay slot after execute 1", cpu->GetVariable("inDelaySlot")->ToString(), "true");
+	UnitTest::Assert("r30 after execute 1", cpu->GetVariable("r30")->ToInteger(), 0);
+	UnitTest::Assert("r31 after execute 1", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute(1);
+
+	UnitTest::Assert("delay slot after execute 2", cpu->GetVariable("inDelaySlot")->ToString(), "false");
+	UnitTest::Assert("pc should have changed 2", cpu->GetVariable("pc")->ToInteger(), 0x1040);
+	UnitTest::Assert("r30 after execute 2", cpu->GetVariable("r30")->ToInteger(), 0x1000);
+	UnitTest::Assert("r31 after execute 2", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+}
+
+static void Test_M88K_CPUComponent_Execute_DelayBranchWithValidInstruction_RunTwoTimes()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testm88k");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	uint32_t data32 = 0xcc000010;	// bsr.n 0x1000 + 10*4, i.e. 0x1040
+	bus->AddressSelect(0x1000ULL);
+	bus->WriteData(data32, BigEndian);
+
+	data32 = 0x63df0010; // Something valid, addu r30, r31, 0x10
+	bus->AddressSelect(0x1004ULL);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "0x1000");
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0x1000);
+	UnitTest::Assert("r30 before execute", cpu->GetVariable("r30")->ToInteger(), 0);
+	UnitTest::Assert("r31 before execute", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+
+	// This tests that execute 2 steps (using single-stepping) will execute both
+	// the delay branch and the delay slot instruction.
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(1);
+
+	// Should now be in the delay slot.
+	UnitTest::Assert("pc should have changed 1", cpu->GetVariable("pc")->ToInteger(), 0x1004);
+	UnitTest::Assert("delay slot after execute 1", cpu->GetVariable("inDelaySlot")->ToString(), "true");
+	UnitTest::Assert("r30 after execute 1", cpu->GetVariable("r30")->ToInteger(), 0);
+	UnitTest::Assert("r31 after execute 1", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(1);
+
+	UnitTest::Assert("delay slot after execute 2", cpu->GetVariable("inDelaySlot")->ToString(), "false");
+	UnitTest::Assert("pc should have changed 2", cpu->GetVariable("pc")->ToInteger(), 0x1040);
+	UnitTest::Assert("r30 after execute 2", cpu->GetVariable("r30")->ToInteger(), 0x1000);
+	UnitTest::Assert("r31 after execute 2", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+}
+
+static void Test_M88K_CPUComponent_Execute_DelayBranchWithFault()
+{
+	GXemul gxemul;
+	gxemul.GetCommandInterpreter().RunCommand("add testm88k");
+
+	refcount_ptr<Component> cpu = gxemul.GetRootComponent()->LookupPath("root.machine0.mainbus0.cpu0");
+	UnitTest::Assert("huh? no cpu?", !cpu.IsNULL());
+
+	AddressDataBus* bus = cpu->AsAddressDataBus();
+	UnitTest::Assert("cpu should be addressable", bus != NULL);
+
+	uint32_t data32 = 0xcc000010;	// bsr.n 0x1000 + 10*4, i.e. 0x1040
+	bus->AddressSelect(0x1000ULL);
+	bus->WriteData(data32, BigEndian);
+
+	data32 = 0xffffffff; // Something invalid
+	bus->AddressSelect(0x1004ULL);
+	bus->WriteData(data32, BigEndian);
+
+	cpu->SetVariableValue("pc", "0x1000");
+	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0x1000);
+	UnitTest::Assert("r30 before execute", cpu->GetVariable("r30")->ToInteger(), 0);
+	UnitTest::Assert("r31 before execute", cpu->GetVariable("r31")->ToInteger(), 0xff0);
+
+	// This tests that execute 100 steps will only execute 1, if the instruction
+	// in the delay slot fails.
+	gxemul.SetRunState(GXemul::Running);
+	gxemul.Execute(100);
+
+	UnitTest::Assert("pc should have increased one step", cpu->GetVariable("pc")->ToInteger(), 0x1004ULL);
+	UnitTest::Assert("should be in delay slot after execution", cpu->GetVariable("inDelaySlot")->ToString(), "true");
+
+	gxemul.SetRunState(GXemul::SingleStepping);
+	gxemul.Execute(1);
+
+	UnitTest::Assert("pc should not have increased", cpu->GetVariable("pc")->ToInteger(), 0x1004ULL);
+	UnitTest::Assert("should still be in delay slot", cpu->GetVariable("inDelaySlot")->ToString(), "true");
+}
+
 UNITTESTS(M88K_CPUComponent)
 {
 	UNITTEST(Test_M88K_CPUComponent_IsStable);
@@ -1711,6 +1972,10 @@ UNITTESTS(M88K_CPUComponent)
 
 	// Dyntrans execution:
 	UNITTEST(Test_M88K_CPUComponent_Execute_Basic);
+	UNITTEST(Test_M88K_CPUComponent_Execute_DelayBranchWithValidInstruction);
+	UNITTEST(Test_M88K_CPUComponent_Execute_DelayBranchWithValidInstruction_SingleStepping);
+	UNITTEST(Test_M88K_CPUComponent_Execute_DelayBranchWithValidInstruction_RunTwoTimes);
+	UNITTEST(Test_M88K_CPUComponent_Execute_DelayBranchWithFault);
 }
 
 #endif

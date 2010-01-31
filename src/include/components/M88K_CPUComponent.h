@@ -384,6 +384,9 @@ private:
 	DECLARE_DYNTRANS_INSTR(bsr);
 	DECLARE_DYNTRANS_INSTR(bsr_samepage);
 	DECLARE_DYNTRANS_INSTR(bsr_functioncalltrace);
+	DECLARE_DYNTRANS_INSTR(bsr_n);
+	DECLARE_DYNTRANS_INSTR(bsr_n_functioncalltrace);
+	DECLARE_DYNTRANS_INSTR(bsr_n_functioncalltrace_singlestep);
 	DECLARE_DYNTRANS_INSTR(jmp_n);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace_singlestep);

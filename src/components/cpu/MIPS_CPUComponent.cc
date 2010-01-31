@@ -1509,18 +1509,21 @@ static void Test_MIPS_CPUComponent_Execute_DelayBranchWithFault()
 
 	cpu->SetVariableValue("pc", "0xffffffff80004000");
 	UnitTest::Assert("setting pc failed?", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004000ULL);
+	UnitTest::Assert("should not be in delay slot before execution", cpu->GetVariable("inDelaySlot")->ToString(), "false");
 
-	// This tests that execute 100 steps will only execute 1, of the instruction
+	// This tests that execute 100 steps will only execute 1, if the instruction
 	// in the delay slot fails.
 	gxemul.SetRunState(GXemul::Running);
 	gxemul.Execute(100);
 
 	UnitTest::Assert("pc should have increased one step", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004ULL);
+	UnitTest::Assert("should be in delay slot after execution", cpu->GetVariable("inDelaySlot")->ToString(), "true");
 
 	gxemul.SetRunState(GXemul::SingleStepping);
 	gxemul.Execute(1);
 
 	UnitTest::Assert("pc should not have increased", cpu->GetVariable("pc")->ToInteger(), 0xffffffff80004004ULL);
+	UnitTest::Assert("should still be in delay slot", cpu->GetVariable("inDelaySlot")->ToString(), "true");
 }
 
 UNITTESTS(MIPS_CPUComponent)
