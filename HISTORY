@@ -4441,3 +4441,4 @@ Changelog for GXemul:
 		NetBSD/cobalt 5.0 to 5.0.1).
 		Renaming old testmips to oldtestmips, so that the name
 		testmips can be used by the new framework.
+20100131	Reimplementing a slow version of the st.d M88K instruction.

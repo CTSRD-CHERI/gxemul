@@ -1070,7 +1070,8 @@ DYNTRANS_INSTR(M88K_CPUComponent,ldcr)
 
 
 /*
- *  st:   Store word.
+ *  st:   Store word (32-bit).
+ *  st_d:   Store double-word (64-bit).
  *
  *  arg[0] = pointer to register d
  *  arg[1] = pointer to register s1
@@ -1092,6 +1093,34 @@ DYNTRANS_INSTR(M88K_CPUComponent,st)
 	cpu->AddressSelect(addr);
 
 	if (!cpu->WriteData(data, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+		// TODO: bus error exception?
+//		DYNTRANS_SYNCH_PC;
+//		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
+	}
+}
+DYNTRANS_INSTR(M88K_CPUComponent,st_d)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	uint32_t data1 = REG32(ic->arg[0]);
+	uint32_t data2 = (* (((uint32_t*)(ic->arg[0].p)) + 1) );
+	uint32_t addr = REG32(ic->arg[1]) + ic->arg[2].u32;
+
+	if (addr & 7) {
+		DYNTRANS_SYNCH_PC;
+		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
+		return;
+	}
+
+	cpu->AddressSelect(addr);
+	if (!cpu->WriteData(data1, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+		// TODO: bus error exception?
+//		DYNTRANS_SYNCH_PC;
+//		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
+	}
+
+	cpu->AddressSelect(addr + sizeof(uint32_t));
+	if (!cpu->WriteData(data2, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
 		// TODO: bus error exception?
 //		DYNTRANS_SYNCH_PC;
 //		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
@@ -1128,7 +1157,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //	case 0x05:	/*  ld     */
 //	case 0x06:	/*  ld.h   */
 //	case 0x07:	/*  ld.b   */
-//	case 0x08:	/*  st.d   */
+	case 0x08:	/*  st.d   */
 	case 0x09:	/*  st     */
 //	case 0x0a:	/*  st.h   */
 //	case 0x0b:	/*  st.b   */
@@ -1146,14 +1175,15 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //			case 0x05: opsize = 2; break;
 //			case 0x06: opsize = 1; signedness = 1; break;
 //			case 0x07: opsize = 0; signedness = 1; break;
-//			case 0x08: store = 1; opsize = 3; break;
+			case 0x08: ic->f = instr_st_d; store = 1; opsize = 3; break;
 			case 0x09: ic->f = instr_st; store = 1; opsize = 2; break;
 //			case 0x0a: store = 1; opsize = 1; break;
 //			case 0x0b: store = 1; opsize = 0; break;
 			}
 
 			if (opsize == 3 && d == 31) {
-				// m88k load/store of register pair r31/r0 is not yet implemented
+				// m88k load/store of register pair r31/r0 is not
+				// yet implemented: TODO: figure out how to deal with this.
 				ic->f = NULL;
 				break;
 			}
