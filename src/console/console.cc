@@ -537,7 +537,7 @@ void console_slave(const char *arg)
 {
 	int inputd;
 	int len;
-	char *p;
+	const char *p;
 	char buf[16384];
 
 	/*  arg = '3,6' or similar, input and output descriptors  */
