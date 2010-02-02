@@ -2039,6 +2039,9 @@ X(to_be_translated)
 			    + (signedness? M88K_LOADSTORE_SIGNEDNESS:0)
 			    + (cpu->byte_order == EMUL_BIG_ENDIAN?
 			       M88K_LOADSTORE_ENDIANNESS : 0) ];
+
+			if (!store && d == 0)
+				ic->arg[0] = (size_t) &cpu->cd.m88k.zero_scratch;
 		}
 		break;
 
@@ -2525,8 +2528,8 @@ X(to_be_translated)
 				    + (user? M88K_LOADSTORE_USR : 0)
 				    + M88K_LOADSTORE_REGISTEROFFSET ];
 
-				if (op == 0 && d == M88K_ZERO_REG)
-					ic->f = instr(nop);
+				if (d == M88K_ZERO_REG && op == 0)
+					ic->arg[0] = (size_t)&cpu->cd.m88k.zero_scratch;
 
 				if (opsize == 3 && d == 31) {
 					fatal("m88k load/store of register "
@@ -2545,6 +2548,8 @@ X(to_be_translated)
 				} else {
 					ic->f = instr(addu);
 				}
+				if (d == M88K_ZERO_REG)
+					ic->f = instr(nop);
 			} else {
 				/*  xmem:  */
 				ic->f = instr(xmem_slow);
@@ -2623,10 +2628,13 @@ X(to_be_translated)
 			 */
 			if (d == M88K_ZERO_REG) {
 				int opc = (iword >> 8) & 0xff;
-				if (opc != 0x61 && opc != 0x63 &&
-				    opc != 0x65 && opc != 0x67 &&
-				    opc != 0x71 && opc != 0x73 &&
-				    opc != 0x75 && opc != 0x77)
+				if (opc != 0x61 /* addu.co */ && opc != 0x63 /* addu.cio */ &&
+				    opc != 0x65 /* subu.co */ && opc != 0x67 /* subu.cio */ &&
+				    opc != 0x71 /*  add.co */ && opc != 0x73 /*  add.cio */ &&
+				    opc != 0x75 /*  sub.co */ && opc != 0x77 /*  sub.cio */ &&
+				    opc != 0x68 /*  divu   */ && opc != 0x69 /* divu.d   */ &&
+				    opc != 0x6c /*  mul    */ && opc != 0x6d /* mulu.d   */ &&
+				    opc != 0x6e /*  muls   */ && opc != 0x78 /*  div     */)
 					ic->f = instr(nop);
 				else
 					ic->arg[0] = (size_t)

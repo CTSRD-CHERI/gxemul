@@ -1745,10 +1745,13 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			 */
 			if (d == M88K_ZERO_REG) {
 				int opc = (iw >> 8) & 0xff;
-				if (opc != 0x61 && opc != 0x63 &&
-				    opc != 0x65 && opc != 0x67 &&
-				    opc != 0x71 && opc != 0x73 &&
-				    opc != 0x75 && opc != 0x77)
+				if (opc != 0x61 /* addu.co */ && opc != 0x63 /* addu.cio */ &&
+				    opc != 0x65 /* subu.co */ && opc != 0x67 /* subu.cio */ &&
+				    opc != 0x71 /*  add.co */ && opc != 0x73 /*  add.cio */ &&
+				    opc != 0x75 /*  sub.co */ && opc != 0x77 /*  sub.cio */ &&
+				    opc != 0x68 /*  divu   */ && opc != 0x69 /* divu.d   */ &&
+				    opc != 0x6c /*  mul    */ && opc != 0x6d /* mulu.d   */ &&
+				    opc != 0x6e /*  muls   */ && opc != 0x78 /*  div     */)
 					ic->f = instr_nop;
 				else
 					ic->arg[0].p = &m_zero_scratch;
