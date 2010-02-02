@@ -4453,3 +4453,4 @@ Changelog for GXemul:
 		the old implementation, these were constructed using build-
 		time generated define/include magic to simulate a template-
 		style mechanism in C).
+		Reimplementing the M88K divu d,s1,imm instruction.

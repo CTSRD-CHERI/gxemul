@@ -976,16 +976,34 @@ DYNTRANS_INSTR(M88K_CPUComponent,mak_imm)
 
 
 /*
+ *  divu_imm:  d = s1 / immediate
  *  mulu_imm:  d = s1 * immediate
  *
  *  arg[0] = pointer to register d
  *  arg[1] = pointer to register s1
  *  arg[2] = immediate.
  */
+DYNTRANS_INSTR(M88K_CPUComponent,divu_imm)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	// TODO: 88100 only, not 88110:
+	if (cpu->m_cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
+		DYNTRANS_SYNCH_PC;
+		cpu->m_fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
+		cpu->Exception(M88K_EXCEPTION_SFU1_PRECISE, 0);
+	} else if (ic->arg[2].u32 == 0) {
+		DYNTRANS_SYNCH_PC;
+		cpu->Exception(M88K_EXCEPTION_ILLEGAL_INTEGER_DIVIDE, 0);
+	} else {
+		REG32(ic->arg[0]) = REG32(ic->arg[1]) / ic->arg[2].u32;
+	}
+}
 DYNTRANS_INSTR(M88K_CPUComponent,mulu_imm)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
+	// TODO: 88100 only, not 88110:
 	if (cpu->m_cr[M88K_CR_PSR] & M88K_PSR_SFD1) {
 		DYNTRANS_SYNCH_PC;
 		cpu->m_fcr[M88K_FPCR_FPECR] = M88K_FPECR_FUNIMP;
@@ -1300,6 +1318,8 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			}
 
 			// Loads into the zero register => load into scratch register.
+			// According to the MC88110 manual: special cache operation
+			// "(touch, allocate, or flush) may be performed". (TODO)
 			if (!store && d == M88K_ZERO_REG && ic->f != NULL)
 				ic->arg[0].p = &m_zero_scratch;
 		}
@@ -1315,6 +1335,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	case 0x17:	/*  or.u   immu32  */
 	case 0x18:	/*  addu   immu32  */
 	case 0x19:	/*  subu   immu32  */
+	case 0x1a:	/*  divu   immu32  */
 	case 0x1b:	/*  mulu   immu32  */
 	case 0x1f:	/*  cmp    immu32  */
 		{
@@ -1330,7 +1351,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			case 0x17: ic->f = instr_or_u32_u32_immu32; shift = 16; break;
 			case 0x18: ic->f = instr_add_u32_u32_immu32; break;
 			case 0x19: ic->f = instr_sub_u32_u32_immu32; break;
-	//		case 0x1a: ic->f = instr(divu_imm); break;
+			case 0x1a: ic->f = instr_divu_imm; break;
 			case 0x1b: ic->f = instr_mulu_imm; break;
 	//		case 0x1c: ic->f = instr(add_imm); break;
 	//		case 0x1d: ic->f = instr(sub_imm); break;
@@ -1608,6 +1629,10 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 						user<<" signedness="<<signedness << " opsize=" << opsize << "\n";
 				}
 
+				// Loads into the zero register are changed to load into
+				// the scratch register.
+				// According to the MC88110 manual: special cache operation
+				// "(touch, allocate, or flush) may be performed". (TODO)
 				if (op == 0 && d == M88K_ZERO_REG && ic->f != NULL)
 					ic->arg[0].p = &m_zero_scratch;
 
