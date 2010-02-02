@@ -228,7 +228,7 @@ void CPUComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 			size_t k;
 			for (k=0; k<len; ++k) {
 				AddressSelect(vaddr + k);
-				readable[k] = ReadData(data[k]);
+				readable[k] = ReadData(data[k], m_isBigEndian? BigEndian : LittleEndian);
 			}
 
 			ss << " ";
@@ -325,7 +325,7 @@ uint64_t CPUComponent::Unassemble(int nRows, bool indicatePC, uint64_t vaddr, os
 		bool readOk = true;
 		for (size_t k=0; k<maxLen; ++k) {
 			AddressSelect(vaddr + k);
-			readOk &= ReadData(instruction[k]);
+			readOk &= ReadData(instruction[k], m_isBigEndian? BigEndian : LittleEndian);
 		}
 
 		string symbol = GetSymbolRegistry().LookupAddress(vaddr, false);
@@ -503,7 +503,7 @@ void CPUComponent::AddressSelect(uint64_t address)
 }
 
 
-bool CPUComponent::ReadData(uint8_t& data)
+bool CPUComponent::ReadData(uint8_t& data, Endianness endianness)
 {
 	if (!LookupAddressDataBus())
 		return false;
@@ -513,7 +513,7 @@ bool CPUComponent::ReadData(uint8_t& data)
 	VirtualToPhysical(m_addressSelect, paddr, writable);
 
 	m_addressDataBus->AddressSelect(paddr);
-	return m_addressDataBus->ReadData(data);
+	return m_addressDataBus->ReadData(data, endianness);
 }
 
 
@@ -565,7 +565,7 @@ bool CPUComponent::ReadData(uint64_t& data, Endianness endianness)
 }
 
 
-bool CPUComponent::WriteData(const uint8_t& data)
+bool CPUComponent::WriteData(const uint8_t& data, Endianness endianness)
 {
 	if (!LookupAddressDataBus())
 		return false;
@@ -575,7 +575,7 @@ bool CPUComponent::WriteData(const uint8_t& data)
 	VirtualToPhysical(m_addressSelect, paddr, writable);
 
 	m_addressDataBus->AddressSelect(paddr);
-	return m_addressDataBus->WriteData(data);
+	return m_addressDataBus->WriteData(data, endianness);
 }
 
 

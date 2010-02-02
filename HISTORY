@@ -4449,3 +4449,7 @@ Changelog for GXemul:
 		drawing demo, which assumes a valid r31 on startup.)
 		Reimplementing the M88K bsr.n instruction, including single-
 		stepping scenarios.
+20100202	Reimplementing generic M88K loads/stores using templates. (In
+		the old implementation, these were constructed using build-
+		time generated define/include magic to simulate a template-
+		style mechanism in C).

@@ -62,10 +62,12 @@ public:
 	 * \brief Reads 8-bit data from the currently selected address.
 	 *
 	 * \param data A reference to a variable which will receive the data.
+	 * \param endianness Selects the endianness of the operation. Ignored
+	 *	for 8-bit reads and writes.
 	 * \return True if the access was successful, false otherwise (e.g.
 	 *	because of a timeout).
 	 */
-	virtual bool ReadData(uint8_t& data) = 0;
+	virtual bool ReadData(uint8_t& data, Endianness endianness = BigEndian) = 0;
 
 	/**
 	 * \brief Reads 16-bit data from the currently selected address.
@@ -101,10 +103,12 @@ public:
 	 * \brief Writes 8-bit data to the currently selected address.
 	 *
 	 * \param data A reference to a variable which contains the data.
+	 * \param endianness Selects the endianness of the operation. Ignored
+	 *	for 8-bit reads and writes.
 	 * \return True if the access was successful, false otherwise (e.g.
 	 *	because of a timeout).
 	 */
-	virtual bool WriteData(const uint8_t& data) = 0;
+	virtual bool WriteData(const uint8_t& data, Endianness endianness = BigEndian) = 0;
 
 	/**
 	 * \brief Writes 16-bit data to the currently selected address.

@@ -162,12 +162,39 @@ Some things, in no specific order, that I'd like to fix:
 	[ ] Conditional breakpoints before AND after CPU instruction
 	    execution (somewhat different from generic device access).
 
+  [/]	The testm88k machine.
+
+	[X]  Implement 88100 instruction disassembly.
+	[/]  Implement basic 88K instruction execution, enough to run
+	     the rectangle drawing demo.
+	[ ]  Framebuffer output?
+
+  [/]	The MVME187 machine.
+
+	[X]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
+	     I.e. implement an a.out file loader.
+	[ ]  More initial register contents upon reset: r31 isn't enough for
+	     mvme187. See old machine_mvme88k.cc for details.
+	     	[ ]  -Q command line flag (backwards compatibility) for
+	     	     turning off PROM emulation?
+	[ ]  Serial controller component.
+	[ ]  Plugin (?) for serial output (i.e. a terminal window), or
+	     posibility to connect to stdin/stdout. Should be enough to
+	     show boot messages.
+	[ ]  Separate 88200 CMMUs? So that the two are really two
+	     separate devices.
+	[ ]  Implement 88K virtual to physical memory translation.
+	[/]  Implement 88100 instruction execution (completely).
+	[ ]  Implement 88110 instruction disassembly.
+	[ ]  Implement 88110 instruction execution.
+
   [ ]	Address formats?
   	"xxxx:yyyy", "xxxx:yyyyyyyy", "zzzzzzzzzzzzzzzz" for amd64, plus i/o ports
   	"uxxxxxxxx" vs "sxxxxxxxx" for M88K
 	most likely others for "bank select" embedded archs/microcontrollers.
 
-  [ ]	Memory/bus reads in "no exception" mode (for disasm and other things).
+  [ ]	Memory/bus reads in "no exception" mode (for disasm and memory dumping,
+  	and other things).
 
   [ ]	-d command line option => on-reset command, which connects a disk image
   	to a disk controller? But some machines have SCSI controllers, some have
@@ -199,18 +226,6 @@ Some things, in no specific order, that I'd like to fix:
   	is called by consoleui before very command... hm.)
 
   [ ]	Cache short path names if evaluation/generation of them becomes too heavy.
-
-  [/]	The MVME187 machine, with a Motorola 88100 cpu, is a reasonable
-	first thing to implement, without breaking other architectures.
-
-	[X]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
-	     I.e. implement an a.out file loader.
-	[ ]  Separate 88200 CMMUs? So that the two are really two
-	     separate devices.
-	[X]  Implement 88100 instruction disassembly.
-	[ ]  Implement 88110 instruction disassembly.
-	[/]  Implement 88K instruction execution.
-	[ ]  Implement 88K virtual to physical memory translation.
 
   [/]	Mainbus component:
 	[ ]  Maybe this should simply be a "Bus" base class? That way,
@@ -420,7 +435,8 @@ Some things, in no specific order, that I'd like to fix:
 	     		trace [n]	runs with trace enabled for n function calls,
 	     				n = 10 by default?
 	     showFunctionCallReturn should be false by default.
-	
+	[ ]  -t command line option, for backward compatibility?
+
    [ ]  Stack dump (of the emulated machine)
    	[ ]  A method on CPU components?
 

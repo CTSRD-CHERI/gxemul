@@ -151,7 +151,7 @@ void RAMComponent::ExecuteMethod(GXemul* gxemul, const string& methodName,
 			size_t k;
 			for (k=0; k<len; ++k) {
 				AddressSelect(vaddr + k);
-				readable[k] = ReadData(data[k]);
+				readable[k] = ReadData(data[k], BigEndian);
 			}
 			
 			ss << " ";
@@ -240,7 +240,7 @@ void* RAMComponent::AllocateBlock()
 }
 
 
-bool RAMComponent::ReadData(uint8_t& data)
+bool RAMComponent::ReadData(uint8_t& data, Endianness endianness)
 {
 	if (m_selectedHostMemoryBlock == NULL)
 		data = 0;
@@ -309,7 +309,7 @@ bool RAMComponent::ReadData(uint64_t& data, Endianness endianness)
 }
 
 
-bool RAMComponent::WriteData(const uint8_t& data)
+bool RAMComponent::WriteData(const uint8_t& data, Endianness endianness)
 {
 	if (m_writeProtected)
 		return false;

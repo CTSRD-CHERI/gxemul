@@ -212,13 +212,13 @@ void MainbusComponent::AddressSelect(uint64_t address)
 }
 
 
-bool MainbusComponent::ReadData(uint8_t& data)
+bool MainbusComponent::ReadData(uint8_t& data, Endianness endianness)
 {
 	if (!MakeSureMemoryMapExists())
 		return false;
 
 	if (m_currentAddressDataBus != NULL)
-		return m_currentAddressDataBus->ReadData(data);
+		return m_currentAddressDataBus->ReadData(data, endianness);
 	else
 		return false;
 }
@@ -260,13 +260,13 @@ bool MainbusComponent::ReadData(uint64_t& data, Endianness endianness)
 }
 
 
-bool MainbusComponent::WriteData(const uint8_t& data)
+bool MainbusComponent::WriteData(const uint8_t& data, Endianness endianness)
 {
 	if (!MakeSureMemoryMapExists())
 		return false;
 
 	if (m_currentAddressDataBus != NULL)
-		return m_currentAddressDataBus->WriteData(data);
+		return m_currentAddressDataBus->WriteData(data, endianness);
 	else
 		return false;
 }

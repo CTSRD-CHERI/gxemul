@@ -1169,21 +1169,26 @@ DYNTRANS_INSTR(M88K_CPUComponent,ldcr)
 
 
 /*
- *  st:   Store word (32-bit).
- *  st_d:   Store double-word (64-bit).
+ *  Loads and stores:
  *
  *  arg[0] = pointer to register d
  *  arg[1] = pointer to register s1
- *  arg[2] = uint16_t offset
+ *  arg[2] = pointer to register s2  or  uint16_t offset
  */
-DYNTRANS_INSTR(M88K_CPUComponent,st)
+template<bool store, typename T, bool doubleword, bool regofs, bool scaled, bool signedLoad> void M88K_CPUComponent::instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
-	uint32_t data = REG32(ic->arg[0]);
-	uint32_t addr = REG32(ic->arg[1]) + ic->arg[2].u32;
+	// TODO: fast lookups
+	// TODO: usr access
 
-	if (addr & 3) {
+	// TODO: place in M88K's "ongoing memory transaction" registers!
+
+	uint32_t addr = REG32(ic->arg[1]) +
+	    (scaled? (doubleword? sizeof(uint64_t) : sizeof(T)) : 1) *
+	    (regofs? REG32(ic->arg[2]) : ic->arg[2].u32);
+
+	if (sizeof(T) > 1 && (addr & (sizeof(T)-1))) {
 		DYNTRANS_SYNCH_PC;
 		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
 		return;
@@ -1191,38 +1196,44 @@ DYNTRANS_INSTR(M88K_CPUComponent,st)
 
 	cpu->AddressSelect(addr);
 
-	if (!cpu->WriteData(data, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
-		// TODO: bus error exception?
-//		DYNTRANS_SYNCH_PC;
-//		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
-	}
-}
-DYNTRANS_INSTR(M88K_CPUComponent,st_d)
-{
-	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	if (store) {
+		T data = REG32(ic->arg[0]);
+		if (!cpu->WriteData(data, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+			// TODO: failed to access memory was probably an exception. Handle this!
+		}
+	} else {
+		T data;
+		if (!cpu->ReadData(data, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+			// TODO: failed to access memory was probably an exception. Handle this!
+		}
 
-	uint32_t data1 = REG32(ic->arg[0]);
-	uint32_t data2 = (* (((uint32_t*)(ic->arg[0].p)) + 1) );
-	uint32_t addr = REG32(ic->arg[1]) + ic->arg[2].u32;
+		if (signedLoad) {
+			if (sizeof(T) == sizeof(uint16_t))
+				data = (int16_t)data;
+			if (sizeof(T) == sizeof(uint8_t))
+				data = (int8_t)data;
+		}
 
-	if (addr & 7) {
-		DYNTRANS_SYNCH_PC;
-		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
-		return;
-	}
-
-	cpu->AddressSelect(addr);
-	if (!cpu->WriteData(data1, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
-		// TODO: bus error exception?
-//		DYNTRANS_SYNCH_PC;
-//		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
+		REG32(ic->arg[0]) = data;
 	}
 
-	cpu->AddressSelect(addr + sizeof(uint32_t));
-	if (!cpu->WriteData(data2, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
-		// TODO: bus error exception?
-//		DYNTRANS_SYNCH_PC;
-//		cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
+	// Special handling of second word in a double-word read or write:
+	if (doubleword) {
+		if (store) {
+			uint32_t data2 = (* (((uint32_t*)(ic->arg[0].p)) + 1) );
+			cpu->AddressSelect(addr + sizeof(uint32_t));
+			if (!cpu->WriteData(data2, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+				// TODO: failed to access memory was probably an exception. Handle this!
+			}
+		} else {
+			uint32_t data2;
+			cpu->AddressSelect(addr + sizeof(uint32_t));
+			if (!cpu->ReadData(data2, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+				// TODO: failed to access memory was probably an exception. Handle this!
+			}
+
+			(* (((uint32_t*)(ic->arg[0].p)) + 1) ) = data2;
+		}
 	}
 }
 
@@ -1250,34 +1261,35 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 	switch (op26) {
 
-//	case 0x02:	/*  ld.hu  */
-//	case 0x03:	/*  ld.bu  */
-//	case 0x04:	/*  ld.d   */
-//	case 0x05:	/*  ld     */
-//	case 0x06:	/*  ld.h   */
-//	case 0x07:	/*  ld.b   */
+	case 0x02:	/*  ld.hu  */
+	case 0x03:	/*  ld.bu  */
+	case 0x04:	/*  ld.d   */
+	case 0x05:	/*  ld     */
+	case 0x06:	/*  ld.h   */
+	case 0x07:	/*  ld.b   */
 	case 0x08:	/*  st.d   */
 	case 0x09:	/*  st     */
-//	case 0x0a:	/*  st.h   */
-//	case 0x0b:	/*  st.b   */
+	case 0x0a:	/*  st.h   */
+	case 0x0b:	/*  st.b   */
 		{
-			int store = 0, opsize = 0; // signedness = 0
+			bool store = op26 >= 0x08;
+			int opsize = 0;
 
 			ic->arg[0].p = &m_r[d];
 			ic->arg[1].p = &m_r[s1];
 			ic->arg[2].u32 = imm16;
 
 			switch (op26) {
-//			case 0x02: opsize = 1; break;
-//			case 0x03: opsize = 0; break;
-//			case 0x04: opsize = 3; break;
-//			case 0x05: opsize = 2; break;
-//			case 0x06: opsize = 1; signedness = 1; break;
-//			case 0x07: opsize = 0; signedness = 1; break;
-			case 0x08: ic->f = instr_st_d; store = 1; opsize = 3; break;
-			case 0x09: ic->f = instr_st; store = 1; opsize = 2; break;
-//			case 0x0a: store = 1; opsize = 1; break;
-//			case 0x0b: store = 1; opsize = 0; break;
+			case 0x02: ic->f = instr_loadstore<false, uint16_t, false, false, false, false>; opsize = 1; break;
+			case 0x03: ic->f = instr_loadstore<false, uint8_t,  false, false, false, false>; opsize = 0; break;
+			case 0x04: ic->f = instr_loadstore<false, uint32_t, true,  false, false, false>; opsize = 3; break;
+			case 0x05: ic->f = instr_loadstore<false, uint32_t, false, false, false, false>; opsize = 2; break;
+			case 0x06: ic->f = instr_loadstore<false, uint16_t, false, false, false, true>;  opsize = 1; break;
+			case 0x07: ic->f = instr_loadstore<false, uint8_t,  false, false, false, true>;  opsize = 0; break;
+			case 0x08: ic->f = instr_loadstore<true,  uint32_t, true,  false, false, false>; opsize = 3; break;
+			case 0x09: ic->f = instr_loadstore<true,  uint32_t, false, false, false, false>; opsize = 2; break;
+			case 0x0a: ic->f = instr_loadstore<true,  uint16_t, false, false, false, false>; opsize = 1; break;
+			case 0x0b: ic->f = instr_loadstore<true,  uint8_t,  false, false, false, false>; opsize = 0; break;
 			}
 
 			if (opsize == 3 && d == 31) {
@@ -1287,11 +1299,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				break;
 			}
 
-			// ic->f = m88k_loadstore[ opsize
-			//     + (store? M88K_LOADSTORE_STORE : 0)
-			//     + (signedness? M88K_LOADSTORE_SIGNEDNESS:0)
-			//     + (cpu->byte_order == EMUL_BIG_ENDIAN?
-			//        M88K_LOADSTORE_ENDIANNESS : 0) ];
+			// Loads into the zero register => load into scratch register.
+			if (!store && d == M88K_ZERO_REG && ic->f != NULL)
+				ic->arg[0].p = &m_zero_scratch;
 		}
 		break;
 
@@ -1503,7 +1513,131 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	case 0x3d:
 		if ((iw & 0xf000) <= 0x3fff ) {
 			// Load, Store, xmem, and lda:
-			// TODO
+			int op = 0, opsize, user = 0, wt = 0;
+			int signedness = 1, scaled = 0;
+
+			switch (iw & 0xf000) {
+			case 0x2000: op = 1; /* st */  break;
+			case 0x3000: op = 2; /* lda */ break;
+			default:     if ((iw & 0xf800) >= 0x0800)
+					op = 0; /* ld */
+				     else
+					op = 3; /* xmem */
+			}
+
+			/*  for (most) ld, st, lda:  */
+			opsize = (iw >> 10) & 3;
+
+			/*  Turn opsize into x, where size = 1 << x:  */
+			opsize = 3 - opsize;
+
+			if (op == 3) {
+				/*  xmem:  */
+				opsize = -1;
+				switch ((iw >> 10) & 3) {
+				case 0: opsize = 0; break;
+				case 1: opsize = 2; break;
+				default:// Weird xmem opsize/type? TODO
+					break;
+				}
+				if (opsize < 0)
+					break;
+			} else {
+				if ((iw & 0xf800) == 0x800) {
+					signedness = 0;
+					if ((iw & 0xf00) < 0xc00)
+						opsize = 1;
+					else
+						opsize = 0;
+				} else {
+					if (opsize >= 2 || op == 1)
+						signedness = 0;
+				}
+			}
+
+			if (iw & 0x100)
+				user = 1;
+			if (iw & 0x80)
+				wt = 1;
+			if (iw & 0x200)
+				scaled = 1;
+
+			if (wt) {
+				// wt bit not yet implemented! TODO
+				ic->f = NULL;
+				break;
+			}
+
+			ic->arg[0].p = &m_r[d];
+			ic->arg[1].p = &m_r[s1];
+			ic->arg[2].p = &m_r[s2];
+
+			if (op == 0 || op == 1) {
+				/*  ld or st:  */
+
+				int n = opsize +
+					((op == 1)? 4 : 0) +
+					(signedness? 8 : 0) +
+					(m_isBigEndian? 16 : 0) +
+					(scaled? 32 : 0) +
+					(user? 64 : 0);
+
+				// <bool store, typename T, bool doubleword, bool regofs, bool scaled, bool signedLoad>
+				//       4    ,   0123    ,       3        ,     true   ,      32    ,      8           , user (TODO)
+				switch (n) {
+				// load = 0
+				case 2 + 0 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<false, uint32_t, false, true, false, false>; break;
+				case 2 + 0 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<false, uint32_t, false, true, true,  false>; break;
+				case 2 + 0 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<false, uint32_t, false, true, false, false>; break;
+				case 2 + 0 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<false, uint32_t, false, true, true,  false>; break;
+				case 3 + 0 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<false, uint32_t, true,  true, false, false>; break;
+				case 3 + 0 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<false, uint32_t, true,  true, true,  false>; break;
+				case 3 + 0 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<false, uint32_t, true,  true, false, false>; break;
+				case 3 + 0 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<false, uint32_t, true,  true, true,  false>; break;
+				// store = 4
+				case 2 + 4 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<true, uint32_t, false, true, false, false>; break;
+				case 2 + 4 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<true, uint32_t, false, true, true,  false>; break;
+				case 2 + 4 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<true, uint32_t, false, true, false, false>; break;
+				case 2 + 4 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<true, uint32_t, false, true, true,  false>; break;
+				case 3 + 4 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<true, uint32_t, true,  true, false, false>; break;
+				case 3 + 4 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<true, uint32_t, true,  true, true,  false>; break;
+				case 3 + 4 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<true, uint32_t, true,  true, false, false>; break;
+				case 3 + 4 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<true, uint32_t, true,  true, true,  false>; break;
+				default:
+					std::cerr << "TODO generalize! scaled="<<scaled << " user="<<
+						user<<" signedness="<<signedness << " opsize=" << opsize << "\n";
+				}
+
+				if (op == 0 && d == M88K_ZERO_REG && ic->f != NULL)
+					ic->arg[0].p = &m_zero_scratch;
+
+				if (opsize == 3 && d == 31) {
+					// m88k load/store of register pair r31/r0 is not
+					// yet implemented: TODO: figure out how to deal with this.
+					ic->f = NULL;
+					break;
+				}
+			} else if (op == 2) {
+				/*  lda:  */
+// TODO
+//				if (scaled) {
+//					switch (opsize) {
+//					case 0: ic->f = instr(addu); break;
+//					case 1: ic->f = instr(lda_reg_2); break;
+//					case 2: ic->f = instr(lda_reg_4); break;
+//					case 3: ic->f = instr(lda_reg_8); break;
+//					}
+//				} else {
+//					ic->f = instr(addu);
+//				}
+			} else {
+				/*  xmem:  */
+// TODO
+//				ic->f = instr(xmem_slow);
+//				ic->arg[0] = iw;
+//				if (d == M88K_ZERO_REG)
+//					ic->f = instr(nop);
+			}
 		} else switch ((iw >> 8) & 0xff) {
 //		case 0x40:	/*  and    */
 //		case 0x44:	/*  and.c  */

@@ -79,11 +79,11 @@ public:
 
 	/* Implementation of AddressDataBus: */
 	virtual void AddressSelect(uint64_t address);
-	virtual bool ReadData(uint8_t& data);
+	virtual bool ReadData(uint8_t& data, Endianness endianness);
 	virtual bool ReadData(uint16_t& data, Endianness endianness);
 	virtual bool ReadData(uint32_t& data, Endianness endianness);
 	virtual bool ReadData(uint64_t& data, Endianness endianness);
-	virtual bool WriteData(const uint8_t& data);
+	virtual bool WriteData(const uint8_t& data, Endianness endianness);
 	virtual bool WriteData(const uint16_t& data, Endianness endianness);
 	virtual bool WriteData(const uint32_t& data, Endianness endianness);
 	virtual bool WriteData(const uint64_t& data, Endianness endianness);
