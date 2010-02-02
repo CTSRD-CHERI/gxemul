@@ -393,6 +393,7 @@ private:
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace_singlestep);
 	DECLARE_DYNTRANS_INSTR(ldcr);
 	template<bool store, typename T, bool doubleword, bool regofs, bool scaled, bool signedLoad> static void instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic);
+	template<int scaleFactor> static void instr_lda(CPUDyntransComponent* cpubase, DyntransIC* ic);
 
 	void Translate(uint32_t iword, struct DyntransIC* ic);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated);

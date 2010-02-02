@@ -4454,3 +4454,4 @@ Changelog for GXemul:
 		time generated define/include magic to simulate a template-
 		style mechanism in C).
 		Reimplementing the M88K divu d,s1,imm instruction.
+		Reimplementing the M88K lda.* instruction.

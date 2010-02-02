@@ -1187,6 +1187,19 @@ DYNTRANS_INSTR(M88K_CPUComponent,ldcr)
 
 
 /*
+ *  lda:  d = s1 + s2 * scaleFactor
+ *
+ *  arg[0] = pointer to register d
+ *  arg[1] = pointer to register s1
+ *  arg[2] = pointer to register s2
+ */
+template<int scaleFactor> void M88K_CPUComponent::instr_lda(CPUDyntransComponent* cpubase, DyntransIC* ic)
+{
+	REG32(ic->arg[0]) = REG32(ic->arg[1]) + scaleFactor * REG32(ic->arg[2]);
+}
+
+
+/*
  *  Loads and stores:
  *
  *  arg[0] = pointer to register d
@@ -1644,17 +1657,21 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				}
 			} else if (op == 2) {
 				/*  lda:  */
-// TODO
-//				if (scaled) {
-//					switch (opsize) {
-//					case 0: ic->f = instr(addu); break;
-//					case 1: ic->f = instr(lda_reg_2); break;
-//					case 2: ic->f = instr(lda_reg_4); break;
-//					case 3: ic->f = instr(lda_reg_8); break;
-//					}
-//				} else {
-//					ic->f = instr(addu);
-//				}
+				if (scaled) {
+					switch (opsize) {
+//					case 0: // TODO: 88110 vs 88100 etc. ic->f = instr(addu); break;
+					case 1: ic->f = instr_lda<2>; break;
+					case 2: ic->f = instr_lda<4>; break;
+					case 3: ic->f = instr_lda<8>; break;
+					}
+				} else {
+					// TODO: 88110 vs 88100 etc.
+					// ic->f = instr(addu);
+				}
+
+				// TODO: Perhaps 88110 loads into 0 are not nops, but cache ops? Look in docs.
+				if (d == M88K_ZERO_REG && ic->f != NULL)
+					ic->f = instr_nop;
 			} else {
 				/*  xmem:  */
 // TODO
