@@ -19,14 +19,13 @@
 
 <ul>
 	<li>Release 0.6.0 when <i>something</i> in the new framework works
-		well enough to be released
-		(hopefully some time during Summer 2010).
-	<li>The primary goal is [a subset of] <a href="machines/machine_testm88k.html">testm88k</a>.
+		well enough to be released (hopefully some time during Summer 2010).
+	<li>The primary goal is [a tiny subset of] <a href="machines/machine_testm88k.html">testm88k</a>.
 	<li>Most other machine modes will use the old framework.
 </ul>
 
 <p>Because of severe lack of spare time that can be allocated to the GXemul
-project, the 0.6.0 release will most likely not be very meaningful to end-users,
+project, the first 0.6.x release will most likely not be very meaningful to end-users,
 since almost all old features will be deprecated/legacy features, and the new
 features will only work with <tt>testm88k</tt> (which most users will not care about).
 Still, it feels like the way to go forward.
@@ -168,6 +167,8 @@ Some things, in no specific order, that I'd like to fix:
 	[/]  Implement basic 88K instruction execution, enough to run
 	     the rectangle drawing demo.
 	[ ]  Framebuffer output?
+		[ ]  Start thinking about the plugin framework, use sdl
+		     for video output!
 
   [/]	The MVME187 machine.
 
@@ -332,17 +333,26 @@ Some things, in no specific order, that I'd like to fix:
 		where cpu0 would be the default component. This would make it
 		look nice when adding disk images, like wd0:netbsd.img
 
-		How about arguments to the loader?
-
-			[component:][loader([args]):]filename
+			[component:][plugin([args]):]name
 
 		e.g. loader could be raw(vaddr[,skiplen[,entry]])
+		or                   file(raw(vaddr[,skiplen[,entry]]))
 
 		so,	monkey:filename		would load into component monkey
 		but	monkey():filename	would load into the default comonent
 						using the monkey loader.
 		and	a:b(c):filename		would load into component a using
 						the b loader, with args c
+
+		"Plugin descriptors"
+			optional component
+			optional plugin([args])
+			optional name
+
+		If all fields are left out, it's an empty descriptor, which is
+		ignored. GXemul's command line syntax would then be:
+		
+			gxemul [options] [.gxemul file] [plugin descriptors...]
 
 		[ ]  The set of loaders to ask could be different depending on
 		     which interfaces the component supports. For AddressDataBus,
@@ -351,19 +361,58 @@ Some things, in no specific order, that I'd like to fix:
 		     For block devices (disks, e.g. wd0, sd0), it would be a
 		     disk image mapper.
 
+		filename is also optional, and in fact more like a second
+		argument. E.g. the sdl() plugin doesn't need a filename.
+
+		The "load" command could be replaced by some kind of "attach"
+		command, which would run the same thing as the plugin descriptors
+		entered on the command line:
+		
+		Example output:
+			GXemul> attach wd0:netbsd.img
+			wd0: Attaching to image(): netbsd.img
+			     SCSI disk image, 2400 MB
+
+			GXemul> attach vfb:sdl(apa bepa)
+			vfb0: Unable to attaching to sdl(apa bepa)
+			Invalid arguments to sdl().
+
+			GXemul> attach vfb:sdl()
+			vfb0: Attaching to sdl()
+
+			GXemul> attach test/FileLoader_A.OUT_M88K
+			cpu0: Attaching to file(): test/FileLoader_A.OUT_M88K
+			      a.out: entry point 0x000012b8
+			      text + data = 4096 + 4096 bytes
+			      symbols: 1260 bytes at 0x2000
+			      strings: 1070 bytes at 0x24ec
+			      14 symbols read
+
+		Note that the load command should still be used for loading
+		[parts of] emulation setups!
+
 		Think more about this!
 		----------------------
 
 			netbsd-GENERIC.gz			(load a basic file into cpu0)
 			cpu1:netbsd-GENERIC.gz			(load into a specific cpu)
 			wd0:netbsd.img				(disk image file mapper)
-			wd0:image(readonly):netbsd.img			(mapper with arguments!)
-			cpu0.dcache:cachestatisticsviewer
-			vga0:sdl
+			wd0:image(readonly):netbsd.img		(mapper with arguments! non-writable image)
+			wd0:image(cow):netbsd.img		(non-writable, but COW to temporary file (TMPDIR))
+			cpu0.dcache:cachestatisticsviewer()
+			vga0:sdl()				(for displaying graphical controllers, which can
+								be interrogated about memory format, resolution etc)
 			vga0:sdl(DISPLAY=othermachine:1.0)	(sdl on remote display)
-			com0:stdio		(default stdio)
-			com0:xterm		(new xterm)
+			fb_videoram0:sdl(x=800,y=600,data=rgb24) (for displaying raw memory ranges)
+			com0:stdio()		(default stdio)
+			com0:xterm()		(new xterm)
 			...
+
+		com0:stdio() should not be needed, if it is the default
+		choice. com0:null() would disconnect com0 from any output.
+		stdio() would then have to be a plugin which handles multi-
+		plexing of multiple outputs, and allows one input serial
+		console.
 
    [ ]  File loaders:
    	[ ]  automagic .gz (and .bz2) file extraction into /tmp or $TMP or such.
@@ -577,7 +626,7 @@ Some things, in no specific order, that I'd like to fix:
              Read this setting from an environment variable, and only
              if there is none, fall back to hardcoded string.
 	[ ]  File descriptor (0,1,2) assumptions? Think about this.
-	[ ]  Dynamic linking!
+	[ ]  Dynamic linking! (libs from /emul/xxxx etc)
 	[ ]  Initial register/stack contents (environment, command line args).
 	[ ]  Return value (from main).
 	[ ]  mmap emulation layer
