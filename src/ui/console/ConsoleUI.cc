@@ -67,10 +67,16 @@ static void ReshowCurrentCommandBuffer()
  */
 extern "C" void ConsoleUI_SIGINT_Handler(int n)
 {
-	g_GXemul->SetRunState(GXemul::Paused);
+	// Print ^C nomatter if we are running or already paused,
+	// and clear the command buffer.
 	std::cout << "^C\n";
 	g_GXemul->GetCommandInterpreter().ClearCurrentCommandBuffer();
+
+	// Note: If we are running, this will not print anything.
 	ReshowCurrentCommandBuffer();
+
+	g_GXemul->SetRunState(GXemul::Paused);
+
 	signal(SIGINT, ConsoleUI_SIGINT_Handler);
 }
 
