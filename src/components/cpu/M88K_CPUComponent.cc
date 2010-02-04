@@ -1198,15 +1198,60 @@ template<bool one> void M88K_CPUComponent::instr_bb_n_singlestep(CPUDyntransComp
 
 DYNTRANS_INSTR(M88K_CPUComponent,jmp_n)
 {
-	std::cerr << "jmp_n when not single stepping: TODO\n";
-	throw std::exception();
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	// Prepare for the branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+	uint32_t branchTarget = REG32(ic->arg[2]);
+
+	// Execute the next instruction:
+	ic[1].f(cpu, ic+1);
+	cpu->m_executedCycles ++;
+
+	// If there was no exception, then branch:
+	if (!cpu->m_exceptionInDelaySlot) {
+		cpu->m_pc = branchTarget;
+		cpu->DyntransPCtoPointers();
+
+		cpu->m_inDelaySlot = false;
+	}
+
+	// The next instruction is now either the target of the branch
+	// instruction, the instruction 2 steps after this one,
+	// or the first instruction of an exception handler.
+	cpu->m_exceptionInDelaySlot = false;
 }
 
 
 DYNTRANS_INSTR(M88K_CPUComponent,jmp_n_functioncalltrace)
 {
-	std::cerr << "jmp_n with function call trace when not single stepping: TODO\n";
-	throw std::exception();
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	// Prepare for the branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+	uint32_t branchTarget = REG32(ic->arg[2]);
+
+	// Execute the next instruction:
+	ic[1].f(cpu, ic+1);
+	cpu->m_executedCycles ++;
+
+	// If there was no exception, then branch:
+	if (!cpu->m_exceptionInDelaySlot) {
+		if (cpu->m_showFunctionTraceCall && ic->arg[2].p == &cpu->m_r[M88K_RETURN_REG])
+			cpu->FunctionTraceReturn();
+
+		cpu->m_pc = branchTarget;
+		cpu->DyntransPCtoPointers();
+
+		cpu->m_inDelaySlot = false;
+	}
+
+	// The next instruction is now either the target of the branch
+	// instruction, the instruction 2 steps after this one,
+	// or the first instruction of an exception handler.
+	cpu->m_exceptionInDelaySlot = false;
 }
 
 

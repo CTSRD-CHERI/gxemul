@@ -4458,3 +4458,4 @@ Changelog for GXemul:
 20100203	Beginning on reimplementing M88K bb0.n and bb1.n; only the
 		non-singlestepping variant done so far.
 20100204	bb0.n and bb1.n should now also work when single-stepping.
+		Implementing the non-singlestep variant of M88K jmp.n.
