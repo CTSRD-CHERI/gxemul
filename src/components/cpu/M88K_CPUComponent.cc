@@ -1133,6 +1133,69 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_n_functioncalltrace_singlestep)
 }
 
 
+/*
+ *  bb0, bb1:  Branch if a bit in a register is 0 or 1
+ *  bb0.n, bb1.n:  Branch if a bit in a register is 0 or 1 with delay slot
+ *
+ *  arg[0] = pointer to register s1
+ *  arg[1] = uint32_t bitmask to test
+ *  arg[2] = offset from start of current page _OR_ pointer to new instr_call
+ */
+template<bool one> void M88K_CPUComponent::instr_bb_n(CPUDyntransComponent* cpubase, DyntransIC* ic)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+ 	bool bit = REG32(ic->arg[0]) & ic->arg[1].u32;
+
+	// Prepare for the branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+
+	// Execute the next instruction:
+	ic[1].f(cpu, ic+1);
+	cpu->m_executedCycles ++;
+
+	// If there was no exception, then branch:
+	if (!cpu->m_exceptionInDelaySlot) {
+		if (bit == one) {
+			cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+			cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[2].u32);
+			cpu->DyntransPCtoPointers();
+		}
+
+		cpu->m_inDelaySlot = false;
+	}
+
+	// The next instruction is now either the target of the branch
+	// instruction, the instruction 2 steps after this one,
+	// or the first instruction of an exception handler.
+	cpu->m_exceptionInDelaySlot = false;
+}
+
+
+template<bool one> void M88K_CPUComponent::instr_bb_n_singlestep(CPUDyntransComponent* cpubase, DyntransIC* ic)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+ 	bool bit = REG32(ic->arg[0]) & ic->arg[1].u32;
+
+	DYNTRANS_SYNCH_PC;
+
+	// Prepare for the branch.
+	cpu->m_inDelaySlot = true;
+	cpu->m_exceptionInDelaySlot = false;
+
+	if (bit == one) {
+		cpu->m_delaySlotTarget = cpu->m_pc & ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+		cpu->m_delaySlotTarget = (uint32_t) (cpu->m_delaySlotTarget + ic->arg[2].u32);
+	} else {
+		cpu->m_delaySlotTarget = cpu->m_pc + 8;
+	}
+
+	cpu->m_nextIC = ic + 1;
+}
+
+
 DYNTRANS_INSTR(M88K_CPUComponent,jmp_n)
 {
 	std::cerr << "jmp_n when not single stepping: TODO\n";
@@ -1287,7 +1350,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	uint32_t imm16  = iw & 0xffff;
 //	uint32_t w5     = (iw >>  5) & 0x1f;
 	uint32_t cr6    = (iw >>  5) & 0x3f;
-//	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
+	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
 	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
 
 	switch (op26) {
@@ -1488,6 +1551,49 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			}
 		}
 		break;
+
+//	case 0x34:	/*  bb0     */
+	case 0x35:	/*  bb0.n   */
+//	case 0x36:	/*  bb1     */
+	case 0x37:	/*  bb1.n   */
+		{
+			void (*samepage_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+			void (*singlestep_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+
+			switch (op26) {
+//			case 0x34:
+//				ic->f = instr_bb<false>;
+//				samepage_function = inst_bb_samepage<false>;
+//				break;
+			case 0x35:
+				ic->f = instr_bb_n<false>;
+				singlestep_function = instr_bb_n_singlestep<false>;
+				break;
+//			case 0x36:
+//				ic->f = instr_bb<true>;
+//				samepage_function = inst_bb_samepage<true>;
+//				break;
+			case 0x37:
+				ic->f = instr_bb_n<true>;
+				singlestep_function = instr_bb_n_singlestep<true>;
+				break;
+			}
+	
+			ic->arg[0].p = &m_r[s1];
+			ic->arg[1].u32 = (1 << d);
+	
+			int offset = (m_pc & 0xffc) + d16;
+			ic->arg[2].u32 = offset;
+
+			if (singleInstructionLeft && singlestep_function != NULL)
+				ic->f = singlestep_function;
+			else if (offset >= 0 && offset <= 0xffc && samepage_function != NULL) {
+				ic->f = samepage_function;
+				ic->arg[2].p = ( m_firstIConPage + (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
+			}
+		}
+		break;
+
 
 	case 0x3c:
 		switch (op10) {

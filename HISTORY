@@ -4455,3 +4455,6 @@ Changelog for GXemul:
 		style mechanism in C).
 		Reimplementing the M88K divu d,s1,imm instruction.
 		Reimplementing the M88K lda.* instruction.
+20100203	Beginning on reimplementing M88K bb0.n and bb1.n; only the
+		non-singlestepping variant done so far.
+20100204	bb0.n and bb1.n should now also work when single-stepping.

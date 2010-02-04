@@ -388,6 +388,8 @@ private:
 	DECLARE_DYNTRANS_INSTR(bsr_n);
 	DECLARE_DYNTRANS_INSTR(bsr_n_functioncalltrace);
 	DECLARE_DYNTRANS_INSTR(bsr_n_functioncalltrace_singlestep);
+	template<bool one> static void instr_bb_n(CPUDyntransComponent* cpubase, DyntransIC* ic);
+	template<bool one> static void instr_bb_n_singlestep(CPUDyntransComponent* cpubase, DyntransIC* ic);
 	DECLARE_DYNTRANS_INSTR(jmp_n);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace_singlestep);
