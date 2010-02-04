@@ -59,6 +59,7 @@ public:
 		Paused,
 		SingleStepping,			// Single-step execution
 		Running,			// Continuous execution
+		Interrupting,			// Continuous execution, interrupting
 		Quitting
 	};
 

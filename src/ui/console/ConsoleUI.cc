@@ -67,17 +67,20 @@ static void ReshowCurrentCommandBuffer()
  */
 extern "C" void ConsoleUI_SIGINT_Handler(int n)
 {
-	if (g_GXemul->GetRunState() == GXemul::Running)
+	switch (g_GXemul->GetRunState()) {
+	case GXemul::Running:
 		std::cout << "^C (interrupting emulation)\n";
-	else
+		g_GXemul->SetRunState(GXemul::Interrupting);
+		break;
+	case GXemul::Interrupting:
+		std::cout << "^C (interrupting emulation; please wait)\n";
+		break;
+	default:
 		std::cout << "^C\n";
+	}
 
 	g_GXemul->GetCommandInterpreter().ClearCurrentCommandBuffer();
-
-	// Note: If we are running, this will not print anything.
 	ReshowCurrentCommandBuffer();
-
-	g_GXemul->SetRunState(GXemul::Paused);
 
 	signal(SIGINT, ConsoleUI_SIGINT_Handler);
 }
@@ -292,6 +295,10 @@ int ConsoleUI::MainLoop()
 			}
 
 			m_gxemul->Execute();
+			break;
+
+		case GXemul::Interrupting:
+			m_gxemul->SetRunState(GXemul::Paused);
 			break;
 
 		case GXemul::Quitting:

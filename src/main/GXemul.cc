@@ -741,6 +741,8 @@ string GXemul::GetRunStateAsString() const
 		return "Single-stepping";
 	case Running:
 		return "Running";
+	case Interrupting:
+		return "Interrupting";
 	case Quitting:
 		return "Quitting";
 	}
@@ -1117,6 +1119,9 @@ void GXemul::Execute(const int longestTotalRun)
 		    " running state. Internal error?\n";
 		throw std::exception();
 	}
+
+	if (GetRunState() == Interrupting)
+		SetRunState(Paused);
 }
 
 
