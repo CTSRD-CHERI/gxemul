@@ -67,9 +67,11 @@ static void ReshowCurrentCommandBuffer()
  */
 extern "C" void ConsoleUI_SIGINT_Handler(int n)
 {
-	// Print ^C nomatter if we are running or already paused,
-	// and clear the command buffer.
-	std::cout << "^C\n";
+	if (g_GXemul->GetRunState() == GXemul::Running)
+		std::cout << "^C (interrupting emulation)\n";
+	else
+		std::cout << "^C\n";
+
 	g_GXemul->GetCommandInterpreter().ClearCurrentCommandBuffer();
 
 	// Note: If we are running, this will not print anything.
