@@ -54,6 +54,7 @@ SUCH DAMAGE.
   <li><a href="unsupported.html#linux_malta2">Linux/Malta</a> (variant 2)
   <li><a href="unsupported.html#linux_qemu_mips">Linux/QEMU_MIPS</a>
   <li><a href="unsupported.html#windows_nt_mips">Windows NT/MIPS</a>
+  <li><a href="unsupported.html#netbsdplaystation2">NetBSD/playstation2</a>
 </ul>
 
 <p>NOTE: The guest operating systems listed on this page are here because
@@ -722,6 +723,29 @@ Windows NT onto a disk image:
 
 <p><tt>SETUPLDR</tt> manages to load some drivers from the cdrom,
 but then it crashes because of incomplete emulation of some hardware devices.
+
+
+
+
+
+<p><br>
+<a name="netbsdplaystation2"></a>
+<h3>NetBSD/playstation2:</h3>
+
+<p>This doesn't work, and the <a href="http://www.netbsd.org/ports/playstation2/">playstation2 port of NetBSD</a> is dead at the time of writing this.
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="20100205-netbsd-playstation2.png"><img src="20100205-netbsd-playstation2-small.png"></a>
+
+<p>To attempt to run the latest snapshot (from 2002):
+<ol>
+	<li>Download <a href="ftp://ftp.netbsd.org/pub/NetBSD/arch/playstation2/snapshot/20020327/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/arch/playstation2/snapshot/20020327/binary/kernel/netbsd-GENERIC.gz</a> and run<pre>
+	<b>gxemul -X -E playstation2 netbsd-GENERIC.gz</b>
+</pre>
+</ol>
+
+<p>Supplying a disk image with <tt>-d</tt> almost works. Then it hangs, waiting for
+keyboard input from a keyboard which doesn't exist.
 
 
 
