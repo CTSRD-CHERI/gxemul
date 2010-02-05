@@ -168,12 +168,14 @@ void ConsoleUI::ShowDebugMessage(const string& msg)
 	vector<string> lines = SplitIntoRows(msg, true);
 
 	for (size_t i=0; i<lines.size(); ++i) {
-		if (m_gxemul->GetRunState() == GXemul::Running)
+		if (m_gxemul->GetRunState() == GXemul::Running ||
+		    m_gxemul->GetRunState() == GXemul::Interrupting)
 			std::cout << "[ " << m_indentationMsg << lines[i] << " ]\n";
 		else
 			std::cout << m_indentationMsg << lines[i] << "\n";
 
-		// Replace indentation string with spaces.
+		// Replace indentation string with spaces after first
+		// line of output:
 		for (size_t j=m_indentationMsg.length(); j>0; --j)
 			m_indentationMsg[j-1] = ' ';
 	}
