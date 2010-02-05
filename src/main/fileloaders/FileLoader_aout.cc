@@ -289,8 +289,14 @@ bool FileLoader_aout::LoadIntoComponent(refcount_ptr<Component> component, ostre
 
 			// TODO: These bits probably mean different things for
 			// different a.out formats. For OpenBSD/m88k at least,
-			// this bit (0x1000000) seems to mean "a normal symbol".
-			if (!(type & 0x1000000))
+			// this bit (0x01000000) seems to mean "a normal symbol".
+			if (!(type & 0x01000000))
+				continue;
+
+			// ... and the rectangle drawing demo says
+			// "_my_memset" at addr 1020, type 5020000
+			// "rectangles_m88k_O2.o" at addr 1020, type 1f000000
+			if ((type & 0x1f000000) == 0x1f000000)
 				continue;
 
 			if (index >= (uint32_t)strings_len) {
