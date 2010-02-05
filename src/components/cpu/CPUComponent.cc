@@ -96,7 +96,7 @@ void CPUComponent::ResetState()
 }
 
 
-void CPUComponent::FunctionTraceCall()
+bool CPUComponent::FunctionTraceCall()
 {
 	stringstream ss;
 	for (int i=0; i<m_functionCallTraceDepth; ++i)
@@ -131,10 +131,16 @@ void CPUComponent::FunctionTraceCall()
 	++ m_functionCallTraceDepth;
 	if (m_functionCallTraceDepth > 100)
 		m_functionCallTraceDepth = 100;
+
+	GXemul* gxemul = GetRunningGXemulInstance();
+	if (gxemul != NULL && gxemul->IsInterrupting())
+		return false;
+
+	return true;
 }
 
 
-void CPUComponent::FunctionTraceReturn()
+bool CPUComponent::FunctionTraceReturn()
 {
 	-- m_functionCallTraceDepth;
 	if (m_functionCallTraceDepth < 0)
@@ -159,7 +165,13 @@ void CPUComponent::FunctionTraceReturn()
 
 			GetUI()->ShowDebugMessage(this, ss.str());
 		}
+
+		GXemul* gxemul = GetRunningGXemulInstance();
+		if (gxemul != NULL && gxemul->IsInterrupting())
+			return false;
 	}
+
+	return true;
 }
 
 

@@ -1053,6 +1053,9 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_n)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
+	uint32_t startOfPage = cpu->m_pc & ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+	cpu->m_r[M88K_RETURN_REG] = startOfPage + ic->arg[2].u32;
+
 	// Prepare for the branch.
 	cpu->m_inDelaySlot = true;
 	cpu->m_exceptionInDelaySlot = false;
@@ -1063,10 +1066,7 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_n)
 
 	// If there was no exception, then branch:
 	if (!cpu->m_exceptionInDelaySlot) {
-		cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
-		cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2].u32;
-
-		cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1].u32);
+		cpu->m_pc = (uint32_t) (startOfPage + ic->arg[1].u32);
 		cpu->DyntransPCtoPointers();
 
 		cpu->m_inDelaySlot = false;
@@ -1082,6 +1082,9 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_n_functioncalltrace)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
+	uint32_t startOfPage = cpu->m_pc & ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+	cpu->m_r[M88K_RETURN_REG] = startOfPage + ic->arg[2].u32;
+
 	// Prepare for the branch.
 	cpu->m_inDelaySlot = true;
 	cpu->m_exceptionInDelaySlot = false;
@@ -1092,10 +1095,7 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_n_functioncalltrace)
 
 	// If there was no exception, then branch:
 	if (!cpu->m_exceptionInDelaySlot) {
-		cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
-		cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2].u32;
-
-		cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1].u32);
+		cpu->m_pc = (uint32_t) (startOfPage + ic->arg[1].u32);
 		cpu->FunctionTraceCall();
 		cpu->DyntransPCtoPointers();
 
@@ -1134,12 +1134,85 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_n_functioncalltrace_singlestep)
 
 
 /*
+ *  bcnd, bcnd.n:  Branch on condition
+ *
+ *  arg[0] = pointer to register s1
+ *  arg[2] = offset from start of current page to branch to _OR_ pointer to new instr_call
+ */
+template<bool n, int op, bool singlestep> void M88K_CPUComponent::instr_bcnd(CPUDyntransComponent* cpubase, DyntransIC* ic)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	bool cond;
+	if (op == 1)	// gt0
+		cond = ((int32_t)REG32(ic->arg[0]) > 0);
+	else
+//	if (op == 14)	// le0
+		cond = ((int32_t)REG32(ic->arg[0]) <= 0);
+
+	if (n) {
+		if (singlestep) {
+			DYNTRANS_SYNCH_PC;
+		
+			// Prepare for the branch.
+			cpu->m_inDelaySlot = true;
+			cpu->m_exceptionInDelaySlot = false;
+
+			if (cond) {
+				cpu->m_delaySlotTarget = cpu->m_pc & ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+				cpu->m_delaySlotTarget = (uint32_t) (cpu->m_delaySlotTarget + ic->arg[2].u32);
+			} else {
+				cpu->m_delaySlotTarget = cpu->m_pc + 8;
+			}
+		
+			cpu->m_nextIC = ic + 1;
+		} else {
+			// Prepare for the branch.
+			cpu->m_inDelaySlot = true;
+			cpu->m_exceptionInDelaySlot = false;
+		
+			// Execute the next instruction:
+			ic[1].f(cpu, ic+1);
+			cpu->m_executedCycles ++;
+		
+			// If there was no exception, then branch:
+			if (!cpu->m_exceptionInDelaySlot) {
+				if (cond) {
+					cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+					cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[2].u32);
+					cpu->DyntransPCtoPointers();
+				} else {
+					cpu->m_nextIC = ic + 2;
+				}
+		
+				cpu->m_inDelaySlot = false;
+			}
+		
+			// The next instruction is now either the target of the branch
+			// instruction, the instruction 2 steps after this one,
+			// or the first instruction of an exception handler.
+			cpu->m_exceptionInDelaySlot = false;
+		}
+	} else {
+		// bcnd without the .n flag:
+		if (cond) {
+			cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+			cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[2].u32);
+			cpu->DyntransPCtoPointers();
+		} else {
+			// m_nextIC should already point to the next ic.
+		}
+	}
+}
+
+
+/*
  *  bb0, bb1:  Branch if a bit in a register is 0 or 1
  *  bb0.n, bb1.n:  Branch if a bit in a register is 0 or 1 with delay slot
  *
  *  arg[0] = pointer to register s1
  *  arg[1] = uint32_t bitmask to test
- *  arg[2] = offset from start of current page _OR_ pointer to new instr_call
+ *  arg[2] = offset from start of current page to branch to _OR_ pointer to new instr_call
  */
 template<bool one> void M88K_CPUComponent::instr_bb_n(CPUDyntransComponent* cpubase, DyntransIC* ic)
 {
@@ -1161,6 +1234,8 @@ template<bool one> void M88K_CPUComponent::instr_bb_n(CPUDyntransComponent* cpub
 			cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
 			cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[2].u32);
 			cpu->DyntransPCtoPointers();
+		} else {
+			cpu->m_nextIC = ic + 2;
 		}
 
 		cpu->m_inDelaySlot = false;
@@ -1577,8 +1652,8 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			ic->arg[0].p = ( m_firstIConPage + (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
 			ic->arg[1].u32 = offset;
 
-			/*  Return offset for bsr (stored in m_r[M88K_RETURN_REG]):  */
-			ic->arg[2].u32 = (m_pc & 0xffc) + 4;
+			/*  Return offset for bsr and bsr.n (stored in m_r[M88K_RETURN_REG]):  */
+			ic->arg[2].u32 = (m_pc & 0xffc) + ((op26 & 1)? 8 : 4);
 
 			if (offset >= 0 && offset <= 0xffc &&
 			    samepage_function != NULL)
@@ -1630,6 +1705,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			int offset = (m_pc & 0xffc) + d16;
 			ic->arg[2].u32 = offset;
 
+			if (ic->f == NULL)
+				break;
+
 			if (singleInstructionLeft && singlestep_function != NULL)
 				ic->f = singlestep_function;
 			else if (offset >= 0 && offset <= 0xffc && samepage_function != NULL) {
@@ -1639,6 +1717,52 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 		}
 		break;
 
+	case 0x3a:	/*  bcnd    */
+	case 0x3b:	/*  bcnd.n  */
+		{
+			void (*samepage_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+			void (*singlestep_f)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+
+			if (op26 & 1) {
+				switch (d) {
+				case  1: ic->f = instr_bcnd<true,1, false>; singlestep_f = instr_bcnd<true,1, true>; break;
+				case 14: ic->f = instr_bcnd<true,14,false>; singlestep_f = instr_bcnd<true,14,true>; break;
+				}
+			} else {
+				switch (d) {
+				case  1: ic->f = instr_bcnd<false,1, false>; break;
+				case 14: ic->f = instr_bcnd<false,14,false>; break;
+				}
+			}
+
+			// TODO: samepage optimization: probably easiest to do using
+			// another template bit...
+			// samepage_function = m88k_bcnd[64 + d + 32 * (op26 & 1)];
+
+			if (ic->f == NULL) {
+				if (ui != NULL) {
+					stringstream ss;
+					ss.flags(std::ios::hex);
+					ss << "unimplemented bcnd condition code d = " << d;
+					ui->ShowDebugMessage(this, ss.str());
+				}
+
+				break;
+			}
+
+			ic->arg[0].p = &m_r[s1];
+
+			int offset = (m_pc & 0xffc) + d16;
+			ic->arg[2].u32 = offset;
+
+			if (singleInstructionLeft && singlestep_f != NULL) {
+				ic->f = singlestep_f;
+			} else if (offset >= 0 && offset <= 0xffc && samepage_function != NULL) {
+				ic->f = samepage_function;
+				ic->arg[2].p = ( m_firstIConPage + (offset >> M88K_INSTR_ALIGNMENT_SHIFT) );
+			}
+		}
+		break;
 
 	case 0x3c:
 		switch (op10) {
@@ -1771,6 +1895,14 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				//       4    ,   0123    ,       3        ,     true   ,      32    ,      8           , user (TODO)
 				switch (n) {
 				// load = 0
+				case 0 + 0 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<false, uint8_t,  false, true, false, false>; break;
+				case 0 + 0 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<false, uint8_t,  false, true, true,  false>; break;
+				case 0 + 0 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<false, uint8_t,  false, true, false, false>; break;
+				case 0 + 0 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<false, uint8_t,  false, true, true,  false>; break;
+				case 1 + 0 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<false, uint16_t, false, true, false, false>; break;
+				case 1 + 0 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<false, uint16_t, false, true, true,  false>; break;
+				case 1 + 0 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<false, uint16_t, false, true, false, false>; break;
+				case 1 + 0 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<false, uint16_t, false, true, true,  false>; break;
 				case 2 + 0 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<false, uint32_t, false, true, false, false>; break;
 				case 2 + 0 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<false, uint32_t, false, true, true,  false>; break;
 				case 2 + 0 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<false, uint32_t, false, true, false, false>; break;
@@ -1780,6 +1912,14 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				case 3 + 0 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<false, uint32_t, true,  true, false, false>; break;
 				case 3 + 0 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<false, uint32_t, true,  true, true,  false>; break;
 				// store = 4
+				case 0 + 4 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<true, uint8_t,  false, true, false, false>; break;
+				case 0 + 4 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<true, uint8_t,  false, true, true,  false>; break;
+				case 0 + 4 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<true, uint8_t,  false, true, false, false>; break;
+				case 0 + 4 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<true, uint8_t,  false, true, true,  false>; break;
+				case 1 + 4 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<true, uint16_t, false, true, false, false>; break;
+				case 1 + 4 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<true, uint16_t, false, true, true,  false>; break;
+				case 1 + 4 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<true, uint16_t, false, true, false, false>; break;
+				case 1 + 4 + 0 + 16  + 32 +  0: ic->f = instr_loadstore<true, uint16_t, false, true, true,  false>; break;
 				case 2 + 4 + 0 +  0  +  0 +  0: ic->f = instr_loadstore<true, uint32_t, false, true, false, false>; break;
 				case 2 + 4 + 0 +  0  + 32 +  0: ic->f = instr_loadstore<true, uint32_t, false, true, true,  false>; break;
 				case 2 + 4 + 0 + 16  +  0 +  0: ic->f = instr_loadstore<true, uint32_t, false, true, false, false>; break;

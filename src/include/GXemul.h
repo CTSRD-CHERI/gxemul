@@ -59,7 +59,6 @@ public:
 		Paused,
 		SingleStepping,			// Single-step execution
 		Running,			// Continuous execution
-		Interrupting,			// Continuous execution, interrupting
 		Quitting
 	};
 
@@ -162,6 +161,24 @@ public:
 	 * @return false if any of the reset commands failed.
 	 */
 	bool Reset();
+
+	/**
+	 * \brief Interrupts emulation.
+	 *
+	 * Only meaningful if RunState is Running or SingleStepping.
+	 */
+	void Interrupt();
+
+	/**
+	 * \brief Returns whether or not the current emulation is being
+	 * interrupted.
+	 *
+	 * Only meaningful if RunState is Running or SingleStepping.
+	 */
+	bool IsInterrupting() const
+	{
+		return m_interrupting;
+	}
 
 	/**
 	 * \brief Sets the RunState.
@@ -311,6 +328,7 @@ private:
 
 	// Runtime:
 	RunState		m_runState;
+	bool			m_interrupting;
 	uint64_t		m_nrOfSingleStepsLeft;
 
 	// Performance measurement:

@@ -160,8 +160,8 @@ protected:
 	}
 
 	// CPUComponent:
-	void FunctionTraceCall();
-	void FunctionTraceReturn();
+	bool FunctionTraceCall();
+	bool FunctionTraceReturn();
 
 	// Overridden by each CPU architecture:
 	virtual int FunctionTraceArgumentCount() { return 0; }

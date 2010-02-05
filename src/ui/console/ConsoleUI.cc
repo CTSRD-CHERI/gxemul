@@ -67,17 +67,12 @@ static void ReshowCurrentCommandBuffer()
  */
 extern "C" void ConsoleUI_SIGINT_Handler(int n)
 {
-	switch (g_GXemul->GetRunState()) {
-	case GXemul::Running:
-		std::cout << "^C (interrupting emulation)\n";
-		g_GXemul->SetRunState(GXemul::Interrupting);
-		break;
-	case GXemul::Interrupting:
-		std::cout << "^C (interrupting emulation; please wait)\n";
-		break;
-	default:
+	if (g_GXemul->IsInterrupting())
+		std::cout << "^C (already attempting to interrupt, please wait)\n";
+	else
 		std::cout << "^C\n";
-	}
+
+	g_GXemul->Interrupt();
 
 	g_GXemul->GetCommandInterpreter().ClearCurrentCommandBuffer();
 	ReshowCurrentCommandBuffer();
@@ -168,8 +163,7 @@ void ConsoleUI::ShowDebugMessage(const string& msg)
 	vector<string> lines = SplitIntoRows(msg, true);
 
 	for (size_t i=0; i<lines.size(); ++i) {
-		if (m_gxemul->GetRunState() == GXemul::Running ||
-		    m_gxemul->GetRunState() == GXemul::Interrupting)
+		if (m_gxemul->GetRunState() == GXemul::Running)
 			std::cout << "[ " << m_indentationMsg << lines[i] << " ]\n";
 		else
 			std::cout << m_indentationMsg << lines[i] << "\n";
@@ -297,10 +291,6 @@ int ConsoleUI::MainLoop()
 			}
 
 			m_gxemul->Execute();
-			break;
-
-		case GXemul::Interrupting:
-			m_gxemul->SetRunState(GXemul::Paused);
 			break;
 
 		case GXemul::Quitting:

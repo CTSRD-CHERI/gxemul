@@ -169,6 +169,7 @@ GXemul::GXemul()
 	, m_ui(new NullUI(this))
 	, m_commandInterpreter(this)
 	, m_runState(Paused)
+	, m_interrupting(false)
 	, m_nrOfSingleStepsLeft(1)
 	, m_rootComponent(new RootComponent(this))
 	, m_snapshottingEnabled(false)
@@ -718,6 +719,19 @@ bool GXemul::Reset()
 }
 
 
+void GXemul::Interrupt()
+{
+	switch (GetRunState()) {
+	case SingleStepping:
+	case Running:
+		m_interrupting = true;
+		break;
+	default:
+		m_interrupting = false;
+	}
+}
+
+
 void GXemul::SetRunState(RunState newState)
 {
 	m_runState = newState;
@@ -741,8 +755,6 @@ string GXemul::GetRunStateAsString() const
 		return "Single-stepping";
 	case Running:
 		return "Running";
-	case Interrupting:
-		return "Interrupting";
 	case Quitting:
 		return "Quitting";
 	}
@@ -908,7 +920,7 @@ void GXemul::Execute(const int longestTotalRun)
 
 		// Note that setting run state to something else, OR
 		// decreasing nr of single steps left to 0, will break the loop.
-		while (m_nrOfSingleStepsLeft > 0 && GetRunState() == SingleStepping) {
+		while (!m_interrupting && m_nrOfSingleStepsLeft > 0 && GetRunState() == SingleStepping) {
 			uint64_t step = GetStep();
 
 			if (printEmptyLineBetweenSteps)
@@ -991,7 +1003,7 @@ void GXemul::Execute(const int longestTotalRun)
 			// The following code is for cycle accurate emulation:
 
 			while (step < startingStep + longestTotalRun) {
-				if (GetRunState() != Running)
+				if (m_interrupting || GetRunState() != Running)
 					break;
 
 				int toExecute = -1;
@@ -1120,8 +1132,10 @@ void GXemul::Execute(const int longestTotalRun)
 		throw std::exception();
 	}
 
-	if (GetRunState() == Interrupting)
+	if (m_interrupting) {
+		m_interrupting = false;
 		SetRunState(Paused);
+	}
 }
 
 

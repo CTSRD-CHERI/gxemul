@@ -4459,3 +4459,7 @@ Changelog for GXemul:
 		non-singlestepping variant done so far.
 20100204	bb0.n and bb1.n should now also work when single-stepping.
 		Implementing the non-singlestep variant of M88K jmp.n.
+		Beginning on the M88K bcnd.n instruction.
+20100205	Continuign on bcnd.n. The testm88k rectangle drawing demo
+		now runs :) both when running continuously, and when
+		single-stepping. (No graphical output yet, of course.)

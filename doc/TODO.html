@@ -47,6 +47,16 @@ Some things, in no specific order, that I'd like to fix:
 </i>
 
 
+[ ]  Add NetBSD/playstation2 to the unsupported page?
+
+[ ]  Improve CTRL-C behavior! Abort quicker.
+
+[ ]	BUG: Turning on showTraceTree AFTER starting (without -V) doesn't
+	print any output, because of cached instruction translations.
+	Fix this!
+
+
+
    [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
 	[/] Continuous execution forward.
@@ -110,10 +120,10 @@ Some things, in no specific order, that I'd like to fix:
 	     m_nextIC (and other state, such as processor status registers)
 	     _immediately_.
 
-	[ ]  Helpers for CPU implementations:
-		dyntrans pages?
-		pc to dyntrans page lookups? 32-bit and 64-bit
-		memory to direct host page lookups, TLB-entry based
+	[/]  Helpers for CPU implementations:
+		[X]  dyntrans pages?
+		[ ]  pc to dyntrans page lookups? 32-bit and 64-bit
+		[ ]  memory to direct host page lookups, TLB-entry based
 
 	[ ]  For instruction combination implementations, the first thing
 	     checked is whether instr combos is allowed, if not then call
@@ -164,7 +174,7 @@ Some things, in no specific order, that I'd like to fix:
   [/]	The testm88k machine.
 
 	[X]  Implement 88100 instruction disassembly.
-	[/]  Implement basic 88K instruction execution, enough to run
+	[X]  Implement basic 88K instruction execution, enough to run
 	     the rectangle drawing demo.
 	[ ]  Framebuffer output?
 		[ ]  Start thinking about the plugin framework, use sdl
