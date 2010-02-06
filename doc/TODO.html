@@ -44,10 +44,27 @@ Some things, in no specific order, that I'd like to fix:
 [ ] = not started yet, or just planning/thinking about it
 [/] = started, either "on paper" or actual implementation
 [X] = done  (but usually these entries are removed from the TODO list)
+
+------------------------------------------------------------------------
 </i>
 
 
-   [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
+  [/]	The testm88k machine.
+
+	[X]  Implement 88100 instruction disassembly.
+	[X]  Implement basic 88K instruction execution, enough to run
+	     the rectangle drawing demo.
+	[ ]  Framebuffer output?
+		[ ]  Start thinking about the plugin framework, use sdl
+		     for video output!
+
+  [ ]	Improve CTRL-C behavior! Abort quicker.
+
+  [ ]	BUG: Turning on showTraceTree AFTER starting (without -V) doesn't
+	print any output, because of cached instruction translations.
+	Fix this!
+
+  [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
 	[/] Continuous execution forward.
 		[ ]  "Sloppy" accuracy mode: it could be possible to
@@ -161,21 +178,6 @@ Some things, in no specific order, that I'd like to fix:
 	[ ] Conditional breakpoints before AND after CPU instruction
 	    execution (somewhat different from generic device access).
 
-  [/]	The testm88k machine.
-
-	[X]  Implement 88100 instruction disassembly.
-	[X]  Implement basic 88K instruction execution, enough to run
-	     the rectangle drawing demo.
-	[ ]  Framebuffer output?
-		[ ]  Start thinking about the plugin framework, use sdl
-		     for video output!
-
-   [ ]  Improve CTRL-C behavior! Abort quicker.
-
-   [ ]	BUG: Turning on showTraceTree AFTER starting (without -V) doesn't
-	print any output, because of cached instruction translations.
-	Fix this!
-
   [/]	The MVME187 machine.
 
 	[X]  Loading OpenBSD/mvme88k bsd and bsd.rd executables!
@@ -243,10 +245,10 @@ Some things, in no specific order, that I'd like to fix:
 	     page mapping.
 	[ ]  Unit tests for the above!
 
-   [ ]  Interrupt subsystem
+  [ ]	Interrupt subsystem
    	[ ]  Components exposing an InterruptPin interface? Think about this...
 
-   [ ]  Timers
+  [ ]	Timers
 	[ ]  Host speed approaching timers:  a device that wishes
 	     to cause interrupts 100 times per emulated second
 	     will interrupt (approximately) 100 times per host
@@ -285,11 +287,11 @@ Some things, in no specific order, that I'd like to fix:
 	     i.e. overlays must be used if reverse execution support is
 	     enabled.
 
-  [ ] Serialize symbols
+  [ ]	Serialize symbols
 
-  [ ] Serialize breakpoints
+  [ ]	Serialize breakpoints
 
-  [ ] Plugin framework
+  [ ]	Plugin framework
   	Note: The term "Plugin" does not mean dynamically loaded. It simply is a
   	generalization of "something" which is the common base for file loaders,
   	framebuffers, statistics viewers, etc.
@@ -420,7 +422,7 @@ Some things, in no specific order, that I'd like to fix:
 		plexing of multiple outputs, and allows one input serial
 		console.
 
-   [ ]  File loaders:
+  [ ]	File loaders:
    	[ ]  automagic .gz (and .bz2) file extraction into /tmp or $TMP or such.
 	[ ]  symbol handling, line number info, data types?
 	[ ]  argument handling! (arg count, at least)
@@ -431,7 +433,7 @@ Some things, in no specific order, that I'd like to fix:
 		     in the tmp directory, so that writes within a session
 		     will succeed. At reboot/reset they'd be lost.
 
-   [ ]  Breakpoints
+  [ ]	Breakpoints
 
 	Breakpoint = some form of expression, which will be evaluated
 	after (or before?) running each cycle. (*)
