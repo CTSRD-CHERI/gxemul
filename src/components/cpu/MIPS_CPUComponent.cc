@@ -1055,9 +1055,9 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 		switch (s6) {
 
 		case SPECIAL_SLL:
-/*		case SPECIAL_SLLV:
+//		case SPECIAL_SLLV:
 		case SPECIAL_SRL:
-		case SPECIAL_SRLV:
+/*		case SPECIAL_SRLV:
 		case SPECIAL_SRA:
 		case SPECIAL_SRAV:
 		case SPECIAL_DSRL:
@@ -1071,9 +1071,9 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 		case SPECIAL_DSRA32: */
 			switch (s6) {
 			case SPECIAL_SLL:  ic->f = instr_shift_left_u64_u64_imm5_truncS32; break;
-/*			case SPECIAL_SLLV: ic->f = instr(sllv); sa = -1; break;
-			case SPECIAL_SRL:  ic->f = instr(srl); break;
-			case SPECIAL_SRLV: ic->f = instr(srlv); sa = -1; break;
+//			case SPECIAL_SLLV: ic->f = instr(sllv); sa = -1; break;
+			case SPECIAL_SRL:  ic->f = instr_shift_right_u64_u64_imm5_truncS32; break;
+/*			case SPECIAL_SRLV: ic->f = instr(srlv); sa = -1; break;
 			case SPECIAL_SRA:  ic->f = instr(sra); break;
 			case SPECIAL_SRAV: ic->f = instr(srav); sa = -1; break;
 			case SPECIAL_DSRL: ic->f = instr(dsrl); x64=1; break;

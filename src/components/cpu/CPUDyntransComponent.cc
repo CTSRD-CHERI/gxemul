@@ -752,6 +752,21 @@ DYNTRANS_INSTR(CPUDyntransComponent,shift_left_u64_u64_imm5_truncS32)
 }
 
 
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 5-bit immediate
+ *
+ * Right-shifts arg 1 (truncated into a signed 32-bit) the number of steps
+ * indicated by the immediate, storing the result in arg 0 truncated to a 
+ * signed 32-bit value.
+ */
+DYNTRANS_INSTR(CPUDyntransComponent,shift_right_u64_u64_imm5_truncS32)
+{
+	REG64(ic->arg[0]) = (int32_t)(((int32_t)REG64(ic->arg[1])) >> (ic->arg[2].u32 & 0x1f));
+}
+
+
 /*****************************************************************************/
 
 
