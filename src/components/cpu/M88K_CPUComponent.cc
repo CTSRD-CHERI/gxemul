@@ -942,6 +942,59 @@ DYNTRANS_INSTR(M88K_CPUComponent,cmp_imm)
 
 
 /*
+ *  extu_imm:  Extract bits, unsigned, immediate W<O>.
+ *  extu:      Extract bits, unsigned, W<O> taken from register s2.
+ *  ext_imm:   Extract bits, signed, immediate W<O>.
+ *  ext:       Extract bits, signed, W<O> taken from register s2.
+ *
+ *  arg[0] = pointer to register d
+ *  arg[1] = pointer to register s1
+ *  arg[2] = pointer to register s2 or 10 bits wwwwwooooo
+ */
+void M88K_CPUComponent::m88k_extu(struct DyntransIC *ic, int w, int o)
+{
+	uint32_t x = REG32(ic->arg[1]) >> o;
+	if (w != 0) {
+		x <<= (32-w);
+		x >>= (32-w);
+	}
+
+	REG32(ic->arg[0]) = x;
+}
+void M88K_CPUComponent::m88k_ext(struct DyntransIC *ic, int w, int o)
+{
+	int32_t x = REG32(ic->arg[1]);
+	x >>= o;	/*  signed (arithmetic) shift  */
+	if (w != 0) {
+		x <<= (32-w);
+		x >>= (32-w);
+	}
+
+	REG32(ic->arg[0]) = x;
+}
+DYNTRANS_INSTR(M88K_CPUComponent,extu_imm)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	cpu->m88k_extu(ic, ic->arg[2].u32 >> 5, ic->arg[2].u32 & 0x1f);
+}
+DYNTRANS_INSTR(M88K_CPUComponent,extu)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	cpu->m88k_extu(ic, (REG32(ic->arg[2]) >> 5) & 0x1f, REG32(ic->arg[2]) & 0x1f);
+}
+DYNTRANS_INSTR(M88K_CPUComponent,ext_imm)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	cpu->m88k_ext(ic, ic->arg[2].u32 >> 5, ic->arg[2].u32 & 0x1f);
+}
+DYNTRANS_INSTR(M88K_CPUComponent,ext)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+	cpu->m88k_ext(ic, (REG32(ic->arg[2]) >> 5) & 0x1f, REG32(ic->arg[2]) & 0x1f);
+}
+
+
+/*
  *  mak:      Make bit field, W<O> taken from register s2.
  *  mak_imm:  Make bit field, immediate W<O>.
  *
@@ -1769,8 +1822,8 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 //		case 0x20:	/*  clr  */
 //		case 0x22:	/*  set  */
-//		case 0x24:	/*  ext  */
-//		case 0x26:	/*  extu  */
+		case 0x24:	/*  ext  */
+		case 0x26:	/*  extu  */
 		case 0x28:	/*  mak  */
 			ic->arg[0].p = &m_r[d];
 			ic->arg[1].p = &m_r[s1];
@@ -1797,8 +1850,8 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //					ic->arg[2] = x;
 //				   }
 //				   break;
-//			case 0x24: ic->f = instr(ext_imm); break;
-//			case 0x26: ic->f = instr(extu_imm); break;
+			case 0x24: ic->f = instr_ext_imm; break;
+			case 0x26: ic->f = instr_extu_imm; break;
 			case 0x28: ic->f = instr_mak_imm; break;
 			}
 
@@ -1816,6 +1869,14 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //			case 0x36: ic->f = instr(tb1); break;
 //			}
 //			break;
+
+		default:
+			if (ui != NULL) {
+				stringstream ss;
+				ss.flags(std::ios::hex);
+				ss << "unimplemented opcode 0x" << op26 << ",0x" << op10;
+				ui->ShowDebugMessage(this, ss.str());
+			}
 		}
 		break;
 
@@ -1991,8 +2052,8 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 		case 0x7c:	/*  cmp    */
 //		case 0x80:	/*  clr    */
 //		case 0x88:	/*  set    */
-//		case 0x90:	/*  ext    */
-//		case 0x98:	/*  extu   */
+		case 0x90:	/*  ext    */
+		case 0x98:	/*  extu   */
 		case 0xa0:	/*  mak    */
 //		case 0xa8:	/*  rot    */
 			ic->arg[0].p = &m_r[d];
@@ -2019,8 +2080,8 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			case 0x7c: ic->f = instr_cmp; break;
 //			case 0x80: ic->f = instr(clr);   break;
 //			case 0x88: ic->f = instr(set);   break;
-//			case 0x90: ic->f = instr(ext);   break;
-//			case 0x98: ic->f = instr(extu);  break;
+			case 0x90: ic->f = instr_ext;   break;
+			case 0x98: ic->f = instr_extu;  break;
 			case 0xa0: ic->f = instr_mak; break;
 //			case 0xa8: ic->f = instr(rot);   break;
 			}
@@ -2028,13 +2089,13 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			/*
 			 * Handle the case when the destination register is r0:
 			 *
-			 * If there is NO SIDE-EFFECT! (i.e. no carry out),
-			 * then replace the instruction with a nop. If there is
-			 * a side-effect, we still have to run the instruction,
-			 * so replace the destination register with a scratch
-			 * register.
+			 * If there is NO SIDE-EFFECT! (i.e. no carry out, no possibility
+			 * of exceptions, etc), then replace the instruction with a nop.
+			 * If there is a possible side-effect, we still have to run the
+			 * instruction, so replace the destination register with the
+			 * scratch register.
 			 */
-			if (d == M88K_ZERO_REG) {
+			if (d == M88K_ZERO_REG && ic->f != NULL) {
 				int opc = (iw >> 8) & 0xff;
 				if (opc != 0x61 /* addu.co */ && opc != 0x63 /* addu.cio */ &&
 				    opc != 0x65 /* subu.co */ && opc != 0x67 /* subu.cio */ &&
@@ -2047,6 +2108,14 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				else
 					ic->arg[0].p = &m_zero_scratch;
 			}
+
+			if (ic->f == NULL && ui != NULL) {
+				stringstream ss;
+				ss.flags(std::ios::hex);
+				ss << "unimplemented opcode 0x3d,0x" << ((iw >> 8) & 0xff);
+				ui->ShowDebugMessage(this, ss.str());
+			}
+
 			break;
 //		case 0xc0:	/*  jmp    */
 		case 0xc4:	/*  jmp.n  */
@@ -2097,6 +2166,13 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			// TODO
 //		case 0xfc:
 			// TODO
+		default:
+			if (ui != NULL) {
+				stringstream ss;
+				ss.flags(std::ios::hex);
+				ss << "unimplemented opcode 0x3d,0x" << ((iw >> 8) & 0xff);
+				ui->ShowDebugMessage(this, ss.str());
+			}
 		}
 		break;
 

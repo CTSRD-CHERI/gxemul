@@ -374,10 +374,16 @@ private:
 	void Exception(int vector, int is_trap);
 
 	void m88k_cmp(struct DyntransIC *ic, uint32_t y);
+	void m88k_extu(struct DyntransIC *ic, int w, int o);
+	void m88k_ext(struct DyntransIC *ic, int w, int o);
 	void m88k_mak(struct DyntransIC *ic, int w, int o);
 
 	DECLARE_DYNTRANS_INSTR(cmp);
 	DECLARE_DYNTRANS_INSTR(cmp_imm);
+	DECLARE_DYNTRANS_INSTR(extu);
+	DECLARE_DYNTRANS_INSTR(extu_imm);
+	DECLARE_DYNTRANS_INSTR(ext);
+	DECLARE_DYNTRANS_INSTR(ext_imm);
 	DECLARE_DYNTRANS_INSTR(mak);
 	DECLARE_DYNTRANS_INSTR(mak_imm);
 	DECLARE_DYNTRANS_INSTR(divu_imm);
