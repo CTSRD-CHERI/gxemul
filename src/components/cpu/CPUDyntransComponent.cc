@@ -487,6 +487,18 @@ DYNTRANS_INSTR(CPUDyntransComponent,set_u64_imms32)
 
 
 /*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ *
+ * Moves (copies) the contents of arg 1 to arg 0.
+ */
+DYNTRANS_INSTR(CPUDyntransComponent,mov_u64_u64)
+{
+	REG64(ic->arg[0]) = REG64(ic->arg[1]);
+}
+
+
+/*
  * arg 0: 32-bit register
  * arg 1: 32-bit register
  * arg 2: 32-bit unsigned immediate

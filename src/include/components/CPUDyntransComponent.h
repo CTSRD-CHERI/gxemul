@@ -147,6 +147,7 @@ protected:
 
 	// Data movement.
 	DECLARE_DYNTRANS_INSTR(set_u64_imms32);
+	DECLARE_DYNTRANS_INSTR(mov_u64_u64);
 
 	// Arithmetic.
 	DECLARE_DYNTRANS_INSTR(add_u32_u32_immu32);

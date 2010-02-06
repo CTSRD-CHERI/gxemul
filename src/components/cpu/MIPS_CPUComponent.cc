@@ -970,6 +970,18 @@ DYNTRANS_INSTR(MIPS_CPUComponent,branch_samepage_with_delayslot)
 }
 
 
+DYNTRANS_INSTR(MIPS_CPUComponent,multu)
+{
+	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
+
+	uint32_t a = REG64(ic->arg[1]), b = REG64(ic->arg[2]);
+	uint64_t res = (uint64_t)a * (uint64_t)b;
+
+	cpu->m_lo = (int32_t)res;
+	cpu->m_hi = (int32_t)(res >> 32);
+}
+
+
 template<bool store, typename addressType, typename T, bool signedLoad> void MIPS_CPUComponent::instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic)
 {
 	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
@@ -1148,16 +1160,16 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 //		case SPECIAL_NOR:
 //		case SPECIAL_MOVN:
 //		case SPECIAL_MOVZ:
-//		case SPECIAL_MFHI:
-//		case SPECIAL_MFLO:
-//		case SPECIAL_MTHI:
-//		case SPECIAL_MTLO:
+		case SPECIAL_MFHI:
+		case SPECIAL_MFLO:
+		case SPECIAL_MTHI:
+		case SPECIAL_MTLO:
 //		case SPECIAL_DIV:
 //		case SPECIAL_DIVU:
 //		case SPECIAL_DDIV:
 //		case SPECIAL_DDIVU:
 //		case SPECIAL_MULT:
-//		case SPECIAL_MULTU:
+		case SPECIAL_MULTU:
 //		case SPECIAL_DMULT:
 //		case SPECIAL_DMULTU:
 //		case SPECIAL_TGE:
@@ -1181,16 +1193,16 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 //			case SPECIAL_OR:    ic->f = instr(or); break;
 			case SPECIAL_XOR:   ic->f = instr_xor_u64_u64_u64; break;
 //			case SPECIAL_NOR:   ic->f = instr(nor); break;
-//			case SPECIAL_MFHI:  ic->f = instr(mov); break;
-//			case SPECIAL_MFLO:  ic->f = instr(mov); break;
-//			case SPECIAL_MTHI:  ic->f = instr(mov); break;
-//			case SPECIAL_MTLO:  ic->f = instr(mov); break;
+			case SPECIAL_MFHI:  ic->f = instr_mov_u64_u64; break;
+			case SPECIAL_MFLO:  ic->f = instr_mov_u64_u64; break;
+			case SPECIAL_MTHI:  ic->f = instr_mov_u64_u64; break;
+			case SPECIAL_MTLO:  ic->f = instr_mov_u64_u64; break;
 //			case SPECIAL_DIV:   ic->f = instr(div); break;
 //			case SPECIAL_DIVU:  ic->f = instr(divu); break;
 //			case SPECIAL_DDIV:  ic->f = instr(ddiv); x64=1; break;
 //			case SPECIAL_DDIVU: ic->f = instr(ddivu); x64=1; break;
 //			case SPECIAL_MULT : ic->f = instr(mult); break;
-//			case SPECIAL_MULTU: ic->f = instr(multu); break;
+			case SPECIAL_MULTU: ic->f = instr_multu; break;
 //			case SPECIAL_DMULT: ic->f = instr(dmult); x64=1; break;
 //			case SPECIAL_DMULTU:ic->f = instr(dmultu); x64=1; break;
 //			case SPECIAL_TGE:   ic->f = instr(tge); break;
@@ -1210,12 +1222,12 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 			ic->arg[1].p = &m_gpr[rs];
 			ic->arg[2].p = &m_gpr[rt];
 
-//			switch (s6) {
-//			case SPECIAL_MFHI: ic->arg[0].p = &m_hi; break;
-//			case SPECIAL_MFLO: ic->arg[0].p = &m_lo; break;
-//			case SPECIAL_MTHI: ic->arg[2].p = &m_hi; break;
-//			case SPECIAL_MTLO: ic->arg[2].p = &m_lo; break;
-//			}
+			switch (s6) {
+			case SPECIAL_MFHI: ic->arg[1].p = &m_hi; break;
+			case SPECIAL_MFLO: ic->arg[1].p = &m_lo; break;
+			case SPECIAL_MTHI: ic->arg[0].p = &m_hi; break;
+			case SPECIAL_MTLO: ic->arg[0].p = &m_lo; break;
+			}
 
 			//  Special cases for rd: 
 			switch (s6) {

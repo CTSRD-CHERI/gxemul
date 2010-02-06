@@ -210,6 +210,8 @@ private:
 	DECLARE_DYNTRANS_INSTR(branch_samepage_with_delayslot);
 	DECLARE_DYNTRANS_INSTR(branch_samepage_with_delayslot_singlestep);
 
+	DECLARE_DYNTRANS_INSTR(multu);
+
 	template<bool store, typename addressType, typename T, bool signedLoad> static void instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic);
 
 	void Translate(uint32_t iword, struct DyntransIC* ic);
