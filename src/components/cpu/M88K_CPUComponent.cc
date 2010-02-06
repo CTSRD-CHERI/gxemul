@@ -896,6 +896,99 @@ string M88K_CPUComponent::GetAttribute(const string& attributeName)
 /*****************************************************************************/
 
 
+void M88K_CPUComponent::stcr(int cr, uint32_t value, bool is_rte)
+{
+	uint32_t old = m_cr[cr];
+
+	switch (cr) {
+
+	case M88K_CR_PSR:	/*  Processor Status Regoster  */
+		if ((!m_isBigEndian && !(value & M88K_PSR_BO)) ||
+		    (m_isBigEndian && (value & M88K_PSR_BO))) {
+			std::cerr << "TODO: attempt to change endianness by flipping"
+			    " the endianness bit in the PSR. How should this"
+			    " be handled? Aborting.\n";
+			std::cerr << "TODO: abort in a nicer way\n";
+			throw std::exception();
+		}
+
+		if (!is_rte && (old & M88K_PSR_MODE) && !(value & M88K_PSR_MODE)) {
+			UI* ui = GetUI();
+			if (ui != NULL) {
+				ui->ShowDebugMessage(this, "m88k stcr: WARNING! the PSR_MODE bit is being"
+				    " cleared; this should be done using the RTE "
+				    "instruction only, according to the M88100 "
+				    "manual! Continuing anyway.\n");
+			}
+		}
+
+		if (value & M88K_PSR_MXM) {
+			std::cerr << "m88k stcr: TODO: MXM support\n";
+			std::cerr << "TODO: abort in a nicer way\n";
+			throw std::exception();
+		}
+
+		if ((old & M88K_PSR_MODE) != (value & M88K_PSR_MODE)) {
+//			cpu->invalidate_translation_caches(
+//			    cpu, 0, INVALIDATE_ALL);
+			std::cerr << "m88k stcr: TODO: PSR mode switch.\n";
+			std::cerr << "TODO: abort in a nicer way\n";
+			throw std::exception();
+		}
+
+		m_cr[cr] = value;
+		break;
+
+	case M88K_CR_EPSR:
+		m_cr[cr] = value;
+		break;
+
+	case M88K_CR_SXIP:
+	case M88K_CR_SNIP:
+	case M88K_CR_SFIP:
+		m_cr[cr] = value;
+		break;
+
+	case M88K_CR_SSBR:	/*  Shadow ScoreBoard Register  */
+		if (value & 1) {
+			UI* ui = GetUI();
+			if (ui != NULL)
+				ui->ShowDebugMessage(this, "WARNING! bit 0 non-zero when writing to SSBR\n");
+		}
+
+		m_cr[cr] = value;
+		break;
+
+	case M88K_CR_VBR:
+		if (value & 0x00000fff) {
+			UI* ui = GetUI();
+			if (ui != NULL)
+				ui->ShowDebugMessage(this, "WARNING! bits 0..11 non-zero when writing to VBR\n");
+		}
+
+		m_cr[cr] = value;
+		break;
+
+	case M88K_CR_DMT0:
+	case M88K_CR_DMT1:
+	case M88K_CR_DMT2:
+		m_cr[cr] = value;
+		break;
+
+	case M88K_CR_SR0:	/*  Supervisor Storage Registers 0..3  */
+	case M88K_CR_SR1:
+	case M88K_CR_SR2:
+	case M88K_CR_SR3:
+		m_cr[cr] = value;
+		break;
+
+	default:std::cerr << "m88k stcr: UNIMPLEMENTED cr = " << cr << "\n";
+		std::cerr << "TODO: abort in a nicer way\n";
+		throw std::exception();
+	}
+}
+
+
 /*
  *  cmp_imm:  Compare S1 with immediate value.
  *  cmp:      Compare S1 with S2.
@@ -1440,6 +1533,29 @@ DYNTRANS_INSTR(M88K_CPUComponent,ldcr)
 
 
 /*
+ *  stcr:   Store value from register s1 into a control register.
+ *
+ *  arg[0] = pointer to register s1
+ *  arg[1] = 6-bit control register number
+ */
+DYNTRANS_INSTR(M88K_CPUComponent,stcr)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	DYNTRANS_SYNCH_PC;
+
+	if (!(cpu->m_cr[M88K_CR_PSR] & M88K_PSR_MODE)) {
+		cpu->Exception(M88K_EXCEPTION_PRIVILEGE_VIOLATION, 0);
+		return;
+	}
+
+	cpu->stcr(ic->arg[1].u32, REG32(ic->arg[0]), false);
+
+	cpu->m_nextIC = ic + 1;
+}
+
+
+/*
  *  lda:  d = s1 + s2 * scaleFactor
  *
  *  arg[0] = pointer to register d
@@ -1649,7 +1765,6 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			ic->arg[1].u32 = cr6;
 			if (d == M88K_ZERO_REG)
 				ic->arg[0].p = &m_zero_scratch;
-		}
 //		} else if ((iword & 0x001ff81f) == 0x00004800) {
 //			ic->f = instr(fldcr);
 //			ic->arg[0] = (size_t) &cpu->cd.m88k.r[d];
@@ -1657,12 +1772,21 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //			if (d == M88K_ZERO_REG)
 //				ic->arg[0] = (size_t)
 //				    &cpu->cd.m88k.zero_scratch;
-//		} else if ((iword & 0x03e0f800) == 0x00008000) {
-//			ic->f = instr(stcr);
-//			ic->arg[0] = (size_t) &cpu->cd.m88k.r[s1];
-//			ic->arg[1] = cr6;
-//			if (s1 != s2)
-//				goto bad;
+		} else if ((iw & 0x03e0f800) == 0x00008000) {
+			ic->f = instr_stcr;
+			ic->arg[0].p = &m_r[s1];
+			ic->arg[1].u32 = cr6;
+			if (s1 != s2) {
+				ic->f = NULL;
+				if (ui != NULL) {
+					stringstream ss;
+					ss.flags(std::ios::hex);
+					ss << "stcr with s1 != s2? TODO: how "
+					    "should this be handled? s1=0x"
+					    << s1 << ", s2=0x" << s2;
+					ui->ShowDebugMessage(this, ss.str());
+				}
+			}
 //		} else if ((iword & 0x03e0f800) == 0x00008800) {
 //			ic->f = instr(fstcr);
 //			ic->arg[0] = (size_t) &cpu->cd.m88k.r[s1];
@@ -1676,8 +1800,9 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 //			ic->arg[2] = cr6;
 //			if (s1 != s2)
 //				goto bad;
-//		} else
-//			goto bad;
+		} else if (ui != NULL) {
+			ui->ShowDebugMessage(this, "unimplemented variant of opcode 0x20");
+		}
 		break;
 
 

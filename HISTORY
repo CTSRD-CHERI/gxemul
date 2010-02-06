@@ -4466,3 +4466,4 @@ Changelog for GXemul:
 20100206	Reimplementing the M88K ext and extu instructions.
 		Reimplementing the M88K bb0 and bb1 non-delayslot
 		instructions, including samepage variants.
+		Reimplementing the M88K stcr instruction.

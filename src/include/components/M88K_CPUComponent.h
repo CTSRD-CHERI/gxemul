@@ -373,6 +373,8 @@ protected:
 private:
 	void Exception(int vector, int is_trap);
 
+	void stcr(int cr, uint32_t value, bool is_rte);
+
 	void m88k_cmp(struct DyntransIC *ic, uint32_t y);
 	void m88k_extu(struct DyntransIC *ic, int w, int o);
 	void m88k_ext(struct DyntransIC *ic, int w, int o);
@@ -402,6 +404,7 @@ private:
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace_singlestep);
 	DECLARE_DYNTRANS_INSTR(ldcr);
+	DECLARE_DYNTRANS_INSTR(stcr);
 	template<bool store, typename T, bool doubleword, bool regofs, bool scaled, bool signedLoad> static void instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic);
 	template<int scaleFactor> static void instr_lda(CPUDyntransComponent* cpubase, DyntransIC* ic);
 
