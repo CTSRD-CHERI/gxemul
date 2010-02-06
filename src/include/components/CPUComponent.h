@@ -147,6 +147,23 @@ protected:
 					bool& writable) = 0;
 
 	/**
+	 * \brief Format a virtual address as a displayable string.
+	 *
+	 * This function may be overridden in each CPU implementation.
+	 * The default implementation just uses the stringstream << operator.
+	 *
+	 * @param vaddr The virtual address to translate.
+	 * @return A string rendering of the virtual address, e.g. "0x00100f00"
+	 */
+	virtual string VirtualAddressAsString(uint64_t vaddr)
+	{
+		stringstream ss;
+		ss.flags(std::ios::hex | std::ios::showbase);
+		ss << vaddr;
+		return ss.str();
+	}
+
+	/**
 	 * \brief Convert PC value to instuction address.
 	 *
 	 * Usually, this does not need to be overridden. However, some

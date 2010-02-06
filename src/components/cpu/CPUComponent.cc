@@ -348,7 +348,7 @@ uint64_t CPUComponent::Unassemble(int nRows, bool indicatePC, uint64_t vaddr, os
 
 		stringstream ss;
 		ss.flags(std::ios::hex | std::ios::showbase);
-		ss << vaddr;
+		ss << VirtualAddressAsString(vaddr);
 
 		if (indicatePC && PCtoInstructionAddress(m_pc) == vaddr)
 			ss << " <- ";

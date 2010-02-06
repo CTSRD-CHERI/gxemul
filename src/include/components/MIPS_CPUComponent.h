@@ -178,6 +178,17 @@ protected:
 	virtual bool VirtualToPhysical(uint64_t vaddr, uint64_t& paddr,
 	    bool& writable);
 
+	virtual string VirtualAddressAsString(uint64_t vaddr)
+	{
+		stringstream ss;
+		ss.flags(std::ios::hex | std::ios::showbase | std::ios::right);
+		if (Is32Bit())
+			ss << (uint32_t)vaddr;
+		else
+			ss << vaddr;
+		return ss.str();
+	}
+
 	virtual uint64_t PCtoInstructionAddress(uint64_t pc);
 
 	virtual int FunctionTraceArgumentCount();
@@ -199,6 +210,8 @@ private:
 	DECLARE_DYNTRANS_INSTR(branch_samepage_with_delayslot);
 	DECLARE_DYNTRANS_INSTR(branch_samepage_with_delayslot_singlestep);
 
+	template<bool store, typename addressType, typename T, bool signedLoad> static void instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic);
+
 	void Translate(uint32_t iword, struct DyntransIC* ic);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated_MIPS16);
@@ -212,6 +225,8 @@ private:
 	uint64_t	m_gpr[N_MIPS_GPRS];
 	uint64_t	m_hi;
 	uint64_t	m_lo;
+
+	uint64_t	m_scratch;		// for loads into the zero register
 
 	/*
 	 * Cached or volatile other state:

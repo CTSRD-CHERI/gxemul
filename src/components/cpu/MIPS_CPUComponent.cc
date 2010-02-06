@@ -120,6 +120,7 @@ void MIPS_CPUComponent::ResetState()
 
 	m_hi = 0;
 	m_lo = 0;
+	m_scratch = 0;
 
 	for (size_t i=0; i<N_MIPS_GPRS; i++)
 		m_gpr[i] = 0;
@@ -969,6 +970,54 @@ DYNTRANS_INSTR(MIPS_CPUComponent,branch_samepage_with_delayslot)
 }
 
 
+template<bool store, typename addressType, typename T, bool signedLoad> void MIPS_CPUComponent::instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic)
+{
+	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
+
+	// TODO: fast lookups
+
+	uint64_t addr;
+
+	if (sizeof(addressType) == sizeof(uint64_t))
+		addr = REG64(ic->arg[1]) + (int32_t)ic->arg[2].u32;
+	else
+		addr = (int32_t) (REG64(ic->arg[1]) + (int32_t)ic->arg[2].u32);
+
+	if (sizeof(T) > 1 && (addr & (sizeof(T)-1))) {
+		std::cerr << "TODO: MIPS unaligned data access exception!\n";
+		throw std::exception();
+		// DYNTRANS_SYNCH_PC;
+		// cpu->Exception(M88K_EXCEPTION_MISALIGNED_ACCESS, 0);
+		return;
+	}
+
+	cpu->AddressSelect(addr);
+
+	if (store) {
+		T data = REG64(ic->arg[0]);
+		if (!cpu->WriteData(data, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+			// TODO: failed to access memory was probably an exception. Handle this!
+		}
+	} else {
+		T data;
+		if (!cpu->ReadData(data, cpu->m_isBigEndian? BigEndian : LittleEndian)) {
+			// TODO: failed to access memory was probably an exception. Handle this!
+		}
+
+		if (signedLoad) {
+			if (sizeof(T) == sizeof(uint32_t))
+				REG64(ic->arg[0]) = (int32_t)data;
+			if (sizeof(T) == sizeof(uint16_t))
+				REG64(ic->arg[0]) = (int16_t)data;
+			if (sizeof(T) == sizeof(uint8_t))
+				REG64(ic->arg[0]) = (int8_t)data;
+		} else {
+			REG64(ic->arg[0]) = data;
+		}
+	}
+}
+
+
 /*****************************************************************************/
 
 
@@ -1188,6 +1237,42 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 
 		if (rt == MIPS_GPR_ZERO)
 			ic->f = instr_nop;
+		break;
+
+//	case HI6_LB:
+//	case HI6_LBU:
+//	case HI6_SB:
+//	case HI6_LH:
+//	case HI6_LHU:
+//	case HI6_SH:
+	case HI6_LW:
+//	case HI6_LWU:
+	case HI6_SW:
+//	case HI6_LD:
+//	case HI6_SD:
+		{
+			ic->arg[0].p = &m_gpr[rt];
+			ic->arg[1].p = &m_gpr[rs];
+			ic->arg[2].u32 = (int32_t)imm;
+
+			bool store = false;
+
+			if (Is32Bit()) {
+				switch (hi6) {
+				case HI6_LW:  ic->f = instr_loadstore<false, int32_t,  uint32_t, true>;  break;
+				case HI6_SW:  ic->f = instr_loadstore<true,  int32_t,  uint32_t, false>; store = true; break;
+				}
+			} else {
+				switch (hi6) {
+				case HI6_LW:  ic->f = instr_loadstore<false, uint64_t, uint32_t, true>;  break;
+				case HI6_SW:  ic->f = instr_loadstore<true,  uint64_t, uint32_t, false>; store = true; break;
+				}
+			}
+
+			/*  Load into the dummy scratch register, if rt = zero  */
+			if (!store && rt == MIPS_GPR_ZERO)
+				ic->arg[0].p = &m_scratch;
+		}
 		break;
 
 	default:
