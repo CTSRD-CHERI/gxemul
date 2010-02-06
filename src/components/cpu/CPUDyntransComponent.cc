@@ -529,6 +529,20 @@ DYNTRANS_INSTR(CPUDyntransComponent,add_u64_u64_imms32_truncS32)
 /*
  * arg 0: 64-bit register
  * arg 1: 64-bit register
+ * arg 2: 64-bit register
+ *
+ * Adds the the registers in arg 1 and arg 2, and stores the result in arg 0
+ * (truncated to a signed 32-bit value).
+ */
+DYNTRANS_INSTR(CPUDyntransComponent,add_u64_u64_u64_truncS32)
+{
+	REG64(ic->arg[0]) = (int32_t) (REG64(ic->arg[1]) + REG64(ic->arg[2]));
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
  * arg 2: 32-bit signed immediate
  *
  * Adds the signed immediate to arg 1, and stores the result in arg 0.
@@ -562,6 +576,20 @@ DYNTRANS_INSTR(CPUDyntransComponent,sub_u32_u32_immu32)
 DYNTRANS_INSTR(CPUDyntransComponent,sub_u32_u32_u32)
 {
 	REG32(ic->arg[0]) = REG32(ic->arg[1]) - REG32(ic->arg[2]);
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 64-bit register
+ *
+ * Subtracts arg2 from arg1, and stores the result in arg0
+ * (truncated to a signed 32-bit value).
+ */
+DYNTRANS_INSTR(CPUDyntransComponent,sub_u64_u64_u64_truncS32)
+{
+	REG64(ic->arg[0]) = (int32_t) (REG64(ic->arg[1]) - REG64(ic->arg[2]));
 }
 
 
@@ -678,6 +706,23 @@ DYNTRANS_INSTR(CPUDyntransComponent,xor_u32_u32_u32)
 DYNTRANS_INSTR(CPUDyntransComponent,xor_u64_u64_immu32)
 {
 	REG64(ic->arg[0]) = REG64(ic->arg[1]) ^ (uint32_t)ic->arg[2].u32;
+}
+
+
+/*
+ * arg 0: 64-bit register
+ * arg 1: 64-bit register
+ * arg 2: 64-bit register
+ *
+ * XORs the arg 1 and arg 2, storing the result in arg 0.
+ *
+ * Note: No sign truncation is performed, i.e. if arg 1 is 0xffffffff80001234
+ * and arg 2 is 0x80001200, then arg 0 becomes 0xffffffff00000034 (note: the
+ * upper bits are not sign-extended from bit 31).
+ */
+DYNTRANS_INSTR(CPUDyntransComponent,xor_u64_u64_u64)
+{
+	REG64(ic->arg[0]) = REG64(ic->arg[1]) ^ REG64(ic->arg[2]);
 }
 
 

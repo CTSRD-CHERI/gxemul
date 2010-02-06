@@ -4471,4 +4471,6 @@ Changelog for GXemul:
 		Fixing a bug in the MRU list in DyntransTranslationCache.
 		Fixing disassembly of tb0 and tb1, and implementing the
 		rest of the bcnd conditions.
-		Beginning on reimplementing MIPS (slow) loads/stores.
+		Beginning on reimplementing MIPS (slow) loads/stores,
+		and reimplementing the MIPS addu, subu, and xor
+		instructions.

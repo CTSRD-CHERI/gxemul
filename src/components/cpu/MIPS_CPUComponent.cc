@@ -1131,8 +1131,148 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 				ic->f = instr_nop;
 
 			break;
-		}
 
+//		case SPECIAL_ADD:
+		case SPECIAL_ADDU:
+//		case SPECIAL_SUB:
+		case SPECIAL_SUBU:
+//		case SPECIAL_DADD:
+//		case SPECIAL_DADDU:
+//		case SPECIAL_DSUB:
+//		case SPECIAL_DSUBU:
+//		case SPECIAL_SLT:
+//		case SPECIAL_SLTU:
+//		case SPECIAL_AND:
+//		case SPECIAL_OR:
+		case SPECIAL_XOR:
+//		case SPECIAL_NOR:
+//		case SPECIAL_MOVN:
+//		case SPECIAL_MOVZ:
+//		case SPECIAL_MFHI:
+//		case SPECIAL_MFLO:
+//		case SPECIAL_MTHI:
+//		case SPECIAL_MTLO:
+//		case SPECIAL_DIV:
+//		case SPECIAL_DIVU:
+//		case SPECIAL_DDIV:
+//		case SPECIAL_DDIVU:
+//		case SPECIAL_MULT:
+//		case SPECIAL_MULTU:
+//		case SPECIAL_DMULT:
+//		case SPECIAL_DMULTU:
+//		case SPECIAL_TGE:
+//		case SPECIAL_TGEU:
+//		case SPECIAL_TLT:
+//		case SPECIAL_TLTU:
+//		case SPECIAL_TEQ:
+//		case SPECIAL_TNE:
+			switch (s6) {
+//			case SPECIAL_ADD:   ic->f = instr(add); break;
+			case SPECIAL_ADDU:  ic->f = instr_add_u64_u64_u64_truncS32; break;
+//			case SPECIAL_SUB:   ic->f = instr(sub); break;
+			case SPECIAL_SUBU:  ic->f = instr_sub_u64_u64_u64_truncS32; break;
+//			case SPECIAL_DADD:  ic->f = instr(dadd); x64=1; break;
+//			case SPECIAL_DADDU: ic->f = instr(daddu); x64=1; break;
+//			case SPECIAL_DSUB:  ic->f = instr(dsub); x64=1; break;
+//			case SPECIAL_DSUBU: ic->f = instr(dsubu); x64=1; break;
+//			case SPECIAL_SLT:   ic->f = instr(slt); break;
+//			case SPECIAL_SLTU:  ic->f = instr(sltu); break;
+//			case SPECIAL_AND:   ic->f = instr(and); break;
+//			case SPECIAL_OR:    ic->f = instr(or); break;
+			case SPECIAL_XOR:   ic->f = instr_xor_u64_u64_u64; break;
+//			case SPECIAL_NOR:   ic->f = instr(nor); break;
+//			case SPECIAL_MFHI:  ic->f = instr(mov); break;
+//			case SPECIAL_MFLO:  ic->f = instr(mov); break;
+//			case SPECIAL_MTHI:  ic->f = instr(mov); break;
+//			case SPECIAL_MTLO:  ic->f = instr(mov); break;
+//			case SPECIAL_DIV:   ic->f = instr(div); break;
+//			case SPECIAL_DIVU:  ic->f = instr(divu); break;
+//			case SPECIAL_DDIV:  ic->f = instr(ddiv); x64=1; break;
+//			case SPECIAL_DDIVU: ic->f = instr(ddivu); x64=1; break;
+//			case SPECIAL_MULT : ic->f = instr(mult); break;
+//			case SPECIAL_MULTU: ic->f = instr(multu); break;
+//			case SPECIAL_DMULT: ic->f = instr(dmult); x64=1; break;
+//			case SPECIAL_DMULTU:ic->f = instr(dmultu); x64=1; break;
+//			case SPECIAL_TGE:   ic->f = instr(tge); break;
+//			case SPECIAL_TGEU:  ic->f = instr(tgeu); break;
+//			case SPECIAL_TLT:   ic->f = instr(tlt); break;
+//			case SPECIAL_TLTU:  ic->f = instr(tltu); break;
+//			case SPECIAL_TEQ:   ic->f = instr(teq); break;
+//			case SPECIAL_TNE:   ic->f = instr(tne); break;
+//			case SPECIAL_MOVN:  ic->f = instr(movn); break;
+//			case SPECIAL_MOVZ:  ic->f = instr(movz); break;
+			}
+
+			// NOTE: When uncommenting instruction above, make sure they
+			// use the same rd, rs, rt format!
+
+			ic->arg[0].p = &m_gpr[rd];
+			ic->arg[1].p = &m_gpr[rs];
+			ic->arg[2].p = &m_gpr[rt];
+
+//			switch (s6) {
+//			case SPECIAL_MFHI: ic->arg[0].p = &m_hi; break;
+//			case SPECIAL_MFLO: ic->arg[0].p = &m_lo; break;
+//			case SPECIAL_MTHI: ic->arg[2].p = &m_hi; break;
+//			case SPECIAL_MTLO: ic->arg[2].p = &m_lo; break;
+//			}
+
+			//  Special cases for rd: 
+			switch (s6) {
+			case SPECIAL_MTHI:
+			case SPECIAL_MTLO:
+			case SPECIAL_DIV:
+			case SPECIAL_DIVU:
+			case SPECIAL_DDIV:
+			case SPECIAL_DDIVU:
+			case SPECIAL_MULT:
+			case SPECIAL_MULTU:
+			case SPECIAL_DMULT:
+			case SPECIAL_DMULTU:
+				if (s6 == SPECIAL_MULT && rd != MIPS_GPR_ZERO) {
+					if (m_type.rev == MIPS_R5900) {
+						// ic->f = instr(mult_r5900);
+						ic->f = NULL;
+						break;
+					}
+					break;
+				}
+				if (s6 == SPECIAL_MULTU && rd!=MIPS_GPR_ZERO) {
+					if (m_type.rev == MIPS_R5900) {
+						// ic->f = instr(multu_r5900);
+						ic->f = NULL;
+						break;
+					}
+				}
+				if (rd != MIPS_GPR_ZERO) {
+					std::cerr << "TODO: rd NON-zero\n";
+					ic->f = NULL;
+				}
+				//  These instructions don't use rd.
+				break;
+			case SPECIAL_TGE:
+			case SPECIAL_TGEU:
+			case SPECIAL_TLT:
+			case SPECIAL_TLTU:
+			case SPECIAL_TEQ:
+			case SPECIAL_TNE:
+				//  In these instructions, rd is a 'code',
+				//  only read by trap handling software.
+				break;
+			default:if (rd == MIPS_GPR_ZERO)
+					ic->f = instr_nop;
+			}
+
+			break;
+
+		default:
+			if (ui != NULL) {
+				stringstream ss;
+				ss.flags(std::ios::hex);
+				ss << "unimplemented opcode HI6_SPECIAL, s6 = 0x" << s6;
+				ui->ShowDebugMessage(this, ss.str());
+			}
+		}
 		break;
 
 	case HI6_BEQ:
