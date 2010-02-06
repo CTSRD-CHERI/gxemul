@@ -1267,6 +1267,23 @@ template<bool n, int op, bool singlestep> void M88K_CPUComponent::instr_bcnd(CPU
  *  arg[1] = uint32_t bitmask to test
  *  arg[2] = offset from start of current page to branch to _OR_ pointer to new instr_call
  */
+template<bool one, bool samepage> void M88K_CPUComponent::instr_bb(CPUDyntransComponent* cpubase, DyntransIC* ic)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+ 	bool bit = REG32(ic->arg[0]) & ic->arg[1].u32;
+	if (bit == one) {
+		if (samepage) {
+			cpu->m_nextIC = (DyntransIC*) ic->arg[2].p;
+		} else {
+			cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
+			cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[2].u32);
+			cpu->DyntransPCtoPointers();
+		}
+	}
+}
+
+
 template<bool one> void M88K_CPUComponent::instr_bb_n(CPUDyntransComponent* cpubase, DyntransIC* ic)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
@@ -1725,27 +1742,27 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 		}
 		break;
 
-//	case 0x34:	/*  bb0     */
+	case 0x34:	/*  bb0     */
 	case 0x35:	/*  bb0.n   */
-//	case 0x36:	/*  bb1     */
+	case 0x36:	/*  bb1     */
 	case 0x37:	/*  bb1.n   */
 		{
 			void (*samepage_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 			void (*singlestep_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 
 			switch (op26) {
-//			case 0x34:
-//				ic->f = instr_bb<false>;
-//				samepage_function = inst_bb_samepage<false>;
-//				break;
+			case 0x34:
+				ic->f = instr_bb<false,false>;
+				samepage_function = instr_bb<false,true>;
+				break;
 			case 0x35:
 				ic->f = instr_bb_n<false>;
 				singlestep_function = instr_bb_n_singlestep<false>;
 				break;
-//			case 0x36:
-//				ic->f = instr_bb<true>;
-//				samepage_function = inst_bb_samepage<true>;
-//				break;
+			case 0x36:
+				ic->f = instr_bb<true,false>;
+				samepage_function = instr_bb<true,true>;
+				break;
 			case 0x37:
 				ic->f = instr_bb_n<true>;
 				singlestep_function = instr_bb_n_singlestep<true>;
@@ -1757,9 +1774,6 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	
 			int offset = (m_pc & 0xffc) + d16;
 			ic->arg[2].u32 = offset;
-
-			if (ic->f == NULL)
-				break;
 
 			if (singleInstructionLeft && singlestep_function != NULL)
 				ic->f = singlestep_function;

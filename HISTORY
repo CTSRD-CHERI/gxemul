@@ -4464,3 +4464,5 @@ Changelog for GXemul:
 		now runs :) both when running continuously, and when
 		single-stepping. (No graphical output yet, of course.)
 20100206	Reimplementing the M88K ext and extu instructions.
+		Reimplementing the M88K bb0 and bb1 non-delayslot
+		instructions, including samepage variants.
