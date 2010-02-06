@@ -682,12 +682,12 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 			break;
 		case 0x34:	/*  tb0  */
 		case 0x36:	/*  tb1  */
-			/*  Two-register plus 9-bit immediate:  */
+			/*  B5 bit index, register, plus 9-bit immediate vector:  */
 			{
 				result.push_back(opcode_names_3c[op10]);
 
 				stringstream ss;
-				ss << "r" << d << ",r" << s1 << ",";
+				ss << d << ",r" << s1 << ",";
 				ss.flags(std::ios::hex | std::ios::showbase);
 				ss << (iw & 0x1ff);
 				result.push_back(ss.str());
@@ -1293,13 +1293,14 @@ template<bool n, int op, bool singlestep> void M88K_CPUComponent::instr_bcnd(CPU
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
 	bool cond;
-	if (op == 1)		// gt0
-		cond = ((int32_t)REG32(ic->arg[0]) > 0);
-	else if (op == 2)	// eq0
-		cond = ((int32_t)REG32(ic->arg[0]) == 0);
-	else
-//	if (op == 14)	/	/ le0
-		cond = ((int32_t)REG32(ic->arg[0]) <= 0);
+	if (op == 1)		cond = ((int32_t)REG32(ic->arg[0]) > 0);		// gt0
+	else if (op == 2)	cond = ((int32_t)REG32(ic->arg[0]) == 0);		// eq0
+	else if (op == 3)	cond = ((int32_t)REG32(ic->arg[0]) >= 0);		// ge0
+	else if (op == 7)	cond = ((uint32_t)REG32(ic->arg[0]) != 0x80000000UL);	// not_maxneg
+	else if (op == 8)	cond = ((uint32_t)REG32(ic->arg[0]) == 0x80000000UL);	// maxneg
+	else if (op == 12)	cond = ((int32_t)REG32(ic->arg[0]) < 0);		// lt0
+	else if (op == 13)	cond = ((int32_t)REG32(ic->arg[0]) != 0);		// ne0
+	else /* op == 14 */	cond = ((int32_t)REG32(ic->arg[0]) <= 0);		// le0
 
 	if (n) {
 		if (singlestep) {
@@ -1961,12 +1962,22 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				switch (d) {
 				case  1: ic->f = instr_bcnd<true,1, false>; singlestep_f = instr_bcnd<true,1, true>; break;
 				case  2: ic->f = instr_bcnd<true,2, false>; singlestep_f = instr_bcnd<true,2, true>; break;
+				case  3: ic->f = instr_bcnd<true,3, false>; singlestep_f = instr_bcnd<true,3, true>; break;
+				case  7: ic->f = instr_bcnd<true,7, false>; singlestep_f = instr_bcnd<true,7, true>; break;
+				case  8: ic->f = instr_bcnd<true,8, false>; singlestep_f = instr_bcnd<true,8, true>; break;
+				case 12: ic->f = instr_bcnd<true,12,false>; singlestep_f = instr_bcnd<true,12,true>; break;
+				case 13: ic->f = instr_bcnd<true,13,false>; singlestep_f = instr_bcnd<true,13,true>; break;
 				case 14: ic->f = instr_bcnd<true,14,false>; singlestep_f = instr_bcnd<true,14,true>; break;
 				}
 			} else {
 				switch (d) {
 				case  1: ic->f = instr_bcnd<false,1, false>; break;
 				case  2: ic->f = instr_bcnd<false,2, false>; break;
+				case  3: ic->f = instr_bcnd<false,3, false>; break;
+				case  7: ic->f = instr_bcnd<false,7, false>; break;
+				case  8: ic->f = instr_bcnd<false,8, false>; break;
+				case 12: ic->f = instr_bcnd<false,12,false>; break;
+				case 13: ic->f = instr_bcnd<false,13,false>; break;
 				case 14: ic->f = instr_bcnd<false,14,false>; break;
 				}
 			}
@@ -2044,7 +2055,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 
 		case 0x34:	/*  tb0  */
 		case 0x36:	/*  tb1  */
-			ic->arg[0].u32 = 1 << d;
+			ic->arg[0].u32 = 1 << d;	// d is called B5 in the manual
 			ic->arg[1].p = &m_r[s1];
 			ic->arg[2].u32 = iw & 0x1ff;
 			switch (op10) {

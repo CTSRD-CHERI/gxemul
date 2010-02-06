@@ -4469,3 +4469,5 @@ Changelog for GXemul:
 		Reimplementing the M88K stcr, jmp, and tb0 and tb1
 		instructions.
 		Fixing a bug in the MRU list in DyntransTranslationCache.
+		Fixing disassembly of tb0 and tb1, and implementing the
+		rest of the bcnd conditions.
