@@ -29,6 +29,39 @@
 #include "ComponentFactory.h"
 
 
+/*
+ *  This is for experiments with OpenBSD/mvme88k.
+ *
+ *  MVME187 according to http://mcg.motorola.com/us/products/docs/pdf/187igd.pdf
+ *  ("MVME187 RISC Single Board Computer Installation Guide"):
+ *
+ *	88100 MPU, two MC88200 or MC88204 CMMUs (one for data cache and
+ *		one for instruction cache).
+ *	82596CA LAN Ethernet
+ *	53C710 SCSI
+ *	CD2401 SCC SERIAL IO
+ *	PRINTER PORT
+ *	MK48T08 BBRAM & CLOCK
+ *	EPROM
+ *	VME bus
+ *
+ *  ... and more details from OpenBSD/mvme88k sources:
+ *
+ *	0xff800000 .. 0xffbfffff = BUG PROM
+ *	0xffe00000 .. 0xffe1ffff = BUG SRAM
+ *	0xfff00000               = PCCTWO
+ *	  0xfff40000             = VME bus
+ *	  0xfff43000             = MEMC040 (Memory controller)
+ *	  0xfff45000             = CD2401 SCC SERIAL IO (cl0)
+ *	  0xfff46000             = 82596 Ethernet (ie0)
+ *	  0xfff47000             = 53C710 SCSI (osiop0)
+ *	  0xfffc0000             = MK48T08 (nvram0)
+ *
+ *  Note: It may turn out to be easier to support Lance ethernet (via VME)
+ *  than to support the 82596 ethernet controller.
+ */
+
+
 refcount_ptr<Component> MVME187Machine::Create(const ComponentCreateArgs& args)
 {
 	// Defaults:

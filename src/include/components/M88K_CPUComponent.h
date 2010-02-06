@@ -400,11 +400,13 @@ private:
 	template<bool one, bool samepage> static void instr_bb(CPUDyntransComponent* cpubase, DyntransIC* ic);
 	template<bool one> static void instr_bb_n(CPUDyntransComponent* cpubase, DyntransIC* ic);
 	template<bool one> static void instr_bb_n_singlestep(CPUDyntransComponent* cpubase, DyntransIC* ic);
+	DECLARE_DYNTRANS_INSTR(jmp);
 	DECLARE_DYNTRANS_INSTR(jmp_n);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace);
 	DECLARE_DYNTRANS_INSTR(jmp_n_functioncalltrace_singlestep);
 	DECLARE_DYNTRANS_INSTR(ldcr);
 	DECLARE_DYNTRANS_INSTR(stcr);
+	template<bool one> static void instr_tb(CPUDyntransComponent* cpubase, DyntransIC* ic);
 	template<bool store, typename T, bool doubleword, bool regofs, bool scaled, bool signedLoad> static void instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic);
 	template<int scaleFactor> static void instr_lda(CPUDyntransComponent* cpubase, DyntransIC* ic);
 

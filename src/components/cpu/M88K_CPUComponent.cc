@@ -1434,6 +1434,18 @@ template<bool one> void M88K_CPUComponent::instr_bb_n_singlestep(CPUDyntransComp
 }
 
 
+DYNTRANS_INSTR(M88K_CPUComponent,jmp)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	if (cpu->m_showFunctionTraceCall && ic->arg[2].p == &cpu->m_r[M88K_RETURN_REG])
+		cpu->FunctionTraceReturn();
+
+	cpu->m_pc = REG32(ic->arg[2]);
+	cpu->DyntransPCtoPointers();
+}
+
+
 DYNTRANS_INSTR(M88K_CPUComponent,jmp_n)
 {
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
@@ -1552,6 +1564,32 @@ DYNTRANS_INSTR(M88K_CPUComponent,stcr)
 	cpu->stcr(ic->arg[1].u32, REG32(ic->arg[0]), false);
 
 	cpu->m_nextIC = ic + 1;
+}
+
+
+/*
+ *  tb0, tb1:  Trap on bit Clear/Set
+ *
+ *  arg[0] = bitmask to check (e.g. 0x00020000 for bit 17)
+ *  arg[1] = pointer to register s1
+ *  arg[2] = 9-bit vector number
+ */
+template<bool one> void M88K_CPUComponent::instr_tb(CPUDyntransComponent* cpubase, DyntransIC* ic)
+{
+	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
+
+	if (!(cpu->m_cr[M88K_CR_PSR] & M88K_PSR_MODE)
+	    && ic->arg[2].u32 < M88K_EXCEPTION_USER_TRAPS_START) {
+		DYNTRANS_SYNCH_PC;
+		cpu->Exception(M88K_EXCEPTION_PRIVILEGE_VIOLATION, 0);
+		return;
+	}
+
+	bool bit = (REG32(ic->arg[1]) & ic->arg[0].u32) > 0;
+	if (bit == one) {
+		DYNTRANS_SYNCH_PC;
+		cpu->Exception(ic->arg[2].u32, 1);
+	}
 }
 
 
@@ -1998,16 +2036,16 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				ic->f = instr_nop;
 			break;
 
-//		case 0x34:	/*  tb0  */
-//		case 0x36:	/*  tb1  */
-//			ic->arg[0] = 1 << d;
-//			ic->arg[1] = (size_t) &cpu->cd.m88k.r[s1];
-//			ic->arg[2] = iword & 0x1ff;
-//			switch (op10) {
-//			case 0x34: ic->f = instr(tb0); break;
-//			case 0x36: ic->f = instr(tb1); break;
-//			}
-//			break;
+		case 0x34:	/*  tb0  */
+		case 0x36:	/*  tb1  */
+			ic->arg[0].u32 = 1 << d;
+			ic->arg[1].p = &m_r[s1];
+			ic->arg[2].u32 = iw & 0x1ff;
+			switch (op10) {
+			case 0x34: ic->f = instr_tb<false>; break;
+			case 0x36: ic->f = instr_tb<true>; break;
+			}
+			break;
 
 		default:
 			if (ui != NULL) {
@@ -2256,7 +2294,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			}
 
 			break;
-//		case 0xc0:	/*  jmp    */
+		case 0xc0:	/*  jmp    */
 		case 0xc4:	/*  jmp.n  */
 //		case 0xc8:	/*  jsr    */
 //		case 0xcc:	/*  jsr.n  */
@@ -2264,7 +2302,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 				void (*f_ss)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 
 				switch ((iw >> 8) & 0xff) {
-	//			case 0xc0: ic->f = instr(jmp); break;
+				case 0xc0: ic->f = instr_jmp; break;
 				case 0xc4: ic->f = instr_jmp_n; f_ss = instr_jmp_n_functioncalltrace_singlestep; break;
 	//			case 0xc8: ic->f = instr(jsr); break;
 	//			case 0xcc: ic->f = instr(jsr_n); break;
@@ -2277,10 +2315,6 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 					ic->arg[1].u32 = (m_pc & 0xffc) + 8;
 
 				if (m_showFunctionTraceCall && s2 == M88K_RETURN_REG) {
-	//				if (ic->f == instr(jmp)) {
-	//					ic->f = instr(jmp_trace);
-	//					f_ss = NULL; //instr(jmp_trace);
-	//				}
 					if (ic->f == instr_jmp_n) {
 						ic->f = instr_jmp_n_functioncalltrace;
 						f_ss = instr_jmp_n_functioncalltrace_singlestep;
@@ -2296,7 +2330,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 	//					TODO f_ss
 	//			}
 
-				if (singleInstructionLeft)
+				if (singleInstructionLeft && f_ss != NULL)
 					ic->f = f_ss;
 			}
 			break;

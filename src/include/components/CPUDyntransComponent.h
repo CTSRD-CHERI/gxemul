@@ -521,9 +521,14 @@ private:
 					if (next >= 0)
 						m_pageCache[next].m_prev = prev;
 
+					// ... disconnect from "end of list":
+					if (pageIndex == m_lastMRU)
+						m_lastMRU = prev;
+
 					// ... and insert first in list:
 					m_pageCache[pageIndex].m_prev = -1;
 					m_pageCache[pageIndex].m_next = m_firstMRU;
+					m_pageCache[m_firstMRU].m_prev = pageIndex;
 					m_firstMRU = pageIndex;
 				}
 
