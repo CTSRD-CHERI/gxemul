@@ -1267,6 +1267,8 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_n_functioncalltrace_singlestep)
 	cpu->m_pc &= ~((M88K_IC_ENTRIES_PER_PAGE-1) << M88K_INSTR_ALIGNMENT_SHIFT);
 	cpu->m_r[M88K_RETURN_REG] = cpu->m_pc + ic->arg[2].u32;
 
+	uint32_t old_pc = cpu->m_pc;
+
 	cpu->m_pc = (uint32_t) (cpu->m_pc + ic->arg[1].u32);
 
 	if (cpu->m_showFunctionTraceCall)
@@ -1274,8 +1276,9 @@ DYNTRANS_INSTR(M88K_CPUComponent,bsr_n_functioncalltrace_singlestep)
 
 	cpu->m_delaySlotTarget = cpu->m_pc;
 
-	// m_nextIC should point to the next instruction:
+	// make m_nextIC (and pc!) point to the next instruction:
 	cpu->m_nextIC = ic + 1;
+	cpu->m_pc = old_pc;	// at least the same page... not necessarily more correct than that.
 }
 
 
@@ -1290,10 +1293,12 @@ template<bool n, int op, bool singlestep> void M88K_CPUComponent::instr_bcnd(CPU
 	DYNTRANS_INSTR_HEAD(M88K_CPUComponent)
 
 	bool cond;
-	if (op == 1)	// gt0
+	if (op == 1)		// gt0
 		cond = ((int32_t)REG32(ic->arg[0]) > 0);
+	else if (op == 2)	// eq0
+		cond = ((int32_t)REG32(ic->arg[0]) == 0);
 	else
-//	if (op == 14)	// le0
+//	if (op == 14)	/	/ le0
 		cond = ((int32_t)REG32(ic->arg[0]) <= 0);
 
 	if (n) {
@@ -1888,8 +1893,7 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			/*  Return offset for bsr and bsr.n (stored in m_r[M88K_RETURN_REG]):  */
 			ic->arg[2].u32 = (m_pc & 0xffc) + ((op26 & 1)? 8 : 4);
 
-			if (offset >= 0 && offset <= 0xffc &&
-			    samepage_function != NULL)
+			if (offset >= 0 && offset <= 0xffc && samepage_function != NULL)
 				ic->f = samepage_function;
 
 			if (m_showFunctionTraceCall) {
@@ -1956,11 +1960,13 @@ void M88K_CPUComponent::Translate(uint32_t iw, struct DyntransIC* ic)
 			if (op26 & 1) {
 				switch (d) {
 				case  1: ic->f = instr_bcnd<true,1, false>; singlestep_f = instr_bcnd<true,1, true>; break;
+				case  2: ic->f = instr_bcnd<true,2, false>; singlestep_f = instr_bcnd<true,2, true>; break;
 				case 14: ic->f = instr_bcnd<true,14,false>; singlestep_f = instr_bcnd<true,14,true>; break;
 				}
 			} else {
 				switch (d) {
 				case  1: ic->f = instr_bcnd<false,1, false>; break;
+				case  2: ic->f = instr_bcnd<false,2, false>; break;
 				case 14: ic->f = instr_bcnd<false,14,false>; break;
 				}
 			}
