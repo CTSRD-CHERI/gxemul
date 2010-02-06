@@ -66,6 +66,12 @@ string FileLoader_aout::DetectFileType(unsigned char *buf, size_t buflen, float&
 		// AOUT_FLAG_VADDR_ZERO_HACK for OpenBSD/mac68k
 		return "a.out_M68K_vaddr0";
 	}
+// Luna88k a.out for OpenBSD is _almost_ like for MVME88K... just a difference
+// of entry point (?)
+//	if (buf[0]==0x00 && buf[1]==0x99 && buf[2]==0x01 && buf[3]==0x07) {
+//		/*  OpenBSD/luna88k a.out  */
+//		return "a.out_M88K_fromBeginningEntryAfterHeader";
+//	}
 	if (buf[0]==0x00 && buf[1]==0x99 && buf[2]==0x01 && buf[3]==0x0b) {
 		/*  OpenBSD/M88K a.out  */
 		return "a.out_M88K_fromBeginning";
