@@ -1018,6 +1018,14 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_j(CPUDyntrans
 	if (link) {
 		DYNTRANS_SYNCH_PC;
 		cpu->m_gpr[MIPS_GPR_RA] = cpu->m_pc + 8;
+
+		if (cpu->m_showFunctionTraceCall) {
+			uint64_t saved_pc = cpu->m_pc;
+			cpu->m_pc = cpu->m_pc & ~0x0fffffffUL;
+			cpu->m_pc += ic->arg[0].u32;
+			cpu->FunctionTraceCall();
+			cpu->m_pc = saved_pc;
+		}
 	}
 
 	if (singlestep) {
@@ -1027,6 +1035,8 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_j(CPUDyntrans
 
 		cpu->m_delaySlotTarget = cpu->m_pc & ~0x0fffffffUL;
 		cpu->m_delaySlotTarget += ic->arg[0].u32;
+
+		cpu->m_nextIC = ic + 1;
 	} else {
 		// Prepare for the branch.
 		cpu->m_inDelaySlot = true;
@@ -1066,7 +1076,17 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_jr(CPUDyntran
 	if (link) {
 		DYNTRANS_SYNCH_PC;
 		REG32(ic->arg[1]) = cpu->m_pc + 8;
+
+		if (cpu->m_showFunctionTraceCall && ic->arg[1].p == &cpu->m_gpr[MIPS_GPR_RA]) {
+			uint64_t saved_pc = cpu->m_pc;
+			cpu->m_pc = REG64(ic->arg[0]);
+			cpu->FunctionTraceCall();
+			cpu->m_pc = saved_pc;
+		}
 	}
+
+	if (!link && cpu->m_showFunctionTraceCall && ic->arg[0].p == &cpu->m_gpr[MIPS_GPR_RA])
+		cpu->FunctionTraceReturn();
 
 	if (singlestep) {
 		// Prepare for the branch.
@@ -1074,6 +1094,7 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_jr(CPUDyntran
 		cpu->m_exceptionInDelaySlot = false;
 
 		cpu->m_delaySlotTarget = REG64(ic->arg[0]);
+		cpu->m_nextIC = ic + 1;
 	} else {
 		// Prepare for the branch.
 		cpu->m_inDelaySlot = true;
