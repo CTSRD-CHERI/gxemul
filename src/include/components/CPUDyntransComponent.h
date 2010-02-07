@@ -172,7 +172,7 @@ protected:
 
 	// Shifts, rotates.
 	DECLARE_DYNTRANS_INSTR(shift_left_u64_u64_imm5_truncS32);
-	DECLARE_DYNTRANS_INSTR(shift_right_u64_u64_imm5_truncS32);
+	DECLARE_DYNTRANS_INSTR(shift_right_u64_u64asu32_imm5_truncS32);
 
 private:
 	class DyntransTranslationPage

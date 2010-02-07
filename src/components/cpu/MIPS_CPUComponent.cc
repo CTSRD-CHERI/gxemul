@@ -929,44 +929,173 @@ string MIPS_CPUComponent::GetAttribute(const string& attributeName)
 /*****************************************************************************/
 
 
-DYNTRANS_INSTR(MIPS_CPUComponent,branch_samepage_with_delayslot_singlestep)
+/*
+ *  b*:  Branch on condition
+ *
+ *  op 0: beq    rs == rt
+ *  op 1: bne    rs != rt
+ *  op 2: blez   rs <= 0  (signed)
+ *  op 3: bgtz   rs > 0   (signed)
+ *
+ *  arg[0] = pointer to register rs
+ *  arg[1] = pointer to register rt
+ *  arg[2] = signed offset from start of current page to branch to _OR_ pointer to new instr_call
+ */
+template<int op, bool samepage, bool singlestep> void MIPS_CPUComponent::instr_b(CPUDyntransComponent* cpubase, DyntransIC* ic)
 {
 	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
 
-	// Prepare for the delayed branch.
-	cpu->m_inDelaySlot = true;
-	cpu->m_exceptionInDelaySlot = false;
+	bool cond;
 
-	cpu->m_nextIC = (struct DyntransIC *) ic->arg[2].p;
-	cpu->DyntransResyncPC();	// overwrite m_pc temporarily to get the target
-	cpu->m_delaySlotTarget = cpu->m_pc;
+	if (op == 0)		cond = REG64(ic->arg[0]) == REG64(ic->arg[1]);	// beq
+	else if (op == 1)	cond = REG64(ic->arg[0]) != REG64(ic->arg[1]);	// bne
+	else if (op == 2)	cond = (int64_t)REG64(ic->arg[0]) <= 0;		// blez
+	else /* op == 3 */	cond = (int64_t)REG64(ic->arg[0]) > 0;		// bgtz
 
-	// m_nextIC should point to the next instruction:
-	cpu->m_nextIC = ic + 1;
+	if (singlestep) {
+		DYNTRANS_SYNCH_PC;
+
+		// Prepare for the branch.
+		cpu->m_inDelaySlot = true;
+		cpu->m_exceptionInDelaySlot = false;
+
+		if (cond) {
+			if (samepage) {
+				std::cerr << "MIPS b instruction: samepage singlestep: should not happen.\n";
+				throw std::exception();
+			} else {
+				cpu->m_delaySlotTarget = cpu->m_pc & ~cpu->m_dyntransPageMask;
+				cpu->m_delaySlotTarget = cpu->m_delaySlotTarget + (int32_t)ic->arg[2].u32;
+			}
+		} else {
+			cpu->m_delaySlotTarget = cpu->m_pc + 8;
+		}
+
+		cpu->m_nextIC = ic + 1;
+	} else {
+		// Prepare for the branch.
+		cpu->m_inDelaySlot = true;
+		cpu->m_exceptionInDelaySlot = false;
+
+		// Execute the next instruction:
+		ic[1].f(cpu, ic+1);
+		cpu->m_executedCycles ++;
+	
+		// If there was no exception, then branch:
+		if (!cpu->m_exceptionInDelaySlot) {
+			if (cond) {
+				if (samepage) {
+					cpu->m_nextIC = (DyntransIC*) ic->arg[2].p;
+				} else {
+					cpu->m_pc &= ~cpu->m_dyntransPageMask;
+					cpu->m_pc = cpu->m_pc + (int32_t)ic->arg[2].u32;
+					cpu->DyntransPCtoPointers();
+				}
+			} else {
+				cpu->m_nextIC = ic + 2;
+			}
+	
+			cpu->m_inDelaySlot = false;
+		}
+	
+		// The next instruction is now either the target of the branch
+		// instruction, the instruction 2 steps after this one,
+		// or the first instruction of an exception handler.
+		cpu->m_exceptionInDelaySlot = false;
+	}
 }
 
 
-DYNTRANS_INSTR(MIPS_CPUComponent,branch_samepage_with_delayslot)
+/*
+ *  j, jal:  Jump [and link]
+ *
+ *  arg[0] = lowest 28 bits of new pc
+ */
+template<bool link, bool singlestep> void MIPS_CPUComponent::instr_j(CPUDyntransComponent* cpubase, DyntransIC* ic)
 {
 	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
 
-	// Prepare for the branch.
-	cpu->m_inDelaySlot = true;
-	cpu->m_exceptionInDelaySlot = false;
-
-	// Execute the next instruction:
-	ic[1].f(cpu, ic+1);
-	cpu->m_executedCycles ++;
-
-	// If there was no exception, then branch:
-	if (!cpu->m_exceptionInDelaySlot) {
-		cpu->m_nextIC = (struct DyntransIC *) ic->arg[2].p;
-		cpu->m_inDelaySlot = false;
+	if (link) {
+		DYNTRANS_SYNCH_PC;
+		cpu->m_gpr[MIPS_GPR_RA] = cpu->m_pc + 8;
 	}
 
-	// The next instruction is now either the target of the branch
-	// instruction, or the first instruction of an exception handler.
-	cpu->m_exceptionInDelaySlot = false;
+	if (singlestep) {
+		// Prepare for the branch.
+		cpu->m_inDelaySlot = true;
+		cpu->m_exceptionInDelaySlot = false;
+
+		cpu->m_delaySlotTarget = cpu->m_pc & ~0x0fffffffUL;
+		cpu->m_delaySlotTarget += ic->arg[0].u32;
+	} else {
+		// Prepare for the branch.
+		cpu->m_inDelaySlot = true;
+		cpu->m_exceptionInDelaySlot = false;
+
+		// Execute the next instruction:
+		ic[1].f(cpu, ic+1);
+		cpu->m_executedCycles ++;
+
+		// If there was no exception, then branch:
+		if (!cpu->m_exceptionInDelaySlot) {
+			cpu->m_pc = cpu->m_pc & ~0x0fffffffUL;
+			cpu->m_pc += ic->arg[0].u32;
+			cpu->DyntransPCtoPointers();
+	
+			cpu->m_inDelaySlot = false;
+		}
+	
+		// The next instruction is now either the target of the branch
+		// instruction, the instruction 2 steps after this one,
+		// or the first instruction of an exception handler.
+		cpu->m_exceptionInDelaySlot = false;
+	}
+}
+
+
+/*
+ *  jr, jalr:  Jump to register [and link]
+ *
+ *  arg[0] = pointer to register rs (to jump to)
+ *  arg[1] = pointer to register rd (to store return address in; this is never the zero register)
+ */
+template<bool link, bool singlestep> void MIPS_CPUComponent::instr_jr(CPUDyntransComponent* cpubase, DyntransIC* ic)
+{
+	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
+
+	if (link) {
+		DYNTRANS_SYNCH_PC;
+		REG32(ic->arg[1]) = cpu->m_pc + 8;
+	}
+
+	if (singlestep) {
+		// Prepare for the branch.
+		cpu->m_inDelaySlot = true;
+		cpu->m_exceptionInDelaySlot = false;
+
+		cpu->m_delaySlotTarget = REG64(ic->arg[0]);
+	} else {
+		// Prepare for the branch.
+		cpu->m_inDelaySlot = true;
+		cpu->m_exceptionInDelaySlot = false;
+
+		// Execute the next instruction:
+		ic[1].f(cpu, ic+1);
+		cpu->m_executedCycles ++;
+
+		// If there was no exception, then branch:
+		if (!cpu->m_exceptionInDelaySlot) {
+			cpu->m_pc = REG64(ic->arg[0]);
+			cpu->DyntransPCtoPointers();
+	
+			cpu->m_inDelaySlot = false;
+		}
+	
+		// The next instruction is now either the target of the branch
+		// instruction, the instruction 2 steps after this one,
+		// or the first instruction of an exception handler.
+		cpu->m_exceptionInDelaySlot = false;
+	}
 }
 
 
@@ -1084,7 +1213,7 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 			switch (s6) {
 			case SPECIAL_SLL:  ic->f = instr_shift_left_u64_u64_imm5_truncS32; break;
 //			case SPECIAL_SLLV: ic->f = instr(sllv); sa = -1; break;
-			case SPECIAL_SRL:  ic->f = instr_shift_right_u64_u64_imm5_truncS32; break;
+			case SPECIAL_SRL:  ic->f = instr_shift_right_u64_u64asu32_imm5_truncS32; break;
 /*			case SPECIAL_SRLV: ic->f = instr(srlv); sa = -1; break;
 			case SPECIAL_SRA:  ic->f = instr(sra); break;
 			case SPECIAL_SRAV: ic->f = instr(srav); sa = -1; break;
@@ -1289,6 +1418,42 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 
 			break;
 
+		case SPECIAL_JR:
+		case SPECIAL_JALR:
+			{
+				void (*f_singleStepping)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+
+				if (s6 == SPECIAL_JALR && rd == MIPS_GPR_ZERO)
+					s6 = SPECIAL_JR;
+
+				switch (s6) {
+				case SPECIAL_JR:
+					ic->f            = instr_jr<false, false>;
+					f_singleStepping = instr_jr<false, true>;
+					break;
+				case SPECIAL_JALR:
+					ic->f            = instr_jr<true, false>;
+					f_singleStepping = instr_jr<true, true>;
+					break;
+				}
+	
+				// Only one instruction left, then we carefully single-step it.
+				if (singleInstructionLeft)
+					ic->f = f_singleStepping;
+
+				ic->arg[0].p = &m_gpr[rs];
+				ic->arg[1].p = &m_gpr[rd];
+
+				if (m_inDelaySlot) {
+					if (ui != NULL)
+						ui->ShowDebugMessage(this, "branch in delay slot?!"
+						" TODO: How should this be handled?");
+	
+					ic->f = NULL;
+				}
+			}
+			break;
+
 		default:
 			if (ui != NULL) {
 				stringstream ss;
@@ -1300,49 +1465,64 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 		break;
 
 	case HI6_BEQ:
-//	case HI6_BNE:
+	case HI6_BNE:
 //	case HI6_BEQL:
 //	case HI6_BNEL:
-//	case HI6_BLEZ:
+	case HI6_BLEZ:
 //	case HI6_BLEZL:
-//	case HI6_BGTZ:
+	case HI6_BGTZ:
 //	case HI6_BGTZL:
 		{
 			void (*f_singleStepping)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
 			void (*samepage_function)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
-			void (*samepage_function_singleStepping)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+			bool warnAboutNonZeroRT = false;
 
 			switch (hi6) {
 			case HI6_BEQ:
-				ic->f = NULL; // TODO instr(beq);
-				samepage_function = NULL; //TODO instr(beq_samepage);
-
-				/*  Special case: comparing a register with itself:  */
-				if (rs == rt) {
-					ic->f = NULL; //TODO instr(b);
-					f_singleStepping = NULL;
-					samepage_function = instr_branch_samepage_with_delayslot;
-					samepage_function_singleStepping = instr_branch_samepage_with_delayslot_singlestep;
-				}
+				ic->f             = instr_b<0, false, false>;
+				samepage_function = instr_b<0, true,  false>;
+				f_singleStepping  = instr_b<0, false, true>;
+				break;
+			case HI6_BNE:
+				ic->f             = instr_b<1, false, false>;
+				samepage_function = instr_b<1, true,  false>;
+				f_singleStepping  = instr_b<1, false, true>;
+				break;
+			case HI6_BLEZ:
+				ic->f             = instr_b<2, false, false>;
+				samepage_function = instr_b<2, true,  false>;
+				f_singleStepping  = instr_b<2, false, true>;
+				warnAboutNonZeroRT = true;
+				break;
+			case HI6_BGTZ:
+				ic->f             = instr_b<3, false, false>;
+				samepage_function = instr_b<3, true,  false>;
+				f_singleStepping  = instr_b<3, false, true>;
+				warnAboutNonZeroRT = true;
 				break;
 			}
 
 			if (singleInstructionLeft) {
+				// Only one instruction left, then we carefully single-step it.
+				// (No need to optimize for samepage.)
 				ic->f = f_singleStepping;
-				samepage_function = samepage_function_singleStepping;
+				samepage_function = NULL;
 			}
 
 			uint32_t mask = m_dyntransPageMask & ~3;	// 0xffc for 4 KB pages
 
 			ic->arg[0].p = &m_gpr[rs];
 			ic->arg[1].p = &m_gpr[rt];
-			// TODO: MIPS16 offset?!
-			ic->arg[2].u32 = (int32_t) ( (imm << m_dyntransICshift) +
-			    (m_pc & mask) + 4 );
+			// TODO: MIPS16 offset!
+			ic->arg[2].u32 = (int32_t) ( (imm << m_dyntransICshift) + (m_pc & mask) + 4 );
+
+			if (rt != MIPS_GPR_ZERO && warnAboutNonZeroRT && ui != NULL)
+				ui->ShowDebugMessage(this, "MIPS branch with rt non-zero, where it should have been zero?");
 
 			// Is the offset from the start of the current page still
 			// within the same page? Then use the samepage_function:
-			if (ic->arg[2].u32 < (uint32_t)((m_dyntransICentriesPerPage - 1)
+			if (samepage_function != NULL &&
+			    ic->arg[2].u32 < (uint32_t)((m_dyntransICentriesPerPage - 1)
 			    << m_dyntransICshift) && (m_pc & mask) < mask) {
 				ic->arg[2].p = (m_firstIConPage +
 				    ((ic->arg[2].u32 >> m_dyntransICshift)
@@ -1403,9 +1583,42 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 			ic->f = instr_nop;
 		break;
 
+	case HI6_J:
+	case HI6_JAL:
+		{
+			void (*f_singleStepping)(CPUDyntransComponent*, struct DyntransIC*) = NULL;
+
+			switch (hi6) {
+			case HI6_J:
+				ic->f             = instr_j<false, false>;
+				f_singleStepping  = instr_j<false, true>;
+				break;
+			case HI6_JAL:
+				ic->f             = instr_j<true, false>;
+				f_singleStepping  = instr_j<true, true>;
+				break;
+			}
+
+			// Only one instruction left, then we carefully single-step it.
+			if (singleInstructionLeft)
+				ic->f = f_singleStepping;
+
+			ic->arg[0].u32 = (iword & 0x03ffffff) << 2;
+
+			if (m_inDelaySlot) {
+				if (ui != NULL)
+					ui->ShowDebugMessage(this, "branch in delay slot?!"
+					    " TODO: How should this be handled?");
+
+				ic->f = NULL;
+			}
+
+			break;
+		}
+
 //	case HI6_LB:
 //	case HI6_LBU:
-//	case HI6_SB:
+	case HI6_SB:
 //	case HI6_LH:
 //	case HI6_LHU:
 //	case HI6_SH:
@@ -1424,11 +1637,13 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 			if (Is32Bit()) {
 				switch (hi6) {
 				case HI6_LW:  ic->f = instr_loadstore<false, int32_t,  uint32_t, true>;  break;
+				case HI6_SB:  ic->f = instr_loadstore<true,  int32_t,  uint8_t,  false>; store = true; break;
 				case HI6_SW:  ic->f = instr_loadstore<true,  int32_t,  uint32_t, false>; store = true; break;
 				}
 			} else {
 				switch (hi6) {
 				case HI6_LW:  ic->f = instr_loadstore<false, uint64_t, uint32_t, true>;  break;
+				case HI6_SB:  ic->f = instr_loadstore<true,  uint64_t, uint8_t,  false>; store = true; break;
 				case HI6_SW:  ic->f = instr_loadstore<true,  uint64_t, uint32_t, false>; store = true; break;
 				}
 			}

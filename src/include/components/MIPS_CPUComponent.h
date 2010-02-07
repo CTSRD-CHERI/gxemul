@@ -207,8 +207,9 @@ private:
 	bool Is32Bit() const;
 
 private:
-	DECLARE_DYNTRANS_INSTR(branch_samepage_with_delayslot);
-	DECLARE_DYNTRANS_INSTR(branch_samepage_with_delayslot_singlestep);
+	template<int op, bool samepage, bool singlestep> static void instr_b(CPUDyntransComponent* cpubase, DyntransIC* ic);
+	template<bool link, bool singlestep> static void instr_j(CPUDyntransComponent* cpubase, DyntransIC* ic);
+	template<bool link, bool singlestep> static void instr_jr(CPUDyntransComponent* cpubase, DyntransIC* ic);
 
 	DECLARE_DYNTRANS_INSTR(multu);
 	DECLARE_DYNTRANS_INSTR(slt);
