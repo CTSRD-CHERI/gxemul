@@ -48,7 +48,6 @@ Some things, in no specific order, that I'd like to fix:
 ------------------------------------------------------------------------
 </i>
 
-
   [/]	The testm88k machine.
 
 	[X]  Implement 88100 instruction disassembly.
@@ -60,8 +59,10 @@ Some things, in no specific order, that I'd like to fix:
 
   [/]	The testmips machine.
 
-	[X]  Implement basic MIPS instruction execution, enough to run
+	[X]  Implement basic 32-bit MIPS instruction execution, enough to run
 	     the rectangle drawing demo.
+	[ ]  Implement basic 64-bit MIPS instruction execution, enough to run
+	     the 64-bit variant of the rectangle drawing demo.
 	[ ]  Try both 64-bit and 32-bit MIPS cpus, and both 32-bit and
 	     16-bit instruction encodings!
 
@@ -126,6 +127,9 @@ Some things, in no specific order, that I'd like to fix:
 			    longer instruction combos have been implemented yet.
 		[/]  Unit tests.
 
+	[ ]  Memory writes => invalidate corresponding dyntrans translation pages!
+	     (needed for full guest OS emulation, and self-modifying code)
+
 	[ ]  Interrupts should be cycle accurate, and affect the cpu's
 	     m_nextIC (and other state, such as processor status registers)
 	     _immediately_.
@@ -187,8 +191,10 @@ Some things, in no specific order, that I'd like to fix:
 	     I.e. implement an a.out file loader.
 	[ ]  More initial register contents upon reset: r31 isn't enough for
 	     mvme187. See old machine_mvme88k.cc for details.
-	     	[ ]  -Q command line flag (backwards compatibility) for
-	     	     turning off PROM emulation?
+	[ ]  Soft PROM emulation.
+     	[ ]  -Q command line flag (backwards compatibility) for
+     	     turning off soft PROM emulation?
+     	[ ]  Ability to load raw files (e.g. PROM).
 	[ ]  Serial controller component.
 	[ ]  Plugin (?) for serial output (i.e. a terminal window), or
 	     posibility to connect to stdin/stdout. Should be enough to
