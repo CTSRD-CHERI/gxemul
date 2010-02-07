@@ -4477,3 +4477,5 @@ Changelog for GXemul:
 20100207	Reimplementing the MIPS slt and sltu instructions, various
 		branch instructions, and fixing some bugs; the rectangle
 		drawing demo for testmips runs in the new framework :)
+		Switching function call trace on/off during runtime now
+		clears [individual] translation pages.

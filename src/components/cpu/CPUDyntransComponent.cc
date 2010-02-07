@@ -213,7 +213,7 @@ void CPUDyntransComponent::DyntransClearICPage(struct DyntransIC* icpage)
 struct DyntransIC *CPUDyntransComponent::DyntransGetICPage(uint64_t addr)
 {
 	bool clear = false;
-	struct DyntransIC *icpage = m_translationCache.GetICPage(addr, clear);
+	struct DyntransIC *icpage = m_translationCache.GetICPage(addr, m_showFunctionTraceCall, clear);
 
 	if (clear) {
 		// This is a newly allocated page. Let's fill the page with

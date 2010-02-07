@@ -183,6 +183,7 @@ private:
 			, m_next(-1)
 			, m_nextCacheEntryForAddr(-1)
 			, m_addr(0)
+			, m_showFunctionTraceCall(false)
 		{
 			m_ic.resize(nICentriesPerpage);
 		}
@@ -195,6 +196,12 @@ private:
 		// Address match:
 		int				m_nextCacheEntryForAddr;
 		uint64_t			m_addr;
+
+		// Flags for this page:
+		// TODO: In the future, this could be stuff like different
+		// instruction encodings (MIPS16/Thumb vs 32-bit encoding),
+		// or other mode switches.
+		bool				m_showFunctionTraceCall;
 
 		// Translated instructions:
 		vector< struct DyntransIC >	m_ic;
@@ -435,7 +442,7 @@ private:
 			ValidateConsistency();
 		}
 
-		struct DyntransIC *AllocateNewPage(uint64_t addr)
+		struct DyntransIC *AllocateNewPage(uint64_t addr, bool showFunctionTraceCall)
 		{
 			int index = m_firstFree;
 			assert(index >= 0);
@@ -468,7 +475,9 @@ private:
 				m_pageCache[index].m_prev = -1;
 			}
 
+			// Set attributes for the page: address and other flags.
 			m_pageCache[index].m_addr = addr;
+			m_pageCache[index].m_showFunctionTraceCall = showFunctionTraceCall;
 
 			// Insert into quick lookup table:
 			uint64_t physPageNumber = addr >> m_pageShift;
@@ -489,7 +498,7 @@ private:
 			return &(m_pageCache[index].m_ic[0]);
 		}
 
-		struct DyntransIC *GetICPage(uint64_t addr, bool& clear)
+		struct DyntransIC *GetICPage(uint64_t addr, bool showFunctionTraceCall, bool& clear)
 		{
 			clear = false;
 
@@ -549,6 +558,12 @@ private:
 
 				ValidateConsistency();
 
+				// If flags are not the same, then let's clear the page:
+				if (m_pageCache[pageIndex].m_showFunctionTraceCall != showFunctionTraceCall) {
+					m_pageCache[pageIndex].m_showFunctionTraceCall = showFunctionTraceCall;
+					clear = true;
+				}
+
 				return &(m_pageCache[pageIndex].m_ic[0]);
 			}
 
@@ -562,7 +577,7 @@ private:
 
 			// ... and then finally allocate a new page:
 			clear = true;
-			return AllocateNewPage(addr);
+			return AllocateNewPage(addr, showFunctionTraceCall);
 		}
 
 	private:
