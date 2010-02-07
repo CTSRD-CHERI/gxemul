@@ -4474,3 +4474,4 @@ Changelog for GXemul:
 		Beginning on reimplementing MIPS (slow) loads/stores,
 		and reimplementing the MIPS addu, subu, srl, xor, multu,
 		mfhi, mflo, mthi, and mtlo instructions.
+20100207	Reimplementing the MIPS slt and sltu instructions.

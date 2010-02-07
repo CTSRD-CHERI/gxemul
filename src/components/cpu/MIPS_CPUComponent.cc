@@ -982,6 +982,18 @@ DYNTRANS_INSTR(MIPS_CPUComponent,multu)
 }
 
 
+DYNTRANS_INSTR(MIPS_CPUComponent,slt)
+{
+	REG64(ic->arg[0]) = (int64_t)REG64(ic->arg[1]) < (int64_t)REG64(ic->arg[2]);
+}
+
+
+DYNTRANS_INSTR(MIPS_CPUComponent,sltu)
+{
+	REG64(ic->arg[0]) = (uint64_t)REG64(ic->arg[1]) < (uint64_t)REG64(ic->arg[2]);
+}
+
+
 template<bool store, typename addressType, typename T, bool signedLoad> void MIPS_CPUComponent::instr_loadstore(CPUDyntransComponent* cpubase, DyntransIC* ic)
 {
 	DYNTRANS_INSTR_HEAD(MIPS_CPUComponent)
@@ -1152,8 +1164,8 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 //		case SPECIAL_DADDU:
 //		case SPECIAL_DSUB:
 //		case SPECIAL_DSUBU:
-//		case SPECIAL_SLT:
-//		case SPECIAL_SLTU:
+		case SPECIAL_SLT:
+		case SPECIAL_SLTU:
 //		case SPECIAL_AND:
 //		case SPECIAL_OR:
 		case SPECIAL_XOR:
@@ -1187,8 +1199,8 @@ void MIPS_CPUComponent::Translate(uint32_t iword, struct DyntransIC* ic)
 //			case SPECIAL_DADDU: ic->f = instr(daddu); x64=1; break;
 //			case SPECIAL_DSUB:  ic->f = instr(dsub); x64=1; break;
 //			case SPECIAL_DSUBU: ic->f = instr(dsubu); x64=1; break;
-//			case SPECIAL_SLT:   ic->f = instr(slt); break;
-//			case SPECIAL_SLTU:  ic->f = instr(sltu); break;
+			case SPECIAL_SLT:   ic->f = instr_slt; break;
+			case SPECIAL_SLTU:  ic->f = instr_sltu; break;
 //			case SPECIAL_AND:   ic->f = instr(and); break;
 //			case SPECIAL_OR:    ic->f = instr(or); break;
 			case SPECIAL_XOR:   ic->f = instr_xor_u64_u64_u64; break;
