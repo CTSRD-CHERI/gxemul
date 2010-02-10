@@ -63,10 +63,18 @@ Some things, in no specific order, that I'd like to fix:
 	     the rectangle drawing demo.
 	[ ]  Implement basic 64-bit MIPS instruction execution, enough to run
 	     the 64-bit variant of the rectangle drawing demo.
-	[ ]  Try both 64-bit and 32-bit MIPS cpus, and both 32-bit and
-	     16-bit instruction encodings!
+	[ ]  Implement basic 16-bit MIPS instruction encoding, enough to run
+	     the 16-bit-encoded variant of the rectangle drawing demo (on both
+	     64-bit and 32-bit emulated CPUs).
 
   [ ]	Improve CTRL-C behavior! Abort quicker.
+  	[ ]  Implement an abort instruction call
+  		[ ]  sync pc should take this kind of abort into consideration.
+  	[ ]  Function call trace -> abort quickly on ctrl-c.
+
+  [ ]	Refactor/move helper functions into some helper module:
+	[ ]  SplitStringIntoVector
+	[ ]  parse_number
 
   [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
@@ -146,8 +154,7 @@ Some things, in no specific order, that I'd like to fix:
 
 	[ ]  Try variable-length ISAs early on. Maybe amd64? Or AVR32?
 
-	[ ]  Multi-encoding ISAs, such as MIPS (MIPS16), ARM (Thumb), or
-	     amd64 (16/32/64-bit).
+	[ ]  Multi-encoding ISAs, such as MIPS (MIPS16), ARM (Thumb).
 
 		Commands used to compile MIPS16 test programs:
 		mips64-unknown-elf-gcc-4.3.2 -mips16 -O3 urk.c -c
@@ -191,7 +198,22 @@ Some things, in no specific order, that I'd like to fix:
 	     I.e. implement an a.out file loader.
 	[ ]  More initial register contents upon reset: r31 isn't enough for
 	     mvme187. See old machine_mvme88k.cc for details.
-	[ ]  Soft PROM emulation.
+		[ ]  Soft PROM emulation.
+			MAYBE implement PROM emulation as a plugin? Like
+
+				attach cpu0:mvmeprom(187)
+
+			or even just:  attach mvmeprom(187)
+			since cpu0 would be the default component.
+
+			The plugin would then be responsible for on-reset
+			behavior, AND handling of PROM calls.
+
+			If a software PROM emulation plugin is used for
+			emulating different boot loaders, then that can be
+			specified as arguments, like:  bootregs=linux or
+			bootregs=netbsd  or similar.
+
      	[ ]  -Q command line flag (backwards compatibility) for
      	     turning off soft PROM emulation?
      	[ ]  Ability to load raw files (e.g. PROM).
@@ -203,32 +225,52 @@ Some things, in no specific order, that I'd like to fix:
 	     separate devices.
 	[ ]  Implement 88K virtual to physical memory translation.
 	[/]  Implement 88100 instruction execution (completely).
-	[ ]  Implement 88110 instruction disassembly.
+	[ ]  Implement 88110 instruction disassembly (e.g. "graphics" instructions)
 	[ ]  Implement 88110 instruction execution.
+	[ ]  Disk bootblock boot.
+	[ ]  Reimplement everything from the old mvme187 implementation.
+	[ ]  Ethernet :)
+	[ ]  Dyntrans "user memory" implementation for M88K!
+	[ ]  xmem emulation (set transaction registers)
+	[ ]  Instruction trace by using bits of ??IP control regs.
+	[ ]  Breakpoints: How to indicate user space vs supervisor? (Also the
+	    "dump" instruction and other things need this support.)
+	[ ]  Instruction disassembly, and implementation:
+		o)  See http://www.panggih.staff.ugm.ac.id/download/GCC/info/gcc.i5
+		    for some strange cases of when "div" can fail (?)
+		o)  Floating point stuff:
+			+) Refactor all the fsub, fadd, fmul etc. They
+			   are currently quite horribly redundant.
+			+) Exceptions for overflow etc!
 
   [ ]	Address formats?
   	"xxxx:yyyy", "xxxx:yyyyyyyy", "zzzzzzzzzzzzzzzz" for amd64, plus i/o ports
   	"uxxxxxxxx" vs "sxxxxxxxx" for M88K
 	most likely others for "bank select" embedded archs/microcontrollers.
 
+  [ ]	amd64/x86 emulation:
+  	a) Non-dyntrans emulation mode, as a "proof" that CPUs can be implemented
+	   using slow interpretation, and do not need to be complex dyntrans 
+	   implementations. (PC emulation isn't exactly GXemul's niche, anyway,
+	   so it is ok that it is extremely slow. There are other emulators
+	   and virtualizers for users who need a fast x86/amd64 experience.)
+	b) interesting because of mode switches (16-bit, 32-bit, and long 64-bit)
+	c) interseting because of odd address format (non-RISC style)
+	d) interesting because there are lots of guest OSes and other software
+	   to test with
+	e) how about making the name "pc" in CPUComponent overridable? on amd64,
+	   it is either ip, eip, or rip, depending on mode.
+	f) override bus reads/writes, because amd64 transparently allows
+	   unaligned loads/stores.
+
   [ ]	Memory/bus reads in "no exception" mode (for disasm and memory dumping,
   	and other things).
-
-  [ ]	-d command line option => on-reset command, which connects a disk image
-  	to a disk controller? But some machines have SCSI controllers, some have
-  	IDE, some have the fake testmips controller, and they all have different
-  	names. How to solve this? Maybe not use -d at all in the new framework,
-  	but some other form of disk:path:filename format?
 
   [/]	Symbol registry.
   	[X]  Add ELF symbols (see end of FileLoader_ELF.cc).
   	[X]  Load a.out symbols.
   	[ ]  Cloning a CPUComponent should also clone its symbol registry!
   	     Think about serializing symbols...
-
-  [ ]	Refactor/move helper functions into some helper module:
-	[ ]  SplitStringIntoVector
-	[ ]  parse_number
 
   [ ]   Make sure that BOTH old and new configuration files work!
 
@@ -436,11 +478,12 @@ Some things, in no specific order, that I'd like to fix:
 	[ ]  symbol handling, line number info, data types?
 	[ ]  argument handling! (arg count, at least)
 	[ ]  all the others (macho, ecoff, srec, ...)
-	[ ]  Disk images.
-		[ ]  r vs R modifier: read only disk images causes writes to
-		     fail, while R could create an implicit empty overlay
-		     in the tmp directory, so that writes within a session
-		     will succeed. At reboot/reset they'd be lost.
+
+  [ ]  Disk images.
+	[ ]  r vs R modifier: read only disk images causes writes to
+	     fail, while R could create an implicit empty overlay
+	     in the tmp directory, so that writes within a session
+	     will succeed. At reboot/reset they'd be lost.
 
   [ ]	Breakpoints
 
@@ -652,44 +695,20 @@ Some things, in no specific order, that I'd like to fix:
 	[ ]  struct conversions for many syscalls
 
 
+
 -------------------------------------------------------------------------------
 
 NOTE: MOST of the stuff below are from pre-0.6.0, so the comments may be
       a bit out of date, or more likely, only correspond to the LEGACY parts
       of the code.
+      
+      The long-term goal is to rewrite everything using the new framework,
+      and therefore the comments below will either be incorporated in the
+      rewrite, or they are not applicable any longer.
+
+-------------------------------------------------------------------------------
 
 
-To be translated prefetch:
-	o)  ONLY do this when able to read directly from memory
-	    pages, NOT when running via a slow device!
-
-M88K:
-	o)  MVME187:
-		o)  disk bootblock boot
-		o)  ethernet
-	o)  PERFORMANCE!
-	o)  cpu_dyntrans.c: MEMORY_USER_ACCESS implementation for M88K!
-	    Currently, user memory accesses are not entered into the
-	    translation caches, which result in extremely poor performance.
-	    Also, the entire translation cache is thrown away on user/supervisor
-	    mode switches, which (I guess) makes e.g. syscalls quite
-	    expensive.
-	o)  xmem: Set transaction registers!
-	o)  CMMUs:
-		o)  Translation invalidations, could be optimized.
-		o)  Move initialization from dev_mvme187 to somewhere
-		    more reasonable?
-	o)  Instruction trace by using bits of ??IP control regs.
-	o)  Breakpoints: How to indicate user space vs supervisor? (Also the
-	    "dump" instruction and other things need this support.)
-	o)  Instruction disassembly, and implementation:
-		o)  See http://www.panggih.staff.ugm.ac.id/download/GCC/info/gcc.i5
-		    for some strange cases of when "div" can fail (?)
-		o)  Floating point stuff:
-			+) Refactor all the fsub, fadd, fmul etc. They
-			   are currently quite horribly redundant.
-			+) Exceptions for overflow etc!
-		o)  88110-specific instructions, e.g. "graphics" instructions
 
 MIPS:
 	o)  Nicer MIPS status bits in register dumps.
@@ -782,27 +801,6 @@ Dreamcast:
 	    http://www.maushammer.com/vmu.html for a good description of
 	    the differences between LC86104C and the one used in the VME.
 
-Alpha:
-	x)  OSF1 PALcode, Virtual memory support.
-	x)  PALcode replacement! PAL1E etc opcodes...?
-	x)  Interrupt/exception/trap handling.
-	x)  Floating point exception correctness.
-	x)  More work on bootup memory and register contents.
-	x)  More Alpha machine types, so it could work with
-	    OpenBSD, FreeBSD, and Linux too?
-
-SPARC (both the ISA and the machines):
-	o)  Implement Adress space identifiers; load/stores etc.
-	o)  Exception/trap/interrupt handling.
-	o)  Save/restore register windows etc! Both v9 and pre-v9!
-	o)  Finish the subcc and addcc flag computation code.
-	o)  Add more registers (floating point, control regs etc)
-	o)  Disassemly of some more instructions?
-	o)  Are sll etc 32-bit sign-extending or zero-extending?
-	o)  Floating point exception correctness.
-	o)  SPARC v8, v7 etc?
-	o)  More machine modes and devices.
-
 POWER/PowerPC:
 	x)  Fix DECR timer speed, so it matches the host.
 	x)  NetBSD/prep 3.x triggers a possible bug in the emulator:
@@ -834,11 +832,6 @@ PReP:
 Algor:
 	o)  Other models than the P5064?
 	o)  PCI interrupts... needed for stuff like the tlp NIC?
-
-BeBox:
-	o)  Interrupts. There seems to be a problem with WDC interrupts
-	    "after a short while", although a few interrupts get through?
-	o)  Perhaps find a copy of BeOS and try it?
 
 Malta:
 	o)  The Linux/Malta kernel at people.debian.org/~ths/qemu/malta/
@@ -883,10 +876,6 @@ ARM:
 	o)  Debian/cats crashes because of unimplemented coproc stuff.
 	    fix this?
 
-M32R:
-	o)  Everything.
-	o)  /home/debug/emul/m32r/linux-2.6.14.6-20060127-revE.root/boot/vmlinux-2.6.14.6-20060127-revE
-
 Test machines:
 	o)  dev_fb 2D acceleration functions, to make dev_fb useful for
 	    simple graphical OSes:
@@ -926,6 +915,24 @@ Dyntrans:
 	    it would be reasonably simple to add; in each individual fast
 	    load/store routine = a lot more work, and it would become
 	    kludgy very fast.)
+		o)  Mark every address with bits which tell whether or not the address
+		    has been written to.
+		o)  What should happen when programs are loaded?  Text/data, bss (zero
+		    filled). But stack space and heap is uninitialized.
+		o)  Uninitialized local variables:
+			A load from a place on the stack which has not previously
+			been stored to => warning. Increasing the stack pointer using
+			any available means should reset the memory to uninitialized.
+		o)  If calls to malloc() and free() can be intercepted:
+			o)  Access to a memory area after free() => warning.
+			o)  Memory returned by malloc() is marked as not-initialized.
+			o)  Non-passive, but good to have: Change the argument
+			    given to malloc, to return a slightly larger memory
+			    area, i.e.  margin_before + size + margin_after,
+			    and return the pointer  + margin_before.
+			    Any access to the margin_before or _after space results
+			    in warnings. (free() must be modified to free the
+			    actually allocated address.)
 	x)  Dyntrans with SMP... lots of work to be done here.
 	x)  Dyntrans with cache emulation... lots of work here as well.
 	x)  Remove the concept of base RAM completely; it would be more
@@ -952,26 +959,6 @@ Dyntrans:
 	x)  Lots of other stuff: see src/cpus/README_DYNTRANS
 	x)  Native code generation backends... think carefully about this.
 
-Simple Valgrind-like checks?
-	o)  Mark every address with bits which tell whether or not the address
-	    has been written to.
-	o)  What should happen when programs are loaded?  Text/data, bss (zero
-	    filled). But stack space and heap is uninitialized.
-	o)  Uninitialized local variables:
-		A load from a place on the stack which has not previously
-		been stored to => warning. Increasing the stack pointer using
-		any available means should reset the memory to uninitialized.
-	o)  If calls to malloc() and free() can be intercepted:
-		o)  Access to a memory area after free() => warning.
-		o)  Memory returned by malloc() is marked as not-initialized.
-		o)  Non-passive, but good to have: Change the argument
-		    given to malloc, to return a slightly larger memory
-		    area, i.e.  margin_before + size + margin_after,
-		    and return the pointer  + margin_before.
-		    Any access to the margin_before or _after space results
-		    in warnings. (free() must be modified to free the
-		    actually allocated address.)
-
 Better CD Image file support:
 	x)  Support CD formats that contain more than 1 track, e.g.
 	    CDI files (?). These can then contain a mixture of e.g. sound
@@ -981,6 +968,8 @@ Better CD Image file support:
 	    possibly other live-CD formats.)
 
 Networking:
+[Obsoleted; the new framework will need a much better net implementation. This
+section is kept here, so that the same mistakes may be avoided in the rewrite.]
 	x)  Redesign of the networking subsystem, at least the NAT translation
 		part. The current way of allowing raw ethernet frames to be
 		transfered to/from the emulator via UDP should probably be
@@ -1006,21 +995,6 @@ Networking:
 	x)  Allow SLIP connections, possibly PPP, in addition to
 	    ethernet?
 
-Cache simulation:
-	o)  Command line flags for:
-		o)  CPU endianness?
-		o)  Cache sizes? (multiple levels)
-	o)  Separate from the CPU concept, so that multi-core CPUs sharing
-	    e.g. a L2 cache can be simulated (?)
-	o)  Instruction cache emulation is easiest (if separate from the
-	    data cache); similar hack as the S;I; hack in cpu_dyntrans.c.
-	    NOTE: if the architecture has a delay slot, then an instruction
-	    slot can actually be executed as 2 instructions.
-	o)  Data cache emulation = harder; each arch's load/store routines
-	    must include support? running one instruction at a time and
-	    having a cpu-dependant lookup function for each instruction
-	    is another option (easier to implement, but very very slow).
-
 Documentation:
 	x)  Update the documentation regarding the testmachine interrupts.
 	x)  Note about sandboxing/security:
@@ -1030,8 +1004,6 @@ Documentation:
 		fail on real hardware).  Sandbox = contain from the
 		host OS. But the emulated programs will run "less
 		securely".
-	x)  Try NetBSD/arc 4.x! (It seems to work with disk images!)
-	x)  NetBSD/pmax 4 install instructions: xterm instead of vt100!
 	x)  Rewrite the section about experimental devices, after the
 	    framebuffer acceleration has been implemented, and demos
 	    written. (Symbolic names instead of numbers; example
@@ -1051,6 +1023,8 @@ The Device subsystem:
 	    are connected to a specific memory.
 
 PCI:
+[Obsoleted; the new framework will need a much better bus implementation. This
+section is kept here, so that the same mistakes may be avoided in the rewrite.]
 	x)  Pretty much everything related to runtime configuration, device
 	    slots, interrupts, etc must be redesigned/cleaned up. The current
 	    code is very hardcoded and ugly.
@@ -1075,12 +1049,6 @@ Clocks and timers:
 	x)  Cobalt TOD is incorrect!
 	x)  Go through all other machines, one by one, and fix them.
 
-Sound:
-	x)  generic sound framework
-	x)  add one or more sound cards as devices; add a testmachine
-	    sound card first?
-	x)  Dreamcast sound? Generic PCI sound cards?
-
 ASC SCSI controller:
 	x)  NetBSD/arc 2.0 uses the ASC controller in a way which GXemul
 	    cannot yet handle. (NetBSD 1.6.2 works ok.) (Possibly a problem
@@ -1102,6 +1070,8 @@ File/disk/symbol handling:
 	    URL at top of src/symbol_demangle.c for more info.
 
 Better framebuffer and X-windows functionality:
+[Obsoleted; the new framework will most likely use SDL. This section
+is kept here, so that the same mistakes may be avoided in the rewrite.]
 	o)  Do a complete rewrite of the framebuffer/console stuff, so that:
 		1)  It does not rely on X11 specifically.
 		2)  It is possible to interact with emulated framebuffers
@@ -1136,30 +1106,32 @@ Better framebuffer and X-windows functionality:
 		specific code to a separate module.
 
 Release checklist:
-	README
-	RELEASE NOTES
-	Send SVN dump to Sourceforge
+	Build on as many platforms as possible.
+	Install as many as possible of the Guest OSes in the documentation;
+		the documentation may need to be updated if there are
+		regressions. (This can take a whole day.)
+	Update the README file.
+	Update the RELEASE NOTES.
+	TODO updates (i.e. set goals for the _next_ release, if possible).
+	HISTORY (mention the release).
+	SVN branch/tag.
+	Send SVN dump to Sourceforge.
 	Tarball creation (make_release.sh)
-	Home page update: version numbers
-	Home page News page update
+	Home page update: version numbers, architectures?
+	Home page News page update: new Release.
 	sync homepage to sourceforge
 	#GXemul on FreeNode (IRC): version number in topic
-	Sourceforge file release
+	Sourceforge File Release (upload the tarball).
 	gxemul-users mail
 	Freshmeat
-	Wikipedia page (version number and date)
+	Wikipedia page (version number and date, possibly architectures update,
+		or description update).
 	Send mail to package maintainers (if they are not subscribed
 		to the mailing list(s))
 	If new arch:
-		Wikipedia page
 		Linux-MIPS wiki page
 		Ohloh description page
 		gavare.se main page
-		GXemul web main page
-		CV
-	Graph: Release timeline (date on x axis, including release numbers,
-		and comments for major new features).
-
 
 -------------------------------------------------------------------------------
 </pre>
