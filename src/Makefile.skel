@@ -6,7 +6,8 @@ all: do_include
 	$(MAKE) the_rest
 
 the_rest: do_components do_console do_cpus do_debugger do_devices do_disk \
-	do_file do_machines do_main do_net do_old_main do_promemul do_symbol do_ui
+	do_file do_machines do_main do_net do_old_main do_plugins \
+	do_promemul do_symbol do_ui
 
 do_include:
 	cd include; $(MAKE)
@@ -44,6 +45,9 @@ do_net:
 do_old_main:
 	cd old_main; $(MAKE)
 
+do_plugins:
+	cd plugins; $(MAKE)
+
 do_promemul:
 	cd promemul; $(MAKE)
 
@@ -71,6 +75,7 @@ clean:
 	cd main; $(MAKE) clean
 	cd net; $(MAKE) clean
 	cd old_main; $(MAKE) clean
+	cd plugins; $(MAKE) clean
 	cd promemul; $(MAKE) clean
 	cd symbol; $(MAKE) clean
 	cd ui; $(MAKE) clean
@@ -88,6 +93,7 @@ clean_all: clean
 	cd main; $(MAKE) clean_all
 	cd net; $(MAKE) clean_all
 	cd old_main; $(MAKE) clean_all
+	cd plugins; $(MAKE) clean_all
 	cd promemul; $(MAKE) clean_all
 	cd symbol; $(MAKE) clean_all
 	cd ui; $(MAKE) clean_all
