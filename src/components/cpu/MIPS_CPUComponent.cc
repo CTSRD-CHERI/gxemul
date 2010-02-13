@@ -957,7 +957,7 @@ template<int op, bool samepage, bool singlestep> void MIPS_CPUComponent::instr_b
 
 		// Prepare for the branch.
 		cpu->m_inDelaySlot = true;
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 
 		if (cond) {
 			if (samepage) {
@@ -975,14 +975,14 @@ template<int op, bool samepage, bool singlestep> void MIPS_CPUComponent::instr_b
 	} else {
 		// Prepare for the branch.
 		cpu->m_inDelaySlot = true;
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 
 		// Execute the next instruction:
 		ic[1].f(cpu, ic+1);
 		cpu->m_executedCycles ++;
 	
 		// If there was no exception, then branch:
-		if (!cpu->m_exceptionInDelaySlot) {
+		if (!cpu->m_exceptionOrAbortInDelaySlot) {
 			if (cond) {
 				if (samepage) {
 					cpu->m_nextIC = (DyntransIC*) ic->arg[2].p;
@@ -1001,7 +1001,7 @@ template<int op, bool samepage, bool singlestep> void MIPS_CPUComponent::instr_b
 		// The next instruction is now either the target of the branch
 		// instruction, the instruction 2 steps after this one,
 		// or the first instruction of an exception handler.
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 	}
 }
 
@@ -1031,7 +1031,7 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_j(CPUDyntrans
 	if (singlestep) {
 		// Prepare for the branch.
 		cpu->m_inDelaySlot = true;
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 
 		cpu->m_delaySlotTarget = cpu->m_pc & ~0x0fffffffUL;
 		cpu->m_delaySlotTarget += ic->arg[0].u32;
@@ -1040,14 +1040,14 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_j(CPUDyntrans
 	} else {
 		// Prepare for the branch.
 		cpu->m_inDelaySlot = true;
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 
 		// Execute the next instruction:
 		ic[1].f(cpu, ic+1);
 		cpu->m_executedCycles ++;
 
 		// If there was no exception, then branch:
-		if (!cpu->m_exceptionInDelaySlot) {
+		if (!cpu->m_exceptionOrAbortInDelaySlot) {
 			cpu->m_pc = cpu->m_pc & ~0x0fffffffUL;
 			cpu->m_pc += ic->arg[0].u32;
 			cpu->DyntransPCtoPointers();
@@ -1058,7 +1058,7 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_j(CPUDyntrans
 		// The next instruction is now either the target of the branch
 		// instruction, the instruction 2 steps after this one,
 		// or the first instruction of an exception handler.
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 	}
 }
 
@@ -1091,21 +1091,21 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_jr(CPUDyntran
 	if (singlestep) {
 		// Prepare for the branch.
 		cpu->m_inDelaySlot = true;
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 
 		cpu->m_delaySlotTarget = REG64(ic->arg[0]);
 		cpu->m_nextIC = ic + 1;
 	} else {
 		// Prepare for the branch.
 		cpu->m_inDelaySlot = true;
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 
 		// Execute the next instruction:
 		ic[1].f(cpu, ic+1);
 		cpu->m_executedCycles ++;
 
 		// If there was no exception, then branch:
-		if (!cpu->m_exceptionInDelaySlot) {
+		if (!cpu->m_exceptionOrAbortInDelaySlot) {
 			cpu->m_pc = REG64(ic->arg[0]);
 			cpu->DyntransPCtoPointers();
 	
@@ -1115,7 +1115,7 @@ template<bool link, bool singlestep> void MIPS_CPUComponent::instr_jr(CPUDyntran
 		// The next instruction is now either the target of the branch
 		// instruction, the instruction 2 steps after this one,
 		// or the first instruction of an exception handler.
-		cpu->m_exceptionInDelaySlot = false;
+		cpu->m_exceptionOrAbortInDelaySlot = false;
 	}
 }
 
@@ -1748,7 +1748,7 @@ DYNTRANS_INSTR(MIPS_CPUComponent,ToBeTranslated)
 		cpu->Translate(iword, ic);
 
 	if (cpu->m_inDelaySlot && ic->f == NULL)
-		ic->f = instr_abort_in_delay_slot;
+		ic->f = instr_abort;
 
 	cpu->DyntransToBeTranslatedDone(ic);
 }

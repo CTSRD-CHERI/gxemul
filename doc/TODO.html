@@ -48,6 +48,150 @@ Some things, in no specific order, that I'd like to fix:
 ------------------------------------------------------------------------
 </i>
 
+  [/]	Improve dyntrans CTRL-C behavior! Abort quicker.
+  	[X]  Implement an abort instruction call
+  		[X]  sync pc should take this kind of abort into consideration.
+	[X]  Rename exceptionInDelaySlot -> exceptionOrAbortInDelaySlot
+	[X]  Get rid of abort_in_delay_slot (handled by abort).
+	[/]  Unit tests for the above (M88K).
+  	[/]  Function call trace -> abort quickly on ctrl-c.
+  		[ ]  There is still a crash bug; try interleaving continue +
+  			CTRL-C + continue + CTRL-C, with trace enabled!
+
+  [ ]	Refactor/move helper functions into some helper module:
+	[ ]  SplitStringIntoVector
+	[ ]  parse_number
+
+  [ ]	Plugin framework
+  	Note: The term "Plugin" does not mean dynamically loaded. It simply is a
+  	generalization of "something" which is the common base for file loaders,
+  	framebuffers, statistics viewers, etc.
+	[ ] Base class for plugins.
+	[ ] Plugin registry.
+	[ ] MOVE src/main/fileloaders TO PLUGINS!!! --------------------------
+	[ ] On-reset commands should be _PER COMPONENT_ instead of per GXemul
+		instance (will likely be good for testm88k-reset, stack pointer etc.)
+		[ ] Serialize the on-reset command list (per component) 
+	[ ] Plugins may be attached to component paths!
+		[ ] Multiple components to one plugin (e.g. keyboard + framebuffer to one plugin)
+		[ ] Multiple plugins monitoring the same component.
+	[ ] Think about the "load" command. Load vs attach?
+	[ ] What should a plugin be able to do?
+		[ ] Attach/load
+		[ ] On-reset
+		[ ] Detach
+		[ ] Monitor changes in component(s)' state
+		[ ] Periodical updates (e.g. framebuffers)
+		[ ] Run in a different thread (pthread multithreading?)
+		[ ] Insert stuff into the event queue (e.g. keyboard keypresses
+			from a framebuffer/keyboard plugin)
+	[ ] The Snapshots (the clones) release the plugin connection; the plugins only
+		work on the main tree.
+	[ ] Plugins have to be compatible with replaying during reverse execution!
+		(Maybe they should be disconnected while re-executing?)
+	[ ] Think about how events should contain changes such as breakpoints,
+		added/removed plugins, etc.
+	[ ] Example plugins:
+		[ ] File loaders
+		[ ] Disk image mappers
+		[ ] Framebuffer displays
+			[ ] Think about VGA (charcell AND video framebuffer, being able
+				to switch live)
+		[ ] Keyboards (host -> emulated)
+		[ ] Serial controller -> scrollback buffer -> xterm / other window
+			or even connected to stdin/stdout or files or terminals.
+		[ ] Audio (emulated -> host)
+		[ ] Cache statistics viewer.
+
+	[ ]  CONSISTENT and extensible way of supplying files, disk images,
+		raw files, ... to various plugins on the command line,
+		e.g.:
+			[component:]filename
+
+		where cpu0 would be the default component. This would make it
+		look nice when adding disk images, like wd0:netbsd.img
+
+			[component:][plugin([args]):]name
+
+		e.g. loader could be raw(vaddr[,skiplen[,entry]])
+		or                   file(raw(vaddr[,skiplen[,entry]]))
+
+		so,	monkey:filename		would load into component monkey
+		but	monkey():filename	would load into the default comonent
+						using the monkey loader.
+		and	a:b(c):filename		would load into component a using
+						the b loader, with args c
+
+		"Plugin descriptors"
+			optional component
+			optional plugin([args])
+			optional name
+
+		If all fields are left out, it's an empty descriptor, which is
+		ignored. GXemul's command line syntax would then be:
+		
+			gxemul [options] [.gxemul file] [plugin descriptors...]
+
+		[ ]  The set of loaders to ask could be different depending on
+		     which interfaces the component supports. For AddressDataBus,
+		     it would be the regular file loaders (ELF, raw, a.out, ...).
+
+		     For block devices (disks, e.g. wd0, sd0), it would be a
+		     disk image mapper.
+
+		filename is also optional, and in fact more like a second
+		argument. E.g. the sdl() plugin doesn't need a filename.
+
+		The "load" command could be replaced by some kind of "attach"
+		command, which would run the same thing as the plugin descriptors
+		entered on the command line:
+		
+		Example output:
+			GXemul> attach wd0:netbsd.img
+			wd0: Attaching to image(): netbsd.img
+			     SCSI disk image, 2400 MB
+
+			GXemul> attach vfb:sdl(apa bepa)
+			vfb0: Unable to attaching to sdl(apa bepa)
+			Invalid arguments to sdl().
+
+			GXemul> attach vfb:sdl()
+			vfb0: Attaching to sdl()
+
+			GXemul> attach test/FileLoader_A.OUT_M88K
+			cpu0: Attaching to file(): test/FileLoader_A.OUT_M88K
+			      a.out: entry point 0x000012b8
+			      text + data = 4096 + 4096 bytes
+			      symbols: 1260 bytes at 0x2000
+			      strings: 1070 bytes at 0x24ec
+			      14 symbols read
+
+		Note that the load command should still be used for loading
+		[parts of] emulation setups!
+
+		Think more about this!
+		----------------------
+
+			netbsd-GENERIC.gz			(load a basic file into cpu0)
+			cpu1:netbsd-GENERIC.gz			(load into a specific cpu)
+			wd0:netbsd.img				(disk image file mapper)
+			wd0:image(readonly):netbsd.img		(mapper with arguments! non-writable image)
+			wd0:image(cow):netbsd.img		(non-writable, but COW to temporary file (TMPDIR))
+			cpu0.dcache:cachestatisticsviewer()
+			vga0:sdl()				(for displaying graphical controllers, which can
+								be interrogated about memory format, resolution etc)
+			vga0:sdl(DISPLAY=othermachine:1.0)	(sdl on remote display)
+			fb_videoram0:sdl(x=800,y=600,data=rgb24) (for displaying raw memory ranges)
+			com0:stdio()		(default stdio)
+			com0:xterm()		(new xterm)
+			...
+
+		com0:stdio() should not be needed, if it is the default
+		choice. com0:null() would disconnect com0 from any output.
+		stdio() would then have to be a plugin which handles multi-
+		plexing of multiple outputs, and allows one input serial
+		console.
+
   [/]	The testm88k machine.
 
 	[X]  Implement 88100 instruction disassembly.
@@ -66,15 +210,7 @@ Some things, in no specific order, that I'd like to fix:
 	[ ]  Implement basic 16-bit MIPS instruction encoding, enough to run
 	     the 16-bit-encoded variant of the rectangle drawing demo (on both
 	     64-bit and 32-bit emulated CPUs).
-
-  [ ]	Improve CTRL-C behavior! Abort quicker.
-  	[ ]  Implement an abort instruction call
-  		[ ]  sync pc should take this kind of abort into consideration.
-  	[ ]  Function call trace -> abort quickly on ctrl-c.
-
-  [ ]	Refactor/move helper functions into some helper module:
-	[ ]  SplitStringIntoVector
-	[ ]  parse_number
+	[ ]  All the other devices (interrupts, ethernet, serial, SMP, ...)
 
   [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
@@ -341,137 +477,6 @@ Some things, in no specific order, that I'd like to fix:
   [ ]	Serialize symbols
 
   [ ]	Serialize breakpoints
-
-  [ ]	Plugin framework
-  	Note: The term "Plugin" does not mean dynamically loaded. It simply is a
-  	generalization of "something" which is the common base for file loaders,
-  	framebuffers, statistics viewers, etc.
-	[ ] src/plugins/
-	[ ] Base class for plugins.
-	[ ] Plugin registry.
-	[ ] Move FileLoaders to plugins!
-	[ ] On-reset commands should be _PER COMPONENT_ instead of per GXemul
-		instance (will likely be good for testm88k-reset, stack pointer etc.)
-		[ ] Serialize the on-reset command list (per component) 
-	[ ] Plugins may be attached to component paths!
-		[ ] Multiple components to one plugin (e.g. keyboard + framebuffer to one plugin)
-		[ ] Multiple plugins monitoring the same component.
-	[ ] Think about the "load" command. Load vs attach?
-	[ ] What should a plugin be able to do?
-		[ ] Attach/load
-		[ ] On-reset
-		[ ] Detach
-		[ ] Monitor changes in component(s)' state
-		[ ] Periodical updates (e.g. framebuffers)
-		[ ] Run in a different thread (pthread multithreading?)
-		[ ] Insert stuff into the event queue (e.g. keyboard keypresses
-			from a framebuffer/keyboard plugin)
-	[ ] The Snapshots (the clones) release the plugin connection; the plugins only
-		work on the main tree.
-	[ ] Plugins have to be compatible with replaying during reverse execution!
-		(Maybe they should be disconnected while re-executing?)
-	[ ] Think about how events should contain changes such as breakpoints,
-		added/removed plugins, etc.
-	[ ] Example plugins:
-		[ ] File loaders
-		[ ] Disk image mappers
-		[ ] Framebuffer displays
-			[ ] Think about VGA (charcell AND video framebuffer, being able
-				to switch live)
-		[ ] Keyboards (host -> emulated)
-		[ ] Serial controller -> scrollback buffer -> xterm / other window
-			or even connected to stdin/stdout or files or terminals.
-		[ ] Audio (emulated -> host)
-		[ ] Cache statistics viewer.
-
-	[ ]  CONSISTENT and extensible way of supplying files, disk images,
-		raw files, ... to various plugins on the command line,
-		e.g.:
-			[component:]filename
-
-		where cpu0 would be the default component. This would make it
-		look nice when adding disk images, like wd0:netbsd.img
-
-			[component:][plugin([args]):]name
-
-		e.g. loader could be raw(vaddr[,skiplen[,entry]])
-		or                   file(raw(vaddr[,skiplen[,entry]]))
-
-		so,	monkey:filename		would load into component monkey
-		but	monkey():filename	would load into the default comonent
-						using the monkey loader.
-		and	a:b(c):filename		would load into component a using
-						the b loader, with args c
-
-		"Plugin descriptors"
-			optional component
-			optional plugin([args])
-			optional name
-
-		If all fields are left out, it's an empty descriptor, which is
-		ignored. GXemul's command line syntax would then be:
-		
-			gxemul [options] [.gxemul file] [plugin descriptors...]
-
-		[ ]  The set of loaders to ask could be different depending on
-		     which interfaces the component supports. For AddressDataBus,
-		     it would be the regular file loaders (ELF, raw, a.out, ...).
-
-		     For block devices (disks, e.g. wd0, sd0), it would be a
-		     disk image mapper.
-
-		filename is also optional, and in fact more like a second
-		argument. E.g. the sdl() plugin doesn't need a filename.
-
-		The "load" command could be replaced by some kind of "attach"
-		command, which would run the same thing as the plugin descriptors
-		entered on the command line:
-		
-		Example output:
-			GXemul> attach wd0:netbsd.img
-			wd0: Attaching to image(): netbsd.img
-			     SCSI disk image, 2400 MB
-
-			GXemul> attach vfb:sdl(apa bepa)
-			vfb0: Unable to attaching to sdl(apa bepa)
-			Invalid arguments to sdl().
-
-			GXemul> attach vfb:sdl()
-			vfb0: Attaching to sdl()
-
-			GXemul> attach test/FileLoader_A.OUT_M88K
-			cpu0: Attaching to file(): test/FileLoader_A.OUT_M88K
-			      a.out: entry point 0x000012b8
-			      text + data = 4096 + 4096 bytes
-			      symbols: 1260 bytes at 0x2000
-			      strings: 1070 bytes at 0x24ec
-			      14 symbols read
-
-		Note that the load command should still be used for loading
-		[parts of] emulation setups!
-
-		Think more about this!
-		----------------------
-
-			netbsd-GENERIC.gz			(load a basic file into cpu0)
-			cpu1:netbsd-GENERIC.gz			(load into a specific cpu)
-			wd0:netbsd.img				(disk image file mapper)
-			wd0:image(readonly):netbsd.img		(mapper with arguments! non-writable image)
-			wd0:image(cow):netbsd.img		(non-writable, but COW to temporary file (TMPDIR))
-			cpu0.dcache:cachestatisticsviewer()
-			vga0:sdl()				(for displaying graphical controllers, which can
-								be interrogated about memory format, resolution etc)
-			vga0:sdl(DISPLAY=othermachine:1.0)	(sdl on remote display)
-			fb_videoram0:sdl(x=800,y=600,data=rgb24) (for displaying raw memory ranges)
-			com0:stdio()		(default stdio)
-			com0:xterm()		(new xterm)
-			...
-
-		com0:stdio() should not be needed, if it is the default
-		choice. com0:null() would disconnect com0 from any output.
-		stdio() would then have to be a plugin which handles multi-
-		plexing of multiple outputs, and allows one input serial
-		console.
 
   [ ]	File loaders:
    	[ ]  automagic .gz (and .bz2) file extraction into /tmp or $TMP or such.

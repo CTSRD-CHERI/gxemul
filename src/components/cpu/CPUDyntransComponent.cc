@@ -36,6 +36,7 @@
 CPUDyntransComponent::CPUDyntransComponent(const string& className, const string& cpuArchitecture)
 	: CPUComponent(className, cpuArchitecture)
 {
+	m_abortIC.f = instr_abort;
 }
 
 
@@ -130,8 +131,7 @@ int CPUDyntransComponent::Execute(GXemul* gxemul, int nrOfCycles)
 		m_executedCycles ++;
 
 		// Fault in delay slot: return immediately.
-		if (m_nextIC->f == instr_abort ||
-		    m_nextIC->f == instr_abort_in_delay_slot) {
+		if (m_nextIC->f == instr_abort) {
 			m_nextIC->f = GetDyntransToBeTranslated();
 			return 0;
 		}
@@ -154,8 +154,7 @@ int CPUDyntransComponent::Execute(GXemul* gxemul, int nrOfCycles)
 
 			m_executedCycles += ICsPerLoop;
 			if (m_executedCycles >= hazard ||
-			    m_nextIC->f == instr_abort ||
-			    m_nextIC->f == instr_abort_in_delay_slot)
+			    m_nextIC->f == instr_abort)
 				break;
 		}
 	}
@@ -173,9 +172,7 @@ int CPUDyntransComponent::Execute(GXemul* gxemul, int nrOfCycles)
 
 	// If there's one instruction left (and we're not aborted), then
 	// let's execute it:
-	if (m_executedCycles<nrOfCycles && !(
-	    m_nextIC->f == instr_abort ||
-	    m_nextIC->f == instr_abort_in_delay_slot)) {
+	if (m_executedCycles<nrOfCycles && m_nextIC->f != instr_abort) {
 		m_nextIC->f = GetDyntransToBeTranslated();
 		IC
 		m_executedCycles ++;
@@ -185,8 +182,7 @@ int CPUDyntransComponent::Execute(GXemul* gxemul, int nrOfCycles)
 
 	// If execution aborted, then reset the aborting instruction slot
 	// to the to-be-translated function:
-	if (m_nextIC->f == instr_abort ||
-	    m_nextIC->f == instr_abort_in_delay_slot)
+	if (m_nextIC->f == instr_abort)
 		m_nextIC->f = GetDyntransToBeTranslated();
 
 	return m_executedCycles;
@@ -213,11 +209,19 @@ void CPUDyntransComponent::DyntransClearICPage(struct DyntransIC* icpage)
 struct DyntransIC *CPUDyntransComponent::DyntransGetICPage(uint64_t addr)
 {
 	bool clear = false;
-	struct DyntransIC *icpage = m_translationCache.GetICPage(addr, m_showFunctionTraceCall, clear);
+	struct DyntransIC *icpage = m_translationCache.GetICPage(
+	    addr, m_showFunctionTraceCall, clear);
 
 	if (clear) {
-		// This is a newly allocated page. Let's fill the page with
-		// suitable to-be-translated function pointers.
+		// This is either
+		//
+		// a) a completely new page (the address was not in the cache),
+		// or
+		// b) a page which was translated before, but with different
+		//    settings (e.g. m_showFunctionTraceCall).
+		//
+		// So let's fill the page with suitable to-be-translated
+		// function pointers.
 		DyntransClearICPage(icpage);
 	}
 
@@ -227,6 +231,13 @@ struct DyntransIC *CPUDyntransComponent::DyntransGetICPage(uint64_t addr)
 
 void CPUDyntransComponent::DyntransPCtoPointers()
 {
+	if (m_nextIC != NULL && m_nextIC->f == instr_abort) {
+		// Already aborted, let's not update m_nextIC.
+		std::cerr << "TODO: Already aborted, let's not update m_nextIC."
+		    " Is this correct behavior?\n";
+		return;
+	}
+
 	m_firstIConPage = DyntransGetICPage(m_pc);
 
 	assert(m_firstIConPage != NULL);
@@ -240,6 +251,14 @@ void CPUDyntransComponent::DyntransPCtoPointers()
 
 void CPUDyntransComponent::DyntransResyncPC()
 {
+	// Special case during aborts:
+	if (m_nextIC == &m_abortIC) {
+		// The situation which caused m_nextIC to be set to an abort
+		// IC must have synched PC just before that. So we don't need
+		// to do anything here.
+		return;
+	}
+
 	ptrdiff_t instructionIndex = m_nextIC - m_firstIConPage;
 
 	// On a page with e.g. 1024 instruction slots, instructionIndex is usually
@@ -341,7 +360,7 @@ void CPUDyntransComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 {
 	bool abort = false;
 
-	if (ic->f == NULL || ic->f == instr_abort_in_delay_slot) {
+	if (ic->f == NULL || ic->f == instr_abort) {
 		abort = true;
 
 		// Instruction translation failed. If we were running in
@@ -384,21 +403,24 @@ void CPUDyntransComponent::DyntransToBeTranslatedDone(struct DyntransIC* ic)
 
 	// Finally, execute the translated instruction.
 	bool ds = m_inDelaySlot;
-	bool dsException = m_exceptionInDelaySlot;
+	bool dsExceptionOrAbort = m_exceptionOrAbortInDelaySlot;
 	bool singleInstructionLeft = m_executedCycles == m_nrOfCyclesToExecute - 1;
 
 	m_nextIC = ic + 1;
 	ic->f(this, ic);
 
+	if (m_nextIC == &m_abortIC)
+		abort = true;
+
 	if (singleInstructionLeft && !abort) {
 		// If this instruction was in the delay slot of another instruction,
 		// and we are running a single instruction, then manually branch to
 		// the branch target:
-		if (ds && !dsException) {
+		if (ds && !dsExceptionOrAbort) {
 			m_pc = m_delaySlotTarget;
 			DyntransPCtoPointers();
 			m_inDelaySlot = false;
-			m_exceptionInDelaySlot = false;
+			m_exceptionOrAbortInDelaySlot = false;
 		}
 
 		// Don't leave any "single instruction left" instructions
@@ -429,21 +451,9 @@ DYNTRANS_INSTR(CPUDyntransComponent,abort)
 	// Cycle reduction:
 	-- cpubase->m_executedCycles;
 
-	cpubase->m_nextIC = ic;
-}
-
-
-/*
- * A break-out-of-dyntrans function, if a failure occurred in a delay-slot.
- * Setting ic->f to this function will cause dyntrans execution to be aborted.
- * The cycle counter will _not_ count this as executed cycles.
- */
-DYNTRANS_INSTR(CPUDyntransComponent,abort_in_delay_slot)
-{
-	cpubase->m_exceptionInDelaySlot = true;
-
-	// Cycle reduction:
-	-- cpubase->m_executedCycles;
+	// Are we in a delay slot?
+	if (cpubase->m_inDelaySlot)
+		cpubase->m_exceptionOrAbortInDelaySlot = true;
 
 	cpubase->m_nextIC = ic;
 }

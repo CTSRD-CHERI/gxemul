@@ -295,8 +295,19 @@ struct m88k_cpu_type_def {
 #define	M88K_EXCEPTION_SFU1_IMPRECISE			115
 #define	M88K_EXCEPTION_USER_TRAPS_START			128
 
+
+/*
+ *  GXemul-specific instructions:
+ */
+
 /*  A reserved/unimplemented instruction, used for PROM calls:  */
-#define	M88K_PROM_INSTR		0xf400fc92
+#define	M88K_PROM_INSTR			0xf400fc92
+
+/*  An instruction which aborts before doing anything:  */
+#define	M88K_FAIL_EARLY_INSTR		0xf400fc93
+
+/*  An instruction which aborts after increasing r1:  */
+#define	M88K_FAIL_LATE_INSTR		0xf400fc94
 
 
 /*
@@ -412,6 +423,10 @@ private:
 
 	void Translate(uint32_t iword, struct DyntransIC* ic);
 	DECLARE_DYNTRANS_INSTR(ToBeTranslated);
+
+	// For unit tests:
+	DECLARE_DYNTRANS_INSTR(fail_early);
+	DECLARE_DYNTRANS_INSTR(fail_late);
 
 private:
 	/*

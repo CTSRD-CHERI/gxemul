@@ -228,7 +228,7 @@ protected:
 	 */
 	AddressDataBus *	m_addressDataBus;
 	uint64_t		m_addressSelect;
-	bool			m_exceptionInDelaySlot;
+	bool			m_exceptionOrAbortInDelaySlot;
 
 private:
 	SymbolRegistry		m_symbolRegistry;

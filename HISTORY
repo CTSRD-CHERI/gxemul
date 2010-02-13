@@ -4479,3 +4479,5 @@ Changelog for GXemul:
 		drawing demo for testmips runs in the new framework :)
 		Switching function call trace on/off during runtime now
 		clears [individual] translation pages.
+20100213	Working on dyntrans abort peculiarities (in the middle of
+		delay-slots, etc).

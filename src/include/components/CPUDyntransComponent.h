@@ -138,7 +138,6 @@ protected:
 	 */
 	DECLARE_DYNTRANS_INSTR(nop);
 	DECLARE_DYNTRANS_INSTR(abort);
-	DECLARE_DYNTRANS_INSTR(abort_in_delay_slot);
 	DECLARE_DYNTRANS_INSTR(endOfPage);
 	DECLARE_DYNTRANS_INSTR(endOfPage2);
 
@@ -617,6 +616,11 @@ protected:
 	 * Translation cache:
 	 */
 	DyntransTranslationCache	m_translationCache;
+
+	/*
+	 * Special always present DyntransIC structs, for aborting emulation:
+	 */
+	struct DyntransIC	m_abortIC;
 };
 
 

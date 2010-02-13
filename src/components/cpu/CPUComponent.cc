@@ -82,7 +82,7 @@ CPUComponent * CPUComponent::AsCPUComponent()
 void CPUComponent::ResetState()
 {
 	m_hasUsedUnassemble = false;
-	m_exceptionInDelaySlot = false;
+	m_exceptionOrAbortInDelaySlot = false;
 	m_inDelaySlot = false;
 	m_delaySlotTarget = 0;
 
