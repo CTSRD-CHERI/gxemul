@@ -87,7 +87,7 @@ step 4: cpu0: 0x12c8    58600258   or   r3,r0,0x258
 
 step 5: cpu0: 0x12cc    243f0014   st   r1,r31,0x14
         =&gt; cpu0.pc: 0x12cc -&gt; 0x12d0
-GXemul&gt; </b>cpu0.showFunctionTraceCall = true 
+GXemul&gt; <b>cpu0.showFunctionTraceCall = true</b>
 =&gt; cpu0.showFunctionTraceCall: false -&gt; true
 GXemul&gt; <b>continue</b>
 [ cpu0: _change_resolution(800,600,0,0,0,0,0,0,...) ]
