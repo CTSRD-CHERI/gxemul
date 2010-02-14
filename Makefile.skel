@@ -20,13 +20,13 @@ test: build
 	@if [ -s tmp_valgrind.out ]; then cat tmp_valgrind.out; false; fi
 
 documentation: build
+	doc/generate_machine_doc.sh
 	sed s/PAGETITLE/Machines/g < doc/head.html > doc/machines.html
 	./$(BIN) -WW@M >> doc/machines.html
 	cat doc/tail.html >> doc/machines.html
 	sed s/PAGETITLE/Components/g < doc/head.html > doc/components.html
 	./$(BIN) -WW@C >> doc/components.html
 	cat doc/tail.html >> doc/components.html
-	doc/generate_machine_doc.sh
 	$(DOXYGEN) doc/Doxyfile
 
 install: documentation test

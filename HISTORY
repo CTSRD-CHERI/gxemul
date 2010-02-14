@@ -4485,3 +4485,5 @@ Changelog for GXemul:
 
 ==============  RELEASE 0.6.0  ==============
 
+20100214	Fixing order of machine.html and components.html generation,
+		relative to individual machines from skeleton files.
