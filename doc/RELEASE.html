@@ -34,15 +34,32 @@ system is <a href="guestoses.html#netbsdpmaxinstall">NetBSD/pmax</a>.
 <p><br>The main change between release 0.4.7.2 and 0.6.0 is:
 
 <ul>
-  <li>A new emulation framework, written from scratch in C++ since late
-  	2007, is now beginning to take shape. So far, <i>only the
-	<a href="machines/machine_testm88k.html">testm88k</a> machine mode</i>
+  <li>Since late 2007, a complete rewrite of the emulator's base framework
+  	has been going on. GXemul 0.6.0 is a <b><i>very early release</i></b>
+  	of the new framework. So far, <i><b>only the
+	<a href="machines/machine_testm88k.html">testm88k</a> machine mode</i></b>
 	has been rewritten to use the new framework, all other machine modes
-	run in legacy mode using the old framework.
+	run in legacy mode using the old framework (which is still included).
+
+	<p>In other words: <b>For most emulation modes, 0.6.0 will be
+	exactly like 0.4.7.2.</b>
+
 	<p>The new <tt>testm88k</tt> mode is much less complete than the old
 	<tt>testm88k</tt>; the reason for concentrating on this mode is to be able
 	to make an initial release of the new framework within a reasonable
 	time frame.
+	
+	<p>Compared to the other emulation modes, there are lots of things left
+	to do before the new framework can be considered working:
+	There are no lookup tables for fast loads/stores, no fast pc-to-pointer
+	lookups, no interrupt/trap/exception handling, no timers,
+	no breakpoint support, no general expression parsing, no I/O
+	(serial controllers nor graphical output handlers), no disk or
+	ethernet support, no MMU/virtual memory translation, and snapshotting
+	(for reverse debugging) isn't implemented yet. Still, it is probably
+	better to make many smaller releases (0.6.x) than to wait until
+	everything is in place.
+
 	<p>There is also a (bogus) <tt>testmips</tt> machine which will be
 	implemented using the new framework. To use the old <tt>testmips</tt>
 	machine, please use the name <tt>oldtestmips</tt> instead.
@@ -55,6 +72,11 @@ mentioning:
 
   <li>Many unused, rarely used, and bogus emulation modes and features
   	were removed, to reduce the maintenance burden.
+
+  <p>
+  <li>Some operating systems listed on the
+	  <a href="guestoses.html">guest OS page</a> have had new releases;
+	  the documentation has been updated to reflect this.
 
   <p>
   <li>New source code (but not the legacy part) is

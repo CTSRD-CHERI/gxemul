@@ -4481,3 +4481,7 @@ Changelog for GXemul:
 		clears [individual] translation pages.
 20100213	Working on dyntrans abort peculiarities (in the middle of
 		delay-slots, etc).
+20100214	Preparing for a quick 0.6.0 release.
+
+==============  RELEASE 0.6.0  ==============
+
