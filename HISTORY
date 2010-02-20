@@ -4489,3 +4489,5 @@ Changelog for GXemul:
 		relative to individual machines from skeleton files.
 20100220	Improve install path guessing (DESTDIR and MANDIR) based on
 		feedback from Tom Callaway.
+		Moving the multiple identical instances of parse_number to a
+		new StringHelper class, and adding some unit tests.

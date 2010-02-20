@@ -30,59 +30,7 @@
 
 #include "EscapedString.h"
 #include "StateVariable.h"
-
-
-/*****************************************************************************/
-
-
-// This is basically strtoull(), but it needs to be explicitly implemented
-// since some systems lack it. (Also, compiling with GNU C++ in ANSI mode
-// does not work with strtoull.)
-static uint64_t parse_number(const char* str, bool& error)
-{
-	int base = 10;
-	uint64_t result = 0;
-	bool negative = false;
-
-	error = false;
-
-	if (str == NULL)
-		return 0;
-
-	while (*str == ' ')
-		++str;
-
-	if (*str == '-') {
-		negative = true;
-		++str;
-	}
-
-	while ((*str == 'x' || *str == 'X') || (*str >= '0' && *str <= '9')
-	    || (*str >= 'a' && *str <= 'f') || (*str >= 'A' && *str <= 'F')) {
-		if (*str == 'x' || *str == 'X') {
-			base = 16;
-		} else {
-			int n = *str - '0';
-			if (*str >= 'a' && *str <= 'f')
-				n = *str - 'a' + 10;
-			if (*str >= 'A' && *str <= 'F')
-				n = *str - 'A' + 10;
-			result = result * base + n;
-		}
-		++str;
-	}
-
-	if (*str)
-		error = true;
-
-	if (negative)
-		return -result;
-	else
-		return result;
-}
-
-
-/*****************************************************************************/
+#include "StringHelper.h"
 
 
 StateVariable::StateVariable()
@@ -519,7 +467,7 @@ bool StateVariable::SetValue(const string& expression)
 	case UInt8:
 		{
 			bool error = true;
-			uint64_t tmp64 = parse_number(value.c_str(), error);
+			uint64_t tmp64 = StringHelper::ParseNumber(value.c_str(), error);
 			uint8_t tmp = tmp64;
 			if (tmp == tmp64 && !error)
 				*m_value.puint8 = tmp;
@@ -531,7 +479,7 @@ bool StateVariable::SetValue(const string& expression)
 	case UInt16:
 		{
 			bool error = true;
-			uint64_t tmp64 = parse_number(value.c_str(), error);
+			uint64_t tmp64 = StringHelper::ParseNumber(value.c_str(), error);
 			uint16_t tmp = tmp64;
 			if (tmp == tmp64 && !error)
 				*m_value.puint16 = tmp;
@@ -543,7 +491,7 @@ bool StateVariable::SetValue(const string& expression)
 	case UInt32:
 		{
 			bool error = true;
-			uint64_t tmp64 = parse_number(value.c_str(), error);
+			uint64_t tmp64 = StringHelper::ParseNumber(value.c_str(), error);
 			uint32_t tmp = tmp64;
 			if (tmp == tmp64 && !error)
 				*m_value.puint32 = tmp;
@@ -555,7 +503,7 @@ bool StateVariable::SetValue(const string& expression)
 	case UInt64:
 		{
 			bool error = true;
-			uint64_t tmp64 = parse_number(value.c_str(), error);
+			uint64_t tmp64 = StringHelper::ParseNumber(value.c_str(), error);
 			if (!error)
 				*m_value.puint64 = tmp64;
 			else
@@ -566,7 +514,7 @@ bool StateVariable::SetValue(const string& expression)
 	case SInt8:
 		{
 			bool error = true;
-			int64_t tmp64 = parse_number(value.c_str(), error);
+			int64_t tmp64 = StringHelper::ParseNumber(value.c_str(), error);
 			int8_t tmp = tmp64;
 			if (tmp == tmp64 && !error)
 				*m_value.psint8 = tmp;
@@ -578,7 +526,7 @@ bool StateVariable::SetValue(const string& expression)
 	case SInt16:
 		{
 			bool error = true;
-			int64_t tmp64 = parse_number(value.c_str(), error);
+			int64_t tmp64 = StringHelper::ParseNumber(value.c_str(), error);
 			int16_t tmp = tmp64;
 			if (tmp == tmp64 && !error)
 				*m_value.psint16 = tmp;
@@ -590,7 +538,7 @@ bool StateVariable::SetValue(const string& expression)
 	case SInt32:
 		{
 			bool error = true;
-			int64_t tmp64 = parse_number(value.c_str(), error);
+			int64_t tmp64 = StringHelper::ParseNumber(value.c_str(), error);
 			int32_t tmp = tmp64;
 			if (tmp == tmp64 && !error)
 				*m_value.psint32 = tmp;
@@ -602,7 +550,7 @@ bool StateVariable::SetValue(const string& expression)
 	case SInt64:
 		{
 			bool error = true;
-			int64_t tmp64 = parse_number(value.c_str(), error);
+			int64_t tmp64 = StringHelper::ParseNumber(value.c_str(), error);
 			if (!error)
 				*m_value.psint64 = tmp64;
 			else

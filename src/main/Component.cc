@@ -36,59 +36,7 @@
 #include "ComponentFactory.h"
 #include "EscapedString.h"
 #include "GXemul.h"
-
-
-/*****************************************************************************/
-
-
-// This is basically strtoull(), but it needs to be explicitly implemented
-// since some systems lack it. (Also, compiling with GNU C++ in ANSI mode
-// does not work with strtoull.)
-static uint64_t parse_number(const char* str, bool& error)
-{
-	int base = 10;
-	uint64_t result = 0;
-	bool negative = false;
-
-	error = false;
-
-	if (str == NULL)
-		return 0;
-
-	while (*str == ' ')
-		++str;
-
-	if (*str == '-') {
-		negative = true;
-		++str;
-	}
-
-	while ((*str == 'x' || *str == 'X') || (*str >= '0' && *str <= '9')
-	    || (*str >= 'a' && *str <= 'f') || (*str >= 'A' && *str <= 'F')) {
-		if (*str == 'x' || *str == 'X') {
-			base = 16;
-		} else {
-			int n = *str - '0';
-			if (*str >= 'a' && *str <= 'f')
-				n = *str - 'a' + 10;
-			if (*str >= 'A' && *str <= 'F')
-				n = *str - 'A' + 10;
-			result = result * base + n;
-		}
-		++str;
-	}
-
-	if (*str)
-		error = true;
-
-	if (negative)
-		return -result;
-	else
-		return result;
-}
-
-
-/*****************************************************************************/
+#include "StringHelper.h"
 
 
 Component::Component(const string& className, const string& visibleClassName)
@@ -1036,7 +984,7 @@ bool Component::CheckVariableWrite(StateVariable& var, const string& oldValue)
 			// has special meaning:
 			if (GetParent() == NULL) {
 				bool error = false;
-				int64_t oldStep = parse_number(oldValue.c_str(), error);
+				int64_t oldStep = StringHelper::ParseNumber(oldValue.c_str(), error);
 				int64_t newStep = var.ToInteger();
 
 				// 0. Value is the same as before. Simply return.
