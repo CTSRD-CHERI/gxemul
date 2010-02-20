@@ -30,6 +30,7 @@
 
 #include "ComponentFactory.h"
 #include "GXemul.h"
+#include "StringHelper.h"
 
 
 struct ComponentListEntry {
@@ -73,29 +74,6 @@ bool ComponentFactory::RegisterComponentClass(const string& name,
 }
 
 
-static vector<string> SplitStringIntoVector(const string &str, const char splitter)
-{
-	// This is slow and hackish, but works.
-	vector<string> strings;
-	string word;
-
-	for (size_t i=0, n=str.length(); i<n; i++) {
-		char ch = str[i];
-		if (ch == splitter) {
-			strings.push_back(word);
-			word = "";
-		} else {
-			word += ch;
-		}
-	}
-
-	if (word != "")
-		strings.push_back(word);
-
-	return strings;
-}
-
-
 refcount_ptr<Component> ComponentFactory::CreateComponent(
 	const string& componentNameAndOptionalArgs, GXemul* gxemul)
 {
@@ -122,11 +100,11 @@ refcount_ptr<Component> ComponentFactory::CreateComponent(
 		// argstring is now e.g. "cpu=R4400,ncpus=4"
 
 		// Split into assignments:
-		vector<string> assignments = SplitStringIntoVector(argstring, ',');
+		vector<string> assignments = StringHelper::SplitStringIntoVector(argstring, ',');
 
 		// Split each assignment into key and value:
 		for (size_t i=0; i<assignments.size(); ++i) {
-			vector<string> keyAndValue = SplitStringIntoVector(assignments[i], '=');
+			vector<string> keyAndValue = StringHelper::SplitStringIntoVector(assignments[i], '=');
 			if (keyAndValue.size() != 2) {
 				if (gxemul != NULL)
 					gxemul->GetUI()->ShowDebugMessage("Not a key=value pair: " + assignments[i]);

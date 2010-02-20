@@ -50,10 +50,6 @@ Some things, in no specific order, that I'd like to fix:
   		[ ]  There is still a crash bug; try interleaving continue +
   			CTRL-C + continue + CTRL-C, with trace enabled!
 
-  [/]	Refactor/move helper functions into some helper module:
-	[ ]  SplitStringIntoVector
-	[X]  parse_number => StringHelper::ParseNumber, and add unit tests.
-
   [ ]	Plugin framework
   	Note: The term "Plugin" does not mean dynamically loaded. It simply is a
   	generalization of "something" which is the common base for file loaders,
@@ -992,33 +988,6 @@ section is kept here, so that the same mistakes may be avoided in the rewrite.]
 	x)  Allow SLIP connections, possibly PPP, in addition to
 	    ethernet?
 
-Documentation:
-	x)  Update the documentation regarding the testmachine interrupts.
-	x)  Note about sandboxing/security:
-		Not all emulated instructions fail in the way they would
-		do on real hardware (e.g. a userspace program writing to
-		a system register might work in GXemul, but it would
-		fail on real hardware).  Sandbox = contain from the
-		host OS. But the emulated programs will run "less
-		securely".
-	x)  Rewrite the section about experimental devices, after the
-	    framebuffer acceleration has been implemented, and demos
-	    written. (Symbolic names instead of numbers; example
-	    use cases, etc. Mention demo files that use the various
-	    features?)
-	x)  "a very simple linear framebuffer device (for graphics output)"
-	    under "which machines does gxemul emulate" ==> better
-	    description?
-
-The Device subsystem:
-	x)  allow devices to be moved and/or changed in size (down to a
-	    minimum size, etc, or up to a max size); if there is a collision,
-	    return false. It is up to the caller to handle this situation!
-	x)  NOTE: Translations must be invalidated, both for
-	    registering new devices, and for moving existing ones.
-	    cpu->invalidate translation caches, for all CPUs that
-	    are connected to a specific memory.
-
 PCI:
 [Obsoleted; the new framework will need a much better bus implementation. This
 section is kept here, so that the same mistakes may be avoided in the rewrite.]
@@ -1052,19 +1021,6 @@ ASC SCSI controller:
 	    in NetBSD itself, http://mail-index.netbsd.org/source-changes/
 	    2005/11/06/0024.html suggests that.)
 	    NetBSD 4.x seems to work? :)
-
-File/disk/symbol handling:
-	o)  Make sure that disks can be added/removed during runtime!
-	    (Perhaps this needs a reasonably large re-write.)
-	o)  Remove some of the complexity in file format guessing, for
-		Ultrix kernels that are actually disk images?
-	o)  Remove temporary files (/tmp/gxemul.blahblah) if loading fails
-	    for some reason (unrecognized file, etc).
-	o)  Better handling of tape files	
-	o)  Read function argument count and types from binaries? (ELF?)
-	o)  Better demangling of C++ names. Note: GNU's C++ differs from e.g.
-	    Microsoft's C++, so multiple schemes must be possible. See
-	    URL at top of src/symbol_demangle.c for more info.
 
 Better framebuffer and X-windows functionality:
 [Obsoleted; the new framework will most likely use SDL. This section

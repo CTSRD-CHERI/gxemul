@@ -96,6 +96,32 @@ uint64_t StringHelper::ParseNumber(const char* str, bool& error)
 }
 
 
+vector<string> StringHelper::SplitStringIntoVector(const string &str, const char splitter)
+{
+	// This is slow and hackish, but works.
+	vector<string> strings;
+	string word;
+	bool lastWasSplitter = false;
+
+	for (size_t i=0, n=str.length(); i<n; i++) {
+		char ch = str[i];
+		if (ch == splitter) {
+			strings.push_back(word);
+			word = "";
+			lastWasSplitter = true;
+		} else {
+			word += ch;
+			lastWasSplitter = false;
+		}
+	}
+
+	if (word != "" || lastWasSplitter)
+		strings.push_back(word);
+
+	return strings;
+}
+
+
 /*****************************************************************************/
 
 
@@ -227,6 +253,64 @@ static void Test_StringHelper_ParseNumber_NumberFollowedByError()
 	UnitTest::Assert("Should have resulted in error", error == true);
 }
 
+static void Test_StringHelper_SplitStringIntoVector_Simple()
+{
+	vector<string> v = StringHelper::SplitStringIntoVector("A:B:C", ':');
+
+	UnitTest::Assert("Wrong number of strings?", v.size(), 3);
+	UnitTest::Assert("Wrong string contents?", v[0], "A");
+	UnitTest::Assert("Wrong string contents?", v[1], "B");
+	UnitTest::Assert("Wrong string contents?", v[2], "C");
+}
+
+static void Test_StringHelper_SplitStringIntoVector_EmptyInput()
+{
+	vector<string> v = StringHelper::SplitStringIntoVector("", ':');
+
+	UnitTest::Assert("Wrong number of strings?", v.size(), 0);
+}
+
+static void Test_StringHelper_SplitStringIntoVector_Simple2()
+{
+	vector<string> v = StringHelper::SplitStringIntoVector("A:B:C", 'B');
+
+	UnitTest::Assert("Wrong number of strings?", v.size(), 2);
+	UnitTest::Assert("Wrong string contents?", v[0], "A:");
+	UnitTest::Assert("Wrong string contents?", v[1], ":C");
+}
+
+static void Test_StringHelper_SplitStringIntoVector_WithZeroLengthParts()
+{
+	vector<string> v = StringHelper::SplitStringIntoVector("A::B:::C", ':');
+
+	UnitTest::Assert("Wrong number of strings?", v.size(), 6);
+	UnitTest::Assert("Wrong string contents?", v[0], "A");
+	UnitTest::Assert("Wrong string contents?", v[1], "");
+	UnitTest::Assert("Wrong string contents?", v[2], "B");
+	UnitTest::Assert("Wrong string contents?", v[3], "");
+	UnitTest::Assert("Wrong string contents?", v[4], "");
+	UnitTest::Assert("Wrong string contents?", v[5], "C");
+}
+
+static void Test_StringHelper_SplitStringIntoVector_WithTrailingZeroLengthParts()
+{
+	vector<string> v = StringHelper::SplitStringIntoVector("A::", ':');
+
+	UnitTest::Assert("Wrong number of strings?", v.size(), 3);
+	UnitTest::Assert("Wrong string contents?", v[0], "A");
+	UnitTest::Assert("Wrong string contents?", v[1], "");
+	UnitTest::Assert("Wrong string contents?", v[2], "");
+}
+
+static void Test_StringHelper_SplitStringIntoVector_WithHeadingZeroLengthParts()
+{
+	vector<string> v = StringHelper::SplitStringIntoVector("A::", 'A');
+
+	UnitTest::Assert("Wrong number of strings?", v.size(), 2);
+	UnitTest::Assert("Wrong string contents?", v[0], "");
+	UnitTest::Assert("Wrong string contents?", v[1], "::");
+}
+
 UNITTESTS(StringHelper)
 {
 	UNITTEST(Test_StringHelper_ParseNumber_Simple);
@@ -241,6 +325,13 @@ UNITTESTS(StringHelper)
 	UNITTEST(Test_StringHelper_ParseNumber_HexErrorNonZeroPrefix);
 	UNITTEST(Test_StringHelper_ParseNumber_NumberFollowedByErrorValidHexChar);
 	UNITTEST(Test_StringHelper_ParseNumber_NumberFollowedByError);
+
+	UNITTEST(Test_StringHelper_SplitStringIntoVector_Simple);
+	UNITTEST(Test_StringHelper_SplitStringIntoVector_EmptyInput);
+	UNITTEST(Test_StringHelper_SplitStringIntoVector_Simple2);
+	UNITTEST(Test_StringHelper_SplitStringIntoVector_WithZeroLengthParts);
+	UNITTEST(Test_StringHelper_SplitStringIntoVector_WithTrailingZeroLengthParts);
+	UNITTEST(Test_StringHelper_SplitStringIntoVector_WithHeadingZeroLengthParts);
 }
 
 #endif

@@ -56,6 +56,20 @@ public:
 	 */
 	static uint64_t ParseNumber(const char* str, bool& error);
 
+	/**
+	 * \brief Splits a string with a certain delimiter into a vector of strings.
+	 *
+	 * E.g. if the input string is "A:B:C" and the splitter is ':', then
+	 * the resulting vector consists of 3 strings: "A", "B", and "C".
+	 *
+	 * NOTE: The current implementation is very slow, but it at least it works.
+	 *
+	 * @param str A string to split.
+	 * @param splitter Set to false if a parsed value is returned, true on
+	 *	parse errors.
+	 * @return A vector of strings (without the splitter char).
+	 */
+	static vector<string> SplitStringIntoVector(const string &str, const char splitter);
 
 	/********************************************************************/
 

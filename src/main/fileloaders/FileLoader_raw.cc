@@ -46,33 +46,11 @@ FileLoader_raw::FileLoader_raw(const string& filename)
 }
 
 
-static vector<string> SplitStringIntoVector(const string &str, const char splitter)
-{
-	// This is slow and hackish, but works.
-	vector<string> strings;
-	string word;
-
-	for (size_t i=0, n=str.length(); i<n; i++) {
-		char ch = str[i];
-		if (ch == splitter) {
-			strings.push_back(word);
-			word = "";
-		} else {
-			word += ch;
-		}
-	}
-
-	strings.push_back(word);
-
-	return strings;
-}
-
-
 string FileLoader_raw::DetectFileType(unsigned char *buf, size_t buflen, float& matchness) const
 {
 	matchness = 0.0;
 
-	vector<string> parts = SplitStringIntoVector(Filename(), ':');
+	vector<string> parts = StringHelper::SplitStringIntoVector(Filename(), ':');
 
 	// Possible variants:
 	//
@@ -104,7 +82,7 @@ bool FileLoader_raw::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 	// raw:vaddr:filename
 	// raw:vaddr:skiplen:filename
 	// raw:vaddr:skiplen:initialpc:filename  e.g. 0xbfc00000:0x100:0xbfc00884:rom.bin
-	vector<string> parts = SplitStringIntoVector(Filename(), ':');
+	vector<string> parts = StringHelper::SplitStringIntoVector(Filename(), ':');
 	if (parts.size() < 3 || parts.size() > 5) {
 		messages << "Syntax is raw:vaddr:[skiplen:[initialpc:]]filename.\n";
 		return false;
