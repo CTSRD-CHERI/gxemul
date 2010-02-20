@@ -51,7 +51,7 @@ SUCH DAMAGE.
   <li><a href="#netbsdarcinstall">NetBSD/arc 5.0.1</a>
   <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 4.0.1</a>
   <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0.1</a>
-  <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0</a>
+  <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0.2</a>
   <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
   <li><a href="#netbsdsgimips">NetBSD/sgimips 5.0</a>
   <li><a href="#netbsdcatsinstall">NetBSD/cats 5.0</a>
@@ -414,13 +414,13 @@ image, from an emulated DECstation 3MAX machine:
 
 </pre>
   <li>Download the Malta kernel and the ISO image:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/evbmips/binary/kernel/netbsd-MALTA.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/evbmips/binary/kernel/netbsd-MALTA.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/iso/evbmips-mipselcd-5.0.iso">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0/iso/evbmips-mipselcd-5.0.iso</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/evbmips/binary/kernel/netbsd-MALTA.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/evbmips/binary/kernel/netbsd-MALTA.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0.2/evbmips-mipselcd-5.0.2.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/5.0.2/evbmips-mipselcd-5.0.2.iso</a>
 
 </pre>
   <p>
   <li>Start the emulated DECstation machine like this:<pre>
-	<b>gxemul -e 3max -d nbsd_malta.img -d evbmips-mipselcd-5.0.iso netbsd-INSTALL.gz</b>
+	<b>gxemul -e 3max -d nbsd_malta.img -d evbmips-mipselcd-5.0.2.iso netbsd-INSTALL.gz</b>
 
 </pre>
   <li>At the <tt>Terminal type? [vt100]</tt> prompt, type <b>CTRL-B</b>
