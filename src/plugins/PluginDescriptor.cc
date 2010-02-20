@@ -68,6 +68,11 @@ void PluginDescriptor::Parse()
 
 	// We have either 2 or 3 parts now.
 
+	// TODO: Refactor out common parts of the code below.
+
+	// TODO 2: Return meaningful error message regarding what went wrong
+	//         during parsing, instead of just failing silently.
+
 	if (vec.size() == 3) {
 		// If we have 3 parts, they must be:
 		// component:plugin(args):name
@@ -386,6 +391,92 @@ static void Test_PluginDescriptor_SinglePartMeansFilename2()
 	UnitTest::Assert("name part", pd1.Name(), "hello()");
 }
 
+static void Test_PluginDescriptor_Examples()
+{
+	// Some examples, that are supposed to be parsable:
+
+	// netbsd-GENERIC.gz			(load a basic file into cpu0)
+	PluginDescriptor pd1("netbsd-GENERIC.gz");
+	UnitTest::Assert("pd1 validness", pd1.IsValid());
+	UnitTest::Assert("component part", pd1.ComponentName(), "");
+	UnitTest::Assert("plugin name part", pd1.PluginName(), "");
+	UnitTest::Assert("plugin arguments part", pd1.PluginArguments(), "");
+	UnitTest::Assert("name part", pd1.Name(), "netbsd-GENERIC.gz");
+
+	// cpu1:netbsd-GENERIC.gz		(load into a specific cpu)
+	PluginDescriptor pd2("cpu1:netbsd-GENERIC.gz");
+	UnitTest::Assert("pd2 validness", pd2.IsValid());
+	UnitTest::Assert("component part", pd2.ComponentName(), "cpu1");
+	UnitTest::Assert("plugin name part", pd2.PluginName(), "");
+	UnitTest::Assert("plugin arguments part", pd2.PluginArguments(), "");
+	UnitTest::Assert("name part", pd2.Name(), "netbsd-GENERIC.gz");
+
+	// wd0:netbsd.img			(disk image file mapper)
+	PluginDescriptor pd3("wd0:netbsd.img");
+	UnitTest::Assert("pd3 validness", pd3.IsValid());
+	UnitTest::Assert("component part", pd3.ComponentName(), "wd0");
+	UnitTest::Assert("plugin name part", pd3.PluginName(), "");
+	UnitTest::Assert("plugin arguments part", pd3.PluginArguments(), "");
+	UnitTest::Assert("name part", pd3.Name(), "netbsd.img");
+
+	// wd0:image(readonly):netbsd.img	(mapper with arguments! non-writable image)
+	PluginDescriptor pd4("wd0:image(readonly):netbsd.img");
+	UnitTest::Assert("pd4 validness", pd4.IsValid());
+	UnitTest::Assert("component part", pd4.ComponentName(), "wd0");
+	UnitTest::Assert("plugin name part", pd4.PluginName(), "image");
+	UnitTest::Assert("plugin arguments part", pd4.PluginArguments(), "readonly");
+	UnitTest::Assert("name part", pd4.Name(), "netbsd.img");
+
+	// cpu0.dcache:cachestatisticsviewer()	(cache statistics viewer)
+	PluginDescriptor pd5("cpu0.dcache:cachestatisticsviewer()");
+	UnitTest::Assert("pd5 validness", pd5.IsValid());
+	UnitTest::Assert("component part", pd5.ComponentName(), "cpu0.dcache");
+	UnitTest::Assert("plugin name part", pd5.PluginName(), "cachestatisticsviewer");
+	UnitTest::Assert("plugin arguments part", pd5.PluginArguments(), "");
+	UnitTest::Assert("name part", pd5.Name(), "");
+
+	// vga0:sdl()				(for displaying graphical controllers, which can
+	// 					be interrogated about memory format, resolution etc)
+	PluginDescriptor pd6("vga0:sdl()");
+	UnitTest::Assert("pd6 validness", pd6.IsValid());
+	UnitTest::Assert("component part", pd6.ComponentName(), "vga0");
+	UnitTest::Assert("plugin name part", pd6.PluginName(), "sdl");
+	UnitTest::Assert("plugin arguments part", pd6.PluginArguments(), "");
+	UnitTest::Assert("name part", pd6.Name(), "");
+
+	// vga0:sdl(DISPLAY=othermachine:1.0):VGA	(sdl on remote display)
+	PluginDescriptor pd7("vga0:sdl(DISPLAY=othermachine:1.0):VGA");
+	UnitTest::Assert("pd7 validness", pd7.IsValid());
+	UnitTest::Assert("component part", pd7.ComponentName(), "vga0");
+	UnitTest::Assert("plugin name part", pd7.PluginName(), "sdl");
+	UnitTest::Assert("plugin arguments part", pd7.PluginArguments(), "DISPLAY=othermachine:1.0");
+	UnitTest::Assert("name part", pd7.Name(), "VGA");
+
+	// fb_videoram0:sdl(x=800,y=600,data=rgb24) (for displaying raw memory ranges)
+	PluginDescriptor pd8("fb_videoram0:sdl(x=800,y=600,data=rgb24)");
+	UnitTest::Assert("pd8 validness", pd8.IsValid());
+	UnitTest::Assert("component part", pd8.ComponentName(), "fb_videoram0");
+	UnitTest::Assert("plugin name part", pd8.PluginName(), "sdl");
+	UnitTest::Assert("plugin arguments part", pd8.PluginArguments(), "x=800,y=600,data=rgb24");
+	UnitTest::Assert("name part", pd8.Name(), "");
+
+	// com0:stdio()				(default stdio)
+	PluginDescriptor pd9("com0:stdio()");
+	UnitTest::Assert("pd9 validness", pd9.IsValid());
+	UnitTest::Assert("component part", pd9.ComponentName(), "com0");
+	UnitTest::Assert("plugin name part", pd9.PluginName(), "stdio");
+	UnitTest::Assert("plugin arguments part", pd9.PluginArguments(), "");
+	UnitTest::Assert("name part", pd9.Name(), "");
+
+	// pccom1:xterm(gnome-terminal):COM2		(terminal window)
+	PluginDescriptor pd10("pccom1:xterm(gnome-terminal):COM2");
+	UnitTest::Assert("pd10 validness", pd10.IsValid());
+	UnitTest::Assert("component part", pd10.ComponentName(), "pccom1");
+	UnitTest::Assert("plugin name part", pd10.PluginName(), "xterm");
+	UnitTest::Assert("plugin arguments part", pd10.PluginArguments(), "gnome-terminal");
+	UnitTest::Assert("name part", pd10.Name(), "COM2");
+}
+
 static void Test_PluginDescriptor_AllowPeriodInComponentName()
 {
 	PluginDescriptor pd1("cpu0.dcache:b(c):d");
@@ -641,6 +732,7 @@ UNITTESTS(PluginDescriptor)
 	UNITTEST(Test_PluginDescriptor_MissingName);
 	UNITTEST(Test_PluginDescriptor_SinglePartMeansFilename1);
 	UNITTEST(Test_PluginDescriptor_SinglePartMeansFilename2);
+	UNITTEST(Test_PluginDescriptor_Examples);
 
 	// Specific chars that should work:
 	UNITTEST(Test_PluginDescriptor_AllowPeriodInComponentName);
