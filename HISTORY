@@ -4492,3 +4492,5 @@ Changelog for GXemul:
 		Moving the multiple identical instances of parse_number and
 		SplitStringIntoVector to a new StringHelper class, and adding
 		some unit tests.
+		Adding a PluginDescriptor class, for parsing plugin descriptor
+		strings (component:plugin(args):filename etc).

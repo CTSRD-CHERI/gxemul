@@ -4,7 +4,7 @@
 
 CXXFLAGS=$(CWARNINGS) $(COPTIM) $(DINCLUDE)
 
-OBJS=
+OBJS=PluginDescriptor.o
 
 all: $(OBJS) do_file
 

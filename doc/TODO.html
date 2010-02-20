@@ -50,7 +50,7 @@ Some things, in no specific order, that I'd like to fix:
   		[ ]  There is still a crash bug; try interleaving continue +
   			CTRL-C + continue + CTRL-C, with trace enabled!
 
-  [ ]	Plugin framework
+  [/]	Plugin framework
   	Note: The term "Plugin" does not mean dynamically loaded. It simply is a
   	generalization of "something" which is the common base for file loaders,
   	framebuffers, statistics viewers, etc.
@@ -91,7 +91,7 @@ Some things, in no specific order, that I'd like to fix:
 		[ ] Audio (emulated -> host)
 		[ ] Cache statistics viewer.
 
-	[ ]  CONSISTENT and extensible way of supplying files, disk images,
+	[/]  CONSISTENT and extensible way of supplying files, disk images,
 		raw files, ... to various plugins on the command line,
 		e.g.:
 			[component:]filename
@@ -110,7 +110,9 @@ Some things, in no specific order, that I'd like to fix:
 		and	a:b(c):filename		would load into component a using
 						the b loader, with args c
 
-		"Plugin descriptors"
+		[X]  "Plugin descriptors". A parser has been implemented, and
+		     unit tests have been written. But it isn't used yet.
+
 			optional component
 			optional plugin([args])
 			optional name
