@@ -57,18 +57,17 @@
 #
 # Figure out the default prefix for "make install":
 #
-# Fallback is always:  /usr/local
-#
-# Overridden by setting the PREFIX environment variable before running
-# configure.
+# If the PREFIX environment variable is set before running configure, it is
+# used. The DEFAULTPREFIX calculated here is only used if PREFIX is undefined.
 #
 DEFAULTPREFIX=/usr/local
-TRY=/usr/pkg
-if [ -d $TRY ]; then
-	DEFAULTPREFIX=$TRY
+
+# Special exception for Linux systems: /usr
+if [ z`uname` = zLinux ]; then
+	DEFAULTPREFIX=/usr
 else
 	TRY=/usr/local
-	if [ -d $TRY ]; then
+	if [ -d $TRY/bin ]; then
 		DEFAULTPREFIX=$TRY
 	else
 		TRY=/opt
@@ -1013,6 +1012,21 @@ echo "checking for 'make install' prefix: $PREFIX"
 
 ###############################################################################
 
+if [ z"$MANDIR" = z ]; then
+	# Guess either $PREFIX/share/man or $PREFIX/man, depending on existing
+	# directories. Fallback is $PREFIX/man.
+	TRY=$PREFIX/share/man
+	if [ -d "$TRY" ]; then
+		MANDIR="$TRY"
+	else
+		MANDIR="$PREFIX"/man
+	fi
+fi
+echo "checking for 'make install' man dir: $MANDIR"
+
+
+###############################################################################
+
 INCLUDE=-Iinclude/
 DINCLUDE=-I../include/
 INCLUDE2=-I../../include/
@@ -1021,6 +1035,9 @@ rm -f _testprog.c*
 
 echo C++ compiler flags: $CXXFLAGS $CWARNINGS
 echo Linker flags: $OTHERLIBS
+if [ z"$DESTDIR" != z ]; then
+	echo "Destination dir: $DESTDIR"
+fi
 echo "CWARNINGS=$CWARNINGS" >> _Makefile.header
 echo "COPTIM=$CXXFLAGS" >> _Makefile.header
 echo "INCLUDE=$INCLUDE" >> _Makefile.header
@@ -1033,6 +1050,8 @@ echo "CPU_TOOLS=$CPU_TOOLS" >> _Makefile.header
 echo "DOXYGEN=$DOXYGEN" >> _Makefile.header
 echo "VALGRIND=$VALGRIND" >> _Makefile.header
 echo "PREFIX=$PREFIX" >> _Makefile.header
+echo "MANDIR=$MANDIR" >> _Makefile.header
+echo "DESTDIR=$DESTDIR" >> _Makefile.header
 echo "" >> _Makefile.header
 
 #  Create list of unit testable classes:

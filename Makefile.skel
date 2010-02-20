@@ -31,18 +31,18 @@ documentation: build
 
 install: documentation test
 	@echo Installing binaries, man page, and documentation...
-	mkdir -p $(PREFIX)/bin
-	cp -f $(BIN) $(PREFIX)/bin/
-	mkdir -p $(PREFIX)/man/man1
-	cp -f man/gxemul.1 $(PREFIX)/man/man1/
-	mkdir -p $(PREFIX)/share/doc/gxemul
-	cp -R doc/* $(PREFIX)/share/doc/gxemul/
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin/
+	mkdir -p $(DESTDIR)$(MANDIR)/man1
+	cp -f man/gxemul.1 $(DESTDIR)$(MANDIR)/man1/
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/gxemul
+	cp -R doc/* $(DESTDIR)$(PREFIX)/share/doc/gxemul/
 
 uninstall:
 	@echo Removing binaries, man pages, and documentation...
-	rm -f $(PREFIX)/bin/gxemul
-	rm -f $(PREFIX)/man/man1/gxemul.1
-	rm -rf $(PREFIX)/share/doc/gxemul
+	rm -f $(DESTDIR)$(PREFIX)/bin/gxemul
+	rm -f $(DESTDIR)$(MANDIR)/man1/gxemul.1
+	rm -rf $(DESTDIR)$(PREFIX)/share/doc/gxemul
 
 clean:
 	rm -f $(BIN) *core core.* *.gmon _* *.exe ktrace.out tmp_*.out*

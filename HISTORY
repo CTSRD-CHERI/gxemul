@@ -4487,3 +4487,5 @@ Changelog for GXemul:
 
 20100214	Fixing order of machine.html and components.html generation,
 		relative to individual machines from skeleton files.
+20100220	Improve install path guessing (DESTDIR and MANDIR) based on
+		feedback from Tom Callaway.
