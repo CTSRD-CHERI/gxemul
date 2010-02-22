@@ -215,7 +215,7 @@ static void usage(int longusage)
 	printf("Read the source code and/or documentation for "
 	    "other Copyright messages.\n");
 
-	printf("\nUsage: %s [options] -e name [file [...]]\n", progname);
+	printf("\nUsage: %s [options] -e name [additional components and files [...]]\n", progname);
 	printf("   or  %s [options] configfile\n", progname);
 	printf("   or  %s -H\n", progname);
 	printf("   or  %s -V\n", progname);
@@ -230,17 +230,21 @@ static void usage(int longusage)
 		printf("\n");
 	}
 
-	printf("\nLegacy usage: %s [machine, other, and general options] [file "
-	    "[...]]\n", progname);
-	printf("          or  %s [general options] @configfile\n", progname);
-
 	if (!longusage) {
+		printf("\nLegacy usage: %s [machine, other, and general options] [file "
+		    "[...]]\n", progname);
+		printf("          or  %s [general options] @configfile\n", progname);
+
 		printf("\nRun  %s -h  for help on command line options.\n",
 		    progname);
 		return;
 	}
 
 	printf("\n--------------------- The following are LEGACY options: ---------------------\n");
+
+	printf("\nLegacy usage: %s [machine, other, and general options] [file "
+	    "[...]]\n", progname);
+	printf("          or  %s [general options] @configfile\n", progname);
 
 	printf("\nMachine selection options:\n");
 	printf("  -E t      try to emulate machine type t. (Use -H to get "

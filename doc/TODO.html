@@ -50,60 +50,29 @@ Some things, in no specific order, that I'd like to fix:
   		[ ]  There is still a crash bug; try interleaving continue +
   			CTRL-C + continue + CTRL-C, with trace enabled!
 
-  [/]	Plugin framework
-  	Note: The term "Plugin" does not mean dynamically loaded. It simply is a
-  	generalization of "something" which is the common base for file loaders,
-  	framebuffers, statistics viewers, etc.
+  [ ]  Components! instead of the planned plugin stuff?!
 
-	[X]  "Plugin descriptors". A parser has been implemented, and
-	     unit tests have been written. But it isn't used yet.
+		path_to_add_to:component(args)
 
-		optional component
-		optional plugin([args])
-		optional name
+	or
+		path_to_add_to:filename		args is: "name=filename"
 
-		If all fields are left out, it's an empty descriptor, which is
-		ignored. GXemul's command line syntax would then be:
+	or
+		filename			cpu0 is the path to add to
 
-		[ ]  gxemul [options] [.gxemul file] [plugin descriptors...]
+	I.e. DON'T make an "attach" command, just use the add command.
 
-	[ ]  The set of loaders to ask could be different depending on
-	     which interfaces the component supports. For AddressDataBus,
-	     it would be the regular file loaders (ELF, raw, a.out, ...).
+	$ gxemul -e testmips netbsd-GENERIC.gz
+	$ gxemul -e testmips netbsd-GENERIC.gz wd0:netbsd.img fb_videoram0:sdl()
+	$ gxemul -e testmips netbsd-GENERIC.gz file(type=raw,vaddr=0xbfc00000,name=prom.bin)
 
-	     For block devices (disks, e.g. wd0, sd0), it would be a
-	     disk image mapper.
+	Same as:
+		add file(name=netbsd-GENERIC.gz) cpu0
+		add disk(name=netbsd.img) wd0
+		add file(type=raw,vaddr=0xbfc00000,name=prom.bin) cpu0
+		add sdl() fb_videoram0
 
-	[ ]  Implement the "attach" command! The "load" command should only be
-	     used for loading gxemul config files, not other files.
-
-		Example output:
-			GXemul> attach wd0:netbsd.img
-			wd0: Attaching to image(): netbsd.img
-			     SCSI disk image, 2400 MB
-
-			GXemul> attach vfb:sdl(apa bepa)
-			vfb0: Unable to attaching to sdl(apa bepa)
-			Invalid arguments to sdl().
-
-			GXemul> attach vfb:sdl()
-			vfb0: Attaching to sdl()
-
-			GXemul> attach test/FileLoader_A.OUT_M88K
-			cpu0: Attaching to file(): test/FileLoader_A.OUT_M88K
-			      a.out: entry point 0x000012b8
-			      text + data = 4096 + 4096 bytes
-			      symbols: 1260 bytes at 0x2000
-			      strings: 1070 bytes at 0x24ec
-			      14 symbols read
-
-	[ ] Base class for plugins.
-
-	[ ] Plugin registry.
-
-	[ ] Plugins may be attached to component paths!
-		[ ] Multiple components to one plugin (e.g. keyboard + framebuffer to one plugin)
-		[ ] Multiple plugins monitoring the same component.
+	[ ]  On-reset priority: E.g. clear RAM first, _THEN_ load files!
 
 	[ ] What should a plugin be able to do?
 		[ ] Attach/load
@@ -142,6 +111,10 @@ Some things, in no specific order, that I'd like to fix:
 	     choice. com0:null() would disconnect com0 from any output.
 	     stdio() would then have to be a plugin which handles multi-
 	     plexing of multiple outputs, and allows one input serial console.
+
+	[ ]  How about "-X" behavior of the legacy modes? I.e. a machine, which
+	     when run with -X will set up PROM emulation variables so that the
+	     guest OS uses graphics, and without -X to use serial console...
 
   [/]	The testm88k machine.
 

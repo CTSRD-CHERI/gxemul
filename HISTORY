@@ -4494,3 +4494,7 @@ Changelog for GXemul:
 		some unit tests.
 		Adding a PluginDescriptor class, for parsing plugin descriptor
 		strings (component:plugin(args):filename etc).
+		Beginning on the new plugin mechanism: adding an 'attach'
+		command, to be used instead of 'load'.
+20100222	Scrapping the "plugin" concept; the already existing component
+		framework should hopefully be enough as it is.

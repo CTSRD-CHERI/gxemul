@@ -1108,9 +1108,8 @@ D=". src src/components src/components/busses src/components/cpu"
 D="$D src/components/machines src/components/memory src/components/special"
 D="$D src/console src/cpus src/debugger src/devices src/old_main"
 D="$D src/devices/fonts src/disk src/file src/include src/machines src/main"
-D="$D src/main/commands src/main/fileloaders src/net src/plugins"
-D="$D src/plugins/file src/promemul"
-D="$D src/symbol src/ui src/ui/console src/ui/nullui"
+D="$D src/main/commands src/main/fileloaders src/net"
+D="$D src/promemul src/symbol src/ui src/ui/console src/ui/nullui"
 for a in $D; do
 	echo "creating $a/Makefile"
 	touch $a/Makefile

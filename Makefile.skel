@@ -8,7 +8,7 @@ LIBS=$(XLIB) $(OTHERLIBS)
 all: build
 
 build: do_src
-	$(CXX) $(COPTIM) src/components/*/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/main/*.o src/main/*/*.o src/net/*.o src/old_main/*.o src/plugins/*.o src/promemul/*.o src/symbol/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
+	$(CXX) $(COPTIM) src/components/*/*.o src/console/*.o src/cpus/*.o src/debugger/*.o src/devices/*.o src/disk/*.o src/file/*.o src/machines/*.o src/main/*.o src/main/*/*.o src/net/*.o src/old_main/*.o src/promemul/*.o src/symbol/*.o src/ui/*/*.o $(LIBS) -o $(BIN)
 
 do_src:
 	cd src; $(MAKE)

@@ -40,7 +40,7 @@
 .Op options
 .Fl e
 .Ar name
-.Op file Ar ...
+.Op additional components and files Ar ...
 .Nm
 .Op options
 .Ar configfile
@@ -70,7 +70,7 @@ controllers, ethernet controllers, disk controllers, and serial port
 controllers.
 .Pp
 Note: Only very few emulated machine modes have been rewritten to use the new
-emulation framework introduced in version 0.6.0, so there are two different
+emulation framework introduced in version 0.6.x, so there are two different
 ways to use the emulator. (Most emulation modes and machines are only valid
 in the old framework.) The options available for the new framework are:
 .Pp
@@ -96,10 +96,15 @@ Start up in interactive mode, paused. If this option is used,
 is ignored.
 .El
 .Pp
-Any files supplied on the command line when using the
+When using the
 .Fl e
-option will be loaded into root.machine0.mainbus0.cpu0 (which is assumed
-to be the main CPU in the machine created by the template configuration).
+option, the remainder of the command line consists of zero or more additional
+files to load, or components to add to the emulation setup.
+Including these on the command line is equivalent to using the 'add' command
+(although with a different syntax) in the interactive debugger.
+A simple example is a file name to load
+into the emulated machine, but they can be more complex as well. See the
+Adding Additional Components on the Command Line section below for more details.
 .Pp
 When not using the
 .Fl e
@@ -110,6 +115,40 @@ Starting the emulator with the
 .Fl V
 switch will bring you to the interactive debugger environment, without
 starting the emulation.
+.Sh ADDING ADDITIONAL COMPONENTS ON THE COMMAND LINE
+The general syntax is:
+.Pp
+.Dl "existing_component_path:component(args)"
+.Pp
+If existing_component_path part is omitted, it is assumed to be cpu0.
+The component(args) part may be written as just args, in which case the
+name of the component is autodetected, and the args is given as an
+argument called "name" to that component.
+.Pp
+.Nm
+For example, if the additional component/filename is just
+.Pp
+.Dl "netbsd-GENERIC"
+.Pp
+this will be equivalent to
+.Pp
+.Dl "cpu0:file(name=netbsd-GENERIC)"
+.Pp
+An attempt will be made to load the file netbsd-GENERIC
+into cpu0, which is the default component if none is specified. This will most
+likely be expanded into root.machine0.mainbus0.cpu0. If cpu0 is ambiguous,
+then this will not work; the specific cpu0 name must be supplied instead, like
+this:
+.Pp
+.Dl "machine3.mainbus0.cpu0:netbsd-GENERIC"
+.Pp
+Another example, using an SDL display component to show the contents of an
+emulated video framebuffer:
+.Pp
+.Dl "fb_videoram0:sdl()"
+.Pp
+Here, the existing component name (the framebuffer) and the component to add
+(the SDL display component) are included, but no arguments.
 .Sh RUNNING GUEST OPERATING SYSTEMS
 Please read the HTML documentation for more details on how to run complete
 guest operating systems in the emulator.

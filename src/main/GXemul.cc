@@ -55,10 +55,14 @@
  * The main program creates a GXemul instance, and does one of two things:
  * <ul>
  *	<li>Starts without any template %machine. (<tt>-V</tt>)
- *	<li>Starts with a template %machine, and a list of filenames to load
- *		(usually a kernel binary to boot the emulated %machine).
+ *	<li>Starts with a template %machine, and a list of additional
+ *		components and files
+ *		to attempt to attach (usually kernel binary to boot in the
+ *		emulated %machine).
  * </ul>
- * After letting the %GXemul instance load the files, GXemul::Run() is called.
+ *
+ * After letting the %GXemul instance load the files (or, in the more general
+ * case, attach the components), GXemul::Run() is called.
  * This is the main loop. It doesn't really do much, it simply calls the UI's
  * main loop, i.e. ConsoleUI::MainLoop().
  *
@@ -432,8 +436,7 @@ bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *fil
 	}
 
 	//  1. If a machine template has been selected, then treat the following
-	//     arguments as files to load. (Legacy compatibility with previous
-	//     versions of GXemul.)
+	//     arguments as arguments to the 'add' command.
 	//
 	//  2. Otherwise, treat the argument as a configuration file.
 
@@ -441,16 +444,15 @@ bool GXemul::ParseFilenames(string templateMachine, int filenameCount, char *fil
 		if (templateMachine != "") {
 			// Machine template.
 			while (filenameCount > 0) {
-				// Hm. Why the full path to cpu0 here? Well,
-				// a typical use case I imagine is that people
-				// start with a machine template and one or more
-				// files on the command line, and then add
-				// another machine afterwards. Then the load/
-				// reset commands will still work, if the path
-				// is full-length instead of short.
 				stringstream cmd;
+
+				// TODO: Different syntax!
+				// Use "add" with different syntax here...
+
 				cmd << "load " << filenames[0]
 				    << " root.machine0.mainbus0.cpu0";
+
+				// TODO: Get rid of this onReset mechanism!
 				m_onResetCommands.push_back(cmd.str());
 
 				filenameCount --;
