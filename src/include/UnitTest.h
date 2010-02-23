@@ -219,9 +219,11 @@ public:
 	(functionname)();						\
 	++ (nSucceeded);						\
 } catch (UnitTestFailedException& ex) {					\
+	std::cout.flush();						\
 	std::cerr << "\n### " #functionname " (" __FILE__ " line "	\
 		<< __LINE__ << ") failed!\n"				\
 		"    > " << ex.GetMessage() << "\n";			\
+	std::cerr.flush();						\
 	++ (nFailures);   						\
 }
 
