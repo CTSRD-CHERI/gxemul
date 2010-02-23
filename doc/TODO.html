@@ -138,6 +138,10 @@ Some things, in no specific order, that I'd like to fix:
 
   [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 
+	[ ] Try to get away from using doubles for scheduling! The scheduling
+	    must be made more stable, even in the precense of rounding errors.
+	    See e.g. http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=570899
+
 	[/] Continuous execution forward.
 		[ ]  "Sloppy" accuracy mode: it could be possible to
 		     interleave large chunks even when components "collide"
