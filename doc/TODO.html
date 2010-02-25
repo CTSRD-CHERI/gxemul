@@ -52,6 +52,41 @@ Some things, in no specific order, that I'd like to fix:
 
   [ ]  Components! instead of the planned plugin stuff?!
 
+	[ ]  Improve the "pretty print" of components in the tree dump,
+		by moving it out to a virtual/per-component function:
+
+		ram0  (32 MB at offset 0)
+		cpu0  (5KE, 100 MHz)
+
+		"32 MB at offset 0" should be possible for all
+		address mapped components to print.
+		
+		"5KE" for all CPUs.
+		
+		"100 MHz" if the component has a frequency.
+		
+		And, for the new things:
+		
+		cpu0  (5KE, 100 MHz)
+		\--  file  (netbsd-GENERIC.gz)
+
+		or
+
+		wd0  (ATAPI primary harddisk)
+		\--  image  (cow, netbsd.img)
+
+	Should these be added without digits primarily? And then
+	starting from 1. "file", "file1", "file2" etc. Or is file0
+	better? Just "file" is slightly clearer.
+
+	When adding e.g. a machine with a specific ROM, the ROM file could
+	be looked for in standard places (/usr/blah/share/gxemul/rom/therom.bin,
+	~/.gxemul/rom/therom.bin, ./therom.bin, etc) and if not found anywhere,
+	give an error unless overridden using arguments to the machine template.
+	Like:  gxemul -e "sgi_ip32(prom=my_therom.bin)" netbsd.gz
+
+	New syntax:
+
 		path_to_add_to:component(args)
 
 	or
@@ -61,6 +96,20 @@ Some things, in no specific order, that I'd like to fix:
 		filename			cpu0 is the path to add to
 
 	I.e. DON'T make an "attach" command, just use the add command.
+
+	Maybe change it to:
+	
+		add component_type [at existing_component_path]
+	
+	and/or support the colon-style notation as well?
+	
+		add [existing_component_path:]component_type(args)
+
+	or
+	
+		add existing_component_path:filename
+
+	Think about this!!!
 
 	$ gxemul -e testmips netbsd-GENERIC.gz
 	$ gxemul -e testmips netbsd-GENERIC.gz wd0:netbsd.img fb_videoram0:sdl()
@@ -73,6 +122,8 @@ Some things, in no specific order, that I'd like to fix:
 		add sdl() fb_videoram0
 
 	[ ]  On-reset priority: E.g. clear RAM first, _THEN_ load files!
+		[ ]  EarlyReset (clear)
+		[ ]  LateReset  (load data)
 
 	[ ] What should a plugin be able to do?
 		[ ] Attach/load
@@ -95,9 +146,10 @@ Some things, in no specific order, that I'd like to fix:
 
 	[ ] Example plugins:
 		[ ] File loaders
-			[ ]  Move these from src/main/fileloaders!
+			[ ]  Move these from src/main/fileloaders to
+				src/components/file ...
 			[ ]  raw mode: file(raw(vaddr[,skiplen[,entry]]))
-		[ ] Disk image mappers
+		[ ] Disk image mappers:  src/components/image
 		[ ] Framebuffer displays
 			[ ] Think about VGA (charcell AND video framebuffer, being able
 				to switch live)
@@ -262,7 +314,8 @@ Some things, in no specific order, that I'd like to fix:
 	     I.e. implement an a.out file loader.
 	[ ]  More initial register contents upon reset: r31 isn't enough for
 	     mvme187. See old machine_mvme88k.cc for details.
-		[ ]  Soft PROM emulation.
+
+		[ ]  Soft PROM emulation, if no PROM file is found.
 			MAYBE implement PROM emulation as a plugin? Like
 
 				attach cpu0:mvmeprom(187)
@@ -278,8 +331,6 @@ Some things, in no specific order, that I'd like to fix:
 			specified as arguments, like:  bootregs=linux or
 			bootregs=netbsd  or similar.
 
-     	[ ]  -Q command line flag (backwards compatibility) for
-     	     turning off soft PROM emulation?
      	[ ]  Ability to load raw files (e.g. PROM).
 	[ ]  Serial controller component.
 	[ ]  Plugin (?) for serial output (i.e. a terminal window), or
