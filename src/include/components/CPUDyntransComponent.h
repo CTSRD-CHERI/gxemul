@@ -270,6 +270,7 @@ private:
 
 		void ValidateConsistency()
 		{
+#ifndef NDEBUG
 			vector<bool> pageIsInMRUList;
 			vector<bool> pageIsInFreeList;
 			vector<bool> pageIsInMRUListReverse;
@@ -382,6 +383,7 @@ private:
 					throw std::exception();
 				}
 			}
+#endif
 		}
 
 		void FreeLeastRecentlyUsedPage()
