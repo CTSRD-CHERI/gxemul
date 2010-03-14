@@ -4498,3 +4498,5 @@ Changelog for GXemul:
 		command, to be used instead of 'load'.
 20100222	Scrapping the "plugin" concept; the already existing component
 		framework should hopefully be enough as it is.
+20100314	Updating doc/translation.html with more examples on how the
+		dyntrans system works (in pre-0.6.x and in 0.6.x).
