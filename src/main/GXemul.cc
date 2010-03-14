@@ -73,6 +73,10 @@
  *
  * \section concepts_sec Core concepts
  *
+ * See the end-user <a href="../../framework.html">description of the framework</a>
+ * for information about how these concepts appear to the actual user. The
+ * sections below describe how those concepts are implemented in the code.
+ *
  * \subsection components_subsec Components
  *
  * The most important core concept in %GXemul is the Component. Examples of
@@ -142,8 +146,8 @@
  * done when doing <tt>make install</tt> as well.
  *
  * It is recommended to run the <tt>configure</tt> script with the
- * <tt>--debug</tt> option during development; this enables
- * <a href="http://wyw.dcweb.cn/">Wu Yongwei</a>'s new/debug %memory
+ * <tt>--debug</tt> option during development; among other things, this enables
+ * use of <a href="http://wyw.dcweb.cn/">Wu Yongwei</a>'s new/debug %memory
  * leak detector (part of
  * <a href="http://sourceforge.net/projects/nvwa/">Stones of NVWA</a>).
  */

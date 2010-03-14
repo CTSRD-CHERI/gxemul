@@ -56,16 +56,17 @@ SUCH DAMAGE.
 <a name="introduction"></a>
 <h3>Introduction:</h3>
 
-<p>GXemul 0.6.0 is a complete redesign, compared to the 0.4.x series.
+<p>GXemul 0.6.x is a complete redesign, compared to the 0.4.x series.
 This chapter of the documentation describes the core concepts of the
-new framework.
+new framework. The framework is still being designed and implemented, so
+what you are reading can be considered an early draft, or a work-in-progress.
 
 <p>(For various reasons, most of the old emulation modes are still included
 in the source code, and may be run by users, but the intention is to either
 rewrite them to use the new framework, or remove them.)
 
-<p>The new framework is written in C++ (whereas previous versions were
-written in C).
+<p>The new framework is written in C++. Previous versions were
+written in C.
 
 
 
@@ -160,16 +161,24 @@ fast a particular host executes the simulation. The frequencies are only relativ
 to each other.
 
 <p>Is the new framework <i>cycle-accurate</i>? Both yes and no. The framework
-itself aims to be step/cycle accurate, but it is of course up to the
-implementation of individual components to also be cycle accurate. For example,
+itself aims to be step accurate, but it is up to the implementation of
+individual components to also be cycle accurate. For example,
 the CPU components that are available out-of-the-box in GXemul do not
 try to simulate out-of-order execution, or pipe-line stalls, or other
 effects that happen in a real processor, so even though the aim is that the
 implementation should be cycle accurate, it does not simulate
 any <i>existing real-world</i> processor in a cycle-accurate manner.
 
-<p>(Is it theoretically <i>possible</i> to implement pipe-lined and/or
-out-of-order CPU models for GXemul's new framework? Maybe. But that has not been done.)
+<p>Is it theoretically <i>possible</i> to implement pipe-lined and/or
+out-of-order CPU models for GXemul's new framework? Maybe. But that has not been done.
+
+<p>Note that the component framework described on this page should not be
+confused with the <a href="translation.html">dyntrans mechanism</a> (sometimes
+referred to as "the dyntrans framework"). The dyntrans framework is a helper
+mechanism (or, to use C++ terminology, a base class) for implementing specific CPUs.
+
+
+
 
 
 
@@ -181,6 +190,10 @@ out-of-order CPU models for GXemul's new framework? Maybe. But that has not been
 components, the focus is on emulating components found in electronic computers,
 such as processors, RAM, caches, graphics cards, etc. In most cases, these
 components are naturally contained in a <a href="machines.html"><i>machine</i></a>.
+
+<p>Machines are registered in a <i>machine registry</i>. The end-user can list
+the available machines in the registry by running <tt>gxemul -H</tt> (or by
+reading the documentation built by <tt>make documentation</tt>).
 
 <p>Before GXemul 0.6.0, machines were a special type of entity in the emulator,
 which held one or more CPUs of a particular architecture, e.g.
@@ -199,34 +212,55 @@ occur in the real world:
 		the Dreamcast.
 </ul>
 
-<p>The 0.6.0 framework thus has a somewhat generalized view of what a machine
+<p>The 0.6.0 framework, however, has a somewhat generalized view of what a machine
 is. Machines are simply <i>templates</i> for how components are configured.
 When adding such a template machine to the configuration tree, the result
 is a complete tree of components:
 <pre>
-	GXemul> add testmips 
-	GXemul> root 
+	GXemul> <b>add testmips</b>
+	GXemul> <b>root</b>
 	  root
 	  \-- machine0  [testmips]
 	      \-- mainbus0
 	          |-- ram0  (32 MB at offset 0)
 	          |-- rom0  (16 MB at offset 0x1fc00000)
+	          |-- fb_videoram0  (15 MB at offset 0x12000000)
 	          \-- cpu0  (5KE, 100 MHz)
 </pre>
 Here, a <tt>testmips</tt> machine template was added to the <tt>root</tt>
-component. The name of the machine in the component tree is
-<tt>root.machine0</tt>. The tree dump shows that it was created using the
+component. Adding something without specifying where to add it always assumes
+that the <tt>root</tt> component is the target. The name of the machine in the
+component tree is <tt>root.machine0</tt>. The tree dump shows that it was created using the
 <tt>testmips</tt> template.
+
+<p>To make it easier to start a new emulation from the command line (and to be
+more or less backward compatible with pre-0.6.x command line syntax), the
+<tt>-e</tt> option can be used to start an emulation based on a template machine:
+<pre>
+	$ <b>./gxemul -V -e testmips</b>
+	GXemul (unknown version)      Copyright (C) 2003-2010  Anders Gavare
+
+	  mainbus0
+	  |-- ram0  (32 MB at offset 0)
+	  |-- rom0  (16 MB at offset 0x1fc00000)
+	  |-- fb_videoram0  (15 MB at offset 0x12000000)
+	  \-- cpu0  (5KE, 100 MHz)
+
+	GXemul> 
+</pre>
+
+<p>(When starting a single emulated macine from the command line, only the emulated machine is shown,
+not the entire tree from the <tt>root</tt> node.)
 
 <p>The same machine configuration can be set up by hand as well:
 
 <pre>
-	GXemul> add machine root 
-	GXemul> add mainbus machine0 
-	GXemul> add ram mainbus0 
-	GXemul> ram0.memoryMappedSize = 0x2000000 
-	GXemul> add mips_cpu mainbus0 
-	GXemul> root 
+	GXemul> <b>add machine root</b>
+	GXemul> <b>add mainbus machine0</b>
+	GXemul> <b>add ram mainbus0</b>
+	GXemul> <b>ram0.memoryMappedSize = 0x2000000</b>
+	GXemul> <b>add mips_cpu mainbus0</b>
+	GXemul> <b>root</b>
 	  root
 	  \-- machine0
 	      \-- mainbus0
@@ -234,7 +268,7 @@ component. The name of the machine in the component tree is
 	          \-- cpu0  (5KE, 100 MHz)
 </pre>
 
-<p>(Omitting <tt>rom0</tt> for brevity.)
+<p>(Omitting <tt>rom0</tt> and <tt>fb_videoram0</tt> for brevity.)
 
 </body>
 </html>
