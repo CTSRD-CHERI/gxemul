@@ -189,18 +189,13 @@ to the source code. Requirements are:
 	<li>A reasonably modern C++ compiler environment, including STL.
 </ul>
 
-<p>(Hopefully there are no GNU-specific parts in the source code. Still,
-the GNU C++ compiler is still the compiler most likely to be useful for
-building GXemul. There is a page on the GXemul homepage,
-<a href="http://gxemul.sourceforge.net/build.html">http://gxemul.sourceforge.net/build.html</a>,
-which lists various platforms, compilers, and which versions of GXemul that
-was built on those platforms.)
+<p>See <a href="#hosts">this section</a> for more details.
 
-<p>GXemul does not <i>require</i> any additional third-party libraries to build,
-however, the following optional libraries or third-party software give
+<p>GXemul does not <i>require</i> any additional third-party libraries to build.
+However, the following optional libraries or third-party software give
 additional functionality:
 <ul>
-	<li>X11 libraries: for legacy mode framebuffer emulation.
+	<li>X11 headers and libraries: for legacy mode framebuffer emulation.
 	<li><a href="http://www.doxygen.org/">Doxygen</a>: if installed, source code documentation will be generated
 		when documentation is built.
 </ul>
@@ -299,15 +294,26 @@ architectures.)
 <a name="hosts"></a>
 <h3>Which host architectures/platforms are supported?</h3>
 
-GXemul should hopefully compile and run on most modern host architectures
-(64-bit or 32-bit word-length) on most Unix-like operating systems, as long as
-there is a modern C++ compiler available.
+The goal is that GXemul should compile and run, with few or no modifications, on most
+modern host architectures (64-bit or 32-bit word-length) on most modern Unix-like
+operating systems, as long as there is a modern C++ compiler available.
 
-<p>If it does not build or run, then it can be considered a bug. Please
-report it to the development mailing list.
+<p>In practice, the ability to reach this goal is limited by the amount of
+spare time available for development.
+Most of the development is done on FreeBSD/amd64 using GNU C++ (various
+versions), but every now and then the code is built on FreeBSD/alpha, Linux,
+and also in NetBSD and OpenBSD inside GXemul itself.
 
-<p>It is generally tested on FreeBSD/amd64, FreeBSD/alpha, Linux, and also
-NetBSD and OpenBSD inside GXemul itself.
+<p>Hopefully there are no GNU-specific parts in the source code. Still,
+the GNU C++ compiler is still the compiler most likely to be useful for
+building GXemul. There is a page on the GXemul homepage,
+<a href="http://gxemul.sourceforge.net/build.html">http://gxemul.sourceforge.net/build.html</a>,
+which lists various platforms, compilers, and which versions of GXemul that
+was built on those platforms.
+
+<p>If it does not build or run on your architecture/platform or with your
+compiler, then it can be considered a bug. Please report it to the development
+mailing list.
 
 <p>Note 1: The <a href="translation.html">dynamic translation</a> engine 
 does <i>not</i> require backends for native code generation to be written 
@@ -315,8 +321,8 @@ for each individual host architecture; the intermediate representation
 that the dyntrans system uses can be executed on any host architecture.
 
 <p>Note 2: Although GXemul may build and run on non-Unix-like platforms,
-such as <a href="http://www.cygwin.com/">Cygwin</a>, Unix-like systems are
-the primary platform. Some functionality may be lost when running on Cygwin.
+such as <a href="http://www.cygwin.com/">Cygwin</a> inside Windows, Unix-like
+systems are the primary platform. Some functionality may be lost when running on Cygwin.
 
 
 
