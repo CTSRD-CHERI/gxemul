@@ -122,7 +122,7 @@ int mymkstemp(char *templ)
 		p++;
 	}
 
-	h = open(templ, O_RDWR, 0600);
+	h = open(templ, O_RDWR | O_CREAT | O_EXCL, 0600);
 	return h;
 }
 
