@@ -372,11 +372,13 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	}
 
 	// Read the instruction word:
-	uint32_t iw = *((uint32_t *) instruction);
+	uint32_t instructionWord = *((uint32_t *) instruction);
 	if (m_isBigEndian)
-		iw = BE32_TO_HOST(iw);
+		instructionWord = BE32_TO_HOST(instructionWord);
 	else
-		iw = LE32_TO_HOST(iw);
+		instructionWord = LE32_TO_HOST(instructionWord);
+
+	const uint32_t iw = instructionWord;
 
 	// ... and add it to the result:
 	{
@@ -388,18 +390,18 @@ size_t M88K_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		result.push_back(ss.str());
 	}
 
-	uint32_t op26   = (iw >> 26) & 0x3f;
-	uint32_t op11   = (iw >> 11) & 0x1f;
-	uint32_t op10   = (iw >> 10) & 0x3f;
-	uint32_t d      = (iw >> 21) & 0x1f;
-	uint32_t s1     = (iw >> 16) & 0x1f;
-	uint32_t s2     =  iw        & 0x1f;
-	uint32_t op3d   = (iw >>  8) & 0xff;
-	uint32_t imm16  = iw & 0xffff;
-	uint32_t w5     = (iw >>  5) & 0x1f;
-	uint32_t cr6    = (iw >>  5) & 0x3f;
-	int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
-	int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
+	const uint32_t op26   = (iw >> 26) & 0x3f;
+	const uint32_t op11   = (iw >> 11) & 0x1f;
+	const uint32_t op10   = (iw >> 10) & 0x3f;
+	const uint32_t d      = (iw >> 21) & 0x1f;
+	const uint32_t s1     = (iw >> 16) & 0x1f;
+	const uint32_t s2     =  iw        & 0x1f;
+	const uint32_t op3d   = (iw >>  8) & 0xff;
+	const uint32_t imm16  = iw & 0xffff;
+	const uint32_t w5     = (iw >>  5) & 0x1f;
+	const uint32_t cr6    = (iw >>  5) & 0x3f;
+	const int32_t  d16    = ((int16_t) (iw & 0xffff)) * 4;
+	const int32_t  d26    = ((int32_t)((iw & 0x03ffffff) << 6)) >> 4;
 
 	switch (op26) {
 

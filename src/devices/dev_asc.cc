@@ -310,34 +310,34 @@ fatal("TODO..............\n");
 				fatal("no incoming DMA data?\n");
 				res = 0;
 			} else {
-				size_t len = d->xferp->data_in_len;
-				size_t len2 = d->reg_wo[NCR_TCL] +
+				size_t lenIn = d->xferp->data_in_len;
+				size_t lenIn2 = d->reg_wo[NCR_TCL] +
 				    d->reg_wo[NCR_TCM] * 256;
-				if (len2 == 0)
-					len2 = 65536;
+				if (lenIn2 == 0)
+					lenIn2 = 65536;
 
-                                if (len < len2) {
-                                        fatal("{ asc: data in, len=%i len2=%i "
-					    "}\n", len, len2);
+                                if (lenIn < lenIn2) {
+                                        fatal("{ asc: data in, lenIn=%i lenIn2=%i "
+					    "}\n", lenIn, lenIn2);
                                 }
 
-				/*  TODO: check len2 in a similar way?  */
-				if (len + (d->dma_address_reg &
+				/*  TODO: check lenIn2 in a similar way?  */
+				if (lenIn + (d->dma_address_reg &
 				    (ASC_DMA_SIZE-1)) > ASC_DMA_SIZE)
-					len = ASC_DMA_SIZE -
+					lenIn = ASC_DMA_SIZE -
 					    (d->dma_address_reg &
 					    (ASC_DMA_SIZE-1));
 
-				if (len2 > len) {
+				if (lenIn2 > lenIn) {
 					memset(d->dma + (d->dma_address_reg &
-					    (ASC_DMA_SIZE-1)), 0, len2);
-					len2 = len;
+					    (ASC_DMA_SIZE-1)), 0, lenIn2);
+					lenIn2 = lenIn;
 				}
 
 #ifdef ASC_DEBUG
 				if (!quiet_mode) {
 					int i;
-					for (i=0; i<len; i++)
+					for (i=0; i<lenIn; i++)
 						debug(" %02x", d->xferp->
 						    data_in[i]);
 				}
@@ -353,40 +353,40 @@ fatal("TODO..............\n");
 					d->dma_controller(
 					    d->dma_controller_data,
 					    d->xferp->data_in,
-					    len2, 1);
+					    lenIn2, 1);
 				else
 					memcpy(d->dma + (d->dma_address_reg &
 					    (ASC_DMA_SIZE-1)),
-					    d->xferp->data_in, len2);
+					    d->xferp->data_in, lenIn2);
 
-				if (d->xferp->data_in_len > len2) {
+				if (d->xferp->data_in_len > lenIn2) {
 					unsigned char *n;
 
 if (d->dma_controller != NULL)
 	printf("WARNING!!!!!!!!! BUG!!!! Unexpected stuff..."
-	    "len2=%i d->xferp->data_in_len=%i\n", (int)len2,
+	    "lenIn2=%i d->xferp->data_in_len=%i\n", (int)lenIn2,
 	    (int)d->xferp->data_in_len);
 
 					all_done = 0;
 					/*  fatal("{ asc: multi-transfer"
-					    " data_in, len=%i len2=%i }\n",
-					    (int)len, (int)len2);  */
+					    " data_in, lenIn=%i lenIn2=%i }\n",
+					    (int)lenIn, (int)lenIn2);  */
 
-					d->xferp->data_in_len -= len2;
+					d->xferp->data_in_len -= lenIn2;
 					CHECK_ALLOCATION(n = (unsigned char *)
 					    malloc(d->xferp->data_in_len));
-					memcpy(n, d->xferp->data_in + len2,
+					memcpy(n, d->xferp->data_in + lenIn2,
 					    d->xferp->data_in_len);
 					free(d->xferp->data_in);
 					d->xferp->data_in = n;
 
-					len = len2;
+					lenIn = lenIn2;
 				}
 
-				len = 0;
+				lenIn = 0;
 
-				d->reg_ro[NCR_TCL] = len & 255;
-				d->reg_ro[NCR_TCM] = (len >> 8) & 255;
+				d->reg_ro[NCR_TCL] = lenIn & 255;
+				d->reg_ro[NCR_TCM] = (lenIn >> 8) & 255;
 
 				/*  Successful DMA transfer:  */
 				d->reg_ro[NCR_STAT] |= NCRSTAT_TC;
@@ -398,9 +398,10 @@ if (d->dma_controller != NULL)
 fatal("TODO.......asdgasin\n");
 		} else {
 			/*  Copy data from DMA to data_out:  */
-			int len = d->xferp->data_out_len;
 			int len2 = d->reg_wo[NCR_TCL] +
 			    d->reg_wo[NCR_TCM] * 256;
+			len = d->xferp->data_out_len;
+
 			if (len2 == 0)
 				len2 = 65536;
 
@@ -616,10 +617,10 @@ static int dev_asc_select(struct cpu *cpu, struct asc_data *d, int from_id,
 
 		i = 0;
 		while (n_messagebytes-- > 0) {
-			int ch = dev_asc_fifo_read(d);
+			int ch2 = dev_asc_fifo_read(d);
 			if (!quiet_mode)
-				debug(" %02x", ch);
-			d->xferp->msg_out[i++] = ch;
+				debug(" %02x", ch2);
+			d->xferp->msg_out[i++] = ch2;
 		}
 
 		if ((d->xferp->msg_out[0] & 0x7) != 0x00) {

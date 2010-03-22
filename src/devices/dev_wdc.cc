@@ -713,14 +713,11 @@ DEVICE_ACCESS(wdc)
 
 				if (res == 1) {
 					if (d->atapi_st->data_in != NULL) {
-						int i;
 						d->atapi_phase = PHASE_DATAIN;
-						d->atapi_len = d->atapi_st->
-						    data_in_len;
-						for (i=0; i<d->atapi_len; i++)
-							wdc_addtoinbuf(d,
-							    d->atapi_st->
-							    data_in[i]);
+						d->atapi_len = d->atapi_st->data_in_len;
+						for (int j=0; j<d->atapi_len; j++)
+							wdc_addtoinbuf(d, d->atapi_st->data_in[j]);
+
 						if (d->atapi_len > 32768)
 							d->atapi_len = 32768;
 					} else {

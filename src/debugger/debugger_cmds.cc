@@ -894,12 +894,12 @@ static void debugger_cmd_quit(struct machine *m, char *cmd_line)
 	force_debugger_at_exit = 0;
 
 	for (j=0; j<debugger_emul->n_machines; j++) {
-		struct machine *m = debugger_emul->machines[j];
+		struct machine *mp = debugger_emul->machines[j];
 
-		for (k=0; k<m->ncpus; k++)
-			m->cpus[k]->running = 0;
+		for (k=0; k<mp->ncpus; k++)
+			mp->cpus[k]->running = 0;
 
-		m->exit_without_entering_debugger = 1;
+		mp->exit_without_entering_debugger = 1;
 	}
 
 	exit_debugger = 1;

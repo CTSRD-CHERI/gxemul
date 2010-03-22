@@ -428,8 +428,8 @@ size_t MIPS_CPUComponent::DisassembleInstructionMIPS16(uint64_t vaddr,
 size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 	unsigned char *instruction, vector<string>& result)
 {
-	bool mips16 = m_pc & 1? true : false;
-	size_t instrSize = mips16? sizeof(uint16_t) : sizeof(uint32_t);
+	const bool mips16 = m_pc & 1? true : false;
+	const size_t instrSize = mips16? sizeof(uint16_t) : sizeof(uint32_t);
 
 	if (maxLen < instrSize) {
 		assert(false);
@@ -441,11 +441,13 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		    instruction, result);
 
 	// Read the instruction word:
-	uint32_t iword = *((uint32_t *) instruction);
+	uint32_t instructionWord = *((uint32_t *) instruction);
 	if (m_isBigEndian)
-		iword = BE32_TO_HOST(iword);
+		instructionWord = BE32_TO_HOST(instructionWord);
 	else
-		iword = LE32_TO_HOST(iword);
+		instructionWord = LE32_TO_HOST(instructionWord);
+
+	const uint32_t iword = instructionWord;
 
 	// ... and add it to the result:
 	{
@@ -457,11 +459,11 @@ size_t MIPS_CPUComponent::DisassembleInstruction(uint64_t vaddr, size_t maxLen,
 		result.push_back(ss.str());
 	}
 
-	int hi6 = iword >> 26;
-	int rs = (iword >> 21) & 31;
-	int rt = (iword >> 16) & 31;
-	int rd = (iword >> 11) & 31;
-	int sa = (iword >>  6) & 31;
+	const int hi6 = iword >> 26;
+	const int rs = (iword >> 21) & 31;
+	const int rt = (iword >> 16) & 31;
+	const int rd = (iword >> 11) & 31;
+	const int sa = (iword >>  6) & 31;
 
 	switch (hi6) {
 

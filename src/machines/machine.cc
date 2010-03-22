@@ -822,7 +822,7 @@ void machine_list_available_types_and_cpus(void)
 		fatal("No machines defined!\n");
 
 	while (me != NULL) {
-		int i, j, iadd = DEBUG_INDENTATION;
+		int i, j, iadd2 = DEBUG_INDENTATION;
 
 		debug("%s [%s] (", me->name,
 		    cpu_family_ptr_by_number(me->arch)->name);
@@ -830,7 +830,7 @@ void machine_list_available_types_and_cpus(void)
 			debug("%s\"%s\"", i? ", " : "", me->aliases[i]);
 		debug(")\n");
 
-		debug_indentation(iadd);
+		debug_indentation(iadd2);
 		for (i=0; i<me->n_subtypes; i++) {
 			struct machine_entry_subtype *mes;
 			mes = me->subtype[i];
@@ -841,7 +841,7 @@ void machine_list_available_types_and_cpus(void)
 				    mes->aliases[j]);
 			debug(")\n");
 		}
-		debug_indentation(-iadd);
+		debug_indentation(-iadd2);
 
 		me = me->next;
 	}

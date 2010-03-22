@@ -341,20 +341,20 @@ void *device_add(struct machine *machine, const char *name_and_params)
 			devinit.in_use = mystrtoull(s3, NULL, 0);
 		} else if (strncmp(s2, "name2=", 6) == 0) {
 			const char *h = s2 + 6;
-			size_t len = 0;
+			size_t len2 = 0;
 			quoted = 0;
 			while (*h) {
 				if (*h == '\'')
 					quoted = !quoted;
-				h++, len++;
+				h++, len2++;
 				if (!quoted && *h == ' ')
 					break;
 			}
-			CHECK_ALLOCATION(devinit.name2 = (char *) malloc(len + 1));
+			CHECK_ALLOCATION(devinit.name2 = (char *) malloc(len2 + 1));
 			h = s2 + 6;
 			if (*h == '\'')
-				len -= 2, h++;
-			snprintf(devinit.name2, len + 1, "%s", h);
+				len2 -= 2, h++;
+			snprintf(devinit.name2, len2 + 1, "%s", h);
 		} else {
 			fatal("unknown param: %s\n", s2);
 			if (device_exit_on_error)

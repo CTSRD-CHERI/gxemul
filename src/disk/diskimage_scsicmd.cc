@@ -330,13 +330,14 @@ xferp->data_in[4] = 0x2c - 4;	/*  Additional length  */
 		memcpy(xferp->data_in+8,  "GXemul  ", 8);
 		if (diskimage_getname(cpu->machine, id,
 		    type, namebuf, sizeof(namebuf))) {
-			size_t i;
-			for (i=0; i<sizeof(namebuf); i++)
-				if (namebuf[i] == 0) {
-					for (; i<sizeof(namebuf); i++)
-						namebuf[i] = ' ';
+			for (size_t j=0; j<sizeof(namebuf); j++) {
+				if (namebuf[j] == 0) {
+					for (; j<sizeof(namebuf); j++)
+						namebuf[j] = ' ';
 					break;
 				}
+			}
+			
 			memcpy(xferp->data_in+16, namebuf, 16);
 		} else
 			memcpy(xferp->data_in+16, "DISK            ", 16);
@@ -1005,12 +1006,10 @@ xferp->data_in[4] = 0x2c - 4;	/*  Additional length  */
 		xferp->data_in[9] = 1;   /*  num sessions, msb  */
 		xferp->data_in[10] = 0;  /*  first_track_last_session_msb  */
 		xferp->data_in[11] = 0;  /*  last_track_last_session_msb  */
-		{
-			int i;
-			/*  Lead-in data, for completed cd-rom:  */
-			for (i=16; i<=23; i++)
-				xferp->data_in[i] = 0xff;
-		}
+
+		/*  Lead-in data, for completed cd-rom:  */
+		for (size_t j=16; j<=23; j++)
+			xferp->data_in[j] = 0xff;
 
 		diskimage__return_default_status_and_message(xferp);
 		break;
@@ -1040,15 +1039,12 @@ xferp->data_in[4] = 0x2c - 4;	/*  Additional length  */
 		xferp->data_in[6] = 0x81;     /*  trk info: RT + trk mode  */
 		xferp->data_in[7] = 0x2;      /*  last rec=valid, next w=not
 						  valid */
-		{
-			/*
-			 *  track start, next writable, free blcks,
-			 *  blocking factor
-			 */
-			int i;
-			for(i=8; i<=23; i++)
-				xferp->data_in[i] = 0;
-		}
+		/*
+		 *  track start, next writable, free blcks,
+		 *  blocking factor
+		 */
+		for(size_t j=8; j<=23; j++)
+			xferp->data_in[j] = 0;
 
 		/*  Track size:  */
 		xferp->data_in[24] = (size >> 24) & 0xff;
@@ -1057,11 +1053,8 @@ xferp->data_in[4] = 0x2c - 4;	/*  Additional length  */
 		xferp->data_in[27] = size & 0xff;
 
 		/*  Last recorded address, only for dvd; zero out the rest:  */
-		{
-			int i;
-			for (i=28; i<=35; i++)
-				xferp->data_in[i] = 0;
-		}
+		for (size_t k=28; k<=35; k++)
+			xferp->data_in[k] = 0;
 
 		diskimage__return_default_status_and_message(xferp);
 		break;
@@ -1100,13 +1093,13 @@ xferp->data_in[4] = 0x2c - 4;	/*  Additional length  */
 			debug("[ setting logical_block_size to %i ]\n",
 			    d->logical_block_size);
 		} else {
-			int i;
+			int j;
 			fatal("[ unknown MODE_SELECT: cmd =");
-			for (i=0; i<(ssize_t)xferp->cmd_len; i++)
-				fatal(" %02x", xferp->cmd[i]);
+			for (j=0; j<(ssize_t)xferp->cmd_len; j++)
+				fatal(" %02x", xferp->cmd[j]);
 			fatal(", data_out =");
-			for (i=0; i<(ssize_t)xferp->data_out_len; i++)
-				fatal(" %02x", xferp->data_out[i]);
+			for (j=0; j<(ssize_t)xferp->data_out_len; j++)
+				fatal(" %02x", xferp->data_out[j]);
 			fatal(" ]");
 		}
 

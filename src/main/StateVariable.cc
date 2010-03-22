@@ -432,7 +432,7 @@ bool StateVariable::SetValue(const string& expression)
 
 	case String:
 		{
-			bool success = false;
+			success = false;
 			string newStr = EscapedString(value).Decode(success);
 			if (success)
 				*m_value.pstr = newStr;

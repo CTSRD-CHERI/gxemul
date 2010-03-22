@@ -171,38 +171,38 @@ static void file_load_macho(struct machine *m, struct memory *mem,
 
 			/*  Load data from the file:  */
 			while (filesize != 0) {
-				unsigned char buf[32768];
-				ssize_t len = filesize > sizeof(buf) ?
-				    sizeof(buf) : filesize;
-				len = fread(buf, 1, len, f);
+				unsigned char buf2[32768];
+				ssize_t lenRead = filesize > sizeof(buf2) ?
+				    sizeof(buf2) : filesize;
+				lenRead = fread(buf2, 1, lenRead, f);
 
 				/*  printf("fread len=%i vmaddr=%x buf[0..]="
 				    "%02x %02x %02x\n", (int)len, (int)vmaddr,
-				    buf[0], buf[1], buf[2]);  */
+				    buf2[0], buf2[1], buf2[2]);  */
 
-				if (len > 0) {
+				if (lenRead > 0) {
 					int len2 = 0;
 					uint64_t vaddr1 = vmaddr &
 					    ((1 << BITS_PER_MEMBLOCK) - 1);
 					uint64_t vaddr2 = (vmaddr +
-					    len) & ((1 << BITS_PER_MEMBLOCK)-1);
+					    lenRead) & ((1 << BITS_PER_MEMBLOCK)-1);
 					if (vaddr2 < vaddr1) {
-						len2 = len - vaddr2;
+						len2 = lenRead - vaddr2;
 						m->cpus[0]->memory_rw(m->cpus[
-						    0], mem, vmaddr, &buf[0],
+						    0], mem, vmaddr, &buf2[0],
 						    len2, MEM_WRITE,
 						    NO_EXCEPTIONS);
 					}
 					m->cpus[0]->memory_rw(m->cpus[0], mem,
-					    vmaddr + len2, &buf[len2], len-len2,
+					    vmaddr + len2, &buf2[len2], lenRead-len2,
 					    MEM_WRITE, NO_EXCEPTIONS);
 				} else {
 					fprintf(stderr, "error reading\n");
 					exit(1);
 				}
 
-				vmaddr += len;
-				filesize -= len;
+				vmaddr += lenRead;
+				filesize -= lenRead;
 			}
 
 			debug("\n");

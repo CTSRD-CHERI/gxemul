@@ -792,13 +792,12 @@ void emul_run(struct emul *emul)
 
 	/*  Run any additional debugger commands before starting:  */
 	if (emul->n_debugger_cmds > 0) {
-		int j;
 		if (i == 0)
 			print_separator_line();
-		for (j = 0; j < emul->n_debugger_cmds; j ++) {
-			debug("> %s\n", emul->debugger_cmds[j]);
-			debugger_execute_cmd(emul->debugger_cmds[j],
-			    strlen(emul->debugger_cmds[j]));
+		for (int k = 0; k < emul->n_debugger_cmds; k ++) {
+			debug("> %s\n", emul->debugger_cmds[k]);
+			debugger_execute_cmd(emul->debugger_cmds[k],
+			    strlen(emul->debugger_cmds[k]));
 		}
 	}
 

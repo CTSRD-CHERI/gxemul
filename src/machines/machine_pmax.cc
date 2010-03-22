@@ -861,12 +861,11 @@ abort();
 	    malloc(sizeof(struct dec_memmap)));
 	store_32bit_word_in_host(cpu,
 	    (unsigned char *)&machine->md.pmax->memmap->pagesize, 4096);
-	{
-		unsigned int i;
-		for (i=0; i<sizeof(machine->md.pmax->memmap->bitmap); i++)
-			machine->md.pmax->memmap->bitmap[i] = ((int)i * 4096*8 <
-			    1048576*machine->physical_ram_in_mb)? 0xff : 0x00;
-	}
+
+	for (unsigned int j=0; j<sizeof(machine->md.pmax->memmap->bitmap); j++)
+		machine->md.pmax->memmap->bitmap[j] = ((int)j * 4096*8 <
+		    1048576*machine->physical_ram_in_mb)? 0xff : 0x00;
+
 	store_buf(cpu, DEC_MEMMAP_ADDR,
 	    (char *)machine->md.pmax->memmap, sizeof(struct dec_memmap));
 

@@ -171,12 +171,12 @@ bool CommandInterpreter::TabComplete(string& commandString,
 	} else {
 		// Figure out the longest possible match, and add that:
 		size_t i, n = matches.size();
-		for (size_t pos = 0; ; pos ++) {
-			if (pos >= matches[0].length())
+		for (size_t pos2 = 0; ; pos2 ++) {
+			if (pos2 >= matches[0].length())
 				break;
-			stringchar ch = matches[0][pos];
+			stringchar ch = matches[0][pos2];
 			for (i=1; i<n; i++) {
-				if (matches[i][pos] != ch)
+				if (matches[i][pos2] != ch)
 					break;
 			}
 			if (i == n)
@@ -318,12 +318,12 @@ bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
 	// "memoryMappedAddr" and "memoryMappedSize" are available.
 	string longestPossibleMatch = "";
 	size_t i, n = matchingNames.size();
-	for (size_t pos = 0; ; pos ++) {
-		if (pos >= matchingNames[0].length())
+	for (size_t pos2 = 0; ; pos2 ++) {
+		if (pos2 >= matchingNames[0].length())
 			break;
-		stringchar ch = matchingNames[0][pos];
+		stringchar ch = matchingNames[0][pos2];
 		for (i=1; i<n; i++) {
-			if (matchingNames[i][pos] != ch)
+			if (matchingNames[i][pos2] != ch)
 				break;
 		}
 		if (i == n)
@@ -343,35 +343,34 @@ bool CommandInterpreter::TabCompleteWithSubname(string& commandString,
 	// Show available methods and variable names:		
 	if (visibleShowAvailable) {
 		vector<string> allNames;
-		vector<string> matchingNames;
+		vector<string> matchingNames2;
+		
 		component->GetMethodNames(allNames);
-		for (size_t i=0; i<allNames.size(); ++i) {
+		for (size_t j=0; j<allNames.size(); ++j) {
 			if (methodName.length() == 0 ||
-			    allNames[i].substr(0, methodName.length()) ==
-			    methodName)
-				matchingNames.push_back(allNames[i]);
+			    allNames[j].substr(0, methodName.length()) == methodName)
+				matchingNames2.push_back(allNames[j]);
 		}
 
-		if (matchingNames.size() > 0) {
+		if (matchingNames2.size() > 0) {
 			m_GXemul->GetUI()->ShowDebugMessage("\nMethods:");
-			ShowAvailableWords(matchingNames);
+			ShowAvailableWords(matchingNames2);
 		}
 	}
 	if (visibleShowAvailable) {
 		vector<string> allNames;
-		vector<string> matchingNames;
+		vector<string> matchingNames2;
+		
 		component->GetVariableNames(allNames);
-		for (size_t i=0; i<allNames.size(); ++i) {
+		for (size_t j=0; j<allNames.size(); ++j) {
 			if (methodName.length() == 0 ||
-			    allNames[i].substr(0, methodName.length()) ==
-			    methodName)
-				matchingNames.push_back(allNames[i]);
+			    allNames[j].substr(0, methodName.length()) == methodName)
+				matchingNames2.push_back(allNames[j]);
 		}
 
-		if (matchingNames.size() > 0) {
-			m_GXemul->GetUI()->ShowDebugMessage(
-			    "\nVariables:");
-			ShowAvailableWords(matchingNames);
+		if (matchingNames2.size() > 0) {
+			m_GXemul->GetUI()->ShowDebugMessage("\nVariables:");
+			ShowAvailableWords(matchingNames2);
 		}
 	}
 

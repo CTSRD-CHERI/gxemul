@@ -1424,7 +1424,7 @@ DEVICE_TICK(pvr_fb)
 	struct pvr_data *d = (struct pvr_data *) extra;
 	uint64_t high, low = (uint64_t)(int64_t) -1;
 	int vram_ofs = REG(PVRREG_DIWADDRL), pixels_to_copy;
-	int y, bytes_per_line = d->xsize * d->bytes_per_pixel;
+	int bytes_per_line = d->xsize * d->bytes_per_pixel;
 	int fb_ofs, p;
 	uint8_t *fb = (uint8_t *) d->fb->framebuffer;
 	uint8_t *vram = (uint8_t *) d->vram;
@@ -1506,57 +1506,72 @@ DEVICE_TICK(pvr_fb)
 
 	switch (d->pixelmode) {
 	case 0:	/*  RGB0555 (16-bit)  */
-		for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
-			int fo = fb_ofs, vo = vram_ofs;
-			for (p=0; p<pixels_to_copy; p++) {
-				/*  0rrrrrgg(high) gggbbbbb(low)  */
-				fb[fo] = (vram[(vo+1)%VRAM_SIZE] << 1) & 0xf8;
-				fb[fo+1] = ((vram[vo%VRAM_SIZE] >> 2) & 0x38) +
-				    (vram[(vo+1)%VRAM_SIZE] << 6);
-				fb[fo+2] = (vram[vo%VRAM_SIZE] & 0x1f) << 3;
-				fo += 3; vo += 2;
+		{
+			int y;
+			for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
+				int fo = fb_ofs, vo = vram_ofs;
+				for (p=0; p<pixels_to_copy; p++) {
+					/*  0rrrrrgg(high) gggbbbbb(low)  */
+					fb[fo] = (vram[(vo+1)%VRAM_SIZE] << 1) & 0xf8;
+					fb[fo+1] = ((vram[vo%VRAM_SIZE] >> 2) & 0x38) +
+					    (vram[(vo+1)%VRAM_SIZE] << 6);
+					fb[fo+2] = (vram[vo%VRAM_SIZE] & 0x1f) << 3;
+					fo += 3; vo += 2;
+				}
+				
+				vram_ofs += bytes_per_line;
+				fb_ofs += d->fb->bytes_per_line;
 			}
-			vram_ofs += bytes_per_line;
-			fb_ofs += d->fb->bytes_per_line;
 		}
 		break;
 
 	case 1: /*  RGB565 (16-bit)  */
-		for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
-			int fo = fb_ofs, vo = vram_ofs;
-			for (p=0; p<pixels_to_copy; p++) {
-				/*  rrrrrggg(high) gggbbbbb(low)  */
-				fb[fo] = vram[(vo+1)%VRAM_SIZE] & 0xf8;
-				fb[fo+1] = ((vram[vo%VRAM_SIZE] >> 3) & 0x1c) +
-				    (vram[(vo+1)%VRAM_SIZE] << 5);
-				fb[fo+2] = (vram[vo%VRAM_SIZE] & 0x1f) << 3;
-				fo += 3; vo += 2;
+		{
+			int y;
+			for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
+				int fo = fb_ofs, vo = vram_ofs;
+				for (p=0; p<pixels_to_copy; p++) {
+					/*  rrrrrggg(high) gggbbbbb(low)  */
+					fb[fo] = vram[(vo+1)%VRAM_SIZE] & 0xf8;
+					fb[fo+1] = ((vram[vo%VRAM_SIZE] >> 3) & 0x1c) +
+					    (vram[(vo+1)%VRAM_SIZE] << 5);
+					fb[fo+2] = (vram[vo%VRAM_SIZE] & 0x1f) << 3;
+					fo += 3; vo += 2;
+				}
+				
+				vram_ofs += bytes_per_line;
+				fb_ofs += d->fb->bytes_per_line;
 			}
-			vram_ofs += bytes_per_line;
-			fb_ofs += d->fb->bytes_per_line;
 		}
 		break;
 
 	case 2: /*  RGB888 (24-bit)  */
-		for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
-			/*  TODO: Reverse colors, like in the 32-bit case?  */
-			memcpy(fb+fb_ofs, vram+(vram_ofs%VRAM_SIZE), 3*pixels_to_copy);
-			vram_ofs += bytes_per_line;
-			fb_ofs += d->fb->bytes_per_line;
+		{
+			int y;
+			for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
+				/*  TODO: Reverse colors, like in the 32-bit case?  */
+				memcpy(fb+fb_ofs, vram+(vram_ofs%VRAM_SIZE), 3*pixels_to_copy);
+				vram_ofs += bytes_per_line;
+				fb_ofs += d->fb->bytes_per_line;
+			}
 		}
 		break;
 
 	case 3: /*  RGB0888 (32-bit)  */
-		for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
-			int fo = fb_ofs, vo = vram_ofs;
-			for (p=0; p<pixels_to_copy; p++) {
-				fb[fo] = vram[(vo+2)%VRAM_SIZE];
-				fb[fo+1] = vram[(vo+1)%VRAM_SIZE];
-				fb[fo+2] = vram[(vo+0)%VRAM_SIZE];
-				fo += 3; vo += 4;
+		{
+			int y;
+			for (y=d->fb_update_y1; y<=d->fb_update_y2; y++) {
+				int fo = fb_ofs, vo = vram_ofs;
+				for (p=0; p<pixels_to_copy; p++) {
+					fb[fo] = vram[(vo+2)%VRAM_SIZE];
+					fb[fo+1] = vram[(vo+1)%VRAM_SIZE];
+					fb[fo+2] = vram[(vo+0)%VRAM_SIZE];
+					fo += 3; vo += 4;
+				}
+				
+				vram_ofs += bytes_per_line;
+				fb_ofs += d->fb->bytes_per_line;
 			}
-			vram_ofs += bytes_per_line;
-			fb_ofs += d->fb->bytes_per_line;
 		}
 		break;
 	}

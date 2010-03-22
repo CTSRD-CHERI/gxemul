@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2004-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2004-2010  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -797,19 +797,17 @@ static void net_ip_udp(struct net *net, void *extra,
 	else {
 		debug("NEW");
 		if (free_con_id < 0) {
-			int i;
 			int64_t oldest = net->
 			    udp_connections[0].last_used_timestamp;
 			free_con_id = 0;
 
 			debug(", NO FREE SLOTS, REUSING OLDEST ONE");
-			for (i=0; i<MAX_UDP_CONNECTIONS; i++)
-				if (net->udp_connections[i].
-				    last_used_timestamp < oldest) {
-					oldest = net->udp_connections[i].
-					    last_used_timestamp;
-					free_con_id = i;
+			for (int j=0; j<MAX_UDP_CONNECTIONS; j++)
+				if (net->udp_connections[j].last_used_timestamp < oldest) {
+					oldest = net->udp_connections[j].last_used_timestamp;
+					free_con_id = j;
 				}
+
 			close(net->udp_connections[free_con_id].socket);
 		}
 		con_id = free_con_id;

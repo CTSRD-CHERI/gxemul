@@ -594,7 +594,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 	if (type == NULL && subtype == NULL &&
 	    (single_step == ENTER_SINGLE_STEPPING || argc > 0)) {
-		int res = 0;
+		int res2 = 0;
 		{
 			GXemul gxemul;
 			gxemul.InitUI();
@@ -612,11 +612,13 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 			if (argc > 0 && !gxemul.ParseFilenames("", argc, argv))
 				res = 1;
 
-			if (res == 0)
-				res = gxemul.Run();
+			if (res2 == 0)
+				res2 = gxemul.Run();
 		}
 
-		exit(res);
+		// Note: exit() is outside the GXemul scope, so that GXemul's
+		// destructor runs.
+		exit(res2);
 	}
 
 	if (type != NULL || subtype != NULL) {
@@ -627,7 +629,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 		/*  Is it a new machine mode?  */
 		if (subtype[0] != '\0') {
-			int res = 0;
+			int res2 = 0;
 			bool doExit = false;
 			
 			{
@@ -646,17 +648,17 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 
 				if (gxemul.IsTemplateMachine(subtype)) {
 					if (!gxemul.ParseFilenames(subtype, argc, argv))
-						res = 1;
+						res2 = 1;
 
-					if (res == 0)
-						res = gxemul.Run();
+					if (res2 == 0)
+						res2 = gxemul.Run();
 
 					doExit = true;
 				}
 			}
 			
 			if (doExit)
-				exit(res);
+				exit(res2);
 		}
 
 		/*  Legacy mode?  */

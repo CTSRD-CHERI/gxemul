@@ -9,6 +9,7 @@
  *   x) #print_position changed to print_position (removed the #), to
  *      suppress a Doxygen warning
  *   x) "@file" changed to "@ file" to suppress a Doxygen warning.
+ *   x) variable names in local scopes changed to allow usage of GCC's -Wshadow
  */
 
 #ifndef NDEBUG
@@ -500,7 +501,7 @@ int check_leaks()
             continue;
         while (ptr)
         {
-            fast_mutex_autolock lock(new_output_lock);
+            fast_mutex_autolock lock2(new_output_lock);
             fprintf(new_output_fp,
                     "Leaked object at %p (size %u, ",
                     (char*)ptr + aligned_list_item_size,
@@ -608,7 +609,7 @@ void operator delete(void* pointer) throw()
     new_ptr_list_t** raw_ptr = search_pointer(pointer, hash_index);
     if (raw_ptr == NULL)
     {
-        fast_mutex_autolock lock(new_output_lock);
+        fast_mutex_autolock lock2(new_output_lock);
         fprintf(new_output_fp, "delete: invalid pointer %p at ", pointer);
         print_position(_DEBUG_NEW_CALLER_ADDRESS, 0);
         fprintf(new_output_fp, "\n");
@@ -627,7 +628,7 @@ void operator delete[](void* pointer) throw()
     new_ptr_list_t** raw_ptr = search_pointer(pointer, hash_index);
     if (raw_ptr == NULL)
     {
-        fast_mutex_autolock lock(new_output_lock);
+        fast_mutex_autolock lock2(new_output_lock);
         fprintf(new_output_fp, "delete[]: invalid pointer %p at ", pointer);
         print_position(_DEBUG_NEW_CALLER_ADDRESS, 0);
         fprintf(new_output_fp, "\n");

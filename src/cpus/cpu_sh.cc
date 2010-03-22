@@ -773,7 +773,6 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 	char *symbol;
 	uint64_t offset, addr;
 	uint16_t iword;
-	int hi4, lo4, lo8, r8, r4;
 
 	if (running)
 		dumpaddr = cpu->pc;
@@ -794,8 +793,8 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 		iword = (instr[1] << 8) + instr[0];
 
 	debug(":  %04x %s\t", iword, cpu->delay_slot? "(d)" : "");
-	hi4 = iword >> 12; lo4 = iword & 15; lo8 = iword & 255;
-	r8 = (iword >> 8) & 15; r4 = (iword >> 4) & 15;
+	const int hi4 = iword >> 12, lo4 = iword & 15, lo8 = iword & 255;
+	int r8 = (iword >> 8) & 15, r4 = (iword >> 4) & 15;
 
 
 	/*
@@ -816,8 +815,7 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 			else if (lo4 == 0x6)
 				debug("mov.l\tr%i,@(r0,r%i)", r4, r8);
 			if (running) {
-				uint32_t addr = cpu->cd.sh.r[0] +
-				    cpu->cd.sh.r[r8];
+				addr = cpu->cd.sh.r[0] + cpu->cd.sh.r[r8];
 				debug("\t; r0+r%i = ", r8);
 				symbol = get_symbol_name(
 				    &cpu->machine->symbol_context,
@@ -846,8 +844,7 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 			else if (lo4 == 0xe)
 				debug("mov.l\t@(r0,r%i),r%i", r4, r8);
 			if (running) {
-				uint32_t addr = cpu->cd.sh.r[0] +
-				    cpu->cd.sh.r[r4];
+				addr = cpu->cd.sh.r[0] + cpu->cd.sh.r[r4];
 				debug("\t; r0+r%i = ", r4);
 				symbol = get_symbol_name(
 				    &cpu->machine->symbol_context,
@@ -918,7 +915,7 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 	case 0x1:
 		debug("mov.l\tr%i,@(%i,r%i)", r4, lo4 * 4, r8);
 		if (running) {
-			uint32_t addr = cpu->cd.sh.r[r8] + lo4 * 4;
+			addr = cpu->cd.sh.r[r8] + lo4 * 4;
 			debug("\t; r%i+%i = ", r8, lo4 * 4);
 			symbol = get_symbol_name(&cpu->machine->symbol_context,
 			    addr, &offset);

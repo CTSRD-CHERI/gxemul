@@ -151,12 +151,12 @@ DEVINIT(kn230)
 	/*  Register KN230 interrupts 8..15:  */
 	for (i=8; i<=15; i++) {
 		struct interrupt templ;
-		char tmpstr[300];
-		snprintf(tmpstr, sizeof(tmpstr), "%s.kn230.0x%x",
+		char tmpstr2[300];
+		snprintf(tmpstr2, sizeof(tmpstr2), "%s.kn230.0x%x",
 		    devinit->interrupt_path, 1 << i);
 		memset(&templ, 0, sizeof(templ));
 		templ.line = 1 << i;
-		templ.name = tmpstr;
+		templ.name = tmpstr2;
 		templ.extra = d;
                 templ.interrupt_assert = kn230_interrupt_assert;
                 templ.interrupt_deassert = kn230_interrupt_deassert;

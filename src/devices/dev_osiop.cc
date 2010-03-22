@@ -331,13 +331,14 @@ int osiop_execute_scripts_instr(struct cpu *cpu, struct osiop_data *d)
 			int ofs1 = instr1 & 0x00ffffff;
 			int ofs2 = instr2 & 0x00ffffff;
 			int indirect_addressing = dcmd & 0x20;
-			int table_indirect_addressing = dcmd & 0x10;
 			uint32_t dsa = *dsap;
 			uint32_t addr, xfer_byte_count, xfer_addr;
 			int32_t tmp = ofs2 << 8;
 			int res;
 			size_t i;
+
 			tmp >>= 8;
+			table_indirect_addressing = dcmd & 0x10;
 			
 			opcode = (dcmd >> 3) & 1;
 

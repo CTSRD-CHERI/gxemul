@@ -1660,10 +1660,10 @@ cpu->cd.DYNTRANS_ARCH.vph_tlb_entry[r].valid);
 			if (curpc == (MODE_uint_t)
 			    cpu->machine->breakpoints.addr[i]) {
 				if (!cpu->machine->instruction_trace) {
-					int old_quiet_mode = quiet_mode;
+					int tmp_old_quiet_mode = quiet_mode;
 					quiet_mode = 0;
 					DISASSEMBLE(cpu, ib, 1, 0);
-					quiet_mode = old_quiet_mode;
+					quiet_mode = tmp_old_quiet_mode;
 				}
 #ifdef MODE32
 				fatal("BREAKPOINT: pc = 0x%"PRIx32"\n(The "

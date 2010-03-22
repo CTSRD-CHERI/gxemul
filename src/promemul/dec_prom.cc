@@ -656,14 +656,14 @@ int decstation_prom_emul(struct cpu *cpu)
 		cpu_register_dump(cpu->machine, cpu, 1, 0x1);
 		printf("a0 points to: ");
 		for (i=0; i<40; i++) {
-			unsigned char ch = '\0';
+			unsigned char chTmp = '\0';
 			cpu->memory_rw(cpu, cpu->mem, (int32_t)
-			    cpu->cd.mips.gpr[MIPS_GPR_A0] + i, &ch,
-			    sizeof(ch), MEM_READ, CACHE_DATA | NO_EXCEPTIONS);
-			if (ch >= ' ' && ch < 126)
-				printf("%c", ch);
+			    cpu->cd.mips.gpr[MIPS_GPR_A0] + i, &chTmp,
+			    sizeof(chTmp), MEM_READ, CACHE_DATA | NO_EXCEPTIONS);
+			if (chTmp >= ' ' && chTmp < 126)
+				printf("%c", chTmp);
 			else
-				printf("[%02x]", ch);
+				printf("[%02x]", chTmp);
 		}
 		printf("\n");
 		fatal("PROM emulation: unimplemented callback vector 0x%x\n",

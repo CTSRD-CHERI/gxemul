@@ -4503,3 +4503,4 @@ Changelog for GXemul:
 20100319	Fixing flawed mymkstemp by also passing O_CREAT | O_EXCL (used
 		on systems without mkstemp) (reported as Debian bug #574537).
 20100322	const fixes, enabling builds using GCC's -Wcast-qual.
+		Fixes to allow build using GCC's -Wshadow.

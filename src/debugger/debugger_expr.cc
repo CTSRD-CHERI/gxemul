@@ -293,11 +293,11 @@ int debugger_parse_expression(struct machine *m, char *expr, int writeflag,
 	}
 
 	if (prec == 2 && copy[0] == '(' && copy[strlen(copy)-1] == ')') {
-		int res;
+		int res2;
 		copy[strlen(copy)-1] = '\0';
-		res = debugger_parse_expression(m, copy+1, 0, valuep);
+		res2 = debugger_parse_expression(m, copy+1, 0, valuep);
 		free(copy);
-		return res;
+		return res2;
 	}
 
 	/*  Split according to the first lowest priority operator:  */

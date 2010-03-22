@@ -1326,7 +1326,7 @@ DEVICE_ACCESS(sgi_mte)
 	case 0x29f0:
 		/*  Pixel output:  */
 		{
-			uint32_t data = d->reg[0x20c4 / sizeof(uint32_t)];
+			uint32_t pixeldata = d->reg[0x20c4 / sizeof(uint32_t)];
 			uint32_t color = d->reg[0x20d0 / sizeof(uint32_t)]&255;
 			uint32_t x1 = (d->reg[0x2070 / sizeof(uint32_t)]
 			    >> 16) & 0xfff;
@@ -1343,14 +1343,14 @@ DEVICE_ACCESS(sgi_mte)
 				int tmp = y1; y1 = y2; y2 = tmp;
 			}
 			if (x2-x1 <= 15)
-				data <<= 16;
+				pixeldata <<= 16;
 
 			x=x1; y=y1;
 			while (x <= x2 && y <= y2) {
 				unsigned char buf = color;
 				int addr = x + y*1280;
-				int bit_set = data & 0x80000000UL;
-				data <<= 1;
+				int bit_set = pixeldata & 0x80000000UL;
+				pixeldata <<= 1;
 				if (x < 1280 && y < 1024 && bit_set)
 					cpu->memory_rw(cpu, cpu->mem,
 					    0x38000000 + addr, &buf,1,MEM_WRITE,

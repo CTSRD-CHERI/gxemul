@@ -463,24 +463,57 @@ rm -f _testprog
 
 
 #  -Wstrict-aliasing
-if [ ! z"$DEBUG" = zYES ]; then
-	printf "checking whether -Wstrict-aliasing can be used... "
-	$CXX $CXXFLAGS -Wstrict-aliasing _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
-	cat _testprog.stdout >> _testprog.error
-	if grep strict _testprog.error > /dev/null 2>&1; then
-		printf "no\n"
+printf "checking whether -Wstrict-aliasing can be used... "
+$CXX $CXXFLAGS -Wstrict-aliasing _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
+cat _testprog.stdout >> _testprog.error
+if grep strict _testprog.error > /dev/null 2>&1; then
+	printf "no\n"
+else
+	if [ -x _testprog ]; then
+		CWARNINGS="-Wstrict-aliasing $CWARNINGS"
+		printf "yes\n"
 	else
-		if [ -x _testprog ]; then
-			CWARNINGS="-Wstrict-aliasing $CWARNINGS"
-			printf "yes\n"
-		else
-			printf "no\n"
-		fi
+		printf "no\n"
 	fi
-	rm -f _testprog _testprog.error _testprog.stdout
 fi
+rm -f _testprog _testprog.error _testprog.stdout
 
-#  -O for optimization
+
+#  -Wcast-qual
+printf "checking whether -Wcast-qual can be used... "
+$CXX $CXXFLAGS -Wcast-qual _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
+cat _testprog.stdout >> _testprog.error
+if grep strict _testprog.error > /dev/null 2>&1; then
+	printf "no\n"
+else
+	if [ -x _testprog ]; then
+		CWARNINGS="-Wcast-qual $CWARNINGS"
+		printf "yes\n"
+	else
+		printf "no\n"
+	fi
+fi
+rm -f _testprog _testprog.error _testprog.stdout
+
+
+#  -Wshadow
+printf "checking whether -Wshadow can be used... "
+$CXX $CXXFLAGS -Wshadow _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
+cat _testprog.stdout >> _testprog.error
+if grep strict _testprog.error > /dev/null 2>&1; then
+	printf "no\n"
+else
+	if [ -x _testprog ]; then
+		CWARNINGS="-Wshadow $CWARNINGS"
+		printf "yes\n"
+	else
+		printf "no\n"
+	fi
+fi
+rm -f _testprog _testprog.error _testprog.stdout
+
+
+#  -O optimization for non-debug builds. Try -O and -O3.
 if [ ! z"$DEBUG" = zYES ]; then
 	$CXX $CXXFLAGS -O _testprog.cc -o _testprog 2> /dev/null
 	if [ -x _testprog ]; then

@@ -422,12 +422,12 @@ DEVINIT(i80321)
 	/*  Register 32 i80321 interrupts:  */
 	for (i=0; i<32; i++) {
 		struct interrupt templ;
-		char tmpstr[300];
-		snprintf(tmpstr, sizeof(tmpstr), "%s.i80321.%i",
+		char tmpstr2[300];
+		snprintf(tmpstr2, sizeof(tmpstr2), "%s.i80321.%i",
 		    devinit->interrupt_path, i);
 		memset(&templ, 0, sizeof(templ));
 		templ.line = 1 << i;
-		templ.name = tmpstr;
+		templ.name = tmpstr2;
 		templ.extra = d;
 		templ.interrupt_assert = i80321_interrupt_assert;
 		templ.interrupt_deassert = i80321_interrupt_deassert;
@@ -438,9 +438,9 @@ DEVINIT(i80321)
 		 *  i80321 timer interrupts (nr 9 and 10):
 		 */
 		if (i == 9)
-			INTERRUPT_CONNECT(tmpstr, cpu->cd.arm.tmr0_irq);
+			INTERRUPT_CONNECT(tmpstr2, cpu->cd.arm.tmr0_irq);
 		if (i == 10)
-			INTERRUPT_CONNECT(tmpstr, cpu->cd.arm.tmr1_irq);
+			INTERRUPT_CONNECT(tmpstr2, cpu->cd.arm.tmr1_irq);
 	}
 
 	d->status = &cpu->cd.arm.i80321_isrc;

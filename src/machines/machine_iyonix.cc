@@ -57,7 +57,7 @@ MACHINE_SETUP(iyonix)
 {
 	char tmpstr[1000];
 	uint32_t bootblock_addr;
-	struct bootconfig bootconfig;
+	struct bootconfig bootconfigData;
 
 	machine->machine_name = strdup("Iyonix");
 
@@ -100,16 +100,16 @@ MACHINE_SETUP(iyonix)
 
 	bootblock_addr = machine->physical_ram_in_mb * 1048576 - 65536 - 16384;
 	cpu->cd.arm.r[0] = bootblock_addr;
-	memset(&bootconfig, 0, sizeof(bootconfig));
+	memset(&bootconfigData, 0, sizeof(bootconfigData));
 
 	store_32bit_word_in_host(cpu, (unsigned char *)
-	    &bootconfig.magic, BOOTCONFIG_MAGIC);
+	    &bootconfigData.magic, BOOTCONFIG_MAGIC);
 	store_32bit_word_in_host(cpu, (unsigned char *)
-	    &bootconfig.version, BOOTCONFIG_VERSION);
+	    &bootconfigData.version, BOOTCONFIG_VERSION);
 
 	/*  TODO: More fields.  */
 
-	store_buf(cpu, bootblock_addr, (char *)&bootconfig, sizeof(bootconfig));
+	store_buf(cpu, bootblock_addr, (char *)&bootconfigData, sizeof(bootconfigData));
 }
 
 

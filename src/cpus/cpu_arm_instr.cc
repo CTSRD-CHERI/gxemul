@@ -2728,8 +2728,8 @@ X(to_be_translated)
 			break;
 		}
 		if ((iword & 0x0e000090) == 0x00000090) {
-			int imm = ((iword >> 4) & 0xf0) | (iword & 0xf);
-			int regform = !(iword & 0x00400000);
+			regform = !(iword & 0x00400000);
+			imm = ((iword >> 4) & 0xf0) | (iword & 0xf);
 			p_bit = main_opcode & 1;
 			ic->arg[0] = (size_t)(&cpu->cd.arm.r[rn]);
 			ic->arg[2] = (size_t)(&cpu->cd.arm.r[rd]);
@@ -2911,25 +2911,26 @@ X(to_be_translated)
 			/*  NOTE/TODO: This assumes 4KB pages,
 			    it will not work with 1KB pages.  */
 			if (ofs >= 0 && ofs <= max && p != NULL) {
-				unsigned char c[4];
+				unsigned char cbuf[4];
 				int len = b_bit? 1 : 4;
 				uint32_t x, a = (addr & 0xfffff000) | ofs;
 				/*  ic->f = cond_instr(mov);  */
 				ic->f = arm_dpi_instr[condition_code + 16*0xd];
 				ic->arg[2] = (size_t)(&cpu->cd.arm.r[rd]);
 
-				memcpy(c, p + (a & 0xfff), len);
+				memcpy(cbuf, p + (a & 0xfff), len);
 
 				if (b_bit) {
-					x = c[0];
+					x = cbuf[0];
 				} else {
 					if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
-						x = c[0] + (c[1]<<8) +
-						    (c[2]<<16) + (c[3]<<24);
+						x = cbuf[0] + (cbuf[1]<<8) +
+						    (cbuf[2]<<16) + (cbuf[3]<<24);
 					else
-						x = c[3] + (c[2]<<8) +
-						    (c[1]<<16) + (c[0]<<24);
+						x = cbuf[3] + (cbuf[2]<<8) +
+						    (cbuf[1]<<16) + (cbuf[0]<<24);
 				}
+				
 				ic->arg[1] = x;
 			}
 		}

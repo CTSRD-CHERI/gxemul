@@ -815,8 +815,8 @@ int arm_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 		 *  xxxx0000 1UAShhhh llllssss 1001mmmm  (Rl,Rh,Rm,Rs)
 		 */
 		if ((iw & 0x0f8000f0) == 0x00800090) {
-			int u_bit = (iw >> 22) & 1;
 			int a_bit = (iw >> 21) & 1;
+			u_bit = (iw >> 22) & 1;
 			debug("%s%sl%s%s\t", u_bit? "s" : "u",
 			    a_bit? "mla" : "mul", condition, s_bit? "s" : "");
 			debug("%s,%s,", arm_regname[r12], arm_regname[r16]);
@@ -842,7 +842,7 @@ int arm_cpu_disassemble_instr(struct cpu *cpu, unsigned char *ib,
 		 *  xxxx0001 0010.... ........ 00L1mmmm  bx/blx rm
 		 */
 		if ((iw & 0x0ff000d0) == 0x01200010) {
-			int l_bit = iw & 0x20;
+			l_bit = iw & 0x20;
 			debug("b%sx%s\t%s\n", l_bit? "l" : "", condition,
 			    arm_regname[iw & 15]);
 			break;
