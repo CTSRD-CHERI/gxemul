@@ -65,7 +65,7 @@ struct machine_arcbios {
 
 	/*  File handles:  */
 	int		file_handle_in_use[ARC_MAX_HANDLES];
-	char		*file_handle_string[ARC_MAX_HANDLES];
+	const char	*file_handle_string[ARC_MAX_HANDLES];
 	uint64_t	current_seek_offset[ARC_MAX_HANDLES];
 
 	/*  Memory:  */

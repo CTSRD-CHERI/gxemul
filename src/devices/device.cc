@@ -254,7 +254,7 @@ void *device_add(struct machine *machine, const char *name_and_params)
 	struct device_entry *p;
 	struct devinit devinit;
 	const char *s2;
-	char *s3;
+	const char *s3;
 	size_t len, interrupt_path_len = strlen(machine->path) + 100;
 	int quoted;
 
@@ -302,7 +302,7 @@ void *device_add(struct machine *machine, const char *name_and_params)
 		/*  s2 now points to the next param. eg "addr=1234"  */
 
 		/*  Get a word (until there is a '=' sign):  */
-		s3 = (char *) s2;
+		s3 = s2;
 		while (*s3 != '=' && *s3 != '\0')
 			s3 ++;
 		if (s3 == s2) {

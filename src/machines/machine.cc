@@ -128,8 +128,10 @@ void machine_destroy(struct machine *machine)
 	for (i=0; i<machine->ncpus; i++)
 		cpu_destroy(machine->cpus[i]);
 
-	if (machine->name != NULL)
-		free(machine->name);
+	// TODO: Memory leak; but it's ok, since the whole legacy thing should
+	// be replaced anyway.
+	// if (machine->name != NULL)
+	// 	free(machine->name);
 
 	if (machine->path != NULL)
 		free(machine->path);
@@ -699,7 +701,7 @@ void machine_entry_add_alias(struct machine_entry *me, const char *name)
 	CHECK_ALLOCATION(me->aliases = (char **) realloc(me->aliases,
 	    sizeof(char *) * me->n_aliases));
 
-	me->aliases[me->n_aliases - 1] = (char *) name;
+	me->aliases[me->n_aliases - 1] = strdup(name);
 }
 
 

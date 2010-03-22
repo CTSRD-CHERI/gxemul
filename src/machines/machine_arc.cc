@@ -52,11 +52,14 @@ MACHINE_SETUP(arc)
 	int i, j;
 	const char *eaddr_string = "eaddr=10:20:30:40:50:60";		/*  bogus  */
 	unsigned char macaddr[6];
+	char *machineName;
 
-	CHECK_ALLOCATION(machine->machine_name = (char *) malloc(MACHINE_NAME_MAXBUF));
+	CHECK_ALLOCATION(machineName = (char *) malloc(MACHINE_NAME_MAXBUF));
 
 	cpu->byte_order = EMUL_LITTLE_ENDIAN;
-	snprintf(machine->machine_name, MACHINE_NAME_MAXBUF, "ARC");
+	snprintf(machineName, MACHINE_NAME_MAXBUF, "ARC");
+
+	machine->machine_name = machineName;
 
 	switch (machine->machine_subtype) {
 
@@ -110,13 +113,11 @@ MACHINE_SETUP(arc)
 
 		switch (machine->machine_subtype) {
 		case MACHINE_ARC_JAZZ_PICA:
-			strlcat(machine->machine_name,
-			    " (Microsoft Jazz, Acer PICA-61)",
+			strlcat(machineName, " (Microsoft Jazz, Acer PICA-61)",
 			    MACHINE_NAME_MAXBUF);
 			break;
 		case MACHINE_ARC_JAZZ_MAGNUM:
-			strlcat(machine->machine_name,
-			    " (Microsoft Jazz, MIPS Magnum)",
+			strlcat(machineName, " (Microsoft Jazz, MIPS Magnum)",
 			    MACHINE_NAME_MAXBUF);
 			break;
 		default:

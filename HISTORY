@@ -4502,3 +4502,4 @@ Changelog for GXemul:
 		dyntrans system works (in pre-0.6.x and in 0.6.x).
 20100319	Fixing flawed mymkstemp by also passing O_CREAT | O_EXCL (used
 		on systems without mkstemp) (reported as Debian bug #574537).
+20100322	const fixes, enabling builds using GCC's -Wcast-qual.

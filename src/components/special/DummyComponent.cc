@@ -984,15 +984,15 @@ static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed
 
 	// Compare with single-step stream:
 	{
-		GXemul gxemul;
+		GXemul gxemul2;
 		stringstream singleStepStream;
-		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'A'));
-		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'B'));
-		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'C'));
+		gxemul2.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'A'));
+		gxemul2.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'B'));
+		gxemul2.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'C'));
 
-		refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
-		refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
-		refcount_ptr<Component> counterC = gxemul.GetRootComponent()->GetChildren()[2];
+		counterA = gxemul2.GetRootComponent()->GetChildren()[0];
+		counterB = gxemul2.GetRootComponent()->GetChildren()[1];
+		counterC = gxemul2.GetRootComponent()->GetChildren()[2];
 
 		counterA->SetVariableValue("counter", "0");
 		counterB->SetVariableValue("counter", "0");
@@ -1003,8 +1003,8 @@ static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed
 		counterC->SetVariableValue("frequency", "10");
 
 		for (int i=0; i<n; ++i) {
-			gxemul.SetRunState(GXemul::SingleStepping);
-			gxemul.Execute();
+			gxemul2.SetRunState(GXemul::SingleStepping);
+			gxemul2.Execute();
 		}
 		
 		UnitTest::Assert("output stream mismatch?", os.str() == singleStepStream.str());
@@ -1043,15 +1043,15 @@ static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed
 
 	// Compare with single-step stream:
 	{
-		GXemul gxemul;
+		GXemul gxemul2;
 		stringstream singleStepStream;
-		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'A'));
-		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'B'));
-		gxemul.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'C'));
+		gxemul2.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'A'));
+		gxemul2.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'B'));
+		gxemul2.GetRootComponent()->AddChild(new DummyComponentWithCounter(&singleStepStream, 'C'));
 
-		refcount_ptr<Component> counterA = gxemul.GetRootComponent()->GetChildren()[0];
-		refcount_ptr<Component> counterB = gxemul.GetRootComponent()->GetChildren()[1];
-		refcount_ptr<Component> counterC = gxemul.GetRootComponent()->GetChildren()[2];
+		counterA = gxemul2.GetRootComponent()->GetChildren()[0];
+		counterB = gxemul2.GetRootComponent()->GetChildren()[1];
+		counterC = gxemul2.GetRootComponent()->GetChildren()[2];
 
 		counterA->SetVariableValue("counter", "0");
 		counterB->SetVariableValue("counter", "0");
@@ -1062,8 +1062,8 @@ static void Test_DummyComponent_Execute_Continuous_ThreeComponentsDifferentSpeed
 		counterC->SetVariableValue("frequency", "18");
 
 		for (int i=0; i<n; ++i) {
-			gxemul.SetRunState(GXemul::SingleStepping);
-			gxemul.Execute();
+			gxemul2.SetRunState(GXemul::SingleStepping);
+			gxemul2.Execute();
 		}
 		
 		UnitTest::Assert("output stream mismatch?", os.str() == singleStepStream.str());

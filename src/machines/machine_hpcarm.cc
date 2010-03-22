@@ -87,9 +87,9 @@ MACHINE_SETUP(hpcarm)
 	case MACHINE_HPCARM_JORNADA720:
 	case MACHINE_HPCARM_JORNADA728:
 		/*  SA-1110 206MHz  */
-		machine->machine_name = (machine->machine_subtype ==
-		    MACHINE_HPCARM_JORNADA720) ?
-		    (char *)"Jornada 720" : (char *)"Jornada 728";
+		machine->machine_name =
+		    ((machine->machine_subtype == MACHINE_HPCARM_JORNADA720) ?
+		    "Jornada 720" : "Jornada 728");
 		hpc_fb_addr = 0x48200000;
 		hpc_fb_xsize = 640;
 		hpc_fb_ysize = 240;

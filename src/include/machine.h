@@ -102,7 +102,7 @@ struct machine {
 	struct settings *settings;
 
 	/*  Name as choosen by the user:  */
-	char	*name;
+	const char *name;
 
 	/*  Full "path" to the machine, e.g. "machine[0]":  */
 	char	*path;
@@ -112,7 +112,7 @@ struct machine {
 	int	machine_subtype;	/*  MACHINE_DEC_3MAX_5000, ..  */
 
 	/*  Name set by code in src/machines/machine_*.c:  */
-	char	*machine_name;
+	const char *machine_name;
 
 	/*  The serial number is mostly used when emulating multiple machines
 	    in a network. nr_of_nics is the current nr of network cards, which

@@ -1013,7 +1013,7 @@ static int arcbios_handle_to_disk_id_and_type(struct machine *machine,
 	int handle, int *typep)
 {
 	int id, cdrom;
-	char *s;
+	const char *s;
 
 	if (handle < 0 || handle >= ARC_MAX_HANDLES)
 		return -1;
@@ -1045,8 +1045,8 @@ static int arcbios_handle_to_disk_id_and_type(struct machine *machine,
 static void arcbios_handle_to_start_and_size(struct machine *machine,
 	int handle, uint64_t *start, uint64_t *size)
 {
-	char *s = machine->md.arc->file_handle_string[handle];
-	char *s2;
+	const char *s = machine->md.arc->file_handle_string[handle];
+	const char *s2;
 	int disk_id, disk_type;
 
 	disk_id = arcbios_handle_to_disk_id_and_type(machine,
@@ -1521,10 +1521,13 @@ int arcbios_emul(struct cpu *cpu)
 		} else {
 			machine->md.arc->file_handle_in_use[
 			    cpu->cd.mips.gpr[MIPS_GPR_A0]] = 0;
-			if (machine->md.arc->file_handle_string[
-			    cpu->cd.mips.gpr[MIPS_GPR_A0]] != NULL)
-				free(machine->md.arc->file_handle_string[
-				    cpu->cd.mips.gpr[MIPS_GPR_A0]]);
+			// TODO: Yes, this is a memory leak. But it will be
+			// scrapped in favor of real code after the rewrite (I
+			// hope).
+			//if (machine->md.arc->file_handle_string[
+			//    cpu->cd.mips.gpr[MIPS_GPR_A0]] != NULL)
+			//	free(machine->md.arc->file_handle_string[
+			//	    cpu->cd.mips.gpr[MIPS_GPR_A0]]);
 			machine->md.arc->file_handle_string[cpu->cd.mips.
 			    gpr[MIPS_GPR_A0]] = NULL;
 			cpu->cd.mips.gpr[MIPS_GPR_V0] = ARCBIOS_ESUCCESS;
@@ -2430,7 +2433,7 @@ void arcbios_init(struct machine *machine, int is64bit, uint64_t sgi_ram_offset,
 	for (i=0; i<ARC_MAX_HANDLES; i++) {
 		machine->md.arc->file_handle_in_use[i] = i<3? 1 : 0;
 		machine->md.arc->file_handle_string[i] = i>=3? NULL :
-		    (i==0? (char*)"(stdin)" : (i==1? (char*)"(stdout)" : (char*)"(stderr)"));
+		    (i==0? "(stdin)" : (i==1? "(stdout)" : "(stderr)"));
 		machine->md.arc->current_seek_offset[i] = 0;
 	}
 

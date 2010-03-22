@@ -1185,7 +1185,7 @@ DEVICE_ACCESS(vga_ctrl)
  *  like 80 and 25, respectively.
  */
 void dev_vga_init(struct machine *machine, struct memory *mem,
-	uint64_t videomem_base, uint64_t control_base, char *name)
+	uint64_t videomem_base, uint64_t control_base, const char *name)
 {
 	struct vga_data *d;
 	size_t allocsize, i;
