@@ -35,6 +35,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "ComponentFactory.h"
 #include "console.h"
 #include "cpu.h"
 #include "debugger.h"
@@ -192,7 +193,22 @@ void internal_w(char *arg)
 		exit(0);
 		break;
 	case 'U':
-		exit(UnitTest::RunTests());
+		{
+			int result = UnitTest::RunTests();
+
+			// Hack to prevent leaks:
+			ComponentFactory::UnregisterAllComponentClasses();
+
+#ifndef NDEBUG
+			int leaks = check_leaks();
+			if (leaks > 0) {
+				cerr << "Having memory leaks counts as failure to run the tests!\n";
+				exit(1);
+			}
+#endif
+
+			exit(result);
+		}
 		break;
 	default:
 		fprintf(stderr, "internal_w(): UNIMPLEMENTED arg = '%s'\n",

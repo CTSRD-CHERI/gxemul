@@ -48,10 +48,10 @@ static struct ComponentListEntry componentList[] = {
 };
 
 // List of components that are added dynamically at runtime:
-static vector<ComponentListEntry> componentListRunTime;
+static vector<ComponentListEntry>* componentListRunTime = NULL;
 
 
-bool ComponentFactory::RegisterComponentClass(const string& name,
+bool ComponentFactory::RegisterComponentClass(const char* name,
 	refcount_ptr<Component> (*createFunc)(const ComponentCreateArgs& args),
 	string (*getAttributeFunc)(const string& attributeName))
 {
@@ -63,14 +63,24 @@ bool ComponentFactory::RegisterComponentClass(const string& name,
 		return false;
 	}
 
+	if (componentListRunTime == NULL)
+		componentListRunTime = new vector<ComponentListEntry>();
+
 	ComponentListEntry cle;
-	cle.componentName = strdup(name.c_str());
+	cle.componentName = name;
 	cle.Create = createFunc;
 	cle.GetAttribute = getAttributeFunc;
 
-	componentListRunTime.push_back(cle);
+	componentListRunTime->push_back(cle);
 
 	return true;
+}
+
+
+void ComponentFactory::UnregisterAllComponentClasses()
+{
+	delete componentListRunTime;
+	componentListRunTime = NULL;
 }
 
 
@@ -130,13 +140,13 @@ refcount_ptr<Component> ComponentFactory::CreateComponent(
 		++ i;
 	}
 
-	for (i=0; i<componentListRunTime.size(); ++i) {
-		if (componentName == componentListRunTime[i].componentName
+	for (i=0; componentListRunTime != NULL && i<componentListRunTime->size(); ++i) {
+		if (componentName == (*componentListRunTime)[i].componentName
 #ifndef UNSTABLE_DEVEL
-		    && !componentListRunTime[i].GetAttribute("stable").empty()
+		    && !(*componentListRunTime)[i].GetAttribute("stable").empty()
 #endif
 		    )
-			return componentListRunTime[i].Create(args);
+			return (*componentListRunTime)[i].Create(args);
 	}
 
 	return NULL;
@@ -187,9 +197,9 @@ string ComponentFactory::GetAttribute(const string& name,
 		++ i;
 	}
 	
-	for (i=0; i<componentListRunTime.size(); ++i) {
-		if (name == componentListRunTime[i].componentName)
-			return componentListRunTime[i].GetAttribute(
+	for (i=0; componentListRunTime!=NULL && i<componentListRunTime->size(); ++i) {
+		if (name == (*componentListRunTime)[i].componentName)
+			return (*componentListRunTime)[i].GetAttribute(
 			    attributeName);
 	}
 	
@@ -220,14 +230,14 @@ vector<string> ComponentFactory::GetAllComponentNames(bool onlyTemplates)
 		++ i;
 	}
 
-	for (i=0; i<componentListRunTime.size(); ++i) {
+	for (i=0; componentListRunTime!=NULL && i<componentListRunTime->size(); ++i) {
 		if ((!onlyTemplates ||
-		    componentListRunTime[i].GetAttribute("template") == "yes")
+		    (*componentListRunTime)[i].GetAttribute("template") == "yes")
 #ifndef UNSTABLE_DEVEL
-		    && !componentListRunTime[i].GetAttribute("stable").empty()
+		    && !(*componentListRunTime)[i].GetAttribute("stable").empty()
 #endif
 		    )
-			result.push_back(componentListRunTime[i].componentName);
+			result.push_back((*componentListRunTime)[i].componentName);
 	}
 
 	return result;

@@ -480,7 +480,7 @@ rm -f _testprog _testprog.error _testprog.stdout
 
 
 #  -Wnon-virtual-dtor
-printf "checking whether -Wcast-qual can be used... "
+printf "checking whether -Wnon-virtual-dtor can be used... "
 $CXX $CXXFLAGS -Wnon-virtual-dtor _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
 cat _testprog.stdout >> _testprog.error
 if grep strict _testprog.error > /dev/null 2>&1; then

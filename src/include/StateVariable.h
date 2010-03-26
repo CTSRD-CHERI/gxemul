@@ -86,12 +86,11 @@ public:
 		Custom
 	};
 
-public:
-	/**
-	 * \brief Default constructor.
-	 */
+private:
+	/* Disable construction without name. */
 	StateVariable();
 
+public:
 	/**
 	 * \brief Constructor for a String StateVariable.
 	 *

@@ -1,3 +1,5 @@
+#include <iostream>
+
 /*
  *  GXemul specific changes to debug_new.cc:
  *
@@ -10,6 +12,7 @@
  *      suppress a Doxygen warning
  *   x) "@file" changed to "@ file" to suppress a Doxygen warning.
  *   x) variable names in local scopes changed to allow usage of GCC's -Wshadow
+ *   x) a "catch point" added for catching specific (repeatable) allocations
  */
 
 #ifndef NDEBUG
@@ -535,6 +538,23 @@ void* operator new(size_t size, const char* file, int line)
         _DEBUG_NEW_ERROR_ACTION;
     }
     void* pointer = (char*)ptr + aligned_list_item_size;
+
+    // GXemul hack/addition: Crash on a specific allocation. Useful
+    // for getting a call stack for a memory leak, at the point where the
+    // actual allocation took place. (Only possible if the address is
+    // stable over multiple runs.)
+    if ((size_t)pointer == 0xfefefefecdcdcdcdULL)
+    {
+	static int counter = 0;
+	counter ++;
+    	std::cerr << "--> MEMORY LEAK CATCH POINT, counter = " << counter << "\n";
+
+	if (counter == -42)
+	{
+	    abort();
+	}
+    }
+
     size_t hash_index = _DEBUG_NEW_HASH(pointer);
 #if _DEBUG_NEW_FILENAME_LEN == 0
     ptr->file = file;

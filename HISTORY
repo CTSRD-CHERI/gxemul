@@ -4504,3 +4504,5 @@ Changelog for GXemul:
 		on systems without mkstemp) (reported as Debian bug #574537).
 20100322	const fixes, enabling builds using GCC's -Wcast-qual.
 		Fixes to allow build using GCC's -Wshadow.
+20100326	Running 'make test' will now treat memory leaks as test
+		failure (in debug builds only). Also fixing a memory leak.

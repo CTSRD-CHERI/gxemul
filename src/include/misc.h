@@ -61,6 +61,7 @@ typedef char stringchar;
 
 #include <map>
 using std::map;
+using std::pair;
 
 #include <list>
 using std::list;

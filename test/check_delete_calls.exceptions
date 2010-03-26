@@ -6,4 +6,4 @@
 ./src/include/thirdparty/fast_mutex.h
 ./src/include/thirdparty/static_assert.h
 ./src/main/debug_new.cc
-
+./src/main/ComponentFactory.cc

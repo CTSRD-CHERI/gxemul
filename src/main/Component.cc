@@ -51,11 +51,6 @@ Component::Component(const string& className, const string& visibleClassName)
 }
 
 
-Component::~Component()
-{
-}
-
-
 string Component::GetClassName() const
 {
 	return m_className;

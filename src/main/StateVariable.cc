@@ -33,13 +33,6 @@
 #include "StringHelper.h"
 
 
-StateVariable::StateVariable()
-	: m_type(String)
-{
-	m_value.pstr = NULL;
-}
-
-
 StateVariable::StateVariable(const string& name, string* ptrToString)
 	: m_name(name)
 	, m_type(String)

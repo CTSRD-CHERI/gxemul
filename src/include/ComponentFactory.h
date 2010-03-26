@@ -116,14 +116,15 @@ public:
 	 * Component classes added using this function are then available
 	 * when using e.g. CreateComponent.
 	 *
-	 * @param name The name of the component class.
+	 * @param name The name of the component class. Must be a const char*
+	 *	which lives for the lifetime of the program.
 	 * @param createFunc A pointer to the component's Create function.
 	 * @param getAttributeFunc A pointer to the component's GetAttribute
 	 *	function.
 	 * @return True if the component class was registered, false
 	 *	if the name was already in use.
 	 */
-	static bool RegisterComponentClass(const string& name,
+	static bool RegisterComponentClass(const char* name,
 		refcount_ptr<Component> (*createFunc)(const ComponentCreateArgs& args),
 		string (*getAttributeFunc)(const string& attributeName));
 
@@ -132,6 +133,11 @@ public:
 	 */
 	static bool GetCreationArgOverrides(ComponentCreationSettings& settings,
 		const ComponentCreateArgs& createArgs);
+
+	/**
+	 * \brief Unregisters all manually registered component classes.
+	 */
+	static void UnregisterAllComponentClasses();
 
 
 	/********************************************************************/
