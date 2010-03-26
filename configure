@@ -448,18 +448,22 @@ if [ -x _testprog ]; then
 	if [ z"$UNSTABLE" = zYES ]; then
 		printf "checking whether -Werror can be used... "
 		rm -f _testprog
-		$CXX $CXXFLAGS $CWARNINGS _testprog.cc -o _testprog -Werror 2> /dev/null
+		$CXX $CWARNINGS $CXXFLAGS _testprog.cc -o _testprog -Werror 2> _testprog.err
 		if [ -x _testprog ]; then
 			printf "yes\n"
 			CWARNINGS="$CWARNINGS -Werror"
 		else
 			printf "no\n"
+			
+			#printf "CXXFLAGS = $CXXFLAGS\n"
+			#cat _testprog.err
+			#printf "\n"
 		fi
 	fi
 else
 	printf "no\n"
 fi
-rm -f _testprog
+rm -f _testprog _testprog.err
 
 
 #  -Wstrict-aliasing
@@ -488,6 +492,40 @@ if grep strict _testprog.error > /dev/null 2>&1; then
 else
 	if [ -x _testprog ]; then
 		CWARNINGS="-Wnon-virtual-dtor $CWARNINGS"
+		printf "yes\n"
+	else
+		printf "no\n"
+	fi
+fi
+rm -f _testprog _testprog.error _testprog.stdout
+
+
+#  -Wextra -Wno-unused-parameter
+printf "checking whether -Wextra -Wno-unused-parameter can be used... "
+$CXX $CXXFLAGS -Wextra -Wno-unused-parameter _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
+cat _testprog.stdout >> _testprog.error
+if grep strict _testprog.error > /dev/null 2>&1; then
+	printf "no\n"
+else
+	if [ -x _testprog ]; then
+		CWARNINGS="$CWARNINGS -Wextra -Wno-unused-parameter"
+		printf "yes\n"
+	else
+		printf "no\n"
+	fi
+fi
+rm -f _testprog _testprog.error _testprog.stdout
+
+
+#  -Wcast-align
+printf "checking whether -Wcast-align can be used... "
+$CXX $CXXFLAGS -Wcast-align _testprog.cc -o _testprog 1> _testprog.stdout 2>&1
+cat _testprog.stdout >> _testprog.error
+if grep strict _testprog.error > /dev/null 2>&1; then
+	printf "no\n"
+else
+	if [ -x _testprog ]; then
+		CWARNINGS="-Wcast-align $CWARNINGS"
 		printf "yes\n"
 	else
 		printf "no\n"

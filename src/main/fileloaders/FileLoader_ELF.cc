@@ -216,7 +216,7 @@ bool FileLoader_ELF::LoadIntoComponent(refcount_ptr<Component> component, ostrea
 		return false;
 	}
 
-	if (e_machine >= 0 && e_machine < N_ELF_MACHINE_TYPES)
+	if (e_machine < N_ELF_MACHINE_TYPES)
 		messages << elf_machine_type[e_machine];
 	else
 		messages << "machine type '" << e_machine << "'";

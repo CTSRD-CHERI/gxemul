@@ -44,7 +44,7 @@ struct ComponentListEntry {
 #include "../../components_h.h"
 static struct ComponentListEntry componentList[] = {
 #include "../../components.h"
-	{ NULL }
+	{ NULL, NULL, NULL }
 };
 
 // List of components that are added dynamically at runtime:
