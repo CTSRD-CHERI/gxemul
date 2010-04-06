@@ -4506,3 +4506,5 @@ Changelog for GXemul:
 		Fixes to allow build using GCC's -Wshadow.
 20100326	Running 'make test' will now treat memory leaks as test
 		failure (in debug builds only). Also fixing a memory leak.
+20100406	Bogus hack to machine_evbmips.cc to let RTEMS print some boot
+		messages (again?) for mvme5500.

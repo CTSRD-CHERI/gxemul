@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2006-2010  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,7 @@
  *
  *  COMMENT: MVMEPPC machines
  *
- *  This is for experiments with NetBSD/mvmeppc or RTEMS.
+ *  This is for experiments with NetBSD/mvmeppc.
  *  (ftp://ftp.netbsd.org/pub/NetBSD/arch/mvmeppc/snapshot/20020302/README)
  *
  *  Note:  MVME machines that really adhere to the PReP standard should be
@@ -54,7 +54,7 @@
 
 MACHINE_SETUP(mvmeppc)
 {
-	char tmpstr[300];
+	char tmpstr[300], tmpstr2[300];;
 	struct pci_data *pci_data = NULL;
 
 	switch (machine->machine_subtype) {
@@ -96,14 +96,24 @@ MACHINE_SETUP(mvmeppc)
 		break;
 
 	case MACHINE_MVMEPPC_5500:
+		/*  Could possibly be used for RTEMS experiments some day.  */
 		machine->machine_name = strdup("MVME5500");
 
 		/*  GT64260 interrupt and PCI controller:  */
+		snprintf(tmpstr, sizeof(tmpstr), "%s.cpu[%i]",
+		    machine->path, machine->bootstrap_cpu);
+		snprintf(tmpstr2, sizeof(tmpstr2), "%s.cpu[%i]",
+		    machine->path, machine->bootstrap_cpu);
 		pci_data = dev_gt_init(machine, machine->memory,
-		    0xf1000000, "TODO: timer irq", "TODO: isa irq", 260);
+		    0xf1000000,
+		    tmpstr,		// timer irq path: TODO
+		    tmpstr2,		// ISA irq path: TODO
+		    260);
 
 		/*  TODO: irq  */
-		device_add(machine, "ns16550 irq=0 addr=0xf1120000");
+		snprintf(tmpstr, sizeof(tmpstr), "ns16550 irq=%s.cpu[%i] addr=0xf1120000",
+		    machine->path, machine->bootstrap_cpu);
+		device_add(machine, tmpstr);
 
 		break;
 
