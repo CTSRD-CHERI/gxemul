@@ -86,16 +86,45 @@ The emulator works well enough to run complete operating systems. These
 are often refered to as <i>guest</i> operating systems, in contrast to the 
 <i>host</i> operating system which the emulator is running under.
 
+<p>The emulation, however, is not necessarily complete enough to support
+previously untested guest operating. In many cases, the emulated devices have been
+implemented "on demand" as required by a specific guest operating system,
+and trying to run another operating system (or even a different version of
+a supported one) will trigger new things that are not yet implemented in
+the emulator. This page lists specific versions that are known to work.
+What this usually means is:
+
+<p>
+<ul>
+	<li>A full installation from scratch should work (usually from
+		a CD-ROM image or via the network).
+	<li>Logging in to the installed guest OS after install.
+	<li>Doing something non-trivial.
+</ul>
+
+<p>
+Printing "Hello world" is considered trivial, whereas e.g. building GXemul
+itself inside the emulated guest operating system is considered non-trivial.
+
+
+
+<p><b>Disk images:</b>
+
 <p>Although it is possible to let a guest OS access real hardware, such as 
 harddisks, it is much more flexible and attractive to simulate harddisks 
-using files residing in the host's filesystem. On Unix-like systems, files 
-may contain holes, which makes this really simple. To the guest operating 
-system, the harddisk image looks and acts like a real disk.
+using files residing in the host's filesystem.
+See <a href="misc.html#disk">this section</a> for details about how to
+use disk images.
 
-<p>The version numbers of the various operating systems were the latest 
-versions that worked satisfactory with GXemul at the time this page was 
-updated; if new versions have been released since then, they might work as 
-well.
+<p>While these files may look
+large (several GBs is common for hard disks), on Unix-like file systems, files 
+may contain holes, which means that the disk image files do not actually
+use up all that space from the start, but rather grows only as data is written
+to it. To the guest operating system, the harddisk image looks and acts like
+a real disk.
+
+
+<p><b>Unsupported guest operating systems, or experimental install instructions:</b>
 
 <p>In addition to the "working" guest operating systems listed above,
 you might find the following information interesting:
@@ -119,12 +148,24 @@ specific release of GXemul,</font> for example some of these
 modes may be legacy modes that worked before but not any longer,
 or are not yet working but could be in the future.
 
+
+<p><b>Version numbers:</b>
+
+<p>The version numbers of the various operating systems were the latest 
+versions that worked satisfactory with GXemul at the time this page was 
+updated; if new versions have been released since then, they might work as 
+well.
+
 <p>Some operating systems are listed with a version number <i>less</i> 
 than what was available at the time of this GXemul release (e.g. 
-NetBSD/prep). The reasons for this may be because of incompleteness in 
-GXemul's machine, device, and/or processor implementations.
-It may also simply be that I have not had time to verify the 
-installation prodecure with any higher version than the listed one.
+NetBSD/prep). The reasons for this is usually one of the following:
+<ul>
+	<li>incompleteness/bugs in GXemul's machine, device, and/or processor
+		implementations, which the newer version of the guest operating
+		system triggers, but not the older version, or
+	<li>the newer guest operating system version would work, but the
+		full installation procedure has not been verified.
+</ul>
 
 
 
