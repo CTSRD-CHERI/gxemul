@@ -40,6 +40,12 @@ Some things, in no specific order, that I'd like to fix:
 ------------------------------------------------------------------------
 </i>
 
+  [ ]  debug_new:
+        [ ] update to newer version!
+  	[ ] add small circular buffer of delayed-free (to potentially
+	    catch bugs related to immediate pointer reuse/comparison)
+	[ ] overwrite memory with fill bytes just before free(ptr);
+
   [/]	Improve dyntrans CTRL-C behavior! Abort quicker.
   	[X]  Implement an abort instruction call
   		[X]  sync pc should take this kind of abort into consideration.
