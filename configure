@@ -39,6 +39,13 @@
 #  CXXFLAGS="-pg", run the emulator, and then run 'gprof gxemul' and study
 #  the results.
 #
+#  Or better, using callgrind/cachegrind/kcachegrind:
+#  valgrind --tool=callgrind --dump-instr=yes ./gxemul -e testm88k test/FileLoader_A.OUT_M88K
+#  or
+#  valgrind --tool=cachegrind ./gxemul -e testm88k test/FileLoader_A.OUT_M88K
+#  followed by
+#  kcachegrind
+#
 #
 #  The main things that are detected by this script:
 #
