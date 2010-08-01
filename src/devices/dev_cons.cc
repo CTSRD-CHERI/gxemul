@@ -78,7 +78,7 @@ DEVICE_ACCESS(cons)
 		    return 1;  */
 		/*  TODO: this doesn't work yet. for now, let's
 		    simply use exit()  */
-		exit(1);
+		exit(0);
 	}
 
 	if (writeflag == MEM_WRITE) {
