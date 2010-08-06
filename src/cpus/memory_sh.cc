@@ -278,10 +278,12 @@ int sh_translate_v2p(struct cpu *cpu, uint64_t vaddr64, uint64_t *return_paddr,
 			return 2;
 		}
 
-		fatal("Userspace tried to access non-user space memory."
-		    " TODO: cause exception! (vaddr=0x%08"PRIx32"\n",
-		    (uint32_t) vaddr);
-		exit(1);
+		// Hopefully correct behavior; nbjoerg on #GXemul (FreeNode)
+		// noticed that this case was easily triggered inside a
+		// guest OS, by:  int main(void){ *(int *)-4 = 0; }
+		sh_exception(cpu, (flags & FLAG_WRITEFLAG)?
+		    EXPEVT_TLB_MISS_ST : EXPEVT_TLB_MISS_LD, 0, vaddr);
+		return 0;
 	}
 
 	/*  P1,P2: Direct-mapped physical memory.  */
