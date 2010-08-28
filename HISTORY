@@ -4508,3 +4508,6 @@ Changelog for GXemul:
 		failure (in debug builds only). Also fixing a memory leak.
 20100406	Bogus hack to machine_evbmips.cc to let RTEMS print some boot
 		messages (again?) for mvme5500.
+20100806	nbjoerg on #GXemul (FreeNode) noticed an easy way to trigger
+		an unhandled case in memory_sh.cc; applying a potential fix.
+
