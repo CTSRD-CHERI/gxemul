@@ -599,6 +599,105 @@ DEVICE_TICK(fb)
 	if (need_to_flush_x11)
 		XFlush(d->fb_window->x11_display);
 #endif
+
+#if 0
+
+This is a hack used to produce raw ppm image dumps, which can then be
+used to make movies, e.g. http://www.youtube.com/watch?v=Afh1ECLWac8
+
+{
+	static struct timeval tv_last;
+	static bool first = true;
+
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+
+	if (first)
+	{
+		tv_last = tv;
+		first = false;
+	}
+	else
+	{
+		double diff = (tv.tv_sec - tv_last.tv_sec) + (tv.tv_usec - tv_last.tv_usec) / 1000000.0;
+		if (diff > 0.2)
+		{
+			static int outputNr = 0;
+			outputNr ++;
+			tv_last = tv;
+
+			char name[50];
+			snprintf(name, sizeof(name), "gxemul-%06i.ppm", outputNr);
+			
+			FILE *f = fopen(name, "w");
+			if (f == NULL)
+			{
+				perror(name);
+			}
+			else
+			{
+				const int xsize = 640;
+				const int ysize = 480;
+				fprintf(f, "P6\n%i %i\n255\n", xsize, ysize);
+				unsigned char buf[xsize*ysize*3];
+				memset(buf, 0, xsize*ysize*3);
+
+				// Calculate scaledown:
+				int scaledown = 1;
+				
+				while (d->visible_xsize / scaledown > xsize ||
+					d->visible_ysize / scaledown > ysize)
+				{
+					scaledown ++;
+				}
+
+				// printf("scaledown = %i\n", scaledown);
+
+				int xofs = (xsize - d->visible_xsize / scaledown) / 2;
+				int yofs = (ysize - d->visible_ysize / scaledown) / 2;
+
+				for (int y = 0; y < d->visible_ysize / scaledown; ++y)
+				    for (int x = 0; x < d->visible_xsize / scaledown; ++x)
+				    {
+				    	int r = 0, g = 0, b = 0, n = 0;
+				    	for (int suby = 0; suby < scaledown; ++suby)
+				    	    for (int subx = 0; subx < scaledown; ++subx)
+				    	    {
+				    	    	++n;
+				    	    	int rx = x * scaledown + subx;
+				    	    	int ry = y * scaledown + suby;
+				    	    	int i = (d->xsize * ry + rx) * d->bit_depth / 8;
+
+#if 0
+						r += d->framebuffer[i+0];
+						g += d->framebuffer[i+1];
+						b += d->framebuffer[i+2];
+#else
+						int col = d->framebuffer[i];
+						r += d->rgb_palette[col*3 + 0];
+						g += d->rgb_palette[col*3 + 1];
+						b += d->rgb_palette[col*3 + 2];
+#endif
+				    	    }
+
+					r /= n; g /= n; b /= n;
+					int j = (y + yofs) * xsize + x + xofs;
+					buf[j*3+0] = r;
+					buf[j*3+1] = g;
+					buf[j*3+2] = b;
+				    }
+
+				fwrite(buf, 1, xsize*ysize*3, f);
+				fclose(f);
+			}
+		}
+	}
+
+}
+
+#endif
+
+
 }
 
 
