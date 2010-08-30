@@ -484,6 +484,7 @@ static void free_pointer(new_ptr_list_t** raw_ptr, void* addr, bool array_mode)
                 (unsigned) ptr->size, (unsigned) total_mem_alloc);
     }
     *raw_ptr = ptr->next;
+    memset(ptr, 0xdd, ptr->size + aligned_list_item_size);
     free(ptr);
     return;
 }
