@@ -40,12 +40,6 @@ Some things, in no specific order, that I'd like to fix:
 ------------------------------------------------------------------------
 </i>
 
-  [ ]  debug_new:
-        [ ] update to newer version!
-  	[ ] add small circular buffer of delayed-free (to potentially
-	    catch bugs related to immediate pointer reuse/comparison)
-	[ ] overwrite memory with fill bytes just before free(ptr);
-
   [/]	Improve dyntrans CTRL-C behavior! Abort quicker.
   	[X]  Implement an abort instruction call
   		[X]  sync pc should take this kind of abort into consideration.
@@ -58,20 +52,7 @@ Some things, in no specific order, that I'd like to fix:
 
   [ ]  Components! instead of the planned plugin stuff?!
 
-	[ ]  Improve the "pretty print" of components in the tree dump,
-		by moving it out to a virtual/per-component function:
-
-		ram0  (32 MB at offset 0)
-		cpu0  (5KE, 100 MHz)
-
-		"32 MB at offset 0" should be possible for all
-		address mapped components to print.
-		
-		"5KE" for all CPUs.
-		
-		"100 MHz" if the component has a frequency.
-		
-		And, for the new things:
+	[ ]  Pretty print of files and disk images:
 		
 		cpu0  (5KE, 100 MHz)
 		\--  file  (netbsd-GENERIC.gz)
@@ -193,6 +174,8 @@ Some things, in no specific order, that I'd like to fix:
 	     the 16-bit-encoded variant of the rectangle drawing demo (on both
 	     64-bit and 32-bit emulated CPUs).
 	[ ]  All the other devices (interrupts, ethernet, serial, SMP, ...)
+
+  [ ]	SPARC64? Would be nice; multithreaded Niagara emulation etc.
 
   [/]	STEP EXECUTIONS, REVERSE EXECUTION, SNAPSHOTTING, ...
 

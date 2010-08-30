@@ -4512,4 +4512,6 @@ Changelog for GXemul:
 		an unhandled case in memory_sh.cc; applying a potential fix.
 20100830	Updating the OpenBSD/landisk guest operating system install
 		instructions from 4.6 to 4.7.
+		Improved the "pretty print" of components in the tree dump,
+		by moving it out to a per-component virtual function.
 

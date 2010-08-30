@@ -40,4 +40,40 @@ MemoryMappedComponent::MemoryMappedComponent(const string& className,
 	AddVariable("memoryMappedAddrMul", &m_memoryMappedAddrMul);
 }
 
+string MemoryMappedComponent::GenerateDetails() const
+{
+	stringstream ss;
+	ss << Component::GenerateDetails();
+
+	const StateVariable* memoryMappedBase = GetVariable("memoryMappedBase");
+	const StateVariable* memoryMappedSize = GetVariable("memoryMappedSize");
+	const StateVariable* memoryMappedAddrMul =
+	    GetVariable("memoryMappedAddrMul");
+	if (memoryMappedBase != NULL && memoryMappedSize != NULL) {
+		if (!ss.str().empty())
+			ss << ", ";
+
+		uint64_t nBytes = memoryMappedSize->ToInteger();
+		if (nBytes >= (1 << 30))
+			ss << (nBytes >> 30) << " GB";
+		else if (nBytes >= (1 << 20))
+			ss << (nBytes >> 20) << " MB";
+		else if (nBytes >= (1 << 10))
+			ss << (nBytes >> 10) << " KB";
+		else if (nBytes != 1)
+			ss << nBytes << " bytes";
+		else
+			ss << nBytes << " byte";
+
+		ss << " at offset ";
+		ss.flags(std::ios::hex | std::ios::showbase);
+		ss << memoryMappedBase->ToInteger();
+
+		if (memoryMappedAddrMul != NULL &&
+		    memoryMappedAddrMul->ToInteger() != 1)
+			ss << ", addrmul " << memoryMappedAddrMul->ToInteger();
+	}
+
+	return ss.str();
+}
 

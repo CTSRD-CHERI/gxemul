@@ -58,6 +58,8 @@ public:
 	 */
 	MemoryMappedComponent(const string& className, const string& visibleClassName);
 
+	string GenerateDetails() const;
+
 private:
 	// Variables common to all memory mapped components:
 	uint64_t	m_memoryMappedBase;

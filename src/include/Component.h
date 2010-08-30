@@ -182,6 +182,13 @@ public:
 		string prefixForComponentUrls = "") const;
 
 	/**
+	 * \brief Generate details about the component.
+	 *
+	 * @return A string containing details about the component.
+	 */
+	virtual string GenerateDetails() const;
+
+	/**
 	 * \brief Resets the state of this component and all its children.
 	 */
 	void Reset();

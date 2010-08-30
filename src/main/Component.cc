@@ -414,10 +414,52 @@ void Component::ExecuteMethod(GXemul* gxemul,
 }
 
 
+string Component::GenerateDetails() const
+{
+	stringstream ss;
+
+	// If this component has a "model", then show that.
+	const StateVariable* model = GetVariable("model");
+	if (model != NULL && !model->ToString().empty()) {
+		if (!ss.str().empty())
+			ss << ", ";
+		ss << model->ToString();
+	}
+
+	// If this component has a frequency (i.e. it is runnable), then
+	// show the frequency:
+	double freq = GetCurrentFrequency();
+	if (freq != 0.0) {
+		if (!ss.str().empty())
+			ss << ", ";
+
+		if (freq >= 1e9)
+			ss << freq/1e9 << " GHz";
+		else if (freq >= 1e6)
+			ss << freq/1e6 << " MHz";
+		else if (freq >= 1e3)
+			ss << freq/1e3 << " kHz";
+		else
+			ss << freq << " Hz";
+	}
+
+	const StateVariable* paused = GetVariable("paused");
+	// TODO: ToBool :)
+	if (paused != NULL && paused->ToInteger() > 0) {
+		if (!ss.str().empty())
+			ss << ", ";
+
+		ss << "paused";
+	}
+
+	return ss.str();
+}
+
+
 string Component::GenerateTreeDump(const string& branchTemplate,
 	bool htmlLinksForClassNames, string prefixForComponentUrls) const
 {
-	// Basically, this generates a string which looks like:
+	// This generates an ASCII string which looks like:
 	//
 	//	root
 	//	|-- child1
@@ -425,8 +467,6 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 	//	|   \-- child1's child2
 	//	\-- child2
 	//	    \-- child2's child
-	//
-	// TODO: Comment this better.
 
 	string branch;
 	for (size_t pos=0; pos<branchTemplate.length(); pos++) {
@@ -478,73 +518,10 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 	    !templateName->ToString().empty())
 		str += "  [" + templateName->ToString() + "]";
 
-	stringstream ss;
-
-	// If this component has a "model", then show that.
-	const StateVariable* model = GetVariable("model");
-	if (model != NULL && !model->ToString().empty()) {
-		if (!ss.str().empty())
-			ss << ", ";
-		ss << model->ToString();
-	}
-
-	// If this component has a frequency (i.e. it is runnable), then
-	// show the frequency:
-	double freq = GetCurrentFrequency();
-	if (freq != 0.0) {
-		if (!ss.str().empty())
-			ss << ", ";
-
-		if (freq >= 1e9)
-			ss << freq/1e9 << " GHz";
-		else if (freq >= 1e6)
-			ss << freq/1e6 << " MHz";
-		else if (freq >= 1e3)
-			ss << freq/1e3 << " kHz";
-		else
-			ss << freq << " Hz";
-	}
-
-	const StateVariable* paused = GetVariable("paused");
-	// TODO: ToBool :)
-	if (paused != NULL && paused->ToInteger() > 0) {
-		if (!ss.str().empty())
-			ss << ", ";
-
-		ss << "paused";
-	}
-
-	const StateVariable* memoryMappedBase = GetVariable("memoryMappedBase");
-	const StateVariable* memoryMappedSize = GetVariable("memoryMappedSize");
-	const StateVariable* memoryMappedAddrMul =
-	    GetVariable("memoryMappedAddrMul");
-	if (memoryMappedBase != NULL && memoryMappedSize != NULL) {
-		if (!ss.str().empty())
-			ss << ", ";
-
-		uint64_t nBytes = memoryMappedSize->ToInteger();
-		if (nBytes >= (1 << 30))
-			ss << (nBytes >> 30) << " GB";
-		else if (nBytes >= (1 << 20))
-			ss << (nBytes >> 20) << " MB";
-		else if (nBytes >= (1 << 10))
-			ss << (nBytes >> 10) << " KB";
-		else if (nBytes != 1)
-			ss << nBytes << " bytes";
-		else
-			ss << nBytes << " byte";
-
-		ss << " at offset ";
-		ss.flags(std::ios::hex | std::ios::showbase);
-		ss << memoryMappedBase->ToInteger();
-
-		if (memoryMappedAddrMul != NULL &&
-		    memoryMappedAddrMul->ToInteger() != 1)
-			ss << ", addrmul " << memoryMappedAddrMul->ToInteger();
-	}
-
-	if (!ss.str().empty())
-		str += "  (" + ss.str() + ")";
+	// Get any additional details (CPU model, memory mapped address, etc.):
+	string details = GenerateDetails();
+	if (!details.empty())
+		str += "  (" + details + ")";
 
 	// Show the branch of the tree...
 	string result = "  " + str + "\n";
