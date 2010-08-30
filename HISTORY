@@ -4510,4 +4510,6 @@ Changelog for GXemul:
 		messages (again?) for mvme5500.
 20100806	nbjoerg on #GXemul (FreeNode) noticed an easy way to trigger
 		an unhandled case in memory_sh.cc; applying a potential fix.
+20100830	Updating the OpenBSD/landisk guest operating system install
+		instructions from 4.6 to 4.7.
 
