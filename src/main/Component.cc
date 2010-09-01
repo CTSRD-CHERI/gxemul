@@ -516,7 +516,30 @@ string Component::GenerateTreeDump(const string& branchTemplate,
 	const StateVariable* templateName;
 	if ((templateName = GetVariable("template")) != NULL &&
 	    !templateName->ToString().empty())
-		str += "  [" + templateName->ToString() + "]";
+	{
+		string tName = templateName->ToString();
+
+		str += "  [";
+
+		if (htmlLinksForClassNames) {
+			// See if this class/template name has its own HTML page.
+			// (Usually machines. TODO: also other components.)
+			std::ifstream documentationMachineFile((
+			    "doc/machines/machine_"
+			    + tName + ".html").c_str());
+
+			if (documentationMachineFile.is_open())
+				str += "<a href=\"" + prefixForComponentUrls +
+				    "machines/machine_" +
+				    tName + ".html\">" + tName + "</a>";
+			else
+				str += tName;
+		} else {
+			str += tName;
+		}
+
+		str += "]";
+	}
 
 	// Get any additional details (CPU model, memory mapped address, etc.):
 	string details = GenerateDetails();

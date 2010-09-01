@@ -76,7 +76,7 @@ refcount_ptr<Component> MVME187Machine::Create(const ComponentCreateArgs& args)
 	if (machine.IsNULL())
 		return NULL;
 
-	machine->SetVariableValue("template", "\"MVME187\"");
+	machine->SetVariableValue("template", "\"mvme187\"");
 
 	refcount_ptr<Component> mainbus =
 	    ComponentFactory::CreateComponent("mainbus");
