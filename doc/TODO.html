@@ -19,7 +19,8 @@
 project, the first 0.6.x releases will most likely not be very meaningful to
 end-users, since almost all old features will be deprecated/legacy features,
 and the new features will only work with <tt>testm88k</tt> (which most users
-will not care about). Still, it feels like the way to go forward.
+will not care about), or other partially implemented emulation modes.
+Still, it feels like the way to go forward.
 
 <p>(The name "0.5.x" was skipped. This was the C++ version that was supposed
 to be a complete rewrite from scratch, with no legacy mode support.
@@ -39,6 +40,48 @@ Some things, in no specific order, that I'd like to fix:
 
 ------------------------------------------------------------------------
 </i>
+
+  [/]   Cache components.
+  
+  	This is hopefully a good way to get started working on GXemul again,
+  	after the long break.
+
+	Sub-tasks: (write unit tests for EACH of these, while going along)
+
+	[ ]  State consists of memory size, associativity, cache-line length, ...
+
+	[ ]  Small memory area (the cache memory) itself.
+
+	[ ]  Implement the addressable data bus interface, but if data is contained
+	     in the cache (the small memory state belonging to the cache component),
+	     do not call the main memory.
+
+	[ ]  If possible, for each cache-line, store statistics:
+		nr of hits (reads, writes)
+		nr of misses (reads, writes)
+		on writes, store the PC of the writer, so that on misses,
+			statistics can be gathered.
+
+	[ ]  Caches should be added _onto_ a cpu. The cpu should first look
+	     for a cache as an address data bus, THEN for a parent.
+
+	     [ ]  The cache must then go downwards TWO steps (../..) to get
+	          past the owning cpu, when trying to reach the mainbus/ram.
+
+	     [ ]  How about multi-level caches that are shared between
+	          CPUs/cores? Think through this.
+
+	     [ ]  Test with M88K and MIPS.
+
+	     [ ]  How about a command line switch (or other command) to
+	     	  quickly turn caches on or off? Or maybe just an optional
+	     	  argument to the machine templates (caches=true or false),
+	     	  but that makes it hard to switch during runtime.
+	     	  (Switching during runtime from no caches to caches is
+	     	  easiest (?), but from caches to non-cached will require cache
+	     	  flushes...)
+
+
 
   [/]	Improve dyntrans CTRL-C behavior! Abort quicker.
   	[X]  Implement an abort instruction call
@@ -108,13 +151,10 @@ Some things, in no specific order, that I'd like to fix:
 		add file(type=raw,vaddr=0xbfc00000,name=prom.bin) cpu0
 		add sdl() fb_videoram0
 
-	[ ]  On-reset priority: E.g. clear RAM first, _THEN_ load files!
-		[ ]  EarlyReset (clear)
-		[ ]  LateReset  (load data)
-
-	[ ] What should a plugin be able to do?
-		[ ] Attach/load
-		[ ] On-reset
+	[ ] What should a component be able to do? [as a plugin]
+		[ ] Attach/load/add
+		[ ] On-early-reset  (clear memory etc)
+		[ ] On-late-reset  (fill memory with file contents etc)
 		[ ] Detach
 		[ ] Monitor changes in component(s)' state
 		[ ] Periodical updates (e.g. framebuffers)
@@ -626,21 +666,6 @@ Some things, in no specific order, that I'd like to fix:
 	[ ]  Make the save/load of state more efficient. Right now, it's a hex dump! Yuck.
 	[ ]  methods for searching for values (strings, words, etc?)
 	[ ]  methods for bulk fill/copy [from other address/data busses?]
-
-   [ ]  Cache components.
-
-	[ ]  Implement the addressable data bus interface, but if data is contained
-	     in the cache (a small memory area), do not call the main memory.
-	     Rather straight-forward idea, but will take time to implement
-	     all common variants: associativity, statistics gathering (i.e.
-	     "who [i.e. which PC] evicted who [which other PC] from the cache"), ...
-
-		[ ]  Caches should be added _onto_ a cpu. The cpu first looks
-		     for a cache as an address data bus, THEN for a parent. Hm.
-		[ ]  The cache must then go downwards TWO steps (../..) to get
-		     past the owning cpu, when trying to reach the mainbus/ram.
-
-	[ ]  Unit tests.
 
    [ ]	Floating point helper.
 
