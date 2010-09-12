@@ -52,7 +52,7 @@ SUCH DAMAGE.
   <li><a href="#netbsdhpcmipsinstall">NetBSD/hpcmips 5.0.2</a>
   <li><a href="#netbsdcobaltinstall">NetBSD/cobalt 5.0.1</a>
   <li><a href="#netbsdevbmipsinstall">NetBSD/evbmips 5.0.2</a>
-  <li><a href="#netbsdalgorinstall">NetBSD/algor 3.1</a>
+  <li><a href="#netbsdalgorinstall">NetBSD/algor 5.0.2</a>
   <li><a href="#netbsdsgimips">NetBSD/sgimips 5.0</a>
   <li><a href="#netbsdcatsinstall">NetBSD/cats 5.0</a>
   <li><a href="#netbsdevbarminstall">NetBSD/evbarm 2.1</a>
@@ -539,8 +539,8 @@ image, from an emulated DECstation 3MAX machine:
 
 <p>
 <ol>
-  <li>Download a NetBSD/pmax (DECstation) install RAMDISK kernel:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-3.1/pmax/binary/kernel/netbsd-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-3.1/pmax/binary/kernel/netbsd-INSTALL.gz</a>
+  <li>Download a NetBSD/pmax (DECstation) install RAMDISK kernel (NOTE: not 5.0.2!):<pre>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/pmax/binary/kernel/netbsd-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-4.0.1/pmax/binary/kernel/netbsd-INSTALL.gz</a>
 </pre>
   <p>
   <li>Create an empty harddisk image, which will be the disk image
@@ -548,14 +548,24 @@ image, from an emulated DECstation 3MAX machine:
 	<b>dd if=/dev/zero of=nbsd_algor.img bs=1024 count=1 seek=700000</b>
 
 </pre>
-  <li>Download the P5064 Algor kernel and the 3.1 ISO image:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-3.1/algor/binary/kernel/netbsd-P5064.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-3.1/algor/binary/kernel/netbsd-P5064.gz</a>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/3.1/algorcd-3.1.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/3.1/algorcd-3.1.iso</a>
+  <li>Download the P5064 Algor kernel and the install sets:<pre>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/kernel/netbsd-P5064.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/kernel/netbsd-P5064.gz</a>
+
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/base.tgz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/base.tgz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/comp.tgz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/comp.tgz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/etc.tgz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/etc.tgz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/man.tgz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/man.tgz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/misc.tgz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/misc.tgz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/text.tgz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/algor/binary/sets/text.tgz</a>
+
+</pre>
+  <li>Prepare an ISO image of the install sets:<pre>
+	mkisofs -U -o algor_files.iso base.tgz comp.tgz etc.tgz man.tgz misc.tgz text.tgz
 
 </pre>
   <p>
   <li>Start the emulated DECstation machine like this:<pre>
-	<b>gxemul -e 3max -d nbsd_algor.img -d algorcd-3.1.iso netbsd-INSTALL.gz</b>
+	<b>gxemul -e 3max -d nbsd_algor.img -d algor_files.iso netbsd-INSTALL.gz</b>
 
 </pre>
   <li>At the <tt>Terminal type? [rcons]</tt> prompt, type <b>CTRL-B</b>
@@ -565,7 +575,7 @@ to simulate a CTRL-C sent to NetBSD/pmax. Then execute the following commands:
 mount /dev/cd0c /mnt
 mkdir /mnt2; mount /dev/sd0c /mnt2
 cd /mnt2; sh
-for a in /mnt/*/binary/sets/[bcekmt]*.tgz; do echo $a; tar zxfp $a; done
+for a in /mnt/*.tgz; do echo $a; tar zxfp $a; done
 exit
 cd dev; sh ./MAKEDEV all; cd ../etc
 echo rc_configured=YES >> rc.conf

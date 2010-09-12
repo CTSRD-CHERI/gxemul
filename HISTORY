@@ -4522,5 +4522,6 @@ Changelog for GXemul:
 		count/compare interrupt assert check. (Thanks to Jakub Jermar
 		for noticing this bug using HelenOS.)
 20100912	Updating the NetBSD/hpcmips guest operating system install
-		instructions from 4.0.1 to 5.0.2.
+		instructions from 4.0.1 to 5.0.2, and the NetBSD/algor install
+		instructions from 3.1 to 5.0.2.
 
