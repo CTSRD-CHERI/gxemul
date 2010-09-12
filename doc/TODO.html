@@ -56,6 +56,10 @@ Some things, in no specific order, that I'd like to fix:
 	     in the cache (the small memory state belonging to the cache component),
 	     do not call the main memory.
 
+	[ ]  How about simulating cycle delays? A read or write in this type
+		of model is not instantaneous, but rather a "request", which may
+		take arbitrary long time to execute and return a result.
+
 	[ ]  If possible, for each cache-line, store statistics:
 		nr of hits (reads, writes)
 		nr of misses (reads, writes)
@@ -71,7 +75,35 @@ Some things, in no specific order, that I'd like to fix:
 	     [ ]  How about multi-level caches that are shared between
 	          CPUs/cores? Think through this.
 
-	     [ ]  Test with M88K and MIPS.
+	Or:
+	
+		machine
+		  mainbus
+		    ram
+		    rom
+		    l2cache0
+		      cpu0
+		        l1icache
+		        l1dcache
+		      cpu1
+		        l1icache
+		        l1dcache
+		    l2cache1
+		      cpu2
+		        l1icache
+		        l1dcache
+		      cpu3
+		        l1icache
+		        l1dcache
+
+	if e.g. a 4-core CPU has each core having its own L1 caches (I and D),
+	but sharing L2 caches between pairs of cores.
+
+	Problem: What if there is hyperthreading, and the hyperthread "cpus"
+	share L1I _AND_ L1D? Then the L1 caches cannot be children of both
+	cpus.
+
+	[ ]  Test with caches attached to M88K and MIPS cpus.
 
 	     [ ]  How about a command line switch (or other command) to
 	     	  quickly turn caches on or off? Or maybe just an optional

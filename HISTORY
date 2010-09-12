@@ -4515,4 +4515,10 @@ Changelog for GXemul:
 		Improved the "pretty print" of components in the tree dump,
 		by moving it out to a per-component virtual function.
 20100901	Beginning on CacheComponent (a generic memory cache component).
+20100910	The mechanism for detecting when to assert MIPS compare
+		interrupts could sometimes stop delivering interrupts, if the
+		count register was read. Fixed by keeping track of how many
+		times the register is read and reverting it before doing the
+		count/compare interrupt assert check. (Thanks to Jakub Jermar
+		for noticing this bug using HelenOS.)
 

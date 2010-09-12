@@ -224,6 +224,7 @@ struct mips_cpu {
 	/*  Count/compare timer:  */
 	int		compare_register_set;
 	int		compare_interrupts_pending;
+	int32_t		count_register_read_count;
 	struct interrupt irq_compare;
 	struct timer	*timer;
 

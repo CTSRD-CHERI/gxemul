@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2005-2010  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -389,9 +389,12 @@ int DYNTRANS_RUN_INSTR_DEF(struct cpu *cpu)
 #ifdef DYNTRANS_MIPS
 	/*  Update the count register (on everything except EXC3K):  */
 	if (cpu->cd.mips.cpu_type.exc_model != EXC3K) {
-		uint32_t old = cpu->cd.mips.coproc[0]->reg[COP0_COUNT];
-		int32_t diff1 = cpu->cd.mips.coproc[0]->reg[COP0_COMPARE] - old;
-		int32_t diff2;
+		uint32_t old;
+		int32_t diff1, diff2;
+		cpu->cd.mips.coproc[0]->reg[COP0_COUNT] -= cpu->cd.mips.count_register_read_count;
+		cpu->cd.mips.count_register_read_count = 0;
+		old = cpu->cd.mips.coproc[0]->reg[COP0_COUNT];
+		diff1 = cpu->cd.mips.coproc[0]->reg[COP0_COMPARE] - old;
 		cpu->cd.mips.coproc[0]->reg[COP0_COUNT] =
 		    (int32_t) (old + n_instrs);
 		diff2 = cpu->cd.mips.coproc[0]->reg[COP0_COMPARE] -
