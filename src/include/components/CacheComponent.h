@@ -56,7 +56,7 @@
  * ignore the lowest bits of the address!)
  */
 class CacheComponent
-	: public MemoryMappedComponent
+	: public Component
 	, public AddressDataBus
 	, public UnitTestable
 {
@@ -77,6 +77,8 @@ public:
 	static refcount_ptr<Component> Create(const ComponentCreateArgs& args);
 
 	virtual void ResetState();
+
+	string GenerateDetails() const;
 
 	/**
 	 * \brief Get attribute information about the CacheComponent class.
@@ -121,8 +123,11 @@ private:
 
 private:
 	// State:
-	// TODO: the cache data
+	uint64_t			m_size;		// total cache size
+	uint64_t			m_lineSize;	// line size, in bytes
 	uint64_t			m_lastDumpAddr;
+	int				m_associativity;// 0 = fully. 1 = direct mapped. n = n-way.
+	// TODO: the actual data (cache lines)
 
 	// Cached/runtime state:
 	uint64_t	m_addressSelect;  // For AddressDataBus read/write

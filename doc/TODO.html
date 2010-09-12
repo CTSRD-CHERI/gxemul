@@ -48,9 +48,19 @@ Some things, in no specific order, that I'd like to fix:
 
 	Sub-tasks: (write unit tests for EACH of these, while going along)
 
-	[ ]  State consists of memory size, associativity, cache-line length, ...
-
-	[ ]  Small memory area (the cache memory) itself.
+	[/]  State consists of
+	   [/]	size (e.g. 4 KB, or 1.75 MB)
+	   [/]	associativity (1 = direct mapped, 4 = 4-way, 0 = fully associative?)
+	   [/]	cache-line length (e.g. 4 bytes, or 64 bytes, or more)
+	   [ ]	replacement policy: ?
+	   [ ]  write-policy: write-through vs write-back vs copy-back
+	   [ ]	Small memory area (the cache memory) itself, consisting of cache lines.
+		Cache lines are:
+		  [ ]	data
+		  [ ]	tag/index(offset?)
+		  [ ]	valid bit
+		  [ ]   dirty bit
+		  [ ]	PC of last writer?
 
 	[ ]  Implement the addressable data bus interface, but if data is contained
 	     in the cache (the small memory state belonging to the cache component),

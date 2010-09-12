@@ -30,11 +30,17 @@
 
 
 CacheComponent::CacheComponent(const string& visibleClassName)
-	: MemoryMappedComponent("cache", visibleClassName)
+	: Component("cache", visibleClassName)
+	, m_size(0)
+	, m_lineSize(64)
 	, m_lastDumpAddr(0)
+	, m_associativity(1)
 	, m_addressSelect(0)
 {
+	AddVariable("size", &m_size);
+	AddVariable("lineSize", &m_lineSize);
 	AddVariable("lastDumpAddr", &m_lastDumpAddr);
+	AddVariable("associativity", &m_associativity);
 //	AddCustomVariable("data", &m_dataHandler);
 }
 
@@ -58,7 +64,50 @@ string CacheComponent::GetAttribute(const string& attributeName)
 	if (attributeName == "description")
 		return "A generic memory cache component.";
 
-	return MemoryMappedComponent::GetAttribute(attributeName);
+	return Component::GetAttribute(attributeName);
+}
+
+
+string CacheComponent::GenerateDetails() const
+{
+	stringstream ss;
+	ss << Component::GenerateDetails();
+
+	if (!ss.str().empty())
+		ss << ", ";
+
+	if (m_size >= (1 << 30))
+		ss << (m_size >> 30) << " GB";
+	else if (m_size >= (1 << 20))
+		ss << (m_size >> 20) << " MB";
+	else if (m_size >= (1 << 10))
+		ss << (m_size >> 10) << " KB";
+	else if (m_size != 1)
+		ss << m_size << " bytes";
+	else
+		ss << m_size << " byte";
+
+	if (m_associativity == 0)
+		ss << ", fully associative, ";
+	else if (m_associativity == 1)
+		ss << ", direct-mapped, ";
+	else
+		ss << ", " << m_associativity << "-way, ";
+
+	if (m_lineSize >= (1 << 30))
+		ss << (m_lineSize >> 30) << " GB";
+	else if (m_lineSize >= (1 << 20))
+		ss << (m_lineSize >> 20) << " MB";
+	else if (m_lineSize >= (1 << 10))
+		ss << (m_lineSize >> 10) << " KB";
+	else if (m_lineSize != 1)
+		ss << m_lineSize << " bytes";
+	else
+		ss << m_lineSize << " byte";
+
+	ss << " per line";
+
+	return ss.str();
 }
 
 
