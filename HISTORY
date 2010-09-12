@@ -4521,4 +4521,6 @@ Changelog for GXemul:
 		times the register is read and reverting it before doing the
 		count/compare interrupt assert check. (Thanks to Jakub Jermar
 		for noticing this bug using HelenOS.)
+20100912	Updating the NetBSD/hpcmips guest operating system install
+		instructions from 4.0.1 to 5.0.2.
 
