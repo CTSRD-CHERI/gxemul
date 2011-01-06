@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	memset((char *)&si, sizeof(si), 0);
+	memset((char *)&si, 0, sizeof(si));
 	si.sin_family = AF_INET;
 	si.sin_port = htons(atoi(argv[1]));
 	si.sin_addr.s_addr = htonl(INADDR_ANY);
