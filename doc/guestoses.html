@@ -65,7 +65,7 @@ SUCH DAMAGE.
   <li><a href="dreamcast.html#linux_live_cd">Linux/dreamcast</a>
   <li><a href="#openbsdpmaxinstall">OpenBSD/pmax 2.8-BETA</a>
   <li><a href="#openbsdcatsinstall">OpenBSD/cats 4.0</a>
-  <li><a href="#openbsdlandiskinstall">OpenBSD/landisk 4.7</a>
+  <li><a href="#openbsdlandiskinstall">OpenBSD/landisk 4.8</a>
   <li><a href="#openbsdmvme88kinstall">OpenBSD/mvme88k 4.5</a>
   <li><a href="#helenos">HelenOS 0.4.0</a>
   <li><a href="#ultrixinstall">Ultrix/RISC 4.5</a>
@@ -1670,9 +1670,9 @@ follow these instructions:
 
 </pre>
   <li>Download the entire landisk directory from the ftp server:<pre>
-	<b>wget -np -l 0 -r <a href="ftp://ftp.se.openbsd.org/pub/OpenBSD/4.7/landisk/">ftp://ftp.se.openbsd.org/pub/OpenBSD/4.7/landisk/</a></b>
-	<b>cp ftp.se.openbsd.org/pub/OpenBSD/4.7/landisk/bsd .</b>
-	<b>cp ftp.se.openbsd.org/pub/OpenBSD/4.7/landisk/bsd.rd .</b>
+	<b>wget -np -l 0 -r <a href="ftp://ftp.se.openbsd.org/pub/OpenBSD/4.8/landisk/">ftp://ftp.se.openbsd.org/pub/OpenBSD/4.8/landisk/</a></b>
+	<b>cp ftp.se.openbsd.org/pub/OpenBSD/4.8/landisk/bsd .</b>
+	<b>cp ftp.se.openbsd.org/pub/OpenBSD/4.8/landisk/bsd.rd .</b>
 
 </pre>
 	(Replace ftp.se.openbsd.org with a server closer to you, for
@@ -1682,12 +1682,12 @@ follow these instructions:
 	(I recommend using <tt>mkisofs</tt> for that purpose. If you don't
 	already have <tt>mkisofs</tt> installed on your system, you need
 	to install it in order to do this.)<pre>
-	<b>mkisofs -U -o openbsd_landisk_4.7.iso ftp.se.openbsd.org/pub/OpenBSD/</b>
+	<b>mkisofs -U -o openbsd_landisk_4.8.iso ftp.se.openbsd.org/pub/OpenBSD/</b>
 	<b>rm -rf ftp.se.openbsd.org</b>      <i># this directory is not needed anymore</i>
 
 </pre>
   <li>Start the emulator using this command line:<pre>
-	<b>gxemul -x -E landisk -d obsd_landisk.img -d d:openbsd_landisk_4.7.iso bsd.rd</b>
+	<b>gxemul -x -E landisk -d obsd_landisk.img -d d:openbsd_landisk_4.8.iso bsd.rd</b>
 
 </pre>
 	and proceed like you would do if you were installing OpenBSD
@@ -1695,17 +1695,17 @@ follow these instructions:
 	through the installation:
 	<ul>
 	  <li>Terminal type = <b>xterm</b>
+	  <li>Do <b>not</b> configure the network. (The Realtek NIC
+		found in the Landisk machine is not implemented yet
+		in the emulator.)
 	  <li>root disk = <b>wd0</b> (the disk to install onto)
 	  <li>Use the entire disk for OpenBSD (<b>whole</b>)
 	  <li>Accept the auto-layout (one big root partition (a) and a
 	  	small swap partition (b). c is the entire disk).
-	  <li>Do <b>not</b> configure the network. (The Realtek NIC
-		found in the Landisk machine is not implemented yet
-		in the emulator.)
 	  <li>Location of sets = <b>disk</b>
 	  <li>Is the disk partition already mounted = <b>no</b>
 	  <li>Disk containing the install media = <b>wd1</b>
-	  <li>Pathname to the sets = <b>4.7/landisk</b>
+	  <li>Pathname to the sets = <b>4.8/landisk</b>
 	</ul>
 </ol>
 
