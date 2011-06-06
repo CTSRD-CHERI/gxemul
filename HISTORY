@@ -4526,3 +4526,6 @@ Changelog for GXemul:
 		instructions from 3.1 to 5.0.2.
 20110212	Updating the NetBSD/pmax install instructions: 5.0.2 -> 5.1.
 		Updating OpenBSD/landisk instructions: 4.7 -> 4.8.
+20110606	Updating the documentation on how to start Dreamcast binaries,
+		and updating from NetBSD/dreamcast 5.0.1 to 5.1.
+

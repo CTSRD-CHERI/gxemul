@@ -16,7 +16,7 @@
 
 <!--
 
-Copyright (C) 2006-2010  Anders Gavare.  All rights reserved.
+Copyright (C) 2006-2011  Anders Gavare.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -46,6 +46,7 @@ SUCH DAMAGE.
 <p><br>
 <ul>
   <li><a href="#intro">Introduction</a>
+  <li><a href="#binaries">Running raw binaries (IP.BIN and 1ST_READ.BIN)</a>
   <li><a href="#netbsd_generic_md">NetBSD/dreamcast GENERIC_MD</a>
   <li><a href="#netbsd_live_cd">NetBSD/dreamcast Live CD</a>
   <li><a href="#linux_live_cd">Linux/dreamcast Live CD</a>
@@ -82,6 +83,97 @@ These sometimes work to a certain degree.
 
 
 <p><br>
+<a name="binaries"></a>
+<h3>Running raw binaries (IP.BIN and 1ST_READ.BIN):</h3>
+
+<b>Note:</b> This is very experimental, as GXemul's Dreamcast emulation is very incomplete.
+
+<p>
+The Dreamcast ROM loads files as follows:
+<ul>
+  <li>IP.BIN to virtual address 0x8c008000
+  <li>1ST_READ.BIN to virtual address 0x8c010000
+</ul>
+
+Execution first starts at 0x8c008300 (0x300 bytes into IP.BIN),
+and the code here displays the SEGA logo and waits for a while. The code then
+returns to the ROM, using a system call. The ROM code then calls 0x8c00b800.
+In GXemul, this is currently only done when booting from a CDROM image (or
+by forcing this mode by jumping to 0x8c000080),
+so to boot manually, it's easier to skip the SEGA logo display.
+
+<p>(Loading files as described in this section assumes that 1ST_READ.BIN is an
+<i>unscrambled</i> binary, since it is read straight into GXemul's emulated memory. Read more
+on Dreamcast coding sites on the Internet to learn more about the difference
+between scrambled and unscrambled binaries. If you have a scrambled binary,
+making a complete ISO may be the best way to go. This can then be booted
+(or attempted to be booted) in GXemul using the <tt>-d o23965696:XXX.iso</tt> option.)
+
+<p>There are several ways to start running binaries:
+
+<p>
+To manually start at 0x8c008300, i.e. show the logo:
+<pre>
+	gxemul -XEdreamcast 0x8c010000:1ST_READ.BIN 0x8c008000:0:0x8c008300:IP.BIN
+</pre>
+
+<p>
+To manually start at 0x8c00b800 (Bootstrap 1), i.e. skip the logo and allow bootstrap code to jump to 0x8c010000:
+<pre>
+	gxemul -XEdreamcast 0x8c010000:1ST_READ.BIN 0x8c008000:0:0x8c00b800:IP.BIN
+</pre>
+
+<p>
+Starting at 0x8c000080 fakes a boot from CDROM, i.e. the emulated ROM calls
+0x8c008300 first, and then when that code returns, it calls 0x8c00b800:
+<pre>
+	gxemul -XEdreamcast 0x8c010000:1ST_READ.BIN 0x8c008000:0:0x8c000080:IP.BIN
+</pre>
+
+<p>This does not always work very well, though, because graphics may be initialized
+in a way which is not understood by GXemul yet.
+
+<p>Note that IP.BIN is loaded last, because that also sets the initial program
+counter.
+
+<p>And last, but not least, skip the IP.BIN part alltogether and just run the
+binary you are interested in:
+<pre>
+	gxemul -XEdreamcast 0x8c010000:1ST_READ.BIN
+</pre>
+
+<p>
+See <a href="http://mc.pp.se/dc/ip.bin.html">http://mc.pp.se/dc/ip.bin.html</a>
+for more details on IP.BIN and 1ST_READ.BIN
+
+<p>
+Almost none of the Dreamcast's hardware is actually emulated by GXemul so far,
+but a simple 256-byte demo works:
+
+<p><a href="20110606-dreamcast-roto.png"><img src="20110606-dreamcast-roto-small.png"></a>
+
+<p>To run the roto demo:
+<ul>
+  <li>Go to <a href="http://www.pouet.net/prod.php?which=7050">http://www.pouet.net/prod.php?which=7050</a>
+  	and download <a href="http://www.boob.co.uk/files/roto.zip">http://www.boob.co.uk/files/roto.zip</a>.
+  <li>Extract roto.bin from the zip file.
+  <li>Start GXemul like this:
+<pre>
+	# Starting using bootstrap code in IP.BIN:
+	gxemul -XEdreamcast 0x8c010000:roto.bin 0x8c008000:0:0x8c00b800:IP.BIN
+
+	# or easier: starting the raw binary by itself:
+	gxemul -XEdreamcast 0x8c010000:roto.bin
+</pre>
+</ul>
+
+
+
+
+
+
+
+<p><br>
 <a name="netbsd_generic_md"></a>
 <h3>NetBSD/dreamcast GENERIC_MD:</h3>
 
@@ -99,11 +191,18 @@ interface is emulated yet, so root-on-nfs is not possible.
 Dreamcast, and in the emulator.)
 
 <p>Download the kernel here:<pre>
-	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/dreamcast/binary/kernel/netbsd-GENERIC_MD.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.0.2/dreamcast/binary/kernel/netbsd-GENERIC_MD.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.1/dreamcast/binary/kernel/netbsd-GENERIC_MD.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.1/dreamcast/binary/kernel/netbsd-GENERIC_MD.gz</a>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.1/dreamcast/binary/kernel/netbsd-GENERIC_MD.symbols.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-5.1/dreamcast/binary/kernel/netbsd-GENERIC_MD.symbols.gz</a> (optional)
 </pre>
 
+If you downloaded the symbols, gunzip them before proceeding.
+
 <p>Start NetBSD/dreamcast using the following command line:<pre>
+	# Without symbols:
 	<b>gxemul -XEdreamcast netbsd-GENERIC_MD.gz</b>
+
+	# With symbols (makes single-stepping and tracing more meaningful):
+	<b>gxemul -XEdreamcast netbsd-GENERIC_MD.gz netbsd-GENERIC_MD.symbols</b>
 
 </pre>
 
