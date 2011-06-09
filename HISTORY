@@ -4534,4 +4534,7 @@ Changelog for GXemul:
 		Booting Dreamcast via bootblock now uses software PROM starting
 		point instead of calling a particular bootblock address, making
 		it possible to run a complete boot sequence in more cases.
+		When unimplemented SuperH instructions cause an abort failure,
+		GXemul now drops into the debugger instead of calling exit()
+		(if started with -K).
 

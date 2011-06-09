@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2005-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -41,6 +41,12 @@
 		    << SH_INSTR_ALIGNMENT_SHIFT);			\
 		cpu->pc += (low_pc << SH_INSTR_ALIGNMENT_SHIFT);	\
 	}
+
+#define	ABORT_EXECUTION	  {	SYNCH_PC;				\
+				fatal("Execution aborted at: pc = 0x%08x\n", (int)cpu->pc); \
+				cpu->cd.sh.next_ic = &nothing_call;	\
+				cpu->running = 0;			\
+				debugger_n_steps_left_before_interaction = 0; }
 
 #define	RES_INST_IF_NOT_MD						\
 	if (!(cpu->cd.sh.sr & SH_SR_MD)) {				\
@@ -575,7 +581,8 @@ X(fmov_rm_frn)
 
 	if (cpu->cd.sh.fpscr & SH_FPSCR_SZ) {
 		fatal("fmov_rm_frn: sz=1 (register pair): TODO\n");
-		exit(1);
+		ABORT_EXECUTION;
+		return;
 	}
 
 	if (p != NULL) {
@@ -604,8 +611,9 @@ X(fmov_r0_rm_frn)
 	FLOATING_POINT_AVAILABLE_CHECK;
 
 	if (cpu->cd.sh.fpscr & SH_FPSCR_SZ) {
-		fatal("fmov_rm_frn: sz=1 (register pair): TODO\n");
-		exit(1);
+		fatal("fmov_r0_rm_frn: sz=1 (register pair): TODO\n");
+		ABORT_EXECUTION;
+		return;
 	}
 
 	if (p != NULL) {
@@ -1089,7 +1097,8 @@ X(fmov_frm_rn)
 
 	if (cpu->cd.sh.fpscr & SH_FPSCR_SZ) {
 		fatal("fmov_frm_rn: sz=1 (register pair): TODO\n");
-		exit(1);
+		ABORT_EXECUTION;
+		return;
 	}
 
 	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
@@ -1118,7 +1127,8 @@ X(fmov_frm_r0_rn)
 
 	if (cpu->cd.sh.fpscr & SH_FPSCR_SZ) {
 		fatal("fmov_frm_r0_rn: sz=1 (register pair): TODO\n");
-		exit(1);
+		ABORT_EXECUTION;
+		return;
 	}
 
 	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
@@ -2479,7 +2489,8 @@ X(fsrra_frn)
 	if (cpu->cd.sh.fpscr & SH_FPSCR_PR) {
 		/*  Double-precision:  */
 		fatal("Double-precision fsrra? TODO\n");
-		exit(1);
+		ABORT_EXECUTION;
+		return;
 	} else {
 		/*  Single-precision:  */
 		int32_t ieee, r1 = reg(ic->arg[0]);
@@ -2763,7 +2774,8 @@ X(pref_rn)
 	if (cpu->cd.sh.mmucr & SH4_MMUCR_AT) {
 		fatal("Store Queue to external memory, when "
 		    "MMU enabled: TODO\n");
-		exit(1);
+		ABORT_EXECUTION;
+		return;
 	}
 
 	if (sq_nr == 0)

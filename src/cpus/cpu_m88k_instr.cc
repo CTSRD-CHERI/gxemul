@@ -42,7 +42,9 @@
                 cpu->pc += (low_pc << M88K_INSTR_ALIGNMENT_SHIFT);      \
         }
 
-#define	ABORT_EXECUTION	  {	cpu->cd.m88k.next_ic = &nothing_call;	\
+#define	ABORT_EXECUTION	  {	SYNCH_PC;				\
+				fatal("Execution aborted at: pc = 0x%08x\n", (int)cpu->pc); \
+				cpu->cd.m88k.next_ic = &nothing_call;	\
 				cpu->running = 0;			\
 				debugger_n_steps_left_before_interaction = 0; }
 
