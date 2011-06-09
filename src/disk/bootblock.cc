@@ -90,13 +90,13 @@ int load_bootblock(struct machine *m, struct cpu *cpu,
 
 		CHECK_ALLOCATION(bootblock_buf = (unsigned char *) malloc(32768));
 
-		debug("loading Dreamcast IP.BIN from %s id %i\n",
+		debug("loading Dreamcast IP.BIN from %s id %i to 0x8c008000\n",
 		    diskimage_types[boot_disk_type], boot_disk_id);
 
 		res = diskimage_access(m, boot_disk_id, boot_disk_type,
 		    0, base_offset, bootblock_buf, 0x8000);
 		if (!res) {
-			fatal("Couldn't read the disk image. Aborting.\n");
+			fatal("Couldn't read the first 32 KB from the disk image. Aborting.\n");
 			return 0;
 		}
 
@@ -106,9 +106,30 @@ int load_bootblock(struct machine *m, struct cpu *cpu,
 			return 0;
 		}
 
-		/*  Store IP.BIN at 0x8c008000, and set entry point.  */
+		/*
+		 *  Store IP.BIN at 0x8c008000, and set entry point.
+		 *
+		 *  Note: The boot block contains several executable parts:
+		 *    Offset 0x0300-36ff:  SEGA logo code
+		 *    Offset 0x3800-5FFF:  Bootstrap code 1
+		 *    Offset 0x6000-7FFF:  Bootstrap code 2
+		 *
+		 *  (See http://mc.pp.se/dc/ip.bin.html for details.)
+		 *
+		 *  So one way to boot could be to set initial PC to 0x8c008300,
+		 *  but that would only run the SEGA logo code and then return
+		 *  to... well, to nothing.
+		 *
+		 *  Instead, initial PC is set to 0x8c000080, which triggers
+		 *  software PROM emulation, which in turn:
+		 *    a) calls 0x8c008300 to show the logo, and
+		 *    b) calls 0x8c00b800 to set up registers etc and
+		 *       this code will hopefully jump to 0x8c010000.
+		 *
+		 *  This mimics the behavior of the real Dreamcast.
+		 */
 		store_buf(cpu, 0x8c008000, (char *)bootblock_buf, 32768);
-		cpu->pc = 0x8c008300;
+		cpu->pc = 0x8c000080;
 
 		/*  Remember the name of the file to boot (1ST_READ.BIN):  */
 		if (cpu->machine->boot_kernel_filename == NULL ||
@@ -123,7 +144,7 @@ int load_bootblock(struct machine *m, struct cpu *cpu,
 			    strdup((char *)bootblock_buf + 0x60));
 		}
 
-		debug("boot filename: %s\n",
+		debug("Dreamcast boot filename: %s (to be loaded to 0x8c010000)\n",
 		    cpu->machine->boot_kernel_filename);
 
 		free(bootblock_buf);
@@ -238,7 +259,7 @@ int load_bootblock(struct machine *m, struct cpu *cpu,
 	res = diskimage_access(m, boot_disk_id, boot_disk_type,
 	    0, base_offset + 0x8000, bootblock_buf, 0x800);
 	if (!res) {
-		fatal("Couldn't read the disk image. Aborting.\n");
+		fatal("Couldn't read the ISO header from the disk image. Aborting.\n");
 		return 0;
 	}
 

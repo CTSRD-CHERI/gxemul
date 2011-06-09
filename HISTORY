@@ -4528,4 +4528,10 @@ Changelog for GXemul:
 		Updating OpenBSD/landisk instructions: 4.7 -> 4.8.
 20110606	Updating the documentation on how to start Dreamcast binaries,
 		and updating from NetBSD/dreamcast 5.0.1 to 5.1.
+20110609	Adding automagic guessing of Dreamcast ISO filesystem offset,
+		so that Linux/dreamcast can be booted without specifying the
+		offset.
+		Booting Dreamcast via bootblock now uses software PROM starting
+		point instead of calling a particular bootblock address, making
+		it possible to run a complete boot sequence in more cases.
 

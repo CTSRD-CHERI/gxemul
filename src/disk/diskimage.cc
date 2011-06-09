@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2003-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2003-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -226,9 +226,35 @@ int64_t diskimage_get_baseoffset(struct machine *machine, int id, int type)
 	while (d != NULL) {
 		if (d->type == type && d->id == id)
 			return d->override_base_offset;
+
 		d = d->next;
 	}
 	return -1;
+}
+
+
+/*
+ *  diskimage_set_baseoffset():
+ *
+ *  Sets the base offset for a disk image. Useful e.g. when booting directly
+ *  from NetBSD/dreamcast or Linux/dreamcast ISO images.
+ */
+void diskimage_set_baseoffset(struct machine *machine, int id, int type, int64_t offset)
+{
+	struct diskimage *d = machine->first_diskimage;
+
+	while (d != NULL) {
+		if (d->type == type && d->id == id) {
+			d->override_base_offset = offset;
+			return;
+		}
+		
+		d = d->next;
+	}
+
+	fatal("diskimage_set_baseoffset(): disk id %i (type %i) not found?\n",
+	    id, diskimage_types[type]);
+	exit(1);
 }
 
 

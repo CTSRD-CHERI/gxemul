@@ -2,7 +2,7 @@
 #define	DISKIMAGE_H
 
 /*
- *  Copyright (C) 2003-2010  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2003-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -130,6 +130,7 @@ int diskimage_scsicommand(struct cpu *cpu, int id, int type,
 /*  diskimage.c:  */
 int64_t diskimage_getsize(struct machine *machine, int id, int type);
 int64_t diskimage_get_baseoffset(struct machine *machine, int id, int type);
+void diskimage_set_baseoffset(struct machine *machine, int id, int type, int64_t offset);
 void diskimage_getchs(struct machine *machine, int id, int type,
 	int *c, int *h, int *s);
 int diskimage__internal_access(struct diskimage *d, int writeflag,

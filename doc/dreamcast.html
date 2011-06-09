@@ -88,46 +88,56 @@ These sometimes work to a certain degree.
 
 <b>Note:</b> This is very experimental, as GXemul's Dreamcast emulation is very incomplete.
 
-<p>
-The Dreamcast ROM loads files as follows:
+<p>According to <a href="http://mc.pp.se/dc/ip.bin.html">http://mc.pp.se/dc/ip.bin.html</a>,
+the Dreamcast loads files from the last data track (from track session 2?). The
+data track should be an ISO9660 file system, with the first 0x8000 bytes used
+by a Dreamcast-specific boot block.
+
+<p>When a Dreamcast boots up, the ROM loads the boot block and first file
+as follows:
+
 <ul>
-  <li>IP.BIN to virtual address 0x8c008000
-  <li>1ST_READ.BIN to virtual address 0x8c010000
+  <li>The first 0x8000 bytes from the data track (usually called IP.BIN, but
+  	it has no name on the actual CD) is a boot block, which is loaded to virtual address 0x8c008000.
+	This contains executable SH4 boot code, but also some
+	text strings, and the name of the first file to run, usually "1ST_READ.BIN".
+  <li>1ST_READ.BIN (or whatever the boot block said) is loaded from the regular ISO9660 file system
+  	on the CD, to virtual address 0x8c010000. For CDs (note: not GD-ROMs), the
+  	file is block-scrambled in a specific way.
 </ul>
 
-Execution first starts at 0x8c008300 (0x300 bytes into IP.BIN),
+<p>Execution first starts at 0x8c008300, 0x300 bytes into the boot block,
 and the code here displays the SEGA logo and waits for a while. The code then
 returns to the ROM, using a system call. The ROM code then calls 0x8c00b800.
 In GXemul, this is currently only done when booting from a CDROM image (or
 by forcing this mode by jumping to 0x8c000080),
 so to boot manually, it's easier to skip the SEGA logo display.
 
-<p>(Loading files as described in this section assumes that 1ST_READ.BIN is an
-<i>unscrambled</i> binary, since it is read straight into GXemul's emulated memory. Read more
-on Dreamcast coding sites on the Internet to learn more about the difference
-between scrambled and unscrambled binaries. If you have a scrambled binary,
+<p>When loading files directly from the host's file system, the examples below assume that
+the binary TEST.BIN is an <i>unscrambled</i> binary, since it is read straight into 
+GXemul's emulated memory. If you have a scrambled binary, 1ST_READ.BIN,
 making a complete ISO may be the best way to go. This can then be booted
-(or attempted to be booted) in GXemul using the <tt>-d o23965696:XXX.iso</tt> option.)
+(or attempted to be booted) in GXemul using the <tt>-d name_of_image.iso</tt> option.)
 
 <p>There are several ways to start running binaries:
 
 <p>
 To manually start at 0x8c008300, i.e. show the logo:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:1ST_READ.BIN 0x8c008000:0:0x8c008300:IP.BIN
+	gxemul -XEdreamcast 0x8c010000:TEST.BIN 0x8c008000:0:0x8c008300:IP.BIN
 </pre>
 
 <p>
 To manually start at 0x8c00b800 (Bootstrap 1), i.e. skip the logo and allow bootstrap code to jump to 0x8c010000:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:1ST_READ.BIN 0x8c008000:0:0x8c00b800:IP.BIN
+	gxemul -XEdreamcast 0x8c010000:TEST.BIN 0x8c008000:0:0x8c00b800:IP.BIN
 </pre>
 
 <p>
 Starting at 0x8c000080 fakes a boot from CDROM, i.e. the emulated ROM calls
 0x8c008300 first, and then when that code returns, it calls 0x8c00b800:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:1ST_READ.BIN 0x8c008000:0:0x8c000080:IP.BIN
+	gxemul -XEdreamcast 0x8c010000:TEST.BIN 0x8c008000:0:0x8c000080:IP.BIN
 </pre>
 
 <p>This does not always work very well, though, because graphics may be initialized
@@ -139,7 +149,7 @@ counter.
 <p>And last, but not least, skip the IP.BIN part alltogether and just run the
 binary you are interested in:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:1ST_READ.BIN
+	gxemul -XEdreamcast 0x8c010000:TEST.BIN
 </pre>
 
 <p>
@@ -249,7 +259,8 @@ to attempt to boot directly from the image:<pre>
 (The <tt><b>c</b></tt> disk image option is necessary to treat the raw
 file as a CDROM image, and the <tt><b>o</b></tt> part is needed because
 the ISO9660 filesystem in the image is offset by 11702 sectors, i.e. 2048
-bytes each.)
+bytes each, and GXemul was unable to guess the offset by looking at
+the ISO header.)
 
 <p>At the <b><tt>root device:</tt></b> prompt, type 
 <b><tt>gdrom0</tt></b>. For <b><tt>dump device</tt></b>,
@@ -277,7 +288,7 @@ Enter.
 
 Once you have downloaded the ISO image, type the following command to 
 boot directly from the image:<pre>
-	<b>gxemul -XEdreamcast -d o23965696:lc2000.iso</b>
+	<b>gxemul -XEdreamcast -d lc2000.iso</b>
 </pre>
 
 <p>(It seems that this specific iso image was built using instructions
