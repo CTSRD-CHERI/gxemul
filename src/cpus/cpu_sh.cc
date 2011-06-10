@@ -928,37 +928,41 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 		break;
 	case 0x2:
 		if (lo4 == 0x0)
-			debug("mov.b\tr%i,@r%i\n", r4, r8);
+			debug("mov.b\tr%i,@r%i", r4, r8);
 		else if (lo4 == 0x1)
-			debug("mov.w\tr%i,@r%i\n", r4, r8);
+			debug("mov.w\tr%i,@r%i", r4, r8);
 		else if (lo4 == 0x2)
-			debug("mov.l\tr%i,@r%i\n", r4, r8);
+			debug("mov.l\tr%i,@r%i", r4, r8);
 		else if (lo4 == 0x4)
-			debug("mov.b\tr%i,@-r%i\n", r4, r8);
+			debug("mov.b\tr%i,@-r%i", r4, r8);
 		else if (lo4 == 0x5)
-			debug("mov.w\tr%i,@-r%i\n", r4, r8);
+			debug("mov.w\tr%i,@-r%i", r4, r8);
 		else if (lo4 == 0x6)
-			debug("mov.l\tr%i,@-r%i\n", r4, r8);
+			debug("mov.l\tr%i,@-r%i", r4, r8);
 		else if (lo4 == 0x7)
-			debug("div0s\tr%i,r%i\n", r4, r8);
+			debug("div0s\tr%i,r%i", r4, r8);
 		else if (lo4 == 0x8)
-			debug("tst\tr%i,r%i\n", r4, r8);
+			debug("tst\tr%i,r%i", r4, r8);
 		else if (lo4 == 0x9)
-			debug("and\tr%i,r%i\n", r4, r8);
+			debug("and\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xa)
-			debug("xor\tr%i,r%i\n", r4, r8);
+			debug("xor\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xb)
-			debug("or\tr%i,r%i\n", r4, r8);
+			debug("or\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xc)
-			debug("cmp/str\tr%i,r%i\n", r4, r8);
+			debug("cmp/str\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xd)
-			debug("xtrct\tr%i,r%i\n", r4, r8);
+			debug("xtrct\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xe)
-			debug("mulu.w\tr%i,r%i\n", r4, r8);
+			debug("mulu.w\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xf)
-			debug("muls.w\tr%i,r%i\n", r4, r8);
+			debug("muls.w\tr%i,r%i", r4, r8);
 		else
-			debug("UNIMPLEMENTED hi4=0x%x, lo8=0x%02x\n", hi4, lo8);
+			debug("UNIMPLEMENTED hi4=0x%x, lo8=0x%02x", hi4, lo8);
+		if (running && lo4 <= 6) {
+			debug("\t; r%i = 0x%08"PRIx32, r8, cpu->cd.sh.r[r8]);
+		}
+		debug("\n");
 		break;
 	case 0x3:
 		if (lo4 == 0x0)
@@ -1126,39 +1130,43 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 		break;
 	case 0x6:
 		if (lo4 == 0x0)
-			debug("mov.b\t@r%i,r%i\n", r4, r8);
+			debug("mov.b\t@r%i,r%i", r4, r8);
 		else if (lo4 == 0x1)
-			debug("mov.w\t@r%i,r%i\n", r4, r8);
+			debug("mov.w\t@r%i,r%i", r4, r8);
 		else if (lo4 == 0x2)
-			debug("mov.l\t@r%i,r%i\n", r4, r8);
+			debug("mov.l\t@r%i,r%i", r4, r8);
 		else if (lo4 == 0x3)
-			debug("mov\tr%i,r%i\n", r4, r8);
+			debug("mov\tr%i,r%i", r4, r8);
 		else if (lo4 == 0x4)
-			debug("mov.b\t@r%i+,r%i\n", r4, r8);
+			debug("mov.b\t@r%i+,r%i", r4, r8);
 		else if (lo4 == 0x5)
-			debug("mov.w\t@r%i+,r%i\n", r4, r8);
+			debug("mov.w\t@r%i+,r%i", r4, r8);
 		else if (lo4 == 0x6)
-			debug("mov.l\t@r%i+,r%i\n", r4, r8);
+			debug("mov.l\t@r%i+,r%i", r4, r8);
 		else if (lo4 == 0x7)
-			debug("not\tr%i,r%i\n", r4, r8);
+			debug("not\tr%i,r%i", r4, r8);
 		else if (lo4 == 0x8)
-			debug("swap.b\tr%i,r%i\n", r4, r8);
+			debug("swap.b\tr%i,r%i", r4, r8);
 		else if (lo4 == 0x9)
-			debug("swap.w\tr%i,r%i\n", r4, r8);
+			debug("swap.w\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xa)
-			debug("negc\tr%i,r%i\n", r4, r8);
+			debug("negc\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xb)
-			debug("neg\tr%i,r%i\n", r4, r8);
+			debug("neg\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xc)
-			debug("extu.b\tr%i,r%i\n", r4, r8);
+			debug("extu.b\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xd)
-			debug("extu.w\tr%i,r%i\n", r4, r8);
+			debug("extu.w\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xe)
-			debug("exts.b\tr%i,r%i\n", r4, r8);
+			debug("exts.b\tr%i,r%i", r4, r8);
 		else if (lo4 == 0xf)
-			debug("exts.w\tr%i,r%i\n", r4, r8);
+			debug("exts.w\tr%i,r%i", r4, r8);
 		else
-			debug("UNIMPLEMENTED hi4=0x%x, lo8=0x%02x\n", hi4, lo8);
+			debug("UNIMPLEMENTED hi4=0x%x, lo8=0x%02x", hi4, lo8);
+		if (running && lo4 < 8 && (lo4 & 3) < 3) {
+			debug("\t; r%i = 0x%08"PRIx32, r4, cpu->cd.sh.r[r4]);
+		}
+		debug("\n");
 		break;
 	case 0x7:
 		debug("add\t#%i,r%i\n", (int8_t)lo8, r8);
