@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2006-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -74,7 +74,7 @@ MACHINE_SETUP(dreamcast)
 	 *  0x005f7400 - ...		???
 	 *  0x005f74e4 - ...		GDROM re-enable disabled drive (?)
 	 *  0x005f7800 - ...		G2 External DMA registers
-	 *  0x005f7c00 - ...		???
+	 *  0x005f7c00 - ...		??? some device
 	 *  0x005f8000 - 0x005f9fff	PVR registers (graphics)
 	 *  0x00600400 - 0x0060047f	LAN Adapter (MB86967) registers
 	 *  0x00700000 - ...		SPU registers (sound)

@@ -4537,4 +4537,11 @@ Changelog for GXemul:
 		When unimplemented SuperH instructions cause an abort failure,
 		GXemul now drops into the debugger instead of calling exit()
 		(if started with -K).
+20110610	In SH4 instruction trace, include address in printout in a few
+		more cases than before.
+		Make NetBSD/dreamcast etc. boot correctly with 480 pixels in
+		the y direction (random read hack from PDTRA).
+		Use the 8x16 font as a fake Dreamcast ROM font.
+		Adding fake/skeleton Dreamcast ROM SYSINFO_INIT, SYSINFO_ID,
+		FLASHROM_INIT, and FLASHROM_RAED calls.
 

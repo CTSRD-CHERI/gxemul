@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2006-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -44,9 +44,13 @@
 #include "memory.h"
 #include "misc.h"
 
-
 /*  The ROM FONT seems to be located just after 1MB, in a real Dreamcast:  */
 #define	DREAMCAST_ROMFONT_BASE		0x80100020
+extern unsigned char font8x16[];
+
+/*  Where the machine ID (64-bit) is stored. (Bogus address.)  */
+#define	DREAMCAST_MACHINE_ID_ADDRESS	0x80000010
+
 
 static int booting_from_cdrom = 0;
 
@@ -62,9 +66,20 @@ static void dreamcast_romfont_init(struct machine *machine)
 	int i, y, v;
 	uint64_t d = DREAMCAST_ROMFONT_BASE;
 
-	/*  TODO: A real font.  */
-
-	/*  288 narrow glyphs (12 x 24 pixels):  */
+	/*
+	 *  288 narrow glyphs (12 x 24 pixels):
+	 *
+	 *  Glyphs 1-94 are ASCII characters 33-126, according to
+	 *  http://mc.pp.se/dc/syscalls.html#vecB4
+	 *
+	 *  syscalls.html says "(As there is no glyph for ASCII space, use
+	 *  glyph 96 = ISO-8859-1 unbreakable space instead.)", but this does
+	 *  not seem to work. Marcus Comstedt's own example (video.s) uses
+	 *  char 288 for space instead (but the comment says char 72).
+	 *
+	 *  TODO: A better looking font. This simply reuses the standard 8x16
+	 *  font, which looks odd in Dreamcast programs.
+	 */
 	for (i=0; i<288; i++) {
 		for (y=0; y<24; y+=2) {
 			if (y <= 1 || y >= 22)
@@ -77,13 +92,54 @@ static void dreamcast_romfont_init(struct machine *machine)
 		}
 	}
 
+	for (i=1; i<=94; i++) {
+		d = DREAMCAST_ROMFONT_BASE + i * (24 * 3 / 2);
+		int c = 32 + i;
+		int u;
+		for (y=0; y<24; y+=2) {
+			if (y < 4 || y >= 20)
+				u = v = 0x00;
+			else
+				u = font8x16[c*16 + (y-4)], v = font8x16[c*16 + (y-4+1)];
+
+			//  00 00 u7 u6 u5 u4 u3 u2 u1 u0 00 00
+			//  00 00 v7 v6 v5 v4 v3 v2 v1 v0 00 00
+			//  becomes:
+			//  first byte:   00 00 u7 u6 u5 u4 u3 u2
+			//  second byte:  u1 u0 00 00 00 00 v7 v6
+			//  third byte:   v5 v4 v3 v2 v1 v0 00 00
+			store_byte(cpu, d++, u >> 2);
+			store_byte(cpu, d++, (u << 6) | (v >> 6));
+			store_byte(cpu, d++, v << 2);
+		}
+	}
+	
+	// "ISO-8859-1 characters 160-255" (at pos 96..191):
+	for (i=96; i<=191; i++) {
+		d = DREAMCAST_ROMFONT_BASE + i * (24 * 3 / 2);
+		int c = i - 96 + 160;
+		int u;
+		for (y=0; y<24; y+=2) {
+			if (y < 4 || y >= 20)
+				u = v = 0;
+			else
+				u = font8x16[c*16 + (y-4)], v = font8x16[c*16 + (y-4+1)];
+
+			store_byte(cpu, d++, u >> 2);
+			store_byte(cpu, d++, (u << 6) | (v >> 6));
+			store_byte(cpu, d++, v << 2);
+		}
+	}
+
+	d = DREAMCAST_ROMFONT_BASE + 289 * (24 * 3 / 2);
+
 	/*  7078 wide glyphs (24 x 24 pixels):  */
-	for (i=0; i<7078; i++) {
+	for (i=1; i<7078; i++) {
 		for (y=0; y<24; y++) {
 			if (y <= 1 || y >= 22)
 				v = 0;
 			else
-				v = random();
+				v = 0xff;
 			store_byte(cpu, d++, v & 0x3f);
 			store_byte(cpu, d++, v);
 			store_byte(cpu, d++, v & 0xfc);
@@ -128,6 +184,9 @@ void dreamcast_machine_setup(struct machine *machine)
 	/*  PROM reboot, in case someone jumps to 0xa0000000:  */
 	store_16bit_word(cpu, 0xa0000000, SH_INVALID_INSTR);
 
+	/*  Machine ID (64-bit):  */
+	store_64bit_word(cpu, DREAMCAST_MACHINE_ID_ADDRESS, 0x0000000000000000ULL);
+
 	dreamcast_romfont_init(machine);
 }
 
@@ -154,6 +213,11 @@ int dreamcast_emul(struct cpu *cpu)
 	case 0xb0:
 		/*  SYSINFO  */
 		switch (r7) {
+		case 0:	/*  SYSINFO_INIT: Ignored for now.  */
+			break;
+		case 3:	/*  SYSINFO_ID:  */
+			cpu->cd.sh.r[0] = (uint32_t)DREAMCAST_MACHINE_ID_ADDRESS;
+			break;
 		default:fatal("[ SYSINFO: Unimplemented r7=%i ]\n", r7);
 			goto bad;
 		}
@@ -174,6 +238,10 @@ int dreamcast_emul(struct cpu *cpu)
 		/*  FLASHROM  */
 		switch (r7) {
 		case 0:	/*  FLASHROM_INFO  */
+			/*  TODO  */
+			cpu->cd.sh.r[0] = (uint32_t) -1;
+			break;
+		case 1:	/*  FLASHROM_READ  */
 			/*  TODO  */
 			cpu->cd.sh.r[0] = (uint32_t) -1;
 			break;
