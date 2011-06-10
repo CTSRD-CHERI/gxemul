@@ -1398,7 +1398,12 @@ DEVICE_ACCESS(sh4)
 		} else {
 			debug("[ sh4: pdtra: read: TODO ]\n");
 			odata = d->pdtra;
-odata = random();
+
+			// For experimenting with the Dreamcast ROM:
+			odata = random() & 0xff;
+
+			// bits 8..9 on Dreamcast mean:
+			//  00 = VGA, 10 = RGB, 11 = composite.
 		}
 		break;
 
