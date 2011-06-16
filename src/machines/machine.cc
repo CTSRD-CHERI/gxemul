@@ -443,7 +443,7 @@ void machine_dumpinfo(struct machine *m)
 /*
  *  machine_setup():
  *
- *  This (rather large) function initializes memory, registers, and/or devices
+ *  This function initializes memory, registers, and/or devices
  *  required by specific machine emulations.
  */
 void machine_setup(struct machine *machine)

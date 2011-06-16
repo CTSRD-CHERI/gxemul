@@ -4543,5 +4543,7 @@ Changelog for GXemul:
 		the y direction (random read hack from PDTRA).
 		Use the 8x16 font as a fake Dreamcast ROM font.
 		Adding fake/skeleton Dreamcast ROM SYSINFO_INIT, SYSINFO_ID,
-		FLASHROM_INIT, and FLASHROM_RAED calls.
-
+		FLASHROM_INIT, and FLASHROM_READ calls.
+20110616	Adding Dreamcast devices as symbols, so that runtime debugging
+		will show meaningful names instead of just addresses, when
+		reading and writing device registers.

@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
+#include <string>
 
 #include "cpu.h"
 #include "device.h"
@@ -38,6 +40,9 @@
 #include "machine.h"
 #include "memory.h"
 #include "misc.h"
+
+
+using namespace std;
 
 
 MACHINE_SETUP(dreamcast)
@@ -76,9 +81,11 @@ MACHINE_SETUP(dreamcast)
 	 *  0x005f7800 - ...		G2 External DMA registers
 	 *  0x005f7c00 - ...		??? some device
 	 *  0x005f8000 - 0x005f9fff	PVR registers (graphics)
+	 *  0x00600000 - ...		??? some device
 	 *  0x00600400 - 0x0060047f	LAN Adapter (MB86967) registers
 	 *  0x00700000 - ...		SPU registers (sound)
 	 *  0x00702c00 -		Cable select and AICA (?) (*3)
+	 *  0x00703xxx - ...		???
 	 *  0x00710000 - 0x00710007	RTC registers
 	 *  0x00800000 - 0x009fffff	Sound RAM (2 MB)
 	 *  0x01000000 - ...		Parallel port registers
@@ -120,6 +127,34 @@ MACHINE_SETUP(dreamcast)
 	device_add(machine, "dreamcast_gdrom");
 	device_add(machine, "dreamcast_maple");
 	device_add(machine, "dreamcast_rtc");
+
+	// Add devices as symbols, so that they show up in disassembly/runtime.
+	struct memory *mem = cpu->mem;
+	for (int i = 0; i < mem->n_mmapped_devices; i++) {
+		// Add everything which is not called "ram" (for now).
+		if (strcmp(mem->devices[i].name, "ram") == 0) {
+			continue;
+		}
+		
+		stringstream ss;
+		ss.flags(ios::hex);
+		ss << "(" << mem->devices[i].name << "@0x" << mem->devices[i].baseaddr << ")";
+		string name = ss.str();		
+
+		add_symbol_name(
+		    &machine->symbol_context,
+		    mem->devices[i].baseaddr | 0x80000000U,
+		    mem->devices[i].length,
+		    name.c_str(),
+		    0, 0);
+
+		add_symbol_name(
+		    &machine->symbol_context,
+		    mem->devices[i].baseaddr | 0xa0000000U,
+		    mem->devices[i].length,
+		    name.c_str(),
+		    0, 0);
+	}
 
 	if (!machine->prom_emulation)
 		return;
