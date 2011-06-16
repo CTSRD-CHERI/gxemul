@@ -151,7 +151,7 @@ char *get_symbol_name_and_n_args(struct symbol_context *sc, uint64_t addr,
 			s = sc->first_symbol + ofs;
 
 			/*  Found a match?  */
-			if (addr >= s->addr && addr < s->addr + s->len) {
+			if (addr >= s->addr && addr <= s->addr + (s->len - 1)) {
 				if (addr == s->addr)
 					snprintf(symbol_buf, SYMBOLBUF_MAX,
 					    "%s", s->name);
