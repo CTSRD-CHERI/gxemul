@@ -1123,8 +1123,12 @@ int sh_cpu_disassemble_instr(struct cpu *cpu, unsigned char *instr,
 	case 0x5:
 		debug("mov.l\t@(%i,r%i),r%i", lo4 * 4, r4, r8);
 		if (running) {
-			debug("\t; r%i+%i = 0x%08"PRIx32, r4, lo4 * 4,
-			    cpu->cd.sh.r[r4] + lo4 * 4);
+			addr = cpu->cd.sh.r[r4] + lo4 * 4;
+			symbol = get_symbol_name(&cpu->machine->symbol_context, addr, &offset);
+			if (symbol != NULL)
+				debug("\t; r%i+%i <%s>", r4, lo4 * 4, symbol);
+			else
+				debug("\t; r%i+%i = 0x%08"PRIx32, r4, lo4 * 4, (int)addr);
 		}
 		debug("\n");
 		break;
