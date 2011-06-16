@@ -43,6 +43,7 @@
 #include "machine.h"
 #include "memory.h"
 #include "misc.h"
+#include "thirdparty/dreamcast_pvr.h"
 
 /*  The ROM FONT seems to be located just after 1MB, in a real Dreamcast:  */
 #define	DREAMCAST_ROMFONT_BASE		0x80100020
@@ -298,6 +299,31 @@ int dreamcast_emul(struct cpu *cpu)
 		if (booting_from_cdrom) {
 			fatal("[ dreamcast: Switching to bootstrap 1 ]\n");
 			booting_from_cdrom = 0;
+			
+			/*
+			 *  Reset graphics a little bit before launching
+			 *  the rest of the boot code. TODO: more resetting.
+			 */
+
+			// PVRREG_DIWADDRL (base address for simple video) = 0
+			store_32bit_word(cpu, 0xa05f8000 + PVRREG_DIWADDRL, 0);
+
+			// 640 x 480,
+			// Pixel mode 1 (RGB565, 2 bytes per pixel):
+			// Display Enable
+			store_32bit_word(cpu, 0xa05f8000 + PVRREG_DIWMODE,
+			    (1 << DIWMODE_COL_SHIFT) |
+			    DIWMODE_DE_MASK);
+			
+			store_32bit_word(cpu, 0xa05f8000 + PVRREG_DIWSIZE,
+			    (319 << DIWSIZE_DPL_SHIFT) |
+			    (479 << DIWSIZE_LPF_SHIFT));
+			
+			store_32bit_word(cpu, 0xa05f8000 + PVRREG_DIWCONF, DIWCONF_MAGIC);
+
+			store_32bit_word(cpu, 0xa05f8000 + PVRREG_BRDCOLR, 0x000000);
+			
+			// Jump to boostrap 1
 			cpu->pc = 0x8c00b800;
 			return 1;
 		} else {

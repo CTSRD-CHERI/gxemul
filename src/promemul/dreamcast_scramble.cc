@@ -11,9 +11,9 @@
 
 /*  #define STAND_ALONE  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAXCHUNK (2048*1024)
 
