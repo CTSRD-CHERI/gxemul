@@ -4547,3 +4547,6 @@ Changelog for GXemul:
 20110616	Adding Dreamcast devices as symbols, so that runtime debugging
 		will show meaningful names instead of just addresses, when
 		reading and writing device registers.
+20110621	Adding "trace" versions of SuperH bsr and bsrf_rn instructions.
+		Adding the first SuperH instruction combination for speeding
+		up a variable read loop (bt_samepage_wait_for_variable).

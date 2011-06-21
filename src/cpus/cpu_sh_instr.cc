@@ -1823,6 +1823,26 @@ X(bsr)
 	} else
 		cpu->delay_slot = NOT_DELAYED;
 }
+X(bsr_trace)
+{
+	MODE_int_t target = cpu->pc & ~((SH_IC_ENTRIES_PER_PAGE-1) <<
+	    SH_INSTR_ALIGNMENT_SHIFT);
+	uint32_t old_pc;
+	SYNCH_PC;
+	old_pc = cpu->pc;
+	target += ic->arg[0];
+	cpu->delay_slot = TO_BE_DELAYED;
+	ic[1].f(cpu, ic+1);
+	cpu->n_translated_instrs ++;
+	if (!(cpu->delay_slot & EXCEPTION_IN_DELAY_SLOT)) {
+		cpu->cd.sh.pr = old_pc + 4;
+		cpu->pc = target;
+		cpu_functioncall_trace(cpu, cpu->pc);
+		cpu->delay_slot = NOT_DELAYED;
+		quick_pc_to_pointers(cpu);
+	} else
+		cpu->delay_slot = NOT_DELAYED;
+}
 X(bsr_samepage)
 {
 	uint32_t old_pc;
@@ -1866,6 +1886,26 @@ X(bsrf_rn)
 	if (!(cpu->delay_slot & EXCEPTION_IN_DELAY_SLOT)) {
 		cpu->cd.sh.pr = old_pc + 4;
 		cpu->pc = target;
+		cpu->delay_slot = NOT_DELAYED;
+		quick_pc_to_pointers(cpu);
+	} else
+		cpu->delay_slot = NOT_DELAYED;
+}
+X(bsrf_rn_trace)
+{
+	MODE_int_t target = cpu->pc & ~((SH_IC_ENTRIES_PER_PAGE-1) <<
+	    SH_INSTR_ALIGNMENT_SHIFT);
+	uint32_t old_pc;
+	SYNCH_PC;
+	old_pc = cpu->pc;
+	target += ic->arg[0] + reg(ic->arg[1]);
+	cpu->delay_slot = TO_BE_DELAYED;
+	ic[1].f(cpu, ic+1);
+	cpu->n_translated_instrs ++;
+	if (!(cpu->delay_slot & EXCEPTION_IN_DELAY_SLOT)) {
+		cpu->cd.sh.pr = old_pc + 4;
+		cpu->pc = target;
+		cpu_functioncall_trace(cpu, cpu->pc);
 		cpu->delay_slot = NOT_DELAYED;
 		quick_pc_to_pointers(cpu);
 	} else
@@ -2399,6 +2439,9 @@ X(ftrv_xmtrx_fvn)
 	struct ieee_float_value xmtrx[16], frn[4];
 	double frnp0 = 0.0, frnp1 = 0.0, frnp2 = 0.0, frnp3 = 0.0;
 
+	FLOATING_POINT_AVAILABLE_CHECK;
+	// TODO: FPSCR.EN.V = 1 should cause invalid operation exception?
+
 	ieee_interpret_float_value(reg(ic->arg[0] + 0), &frn[0], IEEE_FMT_S);
 	ieee_interpret_float_value(reg(ic->arg[0] + 4), &frn[1], IEEE_FMT_S);
 	ieee_interpret_float_value(reg(ic->arg[0] + 8), &frn[2], IEEE_FMT_S);
@@ -2788,7 +2831,7 @@ X(pref_rn)
 	SYNCH_PC;
 	for (ofs = 0; ofs < 32; ofs += sizeof(uint32_t)) {
 		uint32_t word;
-		cpu->memory_rw(cpu, cpu->mem, 0xe0000000 + ofs
+		cpu->memory_rw(cpu, cpu->mem, 0xe0000000UL + ofs
 		    + sq_nr * 0x20, (unsigned char *)
 		    &word, sizeof(word), MEM_READ, PHYSICAL);
 		cpu->memory_rw(cpu, cpu->mem, extaddr+ofs, (unsigned char *)
@@ -2857,6 +2900,90 @@ X(prom_emul)
 	} else if ((uint32_t)cpu->pc != old_pc) {
 		/*  The PC value was changed by the PROM call.  */
 		quick_pc_to_pointers(cpu);
+	}
+}
+
+
+/*****************************************************************************/
+
+
+/*
+ *  bt_samepage_wait_for_variable:
+ *
+ *  Loop which reads a variable in memory forever until it changes state,
+ *  can most likely only change state if an interrupt occurs. Simulate speed
+ *  by skipping ahead quickly, until the next interrupt occurs.
+ *
+ *	z:  mov.l  (X,gbr),r0		mov_l_disp_gbr_r0 with arg[1] = X
+ *          cmp/eq r0,rY		cmpeq_rm_rn with args 0 and 1 being r0 and rY
+ *          bt     x			bt_samepage with arg[1] = z
+ */
+X(bt_samepage_wait_for_variable)
+{
+	if (cpu->delay_slot) {
+		instr(mov_l_disp_gbr_r0)(cpu, ic);
+		return;
+	}
+
+	// mov_l_disp_gbr_r0:
+	// Bail out quickly if the memory is not on a readable page.
+	uint32_t addr = cpu->cd.sh.gbr + ic->arg[1];
+	uint32_t *p = (uint32_t *) cpu->cd.sh.host_load[addr >> 12];
+	if (p == NULL) {
+		instr(mov_l_disp_gbr_r0)(cpu, ic);
+		return;
+	}
+
+	uint32_t data = p[(addr & 0xfff) >> 2];
+	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
+		data = LE32_TO_HOST(data);
+	else
+		data = BE32_TO_HOST(data);
+
+	cpu->cd.sh.r[0] = data;
+
+	// cmpeq_rm_rn:
+	if (reg(ic[1].arg[1]) == reg(ic[1].arg[0]))
+		cpu->cd.sh.sr |= SH_SR_T;
+	else
+		cpu->cd.sh.sr &= ~SH_SR_T;
+
+	// Loop for a "long time" if the two registered were equal.
+	if (cpu->cd.sh.sr & SH_SR_T) {
+		// Some bogus amount of instructions.
+		// TODO: Make nicer?
+		cpu->n_translated_instrs += 500;
+		cpu->cd.sh.next_ic = ic;	// "jump to z"
+	} else {
+		// otherwise, get out of the loop.
+		cpu->n_translated_instrs += 2;
+		cpu->cd.sh.next_ic = ic + 3;
+	}
+}
+
+
+/*****************************************************************************/
+
+
+/*
+ *  Combine: something ending with a bt_samepage.
+ *
+ *  See comment for bt_samepage_wait_for_variable above for details.
+ */
+void COMBINE(bt_samepage)(struct cpu *cpu, struct sh_instr_call *ic, int low_addr)
+{
+	int n_back = (low_addr >> SH_INSTR_ALIGNMENT_SHIFT)
+	    & (SH_IC_ENTRIES_PER_PAGE - 1);
+
+	if (n_back < 2)
+		return;
+
+	if (ic[-2].f == instr(mov_l_disp_gbr_r0) &&
+	    ic[-1].f == instr(cmpeq_rm_rn) &&
+	    (ic[-1].arg[0] == (size_t) &cpu->cd.sh.r[0] ||
+	     ic[-1].arg[1] == (size_t) &cpu->cd.sh.r[0]) &&
+	    ic[0].arg[1] == (size_t) &ic[-2]) {
+		ic[-2].f = instr(bt_samepage_wait_for_variable);
 	}
 }
 
@@ -3087,7 +3214,11 @@ X(to_be_translated)
 				ic->arg[0] = (size_t)&cpu->cd.sh.sr;
 				break;
 			case 0x03:	/*  BSRF Rn  */
-				ic->f = instr(bsrf_rn);
+				if (cpu->machine->show_trace_tree)
+					ic->f = instr(bsrf_rn_trace);
+				else
+					ic->f = instr(bsrf_rn);
+
 				ic->arg[0] = (int32_t) (addr &
 				    ((SH_IC_ENTRIES_PER_PAGE-1)
 				    << SH_INSTR_ALIGNMENT_SHIFT) & ~1) + 4;
@@ -3670,6 +3801,9 @@ X(to_be_translated)
 			ic->f = samepage_function;
 		}
 
+		if (ic->f == instr(bt_samepage))
+			cpu->cd.sh.combination_check = COMBINE(bt_samepage);
+
 		break;
 
 	case 0x9:	/*  MOV.W @(disp,PC),Rn  */
@@ -3701,8 +3835,13 @@ X(to_be_translated)
 			samepage_function = instr(bra_samepage);
 			break;
 		case 0xb:
-			ic->f = instr(bsr);
-			samepage_function = instr(bsr_samepage);
+			if (cpu->machine->show_trace_tree)
+				ic->f = instr(bsr_trace);
+			else
+			{
+				ic->f = instr(bsr);
+				samepage_function = instr(bsr_samepage);
+			}
 			break;
 		}
 
