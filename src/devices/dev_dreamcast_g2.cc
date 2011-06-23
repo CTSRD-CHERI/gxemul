@@ -157,6 +157,10 @@ DEVICE_ACCESS(dreamcast_g2_extdma)
 		if (writeflag == MEM_WRITE) {
 			debug("[ dreamcast_g2_extdma: write to channel %i:"
 			    " CHAN_ENABLE = 0x%08x ]\n", channel, (int) idata);
+			if (idata != 0) {
+				fatal("EXTDMA_CTRL_CHAN_ENABLE: todo\n");
+				exit(1);
+			}
 		}
 		break;
 
@@ -165,8 +169,8 @@ DEVICE_ACCESS(dreamcast_g2_extdma)
 			debug("[ dreamcast_g2_extdma: write to channel %i:"
 			    " XFER_ENABLE = 0x%08x ]\n", channel, (int) idata);
 			if (idata != 0) {
-fatal("dma xfer: todo\n");
-exit(1);
+				fatal("EXTDMA_CTRL_XFER_ENABLE: todo\n");
+				exit(1);
 			}
 		}
 		break;

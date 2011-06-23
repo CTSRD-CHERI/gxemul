@@ -62,7 +62,7 @@ struct dreamcast_gdrom_data {
 	int		cur_cnt;
 };
 
-/*  Register offsets:  */
+/*  Register offsets, from NetBSD:  */
 #define	GDROM_BUSY		0x18
 #define	GDROM_DATA		0x80
 #define	GDROM_REGX		0x84
@@ -189,8 +189,9 @@ DEVICE_ACCESS(dreamcast_gdrom)
 		if (writeflag == MEM_READ) {
 			odata = d->busy;
 		} else {
-			fatal("[ Write to GDROM_BUSY? ]\n");
-/*			exit(1);  */
+			// fatal("[ Write to GDROM_BUSY: 0x%08x ]\n", (int)idata);
+			// I'm assuming that writing bits to BUSY clears them.
+			d->busy &= ~idata;
 		}
 		break;
 

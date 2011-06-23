@@ -4550,3 +4550,8 @@ Changelog for GXemul:
 20110621	Adding "trace" versions of SuperH bsr and bsrf_rn instructions.
 		Adding the first SuperH instruction combination for speeding
 		up a variable read loop (bt_samepage_wait_for_variable).
+20110622	Continuing on Dreamcast and SuperH emulation: the SH4 DMA
+		channel numbers were off-by-one (but didn't really have any
+		negative effect). Experimenting with end-of-DMA mechanism in
+		dev_pvr. Adding a second device thing at 0x005f7c00, which
+		seems to be a PVR DMA register range, but not much used?

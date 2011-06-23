@@ -72,22 +72,25 @@ MACHINE_SETUP(dreamcast)
 	 *
 	 *  0x00000000 - 0x001fffff	Boot ROM (2 MB)
 	 *  0x00200000 - 0x003fffff	Flash (256 KB)
+	 *  0x005f0000 - ...            ???
 	 *  0x005f6800 - ...		PowerVR2 DMA registers
 	 *  0x005f6900 - ...		ASIC registers
 	 *  0x005f6c00 - ...		Maple registers (controller ports)
 	 *  0x005f7000 - ...		GDROM registers
-	 *  0x005f7400 - ...		???
+	 *  0x005f7400 - ...		(G2 External DMA registers? Or GDROM?)
 	 *  0x005f74e4 - ...		GDROM re-enable disabled drive (?)
 	 *  0x005f7800 - ...		G2 External DMA registers
-	 *  0x005f7c00 - ...		??? some device
+	 *  0x005f7c00 - ...		DMA (?) for some device (PVR related?)
 	 *  0x005f8000 - 0x005f9fff	PVR registers (graphics)
 	 *  0x00600000 - ...		??? some device
 	 *  0x00600400 - 0x0060047f	LAN Adapter (MB86967) registers
+	 *  0x00606900 - ...		???
 	 *  0x00700000 - ...		SPU registers (sound)
+	 *  0x00702800 - 0x007028ff	???
 	 *  0x00702c00 -		Cable select and AICA (?) (*3)
-	 *  0x00703xxx - ...		???
+	 *  0x00703xxx - ...		AICA something
 	 *  0x00710000 - 0x00710007	RTC registers
-	 *  0x00800000 - 0x009fffff	Sound RAM (2 MB)
+	 *  0x00800000 - 0x009fffff	AICA (Sound) RAM (2 MB) (*4)
 	 *  0x01000000 - ...		Parallel port registers
 	 *  0x02000000 - ...		CD-ROM port registers
 	 *  0x04000000 - 0x047fffff	Video RAM (*)     (64-bit)
@@ -101,9 +104,14 @@ MACHINE_SETUP(dreamcast)
 	 *
 	 *  (*) = with banks 0 and 1 switched; 64-bit read/write access...
 	 *  (*3) = See VOUTC in Linux' drivers/video/pvr2fb.c.
+	 *  (*4) = It seems that ARM machine code is placed here.
 	 */
 
+	dev_ram_init(machine, 0x00600004, 4, DEV_RAM_RAM, 0);
+	dev_ram_init(machine, 0x00700000, 0x27ff, DEV_RAM_RAM, 0);
+	dev_ram_init(machine, 0x00702800, 256, DEV_RAM_RAM, 0);
 	dev_ram_init(machine, 0x00702c00, 4, DEV_RAM_RAM, 0);
+	dev_ram_init(machine, 0x00703000, 0x1fff, DEV_RAM_RAM, 0);
 
 	/*  Sound RAM:  */
 	dev_ram_init(machine, 0x00800000, 2 * 1048576, DEV_RAM_RAM, 0);
@@ -118,7 +126,7 @@ MACHINE_SETUP(dreamcast)
 
 	/*  The "luftvarg" 4KB intro uses memory at paddr 0x0ef00000...  */
 	/*  (*2)   (TODO: Make this a _mirror_ of 0x0c000000?)  */
-	dev_ram_init(machine, 0x0e000000, 16 * 1048576, DEV_RAM_RAM, 0);
+	// dev_ram_init(machine, 0x0e000000, 16 * 1048576, DEV_RAM_RAM, 0);
 
 	device_add(machine, "pvr");
 /*	device_add(machine, "mb8696x addr=0x600400 addr_mult=4");  */
@@ -165,15 +173,15 @@ MACHINE_SETUP(dreamcast)
 
 MACHINE_DEFAULT_CPU(dreamcast)
 {
-	/*  Hitachi SH4, 200 MHz  */
+	// Hitachi SH4, 200 MHz.  (Or probably an "SH4a".)
 	machine->cpu_name = strdup("SH7750");
 }
 
 
 MACHINE_DEFAULT_RAM(dreamcast)
 {
-	/*  Note: This is the size of the boot ROM area, since the
-	    Dreamcast's RAM isn't located at physical address zero.  */
+	// Note: This is the size of the boot ROM area, since the
+	// Dreamcast's RAM isn't located at physical address zero.
 	machine->physical_ram_in_mb = 2;
 }
 

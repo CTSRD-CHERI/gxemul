@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2006-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -134,6 +134,7 @@ struct pvr_data {
 
 	/*  DMA registers:  */
 	uint32_t		dma_reg[N_PVR_DMA_REGS];
+	uint32_t		dma_more_reg[N_PVR_DMA_REGS];
 };
 
 struct pvr_data_alt {
@@ -151,7 +152,7 @@ DEVICE_ACCESS(pvr_ta);
 
 void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 {
-	const int channel = 3;
+	const int channel = 2;
 	uint32_t sar = cpu->cd.sh.dmac_sar[channel] & 0x1fffffff;
 	uint32_t dar = cpu->cd.sh.dmac_dar[channel] & 0x1fffffff;
 	uint32_t count = cpu->cd.sh.dmac_tcr[channel] & 0x1fffffff;
@@ -159,7 +160,20 @@ void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 	int transmit_size = 1;
 	int src_delta = 0, dst_delta = 0;
 	int cause_interrupt = chcr & CHCR_IE;
-        
+
+#if 0
+	// Dump all SH4 DMA channels, for debugging:
+	for (int dmaChannel = 0; dmaChannel < 4; ++dmaChannel)
+	{
+		fatal("{# dma channel %i: sar=%08x dar=%08x count=%08x chcr=%08x #}\n",
+		    dmaChannel,
+		    cpu->cd.sh.dmac_sar[dmaChannel],
+		    cpu->cd.sh.dmac_dar[dmaChannel],
+		    cpu->cd.sh.dmac_tcr[dmaChannel],
+		    cpu->cd.sh.dmac_chcr[dmaChannel]);
+	}
+#endif
+
 	/*  DMAC not enabled?  */
 	if (!(chcr & CHCR_TD)) {
 		fatal("pvr_dma_transfer: SH4 dma not enabled?\n");
@@ -213,6 +227,7 @@ void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 		if (dar != 0x10000000) {
 			fatal("[TODO: DMA to non-TA? dar=%08x\n", (int)dar);
 			cpu->cd.sh.dmac_chcr[channel] |= CHCR_TE;
+			exit(1);	// TODO
 			break;
 		}
 
@@ -239,8 +254,14 @@ void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 			sar += src_delta;
 		}
 
-		/*  Transfer End:  */
+		// Transfer End. TODO: _EXACTLY_ what happens at the end of
+		// a transfer?
 		cpu->cd.sh.dmac_chcr[channel] |= CHCR_TE;
+		cpu->cd.sh.dmac_chcr[channel] &= ~CHCR_TD;
+		cpu->cd.sh.dmac_sar[channel] = sar;
+		cpu->cd.sh.dmac_tcr[channel] = count;
+
+		SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_PVR_DMA);
 
 		break;
 	default:
@@ -328,7 +349,7 @@ DEVICE_ACCESS(pvr_dma)
 		}
 		break;
 
-	case PVR_LMMODE1:	/*  0x84  */
+	case PVR_LMMODE1:	/*  0x88  */
 		if (writeflag == MEM_WRITE && idata != 0) {
 			fatal("[ pvr_dma: TODO: LMMODE1 set to "
 			    "0x%08x ]\n", (int) idata);
@@ -382,6 +403,65 @@ DEVICE_ACCESS(pvr_dma)
 	/*  Default write:  */
 	if (writeflag == MEM_WRITE)
 		d->dma_reg[relative_addr / sizeof(uint32_t)] = idata;
+
+	if (writeflag == MEM_READ)
+		memory_writemax64(cpu, data, len, odata);
+
+	return 1;
+}
+
+
+DEVICE_ACCESS(pvr_dma_more)
+{
+	struct pvr_data *d = (struct pvr_data *) extra;
+	uint64_t idata = 0, odata = 0;
+
+	if (writeflag == MEM_WRITE)
+		idata = memory_readmax64(cpu, data, len);
+
+	/*  Default read:  */
+	if (writeflag == MEM_READ)
+		odata = d->dma_more_reg[relative_addr / sizeof(uint32_t)];
+
+	switch (relative_addr) {
+
+	case 0x00:	// 0x04ff0000
+	case 0x04:	// 0x0cff0000
+	case 0x08:	// 0x00000020
+	case 0x0c:	// 0x00000000
+	case 0x10:	// 0x00000000
+	case 0x14:	// 0x00000000
+	case 0x80:	// 0x67027f00
+		break;
+
+	case 0x18:
+		if (writeflag == MEM_WRITE && idata != 0)
+		{
+			fatal("START:\n");
+			fatal("0x00: %08x\n", d->dma_more_reg[0x00/4]);
+			fatal("0x04: %08x\n", d->dma_more_reg[0x04/4]);
+			fatal("0x08: %08x\n", d->dma_more_reg[0x08/4]);
+			fatal("0x0c: %08x\n", d->dma_more_reg[0x0c/4]);
+			fatal("0x10: %08x\n", d->dma_more_reg[0x10/4]);
+			fatal("0x14: %08x\n", d->dma_more_reg[0x14/4]);
+			exit(1);
+		}
+		break;
+
+	default:if (writeflag == MEM_READ) {
+			fatal("[ pvr_dma_more: read from addr 0x%x ]\n",
+			    (int)relative_addr);
+		} else {
+			fatal("[ pvr_dma_more: write to addr 0x%x: 0x%x ]\n",
+			    (int)relative_addr, (int)idata);
+		}
+
+		exit(1);
+	}
+
+	/*  Default write:  */
+	if (writeflag == MEM_WRITE)
+		d->dma_more_reg[relative_addr / sizeof(uint32_t)] = idata;
 
 	if (writeflag == MEM_READ)
 		memory_writemax64(cpu, data, len, odata);
@@ -556,6 +636,7 @@ void pvr_render(struct cpu *cpu, struct pvr_data *d)
 		ob_ofs += sizeof(uint64_t);
 	}
 
+	// TODO: RENDERDONE is 2. How about other events?
 	SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_RENDERDONE);
 }
 
@@ -779,6 +860,7 @@ DEVICE_ACCESS(pvr)
 			pvr_render(cpu, d);
 		} else {
 			fatal("[ pvr: huh? read from STARTRENDER ]\n");
+			exit(1);
 		}
 		break;
 
@@ -786,14 +868,13 @@ DEVICE_ACCESS(pvr)
 		if (writeflag == MEM_WRITE) {
 			debug("[ pvr: OB_ADDR set to 0x%08"PRIx32" ]\n",
 			    (uint32_t)(idata & PVR_OB_ADDR_MASK));
-			/*  if (idata & ~PVR_OB_ADDR_MASK) {
+			if (idata & ~PVR_OB_ADDR_MASK) {
 				fatal("[ pvr: OB_ADDR: Fatal error: Unknown"
 				    " bits set: 0x%08"PRIx32" ]\n",
 				    (uint32_t)(idata & ~PVR_OB_ADDR_MASK));
 				exit(1);
 			}
 			idata &= PVR_OB_ADDR_MASK;
-			*/
 			DEFAULT_WRITE;
 		}
 		break;
@@ -1445,6 +1526,8 @@ DEVICE_TICK(pvr_fb)
 	if (d->vblank_interrupts_pending > 0) {
 		SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_VBLINT);
 		SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_PVR_SCANINT1);
+		
+		// Is this needed?
 		SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_PVR_SCANINT2);
 
 		/*  TODO: For now, I don't care about missed interrupts:  */
@@ -1693,6 +1776,10 @@ DEVINIT(pvr)
 	/*  PVR2 DMA registers at 0x5f6800:  */
 	memory_device_register(machine->memory, "pvr_dma", 0x005f6800,
 	    PVR_DMA_MEMLENGTH, dev_pvr_dma_access, d, DM_DEFAULT, NULL);
+
+	/*  More DMA registers at 0x5f7c00:  */
+	memory_device_register(machine->memory, "pvr_dma_more", 0x005f7c00,
+	    PVR_DMA_MEMLENGTH, dev_pvr_dma_more_access, d, DM_DEFAULT, NULL);
 
 	d->xsize = 640;
 	d->ysize = 480;

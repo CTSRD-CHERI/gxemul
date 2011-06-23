@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2006-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -1237,7 +1237,7 @@ DEVICE_ACCESS(sh4)
 	case SH4_SAR3:	dma_channel ++;
 	case SH4_SAR2:	dma_channel ++;
 	case SH4_SAR1:	dma_channel ++;
-	case SH4_SAR0:	dma_channel ++;
+	case SH4_SAR0:
 		if (writeflag == MEM_READ)
 			odata = cpu->cd.sh.dmac_sar[dma_channel];
 		else
@@ -1251,7 +1251,7 @@ DEVICE_ACCESS(sh4)
 	case SH4_DAR3:	dma_channel ++;
 	case SH4_DAR2:	dma_channel ++;
 	case SH4_DAR1:	dma_channel ++;
-	case SH4_DAR0:	dma_channel ++;
+	case SH4_DAR0:
 		if (writeflag == MEM_READ)
 			odata = cpu->cd.sh.dmac_dar[dma_channel];
 		else
@@ -1265,7 +1265,7 @@ DEVICE_ACCESS(sh4)
 	case SH4_DMATCR3: dma_channel ++;
 	case SH4_DMATCR2: dma_channel ++;
 	case SH4_DMATCR1: dma_channel ++;
-	case SH4_DMATCR0: dma_channel ++;
+	case SH4_DMATCR0:
 		if (writeflag == MEM_READ)
 			odata = cpu->cd.sh.dmac_tcr[dma_channel] & 0x00ffffff;
 		else {
@@ -1287,7 +1287,7 @@ DEVICE_ACCESS(sh4)
 	case SH4_CHCR3:	dma_channel ++;
 	case SH4_CHCR2:	dma_channel ++;
 	case SH4_CHCR1:	dma_channel ++;
-	case SH4_CHCR0:	dma_channel ++;
+	case SH4_CHCR0:
 		if (writeflag == MEM_READ) {
 			odata = cpu->cd.sh.dmac_chcr[dma_channel];
 		} else {
@@ -1385,25 +1385,35 @@ DEVICE_ACCESS(sh4)
 	/*  GPIO:  General-purpose I/O controller  */
 
 	case SH4_PCTRA:
-		if (writeflag == MEM_WRITE)
+		if (writeflag == MEM_WRITE) {
 			d->pctra = idata;
-		else
+			
+			// Hack: Makes the Dreamcast BIOS pass "cable select"
+			// detection, it seems, without hanging in an endless
+			// loop.
+			d->pdtra |= 0x03;
+		} else {
 			odata = d->pctra;
+		}
 		break;
 
 	case SH4_PDTRA:
 		if (writeflag == MEM_WRITE) {
-			debug("[ sh4: pdtra: write: TODO ]\n");
+			// debug("[ sh4: pdtra: write 0x%08x (while pctra = 0x%08x) ]\n", (int)idata, (int)d->pctra);
 			d->pdtra = idata;
-		} else {
-			debug("[ sh4: pdtra: read: TODO ]\n");
-			odata = d->pdtra;
 
-			// For experimenting with the Dreamcast ROM:
-			odata = random() & 0xff;
+			// Hack: Makes the Dreamcast BIOS pass "cable select"
+			// detection, it seems, without hanging in an endless
+			// loop.
+			if ((idata & 1) == 0 || (idata & 2) == 0)
+				d->pdtra &= ~3;
+		} else {
+			// debug("[ sh4: pdtra: read ]\n");
+			odata = d->pdtra;
 
 			// bits 8..9 on Dreamcast mean:
 			//  00 = VGA, 10 = RGB, 11 = composite.
+			odata |= (0 << 8);
 		}
 		break;
 
