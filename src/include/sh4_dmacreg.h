@@ -2,7 +2,7 @@
 #define	SH4_DMACREG_H
 
 /*
- *  Copyright (C) 2006-2010  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2006-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -54,7 +54,13 @@
 #define	SH4_DMATCR3	0xffa00038
 #define	SH4_CHCR3	0xffa0003c
 
-/*  TODO: Registers at 0xffa00040.  */
+#define	SH4_DMAOR	0xffa00040	/*  DMA operation register  */
+#define	    DMAOR_DDT	    0x00008000		/*  On-Demand Data Transfer  */
+#define	    DMAOR_PR1	    0x00000200		/*  Priority Mode 1  */
+#define	    DMAOR_PR0	    0x00000100		/*  Priority Mode 0  */
+#define	    DMAOR_AE	    0x00000004		/*  Address Error flag  */
+#define	    DMAOR_NMIF	    0x00000002		/*  NMI flag  */
+#define	    DMAOR_DME	    0x00000001		/*  DMAC master enable  */
 
 /*  NOTE: Channel 4 doesn't start at 0xffa00040, but 0xffa00050!  */
 
@@ -128,7 +134,5 @@
 #define	CHCR_IE		0x00000004	/*  Interrupt Enable  */
 #define	CHCR_TE		0x00000002	/*  Transfer End  */
 #define	CHCR_TD		0x00000001	/*  DMAC Enable  */
-
-#define	SH4_DMAOR	0xffa00040	/*  DMA operation register  */
 
 #endif	/*  SH4_DMACREG_H  */

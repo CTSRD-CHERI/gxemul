@@ -62,8 +62,11 @@
 #define	SH4_RTCNT		0xff800020	/* 16bit */
 #define	SH4_RTCOR		0xff800024	/* 16bit */
 #define	SH4_RFCR		0xff800028	/* 16bit */
-#define	SH4_UNKNOWN_2C		0xff80002c	/*  ???  */
-#define	SH4_UNKNOWN_30		0xff800030	/*  ???  */
+#define	SH4_PCTRA		0xff80002c	/*  ???  */
+#define	SH4_PDTRA		0xff800030	/*  ???  */
+#define	SH4_PCTRB		0xff800040	/*  ???  */
+#define	SH4_PDTRB		0xff800044	/*  ???  */
+#define	SH4_GPIOIC		0xff800048	/*  ???  */
 #define	SH4_BCR3		0xff800050	/* 16bit: SH7751R */
 #define	SH4_BCR4		0xfe0a00f0	/* 32bit: SH7751R */
 

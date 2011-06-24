@@ -66,8 +66,8 @@
 #include "thirdparty/dreamcast_sysasicvar.h"
 
 
-#define	TA_DEBUG
-#define debug fatal
+// #define	TA_DEBUG
+// #define debug fatal
 
 #define	INTERNAL_FB_ADDR	0x300000000ULL
 #define	PVR_FB_TICK_SHIFT	19
@@ -226,8 +226,9 @@ void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 
 		if (dar != 0x10000000) {
 			fatal("[TODO: DMA to non-TA? dar=%08x\n", (int)dar);
-			cpu->cd.sh.dmac_chcr[channel] |= CHCR_TE;
 			exit(1);	// TODO
+			//sar += src_delta * count;
+			//count = 0;
 			break;
 		}
 
@@ -430,14 +431,14 @@ DEVICE_ACCESS(pvr_dma_more)
 	case 0x08:	// 0x00000020
 	case 0x0c:	// 0x00000000
 	case 0x10:	// 0x00000000
-	case 0x14:	// 0x00000000
 	case 0x80:	// 0x67027f00
 		break;
 
+	case 0x14:
 	case 0x18:
 		if (writeflag == MEM_WRITE && idata != 0)
 		{
-			fatal("START:\n");
+			fatal("PVR other DMA mode (?):\n");
 			fatal("0x00: %08x\n", d->dma_more_reg[0x00/4]);
 			fatal("0x04: %08x\n", d->dma_more_reg[0x04/4]);
 			fatal("0x08: %08x\n", d->dma_more_reg[0x08/4]);
@@ -628,7 +629,7 @@ void pvr_render(struct cpu *cpu, struct pvr_data *d)
 			    (d->vram[(ob_ofs+7)%VRAM_SIZE] << 24);
 			texture <<= 3;
 			texture &= 0x7fffff;
-			printf("TEXTURE = %x\n", texture);
+			debug("PVR TEXTURE = 0x%08x\n", texture);
 		} else {
 			fatal("pvr_render: internal error, unknown cmd\n");
 		}
@@ -774,7 +775,7 @@ DEVICE_ACCESS(pvr_ta)
 
 #if 0
 	if (writeflag == MEM_WRITE)
-		fatal("[ pvr_ta: WRITE addr=%08x value=%08x\n ]\n",
+		fatal("[ pvr_ta: WRITE addr=%08x value=%08x ]\n",
 		    (int)relative_addr, (int)idata);
 	else
 		fatal("[ pvr_ta: READ addr=%08x ]\n",

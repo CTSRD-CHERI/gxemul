@@ -2,7 +2,7 @@
 #define	CPU_SH_H
 
 /*
- *  Copyright (C) 2005-2010  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2005-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -35,7 +35,8 @@
  *
  *  Note 2: The SuperH emulation in GXemul does not include SH5/SH64 at
  *          this time. There doesn't seem to be that much interesting code
- *          to run in the emulator for SH5. :-/
+ *          to run in the emulator for SH5. There was a NetBSD port to that
+ *          architecture, but it seems to have died out.  :-/
  */
 
 #include "interrupt.h"
@@ -164,6 +165,7 @@ struct sh_cpu {
 	uint32_t	dmac_dar[N_SH4_DMA_CHANNELS];
 	uint32_t	dmac_tcr[N_SH4_DMA_CHANNELS];
 	uint32_t	dmac_chcr[N_SH4_DMA_CHANNELS];
+	uint32_t	dmaor;		/*  DMA operation register  */
 
 	/*  PCI controller:  */
 	struct pci_data	*pcic_pcibus;

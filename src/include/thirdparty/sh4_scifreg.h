@@ -73,7 +73,7 @@
 #define	SCIF_FCR		0x18	/* fifo control */
 #define	SCIF_FDR		0x1c	/* fifo data count set */
 
-#define SCIF_SPTR		0x20	/* seial port */
+#define SCIF_SPTR		0x20	/* serial port */
 #define SCIF_LSR		0x24	/* line status */
 
 #define	SHREG_SCSMR2  (*(volatile uint16_t *)(SH4_SCIF_BASE + SCIF_SMR))

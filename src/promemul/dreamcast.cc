@@ -297,7 +297,7 @@ int dreamcast_emul(struct cpu *cpu)
 		 *  ROM emulation code, or not.
 		 */
 		if (booting_from_cdrom) {
-			fatal("[ dreamcast: Switching to bootstrap 1 ]\n");
+			debug("[ dreamcast: Switching to bootstrap 1 ]\n");
 			booting_from_cdrom = 0;
 			
 			/*

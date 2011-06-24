@@ -4559,3 +4559,4 @@ Changelog for GXemul:
 		sin and cos was incorrectly calculated. "dcfighting.bin" and
 		"gltest.bin" (two "homebrew" Dreamcast programs) now look much
 		more like on the real Dreamcast.
+		Various other small Dreamcast and/or SH4 related updates.

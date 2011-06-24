@@ -29,10 +29,10 @@
  *
  *  TODO: Among other things:
  *
- *	x)  Interrupt masks (msk register stuff).
+ *	x)  Interrupt masks (msk register stuff). Are these really correct?
  *	x)  BSC (Bus state controller).
- *	x)  DMA
- *	x)  UBC
+ *	x)  DMA: Right now there's a hack for Dreamcast emulation
+ *	x)  UBC (User Break Controller)
  *	x)  ...
  */
 
@@ -79,17 +79,18 @@
 #define	SCIF_TX_FIFO_SIZE	16
 #define	SCIF_DELAYED_TX_VALUE	2	/*  2 to be safe, 1 = fast but buggy  */
 
-/*  General-purpose I/O stuff:  */
-#define	SH4_PCTRA		0xff80002c
-#define	SH4_PDTRA		0xff800030
-#define	SH4_PCTRB		0xff800040
-#define	SH4_PDTRB		0xff800044
-#define	SH4_GPIOIC		0xff800048
-
 #ifdef UNSTABLE_DEVEL
-#define SH4_DEGUG
+// #define SH4_DEBUG
 /*  #define debug fatal  */
 #endif
+
+// Clock/occilation related
+#define SH4_CPG_FRQCR		0xffc00000	/* 16-bit */
+#define SH4_CPG_STBCR 		0xffc00004	/* 8-bit */
+#define SH4_CPG_WTCNT 		0xffc00008	/* 8/16-bit */
+#define SH4_CPG_WTCSR 		0xffc0000c	/* 8/16-bit */
+#define SH4_CPG_STBCR2 		0xffc00010	/* 8-bit */
+
 
 struct sh4_data {
 	/*  Store Queues:  */
@@ -116,16 +117,26 @@ struct sh4_data {
 	uint16_t	bsc_bcr2;
 	uint32_t	bsc_wcr1;
 	uint32_t	bsc_wcr2;
+	uint32_t	bsc_wcr3;
 	uint32_t	bsc_mcr;
+	uint16_t	bsc_pcr;
 	uint16_t	bsc_rtcsr;
 	uint16_t	bsc_rtcor;
 	uint16_t	bsc_rfcr;
+
+	/*  CPG:  */
+	uint16_t	cpg_frqcr;
+	uint8_t		cpg_stbcr;
+	uint16_t	cpg_wtcnt;
+	uint16_t	cpg_wtcsr;
+	uint8_t		cpg_stbcr2;
 
 	/*  GPIO:  */
 	uint32_t	pctra;		/*  Port Control Register A  */
 	uint32_t	pdtra;		/*  Port Data Register A  */
 	uint32_t	pctrb;		/*  Port Control Register B  */
 	uint32_t	pdtrb;		/*  Port Data Register B  */
+	uint16_t	bsc_gpioic;
 
 	/*  PCIC (PCI controller):  */
 	struct pci_data	*pci_data;
@@ -155,8 +166,9 @@ struct sh4_data {
 	double		timer_hz[N_SH4_TIMERS];
 
 	/*  RTC:  */
-	uint32_t	rtc_reg[14];	/*  Excluding rcr1 and 2  */
+	uint32_t	rtc_reg[14];	/*  Excluding rcr1 and rcr2  */
 	uint8_t		rtc_rcr1;
+	uint8_t		rtc_rcr2;
 };
 
 
@@ -362,7 +374,7 @@ void sh4_dmac_transfer(struct cpu *cpu, struct sh4_data *d, int channel)
 	src_delta *= transmit_size;
 	dst_delta *= transmit_size;
 
-#ifdef SH4_DEGUG
+#ifdef SH4_DEBUG
 	fatal("|SH4 DMA transfer, channel %i\n", channel);
 	fatal("|Source addr:      0x%08x (delta %i)\n", (int) sar, src_delta);
 	fatal("|Destination addr: 0x%08x (delta %i)\n", (int) dar, dst_delta);
@@ -377,6 +389,10 @@ void sh4_dmac_transfer(struct cpu *cpu, struct sh4_data *d, int channel)
 		 *  Single Address Mode
 		 *  External Address Space => external device
 		 */
+
+		// Avoid compiler warnings about unused sar and dar.
+		(void)sar;
+		(void)dar;
 
 		/*  Note: No transfer is done here! It is up to the
 		    external device to do the transfer itself!  */
@@ -1107,7 +1123,18 @@ DEVICE_ACCESS(sh4)
 	/********************************/
 	/*  UBC: User Break Controller  */
 
-	case 0xff200008:    /*  SH4_BBRA  */
+	case 0xff000014:    /*  SH4_UBC_BASRA  */
+	case 0xff000018:    /*  SH4_UBC_BASRB  */
+
+	case 0xff200000:    /*  SH4_UBC_BARA  */
+	case 0xff200004:    /*  SH4_UBC_BAMRA  */
+	case 0xff200008:    /*  SH4_UBC_BBRA  */
+	case 0xff20000c:    /*  SH4_UBC_BARB  */
+	case 0xff200010:    /*  SH4_UBC_BAMRB  */
+	case 0xff200014:    /*  SH4_UBC_BBRB  */
+	case 0xff200018:    /*  SH4_UBC_BDRB  */
+	case 0xff20001c:    /*  SH4_UBC_BDMRB  */
+	case 0xff200020:    /*  SH4_UBC_BRCR  */
 		/*  TODO  */
 		break;
 
@@ -1302,6 +1329,15 @@ DEVICE_ACCESS(sh4)
 		}
 		break;
 
+	case SH4_DMAOR:
+		if (writeflag == MEM_READ) {
+			odata = cpu->cd.sh.dmaor;
+		} else {
+			// Only some bits are writable:
+			idata &= (DMAOR_DDT | DMAOR_PR1 | DMAOR_PR0 | DMAOR_DME);
+			cpu->cd.sh.dmaor = idata;
+		}
+		break;
 
 	/*************************************************/
 	/*  BSC: Bus State Controller                    */
@@ -1341,11 +1377,25 @@ DEVICE_ACCESS(sh4)
 			odata = d->bsc_wcr2;
 		break;
 
+	case SH4_WCR3:
+		if (writeflag == MEM_WRITE)
+			d->bsc_wcr3 = idata & 0x77777777;
+		else
+			odata = d->bsc_wcr3;
+		break;
+
 	case SH4_MCR:
 		if (writeflag == MEM_WRITE)
 			d->bsc_mcr = idata & 0xf8bbffff;
 		else
 			odata = d->bsc_mcr;
+		break;
+
+	case SH4_PCR:
+		if (writeflag == MEM_WRITE)
+			d->bsc_pcr = idata;
+		else
+			odata = d->bsc_pcr;
 		break;
 
 	case SH4_RTCSR:
@@ -1432,6 +1482,13 @@ DEVICE_ACCESS(sh4)
 			debug("[ sh4: pdtrb: read: TODO ]\n");
 			odata = d->pdtrb;
 		}
+		break;
+
+	case SH4_GPIOIC:
+		if (writeflag == MEM_WRITE)
+			d->bsc_gpioic = idata;
+		else
+			odata = d->bsc_gpioic;
 		break;
 
 
@@ -1644,15 +1701,58 @@ DEVICE_ACCESS(sh4)
 		}
 		break;
 
+	case SH4_SCIF_BASE + SCIF_FDR:
+		/*  Nr of bytes in the TX and RX fifos, respectively:  */
+		odata = (console_charavail(d->scif_console_handle)? 1 : 0)
+		    + (d->scif_tx_fifo_cursize << 8);
+		break;
+
+	case SH4_SCIF_BASE + SCIF_SPTR:
+		/*  TODO: Implement all bits.  */
+		odata = 0;
+		break;
+
 	case SH4_SCIF_BASE + SCIF_LSR:
 		/*  TODO: Implement all bits.  */
 		odata = 0;
 		break;
 
-	case SH4_SCIF_BASE + SCIF_FDR:
-		/*  Nr of bytes in the TX and RX fifos, respectively:  */
-		odata = (console_charavail(d->scif_console_handle)? 1 : 0)
-		    + (d->scif_tx_fifo_cursize << 8);
+
+	/*************************************************/
+
+	case SH4_CPG_FRQCR:	// 0xffc00000	16-bit
+		if (writeflag == MEM_WRITE)
+			d->cpg_frqcr = idata;
+		else
+			odata = d->cpg_frqcr;
+		break;
+
+	case SH4_CPG_STBCR: 	// 0xffc00004	8-bit
+		if (writeflag == MEM_WRITE)
+			d->cpg_stbcr = idata;
+		else
+			odata = d->cpg_stbcr;
+		break;
+
+	case SH4_CPG_WTCNT:	// 0xffc00008	8/16-bit
+		if (writeflag == MEM_WRITE)
+			d->cpg_wtcnt = idata;
+		else
+			odata = d->cpg_wtcnt;
+		break;
+
+	case SH4_CPG_WTCSR:	// 0xffc0000c	8/16-bit
+		if (writeflag == MEM_WRITE)
+			d->cpg_wtcsr = idata;
+		else
+			odata = d->cpg_wtcsr;
+		break;
+
+	case SH4_CPG_STBCR2:	// 0xffc00010	8-bit
+		if (writeflag == MEM_WRITE)
+			d->cpg_stbcr2 = idata;
+		else
+			odata = d->cpg_stbcr2;
 		break;
 
 
@@ -1691,6 +1791,18 @@ DEVICE_ACCESS(sh4)
 		}
 		break;
 
+	case SH4_RCR2:
+		if (writeflag == MEM_READ)
+			odata = d->rtc_rcr2;
+		else {
+			d->rtc_rcr2 = idata;
+			// bit 1 (i.e. idata == 0x02) means reset.
+			if (idata != 0x02) {
+				debug("[ SH4: TODO: RTC RCR2 value 0x%02x ignored. ]\n", (int)idata);
+			}
+		}
+		break;
+
 
 	/*************************************************/
 
@@ -1701,8 +1813,9 @@ DEVICE_ACCESS(sh4)
 			fatal("[ sh4: write to addr 0x%x: 0x%x ]\n",
 			    (int)relative_addr, (int)idata);
 		}
-#ifdef SH4_DEGUG
-		/*  exit(1);  */
+
+#ifdef SH4_DEBUG
+		exit(1);
 #endif
 	}
 
@@ -1870,6 +1983,11 @@ DEVINIT(sh4)
 	}
 
 
+	// The RTC RCR2 register is "basically" initialized to 0x09, with
+	// some bit undefined. :-) According to the manual.
+	d->rtc_rcr2 = 0x09;
+
+
 	/*
 	 *  Bus State Controller initial values, according to the
 	 *  SH7760 manual:
@@ -1878,7 +1996,7 @@ DEVINIT(sh4)
 	d->bsc_bcr2 = 0x3ffc;
 	d->bsc_wcr1 = 0x77777777;
 	d->bsc_wcr2 = 0xfffeefff;
-
+	d->bsc_wcr3 = 0x77777777;
 
 	return 1;
 }
