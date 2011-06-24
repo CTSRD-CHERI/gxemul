@@ -4560,3 +4560,5 @@ Changelog for GXemul:
 		"gltest.bin" (two "homebrew" Dreamcast programs) now look much
 		more like on the real Dreamcast.
 		Various other small Dreamcast and/or SH4 related updates.
+20110624	Updating OpenBSD/landisk installation instructions: 4.8 -> 4.9.
+
