@@ -157,8 +157,9 @@ See <a href="http://mc.pp.se/dc/ip.bin.html">http://mc.pp.se/dc/ip.bin.html</a>
 for more details on IP.BIN and 1ST_READ.BIN
 
 <p>
-Almost none of the Dreamcast's hardware is actually emulated by GXemul so far,
-but a simple 256-byte demo works:
+Almost none of the Dreamcast's hardware is actually emulated by GXemul so far
+(sound, textured graphics, input devices other than keyboard), but a simple
+256-byte demo works:
 
 <p><a href="20110606-dreamcast-roto.png"><img src="20110606-dreamcast-roto-small.png"></a>
 
@@ -177,7 +178,16 @@ but a simple 256-byte demo works:
 </pre>
 </ul>
 
+<p>
+Here is another example with a 3D test program ("gltest.bin") from the
+KOS examples, which more or less works:
 
+<p>
+<a href="20110624-dreamcast-gltest.png"><img src="20110624-dreamcast-gltest-small.png"></a>
+
+<p>
+Nothing related to texture rendering is implemented yet in GXemul, only
+the outlines are drawn, producing the wire-frame look.
 
 
 
