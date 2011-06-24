@@ -4555,3 +4555,7 @@ Changelog for GXemul:
 		negative effect). Experimenting with end-of-DMA mechanism in
 		dev_pvr. Adding a second device thing at 0x005f7c00, which
 		seems to be a PVR DMA register range, but not much used?
+20110623	Found a bug in the SH4 fsca instruction: the angle argument for
+		sin and cos was incorrectly calculated. "dcfighting.bin" and
+		"gltest.bin" (two "homebrew" Dreamcast programs) now look much
+		more like on the real Dreamcast.

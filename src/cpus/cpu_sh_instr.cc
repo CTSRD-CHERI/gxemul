@@ -2385,13 +2385,13 @@ X(fcnvds_drm_fpul)
  */
 X(fsca_fpul_drn)
 {
-	double fpul = ((double) (int32_t)cpu->cd.sh.fpul) / 32768.0;
+	double fpulAngle = ((double)cpu->cd.sh.fpul) * 2.0 * M_PI / 65536.0;
 
 	FLOATING_POINT_AVAILABLE_CHECK;
 
-	reg(ic->arg[0]) = ieee_store_float_value(sin(fpul), IEEE_FMT_S, 0);
+	reg(ic->arg[0]) = ieee_store_float_value(sin(fpulAngle), IEEE_FMT_S, 0);
 	reg(ic->arg[0] + sizeof(uint32_t)) =
-	    ieee_store_float_value(cos(fpul), IEEE_FMT_S, 0);
+	    ieee_store_float_value(cos(fpulAngle), IEEE_FMT_S, 0);
 }
 
 
@@ -2488,12 +2488,34 @@ X(fldi_frn)
 X(fneg_frn)
 {
 	FLOATING_POINT_AVAILABLE_CHECK;
+
+	// Hm. If in double register mode... and the register is pointing to
+	// an _odd_ register, what happens then?
+	if (cpu->cd.sh.fpscr & SH_FPSCR_PR) {
+		int ofs0 = (ic->arg[0] - (size_t)&cpu->cd.sh.fr[0]) / sizeof(uint32_t);
+		if (ofs0 & 1) {
+			fatal("TODO: fneg_frn odd register in double prec. mode.\n");
+			exit(1);
+		}
+	}
+
 	/*  Note: This also works for double-precision.  */
 	reg(ic->arg[0]) ^= 0x80000000;
 }
 X(fabs_frn)
 {
 	FLOATING_POINT_AVAILABLE_CHECK;
+
+	// Hm. If in double register mode... and the register is pointing to
+	// an _odd_ register, what happens then?
+	if (cpu->cd.sh.fpscr & SH_FPSCR_PR) {
+		int ofs0 = (ic->arg[0] - (size_t)&cpu->cd.sh.fr[0]) / sizeof(uint32_t);
+		if (ofs0 & 1) {
+			fatal("TODO: fneg_frn odd register in double prec. mode.\n");
+			exit(1);
+		}
+	}
+
 	/*  Note: This also works for double-precision.  */
 	reg(ic->arg[0]) &= 0x7fffffff;
 }
@@ -2800,6 +2822,9 @@ X(fschg)
 /*
  *  pref_rn:  Prefetch.
  *
+ *  TODO: According to the SH4 manual, "OTLBMULTIHIT or RADDERR may be
+ *  delivered", so those things should be checked for. Not implemented yet.
+ *
  *  arg[1] = ptr to Rn
  */
 X(pref_rn)
@@ -2807,28 +2832,47 @@ X(pref_rn)
 	uint32_t addr = reg(ic->arg[1]), extaddr;
 	int sq_nr, ofs;
 
-	if (addr < 0xe0000000 || addr >= 0xe4000000)
+	if (addr < 0xe0000000U || addr >= 0xe4000000U)
+	{
+		// printf("[ SH4 pref 0x%08x (pc = 0x%08x) ]\n", addr, (int)cpu->pc);
 		return;
+	}
 
-	/*  Send Store Queue contents to external memory:  */
+	SYNCH_PC;
+
+	// Calculate the external address:
 	extaddr = addr & 0x03ffffe0;
 	sq_nr = addr & 0x20? 1 : 0;
 
-	if (cpu->cd.sh.mmucr & SH4_MMUCR_AT) {
-		fatal("Store Queue to external memory, when "
-		    "MMU enabled: TODO\n");
-		ABORT_EXECUTION;
-		return;
-	}
+	if (addr & 0x0000001f)
+		fatal("[ WARNING: SH4 Store Queue, addr = 0x%08x... lowest 5 "
+		    "bits are non-zero. Ignoring. ]\n", addr);
 
 	if (sq_nr == 0)
 		extaddr |= (((cpu->cd.sh.qacr0 >> 2) & 7) << 26);
 	else
 		extaddr |= (((cpu->cd.sh.qacr1 >> 2) & 7) << 26);
 
-	/*  fatal("extaddr = 0x%08x\n", extaddr);  */
+	// debug("[ SH4 pref: SQ extaddr = 0x%08x ]\n", extaddr);
 
-	SYNCH_PC;
+	// Is the MMU turned on?
+	if (cpu->cd.sh.mmucr & SH4_MMUCR_AT) {
+		// When the SQMD bit in MMUCR is set, user access is prohibited
+		// if the MMU is enabled.
+		if (cpu->cd.sh.mmucr & SH4_MMUCR_SQMD) {
+			bool inUserMode = (cpu->cd.sh.sr & SH_SR_MD) ? false : true;
+			if (inUserMode) {
+				sh_exception(cpu, EXPEVT_RES_INST, 0, 0);
+				return;
+			}
+		}
+
+		fatal("Store Queue to external memory, when "
+		    "MMU enabled: Not yet implemented... TODO\n");
+		ABORT_EXECUTION;
+		return;
+	}
+
 	for (ofs = 0; ofs < 32; ofs += sizeof(uint32_t)) {
 		uint32_t word;
 		cpu->memory_rw(cpu, cpu->mem, 0xe0000000UL + ofs
