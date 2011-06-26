@@ -579,10 +579,20 @@ X(fmov_rm_frn)
 
 	FLOATING_POINT_AVAILABLE_CHECK;
 
+	uint32_t data2 = 0;
 	if (cpu->cd.sh.fpscr & SH_FPSCR_SZ) {
-		fatal("fmov_rm_frn: sz=1 (register pair): TODO\n");
-		ABORT_EXECUTION;
-		return;
+		// Register pair. Read second word first, then fallback
+		// to read the first word.
+		SYNCH_PC;
+		if (!cpu->memory_rw(cpu, cpu->mem, addr + 4, (unsigned char *)&data,
+		    sizeof(data), MEM_READ, CACHE_DATA)) {
+			/*  Exception.  */
+			return;
+		}
+
+		data2 = data;
+		
+		// fall-through to read the first word in the pair:
 	}
 
 	if (p != NULL) {
@@ -602,6 +612,15 @@ X(fmov_rm_frn)
 		data = BE32_TO_HOST(data);
 
 	reg(ic->arg[1]) = data;
+
+	// TODO: How about little endian: read words in opposite order?
+	if (cpu->cd.sh.fpscr & SH_FPSCR_SZ) {
+		if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
+			data2 = LE32_TO_HOST(data2);
+		else
+			data2 = BE32_TO_HOST(data2);
+		reg(ic->arg[1] + 4) = data2;
+	}
 }
 X(fmov_r0_rm_frn)
 {
