@@ -4561,4 +4561,7 @@ Changelog for GXemul:
 		more like on the real Dreamcast.
 		Various other small Dreamcast and/or SH4 related updates.
 20110624	Updating OpenBSD/landisk installation instructions: 4.8 -> 4.9.
+20110626	Moving Dreamcast BIOS emulation entry points to 0x8c000100+ofs,
+		so they are not "in the way" of the real BIOS' data area at
+		0x8c000000-0x8c0000ff. Some other minor Dreamcast fixes.
 

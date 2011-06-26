@@ -70,7 +70,11 @@
 // #define debug fatal
 
 #define	INTERNAL_FB_ADDR	0x300000000ULL
-#define	PVR_FB_TICK_SHIFT	19
+#define	PVR_FB_TICK_SHIFT	18
+
+#define	PVR_VBLANK_HZ		60.0
+
+#define	PVR_MARGIN		16
 
 #define	VRAM_SIZE		(8*1048576)
 
@@ -84,9 +88,6 @@
 #define	PVR_LMMODE0		0x84  
 #define	PVR_LMMODE1		0x88
 
-
-#define	PVR_VBLANK_HZ		60.0
-#define	PVR_MARGIN		16
 
 struct pvr_data {
 	struct vfb_data		*fb;
@@ -1523,8 +1524,9 @@ DEVICE_TICK(pvr_fb)
 	 *	  (tick & 3) == 2	nothing
 	 *	  (tick & 3) == 3	SYSASIC_EVENT_PVR_SCANINT2
 	 */
-
 	if (d->vblank_interrupts_pending > 0) {
+		-- d->vblank_interrupts_pending;
+
 		SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_VBLINT);
 		SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_PVR_SCANINT1);
 		

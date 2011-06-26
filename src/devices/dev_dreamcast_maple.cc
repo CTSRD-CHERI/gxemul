@@ -597,7 +597,7 @@ DEVICE_ACCESS(dreamcast_maple)
 
 	case 0x8c:	/*  MAPLE_RESET  */
 		if (writeflag == MEM_WRITE) {
-			if (idata != 0x6155404f)
+			if (idata != 0x6155404f && idata != 0x61557f00)
 				fatal("[ dreamcast_maple: UNIMPLEMENTED reset "
 				    "value 0x%08x ]\n", (int)idata);
 			d->enable = 0;

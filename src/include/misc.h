@@ -2,7 +2,7 @@
 #define	MISC_H
 
 /*
- *  Copyright (C) 2003-2010  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2003-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -265,7 +265,7 @@ int decstation_prom_emul(struct cpu *cpu);
 
 /*  dreamcast.c:  */
 void dreamcast_machine_setup(struct machine *);
-int dreamcast_emul(struct cpu *cpu);
+void dreamcast_emul(struct cpu *cpu);
 
 
 /*  dreamcast_scramble.c:  */

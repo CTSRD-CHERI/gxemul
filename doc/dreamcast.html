@@ -110,7 +110,7 @@ as follows:
 and the code here displays the SEGA logo and waits for a while. The code then
 returns to the ROM, using a system call. The ROM code then calls 0x8c00b800.
 In GXemul, this is currently only done when booting from a CDROM image (or
-by forcing this mode by jumping to 0x8c000080),
+by forcing this mode by jumping to 0x8c000140),
 so to boot manually, it's easier to skip the SEGA logo display.
 
 <p>When loading files directly from the host's file system, the examples below assume that
@@ -134,10 +134,10 @@ To manually start at 0x8c00b800 (Bootstrap 1), i.e. skip the logo and allow boot
 </pre>
 
 <p>
-Starting at 0x8c000080 fakes a boot from CDROM, i.e. the emulated ROM calls
+Starting at 0x8c000140 fakes a boot from CDROM, i.e. the emulated ROM calls
 0x8c008300 first, and then when that code returns, it calls 0x8c00b800:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:TEST.BIN 0x8c008000:0:0x8c000080:IP.BIN
+	gxemul -XEdreamcast 0x8c010000:TEST.BIN 0x8c008000:0:0x8c000140:IP.BIN
 </pre>
 
 <p>This does not always work very well, though, because graphics may be initialized

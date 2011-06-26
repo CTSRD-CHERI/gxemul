@@ -319,7 +319,7 @@ void file_load(struct machine *machine, struct memory *mem,
 		free(tmp_filename);
 
 		/*  Hack: Start a "boot from CDROM" sequence:  */
-		*entrypointp = 0x8c000080;
+		*entrypointp = 0x8c000140;
 		goto ret;
 	}
 

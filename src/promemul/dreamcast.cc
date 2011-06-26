@@ -27,7 +27,35 @@
  *
  *  COMMENT: Dreamcast PROM emulation
  *
- *  NOTE: This is basically just a dummy module, for now.
+ *  NOTE: This module probably only emulates enough system/BIOS calls to let
+ *  NetBSD/dreamcast, Linux/dreamcast, and various KOS demos run. Don't expect
+ *  it do be fully functional.
+ *
+ *  Dreamcast memory layout during startup:
+ *
+ *  0xa0000000: 2 MB ROM/BIOS. This is copied into RAM (0x8c000000) during
+ *              bootup. In GXemul's fake PROM implementation, the only thing
+ *              present at 0xa0000000 is an opcode which triggers a
+ *              reboot/shutdown of the emulator.
+ *
+ *  0x8c000000 - 0x8c0000ff: Various variables and vectors.
+ *	  pointer (32-bit word) at 0x8c0000b0: SYSINFO
+ *	  pointer (32-bit word) at 0x8c0000b4: ROMFONT
+ *	  pointer (32-bit word) at 0x8c0000b8: FLASHROM
+ *	  pointer (32-bit word) at 0x8c0000bc: GDROM
+ *	  pointer (32-bit word) at 0x8c0000c0: (?) something
+ *	  pointer (32-bit word) at 0x8c0000e0: "main menu" call, or "continue
+ *					       booting" (?) or something.
+ *
+ *  0x8c000100: Not on a real Dreamcast, but in GXemul: This is filled with
+ *              a special invalid instruction. Each instruction slot corresponds
+ *              to one of the pointers above (SYSINFO, ROMFONT, etc).
+ *
+ *  0x8c008000: This is where the first 32KB of a CDROM gets loaded, also
+ *              known as the "IP.BIN" part.
+ *
+ *  0x8c010000: This is where the first binary executable gets loaded. The name
+ *              of the executable is given in IP.BIN.
  *
  *  See http://mc.pp.se/dc/syscalls.html for a description of what the
  *  PROM syscalls do. (The symbolic names in this module are the same as on
@@ -49,8 +77,8 @@
 #define	DREAMCAST_ROMFONT_BASE		0x80100020
 extern unsigned char font8x16[];
 
-/*  Where the machine ID (64-bit) is stored. (Bogus address.)  */
-#define	DREAMCAST_MACHINE_ID_ADDRESS	0x80000010
+/*  Where the machine ID (64-bit) is stored.  */
+#define	DREAMCAST_MACHINE_ID_ADDRESS	0x80000068
 
 
 static int booting_from_cdrom = 0;
@@ -175,11 +203,11 @@ void dreamcast_machine_setup(struct machine *machine)
 
 	for (i=0; i<0x50; i+=sizeof(uint32_t)) {
 		/*  Store pointer to PROM routine...  */
-		store_32bit_word(cpu, 0x8c0000b0 + i, 0x8c000040 + i);
+		store_32bit_word(cpu, 0x8c0000b0 + i, 0x8c000100 + i);
 
 		/*  ... which contains only 1 instruction, a special
 		    opcode which triggers PROM emulation:  */
-		store_16bit_word(cpu, 0x8c000040 + i, SH_INVALID_INSTR);
+		store_16bit_word(cpu, 0x8c000100 + i, SH_INVALID_INSTR);
 	}
 
 	/*  PROM reboot, in case someone jumps to 0xa0000000:  */
@@ -194,24 +222,35 @@ void dreamcast_machine_setup(struct machine *machine)
 
 /*
  *  dreamcast_emul():
+ *
+ *  We end up here if someone branched or called to 0x8c000100 + ofs,
+ *  where ofs is a small number. These addresses correspond to the code reading
+ *  a pointer from 0x8c0000b0 + ofs and calling it.
+ *
+ *  See http://mc.pp.se/dc/syscalls.html for more details.
  */
-int dreamcast_emul(struct cpu *cpu)
+void dreamcast_emul(struct cpu *cpu)
 {
-	int addr = (cpu->pc & 0xff) - 0x40 + 0xb0;
+	// cpu->pc is the address where PROM emulation was triggered, but
+	// what we are after is the indirect vector that was used to fetch
+	// that address.
+	int vectorAddr = (cpu->pc & 0xffffff) - 0x100 + 0xb0;
+	vectorAddr |= 0x8c000000;
+
 	int r1 = cpu->cd.sh.r[1];
 	int r6 = cpu->cd.sh.r[6];
 	int r7 = cpu->cd.sh.r[7];
 
 	/*  Special case: Reboot  */
-	if ((uint32_t)cpu->pc == 0xa0000000) {
+	if ((uint32_t)cpu->pc == 0x80000000 || (uint32_t)cpu->pc == 0xa0000000) {
 	 	fatal("[ dreamcast reboot ]\n");
 		cpu->running = 0;
-		return 1;
+		return;
 	}
 
-	switch (addr) {
+	switch (vectorAddr) {
 
-	case 0xb0:
+	case 0x8c0000b0:
 		/*  SYSINFO  */
 		switch (r7) {
 		case 0:	/*  SYSINFO_INIT: Ignored for now.  */
@@ -224,7 +263,7 @@ int dreamcast_emul(struct cpu *cpu)
 		}
 		break;
 
-	case 0xb4:
+	case 0x8c0000b4:
 		/*  ROMFONT  */
 		switch (r1) {
 		case 0:	/*  ROMFONT_ADDRESS  */
@@ -235,7 +274,7 @@ int dreamcast_emul(struct cpu *cpu)
 		}
 		break;
 
-	case 0xb8:
+	case 0x8c0000b8:
 		/*  FLASHROM  */
 		switch (r7) {
 		case 0:	/*  FLASHROM_INFO  */
@@ -251,7 +290,7 @@ int dreamcast_emul(struct cpu *cpu)
 		}
 		break;
 
-	case 0xbc:
+	case 0x8c0000bc:
 		switch ((int32_t)r6) {
 		case 0:	/*  GD-ROM emulation  */
 			switch (r7) {
@@ -281,7 +320,7 @@ int dreamcast_emul(struct cpu *cpu)
 		}
 		break;
 
-	case 0xe0:
+	case 0x8c0000e0:
 		/*
 		 *  This seems to have two uses:
 		 *
@@ -325,25 +364,27 @@ int dreamcast_emul(struct cpu *cpu)
 			
 			// Jump to boostrap 1
 			cpu->pc = 0x8c00b800;
-			return 1;
+			return;
 		} else {
 			fatal("[ dreamcast: Returning to main menu. ]\n");
 			cpu->running = 0;
 		}
 		break;
 
-	case 0xf0:
+	case 0x8c0000f0:
 		/*
 		 *  GXemul hack:
 		 *
-		 *  By jumping to this address (0x8c000080), a "boot from
+		 *  The vector (word) at 0x8c0000f0 contains the value 0x8c000140.
+		 *
+		 *  By jumping to this address (0x8c000140), a "boot from
 		 *  CDROM" is simulated. Control is transfered to the license
 		 *  code in the loaded IP.BIN file.
 		 */
 		debug("[ dreamcast boot from CDROM ]\n");
 		booting_from_cdrom = 1;
 		cpu->pc = 0x8c008300;
-		return 1;
+		return;
 
 	default:goto bad;
 	}
@@ -351,14 +392,14 @@ int dreamcast_emul(struct cpu *cpu)
 	/*  Return from subroutine:  */
 	cpu->pc = cpu->cd.sh.pr;
 
-	return 1;
+	return;
 
 bad:
 	cpu_register_dump(cpu->machine, cpu, 1, 0);
 	printf("\n");
 	fatal("[ dreamcast_emul(): unimplemented dreamcast PROM call, "
-	    "pc=0x%08"PRIx32" ]\n", (uint32_t)cpu->pc);
+	    "pc=0x%08"PRIx32" (vectorAddr=0x%08"PRIx32") ]\n", (uint32_t)cpu->pc, vectorAddr);
 	cpu->running = 0;
-	return 1;
+	return;
 }
 

@@ -120,7 +120,7 @@ int load_bootblock(struct machine *m, struct cpu *cpu,
 		 *  but that would only run the SEGA logo code and then return
 		 *  to... well, to nothing.
 		 *
-		 *  Instead, initial PC is set to 0x8c000080, which triggers
+		 *  Instead, initial PC is set to 0x8c000140, which triggers
 		 *  software PROM emulation, which in turn:
 		 *    a) calls 0x8c008300 to show the logo, and
 		 *    b) calls 0x8c00b800 to set up registers etc and
@@ -129,7 +129,7 @@ int load_bootblock(struct machine *m, struct cpu *cpu,
 		 *  This mimics the behavior of the real Dreamcast.
 		 */
 		store_buf(cpu, 0x8c008000, (char *)bootblock_buf, 32768);
-		cpu->pc = 0x8c000080;
+		cpu->pc = 0x8c000140;	// see src/promemul/dreamcast.cc for details
 
 		/*  Remember the name of the file to boot (1ST_READ.BIN):  */
 		if (cpu->machine->boot_kernel_filename == NULL ||

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2006-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -119,7 +119,9 @@ static void handle_command(struct cpu *cpu, struct dreamcast_gdrom_data *d)
 
 	case 0x30:
 		/*  Read sectors:  */
-		if (d->cmd[1] != 0x20) {
+		if (d->cmd[1] == 0x24) {
+			fatal("GDROM unimplemented data format 0x%02x. Continuing anway.\n", d->cmd[1]);
+		} else if (d->cmd[1] != 0x20) {
 			fatal("GDROM unimplemented data format 0x%02x\n",
 			    d->cmd[1]);
 			exit(1);
@@ -132,21 +134,27 @@ static void handle_command(struct cpu *cpu, struct dreamcast_gdrom_data *d)
 		if (sector_count * 2048 != d->data_len) {
 			fatal("Huh? GDROM data_len=0x%x, but sector_count"
 			    "=0x%x\n", (int)d->data_len, (int)sector_count);
-			exit(1);
+			// exit(1);
 		}
 
-{
-if (sector_nr >= 1376810)
-	sector_nr -= 1376810;
-sector_nr -= 150;
-if (sector_nr > 1048576)
-	sector_nr -= 1048576;
-/*  printf("sector nr = %i\n", (int)sector_nr);  */
+		// Hm. This is/was an ugly hack to make NetBSD/dreamcast
+		// work. It should be fixed (i.e. removed).
+		{
+			printf("sector nr step 1 = %i\n", (int)sector_nr);
+			if (sector_nr >= 1376810)
+				sector_nr -= 1376810;
+			sector_nr -= 150;
+			if (sector_nr > 1048576)
+				sector_nr -= 1048576;
 
-if (sector_nr < 1000)
-	sector_nr += (diskimage_get_baseoffset(cpu->machine, 0, DISKIMAGE_IDE)
-	 / 2048);
-}
+			printf("sector nr step 2 = %i\n", (int)sector_nr);
+
+			if (sector_nr < 1000)
+				sector_nr += (diskimage_get_baseoffset(cpu->machine, 0, DISKIMAGE_IDE)
+				 / 2048);
+				 
+			printf("sector nr step 3 = %i\n", (int)sector_nr);
+		}
 
 		res = diskimage_access(cpu->machine, 0, DISKIMAGE_IDE,
 		    0, sector_nr * 2048, d->data, d->data_len);
@@ -250,7 +258,7 @@ DEVICE_ACCESS(dreamcast_gdrom)
 	case GDROM_REGX:
 		if (writeflag == MEM_READ) {
 			fatal("Read from GDROM_REGX?\n");
-			exit(1);
+			// exit(1);
 		} else {
 			/*  NetBSD/dreamcast writes 0 here.  */
 			if (idata != 0) {
@@ -304,6 +312,7 @@ DEVICE_ACCESS(dreamcast_gdrom)
 				d->cmd_count = 0;
 			} else if (idata == 0xef) {
 				fatal("dreamcast_gdrom: ROM: TODO\n");
+				SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_GDROM);
 			} else {
 				fatal("dreamcast_gdrom: unimplemented "
 				    "GDROM_COND = 0x%02x\n", (int)idata);
