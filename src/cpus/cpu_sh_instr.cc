@@ -2396,7 +2396,7 @@ X(fsca_fpul_drn)
 
 
 /*
- *  fipr_fvm_fvn:  Vector * vector  =>  vector
+ *  fipr_fvm_fvn:  Vector * vector  =>  scalar
  *
  *  arg[0] = ptr to FVm
  *  arg[1] = ptr to FVn
@@ -2853,7 +2853,7 @@ X(pref_rn)
 	else
 		extaddr |= (((cpu->cd.sh.qacr1 >> 2) & 7) << 26);
 
-	// debug("[ SH4 pref: SQ extaddr = 0x%08x ]\n", extaddr);
+	// debug("[ SH4 pref: SQ extaddr = 0x%08x (pc = 0x%08x) ]\n", extaddr, (int)cpu->pc);
 
 	// Is the MMU turned on?
 	if (cpu->cd.sh.mmucr & SH4_MMUCR_AT) {
@@ -2878,6 +2878,7 @@ X(pref_rn)
 		cpu->memory_rw(cpu, cpu->mem, 0xe0000000UL + ofs
 		    + sq_nr * 0x20, (unsigned char *)
 		    &word, sizeof(word), MEM_READ, PHYSICAL);
+		// debug("  addr %08x: %08x\n", (extaddr + ofs), word);
 		cpu->memory_rw(cpu, cpu->mem, extaddr+ofs, (unsigned char *)
 		    &word, sizeof(word), MEM_WRITE, PHYSICAL);
 	}
@@ -4121,8 +4122,8 @@ X(to_be_translated)
 		} else if (lo8 == 0xed) {
 			/*  FIPR FVm,FVn  */
 			ic->f = instr(fipr_fvm_fvn);
-			ic->arg[0] = (size_t)&cpu->cd.sh.fr[r8 & 0xc];  /* m */
-			ic->arg[1] = (size_t)&cpu->cd.sh.fr[(r8&3)*4];  /* n */
+			ic->arg[0] = (size_t)&cpu->cd.sh.fr[(r8<<2) & 0xc];  /* m */
+			ic->arg[1] = (size_t)&cpu->cd.sh.fr[r8 & 0xc];  /* n */
 		} else if ((iword & 0x01ff) == 0x00fd) {
 			/*  FSCA FPUL,DRn  */
 			ic->f = instr(fsca_fpul_drn);

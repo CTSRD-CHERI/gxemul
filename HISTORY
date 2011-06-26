@@ -4564,4 +4564,7 @@ Changelog for GXemul:
 20110626	Moving Dreamcast BIOS emulation entry points to 0x8c000100+ofs,
 		so they are not "in the way" of the real BIOS' data area at
 		0x8c000000-0x8c0000ff. Some other minor Dreamcast fixes.
+		Moving GDROM DMA register handling into dev_dreamcast_gdrom.
+		Fixing a bug in the SH4 fipr instruction (inner product): the
+		rm and rn registers were reversed!
 
