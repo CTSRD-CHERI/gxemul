@@ -27,8 +27,8 @@
  *
  *  COMMENT: Dreamcast GD-ROM
  *
- *  TODO: This is just a dummy so far. It is enough for NetBSD/dreamcast to
- *  read the GD-ROM, but it shouldn't be assumed to work for anything else.
+ *  TODO: This is mostly just a dummy so far. It is enough for NetBSD/dreamcast
+ *  to read the GD-ROM, but it shouldn't be assumed to work for anything else.
  */
 
 #include <stdio.h>
@@ -45,9 +45,12 @@
 #include "thirdparty/dreamcast_sysasicvar.h"
 
 
-/*  #define debug fatal  */
+// #define debug fatal
+
+#define	NREGS_GDROM_DMA		(0x100/sizeof(uint32_t))
 
 struct dreamcast_gdrom_data {
+	// 0x005f7000: GDROM control registers
 	uint8_t		busy;		/*  Busy status  */
 	uint8_t		stat;		/*  Status  */
 	int		cnt;		/*  Data length  */
@@ -60,6 +63,9 @@ struct dreamcast_gdrom_data {
 	int		data_len;
 	int		cur_data_offset;
 	int		cur_cnt;
+
+	// 0x005f7400: GDROM DMA
+	uint32_t	dma_reg[NREGS_GDROM_DMA];
 };
 
 /*  Register offsets, from NetBSD:  */
@@ -128,32 +134,46 @@ static void handle_command(struct cpu *cpu, struct dreamcast_gdrom_data *d)
 		}
 		sector_nr = d->cmd[2] * 65536 + d->cmd[3] * 256 + d->cmd[4];
 		sector_count = d->cmd[8] * 65536 + d->cmd[9] * 256 + d->cmd[10];
+
+		// NetBSD/dreamcast uses correct length, but the BIOS uses
+		// len = 0 (!), but sector count = 7,
+		// which means len = 0x3800. It also sets up DMA to
+		// transfer 0x3800 bytes, so I'm assuming that the
+		// sector count is to be trusted more than the length.
 		if (d->cnt == 0)
-			d->cnt = 65536;
-		alloc_data(d);
-		if (sector_count * 2048 != d->data_len) {
+			d->cnt = 2048 * sector_count;
+
+		if (sector_count * 2048 != d->cnt) {
 			fatal("Huh? GDROM data_len=0x%x, but sector_count"
-			    "=0x%x\n", (int)d->data_len, (int)sector_count);
-			// exit(1);
+			    "=0x%x\n", (int)d->cnt, (int)sector_count);
+			exit(1);
 		}
 
-		// Hm. This is/was an ugly hack to make NetBSD/dreamcast
-		// work. It should be fixed (i.e. removed).
-		{
-			printf("sector nr step 1 = %i\n", (int)sector_nr);
+		alloc_data(d);
+
+		// Hm. This is an ugly hack to make a NetBSD/dreamcast
+		// live-cd work. It should be fixed (i.e. removed).
+		if (true) {
+			// printf("sector nr step 1 = %i\n", (int)sector_nr);
 			if (sector_nr >= 1376810)
 				sector_nr -= 1376810;
 			sector_nr -= 150;
 			if (sector_nr > 1048576)
 				sector_nr -= 1048576;
 
-			printf("sector nr step 2 = %i\n", (int)sector_nr);
+			// printf("sector nr step 2 = %i\n", (int)sector_nr);
 
 			if (sector_nr < 1000)
 				sector_nr += (diskimage_get_baseoffset(cpu->machine, 0, DISKIMAGE_IDE)
 				 / 2048);
 				 
-			printf("sector nr step 3 = %i\n", (int)sector_nr);
+			// printf("sector nr step 3 = %i\n", (int)sector_nr);
+		} else {
+			// printf("sector nr step 1 = %i\n", (int)sector_nr);
+			sector_nr -= 45150;
+			// printf("sector nr step 2 = %i\n", (int)sector_nr);
+			sector_nr += (diskimage_get_baseoffset(cpu->machine, 0, DISKIMAGE_IDE) / 2048);
+			// printf("sector nr step 3 = %i\n", (int)sector_nr);
 		}
 
 		res = diskimage_access(cpu->machine, 0, DISKIMAGE_IDE,
@@ -162,6 +182,14 @@ static void handle_command(struct cpu *cpu, struct dreamcast_gdrom_data *d)
 			fatal("GDROM: diskimage_access failed? TODO\n");
 //			exit(1);
 		}
+
+		/* {
+			printf("(Dump of GDROM sector %i: \"", (int)sector_nr);
+			for (int k = 0; k < 256; ++k)
+				printf("%c", d->data[k] >= 32 ? d->data[k] : '.');
+			printf("\")\n");
+		} */
+
 		break;
 
 	case 0x70:
@@ -312,7 +340,7 @@ DEVICE_ACCESS(dreamcast_gdrom)
 				d->cmd_count = 0;
 			} else if (idata == 0xef) {
 				fatal("dreamcast_gdrom: ROM: TODO\n");
-				SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_GDROM);
+				// SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_GDROM);
 			} else {
 				fatal("dreamcast_gdrom: unimplemented "
 				    "GDROM_COND = 0x%02x\n", (int)idata);
@@ -338,6 +366,81 @@ DEVICE_ACCESS(dreamcast_gdrom)
 }
 
 
+DEVICE_ACCESS(dreamcast_gdrom_dma)
+{
+	struct dreamcast_gdrom_data *d = (struct dreamcast_gdrom_data *) extra;
+	uint64_t idata = 0, odata = 0;
+
+	if (writeflag == MEM_WRITE)
+		idata = memory_readmax64(cpu, data, len);
+
+	/*  Default read:  */
+	if (writeflag == MEM_READ)
+		odata = d->dma_reg[relative_addr / sizeof(uint32_t)];
+
+	switch (relative_addr) {
+
+	case 0x04:	// destination address? e.g. 0x8c008000
+	case 0x08:	// DMA length in bytes? e.g. 0x3800
+	case 0x0c:	// count? e.g. 1
+	case 0x14:	// "enable"?
+		break;
+
+	case 0x18:
+		// GDROM DMA start?
+		if (idata != 0) {
+			if (d->dma_reg[0x0c / sizeof(uint32_t)] == 1 &&
+			    d->dma_reg[0x14 / sizeof(uint32_t)] == 1) {
+				// GDROM DMA transfer.
+				uint32_t dst = d->dma_reg[0x04 / sizeof(uint32_t)];
+				int length = d->dma_reg[0x08 / sizeof(uint32_t)];
+				fatal("[ dreamcast_gdrom_dma: Transfering %i bytes to 0x%08"PRIx32" ]\n", length, dst);
+
+				if (d->data == NULL) {
+					fatal("dreamcast_gdrom_dma: DMA transfer but d->data is NULL. TODO\n");
+					exit(1);
+				}
+
+				dst &= 0x0fffffff;	// 0x8c008000 => 0x0c008000
+				cpu->memory_rw(cpu, cpu->mem, dst,
+				    d->data, d->data_len, MEM_WRITE, PHYSICAL);
+
+				SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_GDROM_DMA);
+
+				idata = 0;
+			} else {
+				fatal("Unimplemented GDROM DMA start? TODO\n");
+				fatal("  %08x\n", (int) d->dma_reg[4 / sizeof(uint32_t)]);
+				fatal("  %08x\n", (int) d->dma_reg[8 / sizeof(uint32_t)]);
+				fatal("  %08x\n", (int) d->dma_reg[0xc / sizeof(uint32_t)]);
+				fatal("  %08x\n", (int) d->dma_reg[0x14 / sizeof(uint32_t)]);
+				exit(1);
+			}
+		}
+		break;			
+
+	default:if (writeflag == MEM_READ) {
+			fatal("[ dreamcast_gdrom_dma: read from addr 0x%x ]\n",
+			    (int)relative_addr);
+		} else {
+			fatal("[ dreamcast_gdrom_dma: write to addr 0x%x: "
+			    "0x%x ]\n", (int)relative_addr, (int)idata);
+		}
+
+		/*  exit(1);  */
+	}
+
+	/*  Default write:  */
+	if (writeflag == MEM_WRITE)
+		d->dma_reg[relative_addr / sizeof(uint32_t)] = idata;
+
+	if (writeflag == MEM_READ)
+		memory_writemax64(cpu, data, len, odata);
+
+	return 1;
+}
+
+
 DEVINIT(dreamcast_gdrom)
 {
 	struct dreamcast_gdrom_data *d;
@@ -348,6 +451,9 @@ DEVINIT(dreamcast_gdrom)
 	memory_device_register(devinit->machine->memory, devinit->name,
 	    0x005f7000, 0x100, dev_dreamcast_gdrom_access, d,
 	    DM_DEFAULT, NULL);
+
+	memory_device_register(devinit->machine->memory, "gdrom_dma", 0x005f7400,
+	    0x80, dev_dreamcast_gdrom_dma_access, d, DM_DEFAULT, NULL);
 
 	return 1;
 }

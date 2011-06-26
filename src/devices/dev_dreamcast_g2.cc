@@ -48,13 +48,11 @@
 // #define debug fatal
 #endif
 
-#define	NREGS_GDROM_DMA		(0x100/sizeof(uint32_t))
 #define	NREGS_EXT_DMA		(0x80/sizeof(uint32_t))
 #define	NREGS_MISC		(0x80/sizeof(uint32_t))
 
 struct dreamcast_g2_data {
 	uint32_t	extdma_reg[NREGS_EXT_DMA];
-	uint32_t	gdrom_dma_reg[NREGS_GDROM_DMA];
 	uint32_t	misc_reg[NREGS_MISC];
 };
 
@@ -240,59 +238,6 @@ DEVICE_ACCESS(dreamcast_g2_extdma)
 }
 
 
-DEVICE_ACCESS(dreamcast_g2_gdrom_dma)
-{
-	struct dreamcast_g2_data *d = (struct dreamcast_g2_data *) extra;
-	uint64_t idata = 0, odata = 0;
-
-	if (writeflag == MEM_WRITE)
-		idata = memory_readmax64(cpu, data, len);
-
-	/*  Default read:  */
-	if (writeflag == MEM_READ)
-		odata = d->gdrom_dma_reg[relative_addr / sizeof(uint32_t)];
-
-	switch (relative_addr) {
-
-	case 0x04:	// destination address? e.g. 0x8c008000
-	case 0x08:	// DMA length in bytes?
-	case 0x0c:	// "1"?
-		break;
-
-	case 0x18:
-		// GDROM DMA start?
-		if (idata != 0) {
-			fatal("GDROM DMA start?\n");
-			fatal("  %08x\n", (int) d->gdrom_dma_reg[4 / sizeof(uint32_t)]);
-			fatal("  %08x\n", (int) d->gdrom_dma_reg[8 / sizeof(uint32_t)]);
-			fatal("  %08x\n", (int) d->gdrom_dma_reg[0xc / sizeof(uint32_t)]);
-			fatal("  %08x\n", (int) d->gdrom_dma_reg[0x14 / sizeof(uint32_t)]);
-			exit(1);
-		}
-		break;			
-
-	default:if (writeflag == MEM_READ) {
-			fatal("[ dreamcast_g2_gdrom_dma: read from addr 0x%x ]\n",
-			    (int)relative_addr);
-		} else {
-			fatal("[ dreamcast_g2_gdrom_dma: write to addr 0x%x: "
-			    "0x%x ]\n", (int)relative_addr, (int)idata);
-		}
-
-		/*  exit(1);  */
-	}
-
-	/*  Default write:  */
-	if (writeflag == MEM_WRITE)
-		d->gdrom_dma_reg[relative_addr / sizeof(uint32_t)] = idata;
-
-	if (writeflag == MEM_READ)
-		memory_writemax64(cpu, data, len, odata);
-
-	return 1;
-}
-
-
 DEVICE_ACCESS(dreamcast_g2_misc)
 {
 	struct dreamcast_g2_data *d = (struct dreamcast_g2_data *) extra;
@@ -345,9 +290,6 @@ DEVINIT(dreamcast_g2)
 	CHECK_ALLOCATION(d = (struct dreamcast_g2_data *)
 	    malloc(sizeof(struct dreamcast_g2_data)));
 	memset(d, 0, sizeof(struct dreamcast_g2_data));
-
-	memory_device_register(machine->memory, "g2_gdrom_dma", 0x005f7400,
-	    0x80, dev_dreamcast_g2_gdrom_dma_access, d, DM_DEFAULT, NULL);
 
 	memory_device_register(machine->memory, "g2_misc", 0x005f7480,
 	    0x80, dev_dreamcast_g2_misc_access, d, DM_DEFAULT, NULL);
