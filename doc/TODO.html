@@ -455,6 +455,8 @@ Some things, in no specific order, that I'd like to fix:
   [/]	Symbol registry.
   	[X]  Add ELF symbols (see end of FileLoader_ELF.cc).
   	[X]  Load a.out symbols.
+  	[ ]  Include device addresses and hardware registers in the symbol
+  	     registry (as in the legacy Dreamcast mode).
   	[ ]  Cloning a CPUComponent should also clone its symbol registry!
   	     Think about serializing symbols...
 
@@ -1126,10 +1128,12 @@ Release checklist:
 	Freshmeat
 	Wikipedia page (version number and date, possibly architectures update,
 		or description update).
+		https://secure.wikimedia.org/wikipedia/en/wiki/GXemul
 	Send mail to package maintainers (if they are not subscribed
 		to the mailing list(s))
 	If new arch:
 		Linux-MIPS wiki page
+		https://secure.wikimedia.org/wikipedia/en/wiki/Comparison_of_platform_virtual_machines
 		Ohloh description page
 		gavare.se main page
 
