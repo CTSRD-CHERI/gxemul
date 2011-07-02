@@ -1,12 +1,12 @@
 /*
- *  Copyright (C) 2005-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2005-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright  
+ *  2. Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the 
  *     documentation and/or other materials provided with the distribution.
  *  3. The name of the author may not be used to endorse or promote products
@@ -132,7 +132,9 @@ int sh_cpu_new(struct cpu *cpu, struct memory *mem, struct machine *machine,
 	CPU_SETTINGS_ADD_REGISTER32("sr", cpu->cd.sh.sr);
 	CPU_SETTINGS_ADD_REGISTER32("pr", cpu->cd.sh.pr);
 	CPU_SETTINGS_ADD_REGISTER32("vbr", cpu->cd.sh.vbr);
+	CPU_SETTINGS_ADD_REGISTER32("sgr", cpu->cd.sh.sgr);
 	CPU_SETTINGS_ADD_REGISTER32("gbr", cpu->cd.sh.gbr);
+	CPU_SETTINGS_ADD_REGISTER32("dbr", cpu->cd.sh.dbr);
 	CPU_SETTINGS_ADD_REGISTER32("macl", cpu->cd.sh.macl);
 	CPU_SETTINGS_ADD_REGISTER32("mach", cpu->cd.sh.mach);
 	CPU_SETTINGS_ADD_REGISTER32("expevt", cpu->cd.sh.expevt);
@@ -520,7 +522,8 @@ void sh_cpu_register_dump(struct cpu *cpu, int gprs, int coprocs)
 	if (coprocs & 2) {
 		/*  System registers, etc:  */
 		debug("cpu%i: vbr = 0x%08"PRIx32"  sgr = 0x%08"PRIx32
-		    "\n", x, cpu->cd.sh.vbr, cpu->cd.sh.sgr);
+		    "  dbr = 0x%08"PRIx32"\n", x, cpu->cd.sh.vbr, cpu->cd.sh.sgr,
+		    cpu->cd.sh.dbr);
 		debug("cpu%i: spc = 0x%08"PRIx32"  ssr = 0x%08"PRIx32"\n",
 		    x, cpu->cd.sh.spc, cpu->cd.sh.ssr);
 		debug("cpu%i: expevt = 0x%"PRIx32"  intevt = 0x%"PRIx32
