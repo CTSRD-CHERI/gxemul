@@ -44,7 +44,7 @@
 #include "../../config.h"
 
 
-#define	COPYRIGHT_MSG	"Copyright (C) 2003-2010  Anders Gavare"
+#define	COPYRIGHT_MSG	"Copyright (C) 2003-2011  Anders Gavare"
 
 // The recommended way to add a specific message to the startup banner or
 // about box is to use the SECONDARY_MSG. This should end with a newline
