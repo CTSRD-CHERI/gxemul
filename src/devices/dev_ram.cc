@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2004-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2004-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -43,11 +43,11 @@
 #include "misc.h"
 
 
-/*  #define RAM_DEBUG  */
-
 struct ram_data {
 	uint64_t	baseaddress;
+	const char*	name;
 
+	bool		trace;
 	int		mode;
 	uint64_t	otheraddress;
 
@@ -64,26 +64,33 @@ DEVICE_ACCESS(ram)
 {
 	struct ram_data *d = (struct ram_data *) extra;
 
-#ifdef RAM_DEBUG
-	if (writeflag==MEM_READ) {
-		debug("[ ram: read from 0x%x, len=%i ]\n",
-		    (int)relative_addr, (int)len);
-	} else {
-		int i;
-		debug("[ ram: write to 0x%x:", (int)relative_addr);
-		for (i=0; i<len; i++)
-			debug(" %02x", data[i]);
-		debug(" (len=%i) ]\n", len);
+	if (cpu->running && d->trace && writeflag == MEM_WRITE) {
+		fatal("[ %s: write %i byte%s from 0x%x:",
+		    d->name, (int)len, len==1? "":"s", (int)relative_addr);
+		for (size_t i=0; i<len; i++)
+			fatal(" %02x", data[i]);
+		fatal(" ]\n");
 	}
-#endif
 
 	switch (d->mode) {
 
 	case DEV_RAM_MIRROR:
 		/*  TODO:  how about caches?  */
-		return cpu->memory_rw(cpu, mem,
-		    d->otheraddress + relative_addr, data, len,
-		    writeflag, PHYSICAL);
+		{
+			int result = cpu->memory_rw(cpu, mem,
+			    d->otheraddress + relative_addr, data, len,
+			    writeflag, PHYSICAL);
+			    
+			if (cpu->running && d->trace) {
+				fatal("[ %s: read %i byte%s from 0x%x:",
+				    d->name, (int)len, len==1? "":"s", (int)relative_addr);
+				for (size_t i=0; i<len; i++)
+					fatal(" %02x", data[i]);
+				fatal(" ]\n");
+			}
+
+			return result;
+		}
 
 	case DEV_RAM_RAM:
 		if (writeflag == MEM_WRITE) {
@@ -97,6 +104,14 @@ DEVICE_ACCESS(ram)
 			}
 		} else {
 			memcpy(data, &d->data[relative_addr], len);
+
+			if (cpu->running && d->trace) {
+				fatal("[ %s: read %i byte%s from 0x%x:",
+				    d->name, (int)len, len==1? "":"s", (int)relative_addr);
+				for (size_t i=0; i<len; i++)
+					fatal(" %02x", data[i]);
+				fatal(" ]\n");
+			}
 		}
 		break;
 
@@ -117,7 +132,7 @@ DEVICE_ACCESS(ram)
  *  translation arrays just as normal memory and other devices are).
  */
 void dev_ram_init(struct machine *machine, uint64_t baseaddr, uint64_t length,
-	int mode, uint64_t otheraddress)
+	int mode, uint64_t otheraddress, const char* name)
 {
 	struct ram_data *d;
 	int flags = DM_DEFAULT, points_to_ram = 1;
@@ -125,9 +140,16 @@ void dev_ram_init(struct machine *machine, uint64_t baseaddr, uint64_t length,
 	CHECK_ALLOCATION(d = (struct ram_data *) malloc(sizeof(struct ram_data)));
 	memset(d, 0, sizeof(struct ram_data));
 
+	d->name = strdup((name == NULL) ? "ram" : name);
+
 	if (mode & DEV_RAM_MIGHT_POINT_TO_DEVICES) {
 		mode &= ~DEV_RAM_MIGHT_POINT_TO_DEVICES;
 		points_to_ram = 0;
+	}
+
+	if (mode & DEV_RAM_TRACE_ALL_ACCESSES) {
+		mode &= ~DEV_RAM_TRACE_ALL_ACCESSES;
+		d->trace = true;
 	}
 
 	d->mode         = mode;
@@ -143,16 +165,18 @@ void dev_ram_init(struct machine *machine, uint64_t baseaddr, uint64_t length,
 		 *  with dyntrans accesses if DM_EMULATED_RAM is set.
 		 */
 		d->offset = baseaddr - otheraddress;
+		d->name = (string(d->name) + " [mirror]").c_str();
 
 		/*  Aligned RAM? Then it works with dyntrans.  */
 		if (points_to_ram &&
 		    (baseaddr & (machine->arch_pagesize-1)) == 0 &&
 		    (otheraddress & (machine->arch_pagesize - 1)) == 0 &&
-		    (length & (machine->arch_pagesize - 1)) == 0)
+		    (length & (machine->arch_pagesize - 1)) == 0 &&
+		    !d->trace)
 			flags |= DM_DYNTRANS_OK | DM_DYNTRANS_WRITE_OK
 			    | DM_EMULATED_RAM;
 
-		memory_device_register(machine->memory, "ram [mirror]",
+		memory_device_register(machine->memory, d->name,
 		    baseaddr, length, dev_ram_access, d, flags
 		    | DM_READS_HAVE_NO_SIDE_EFFECTS, (unsigned char*) (void *) &d->offset);
 		break;
@@ -173,16 +197,17 @@ void dev_ram_init(struct machine *machine, uint64_t baseaddr, uint64_t length,
 
 		/*  Aligned memory? Then it works with dyntrans.  */
 		if ((baseaddr & (machine->arch_pagesize - 1)) == 0 &&
-		    (length & (machine->arch_pagesize - 1)) == 0)
+		    (length & (machine->arch_pagesize - 1)) == 0 &&
+		    !d->trace)
 			flags |= DM_DYNTRANS_OK | DM_DYNTRANS_WRITE_OK;
 
-		memory_device_register(machine->memory, "ram", baseaddr,
+		memory_device_register(machine->memory, d->name, baseaddr,
 		    d->length, dev_ram_access, d, flags
 		    | DM_READS_HAVE_NO_SIDE_EFFECTS, d->data);
 		break;
 
 	default:
-		fatal("dev_ram_access(): unknown mode %i\n", d->mode);
+		fatal("dev_ram_access(): %s: unknown mode %i\n", d->name, d->mode);
 		exit(1);
 	}
 }

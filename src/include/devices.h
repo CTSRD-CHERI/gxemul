@@ -2,7 +2,7 @@
 #define	DEVICES_H
 
 /*
- *  Copyright (C) 2003-2010  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2003-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -341,10 +341,11 @@ void dev_px_init(struct machine *machine, struct memory *mem,
 #define	DEV_RAM_RAM				0
 #define	DEV_RAM_MIRROR				1
 #define	DEV_RAM_MIGHT_POINT_TO_DEVICES		0x10
+#define	DEV_RAM_TRACE_ALL_ACCESSES		0x20
 int dev_ram_access(struct cpu *cpu, struct memory *mem, uint64_t relative_addr,
 	unsigned char *data, size_t len, int writeflag, void *);
 void dev_ram_init(struct machine *machine, uint64_t baseaddr, uint64_t length,
-	int mode, uint64_t otheraddr);
+	int mode, uint64_t otheraddr, const char* name = NULL);
 
 /*  dev_scc.c:  */
 #define	DEV_SCC_LENGTH			0x1000

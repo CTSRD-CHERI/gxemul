@@ -72,6 +72,10 @@ MACHINE_SETUP(dreamcast)
 	 *
 	 *  0x00000000 - 0x001fffff	Boot ROM (2 MB)
 	 *  0x00200000 - 0x003fffff	Flash (256 KB)
+	 *				    Offset 0x1a000 .. 0x1a004 = 5 bytes
+	 *					hex digits (maybe limited to 0x30, 0x31, 0x32, or 0x33)
+	 *				    Offset 0x1a056 .. 0x1a05d = 8 bytes
+	 *					serial number / machine ID.
 	 *  0x005f0000 - ...            ???
 	 *  0x005f6800 - ...		PowerVR2 DMA registers
 	 *  0x005f6900 - ...		ASIC registers
@@ -106,6 +110,12 @@ MACHINE_SETUP(dreamcast)
 	 *  (*3) = See VOUTC in Linux' drivers/video/pvr2fb.c.
 	 *  (*4) = It seems that ARM machine code is placed here.
 	 */
+
+	dev_ram_init(machine, 0x00000000, 2 * 1024 * 1024,
+	    DEV_RAM_RAM /* | DEV_RAM_TRACE_ALL_ACCESSES */, 0x0, "bootrom");
+
+	dev_ram_init(machine, 0x00200000, 256 * 1024,
+	    DEV_RAM_RAM /* | DEV_RAM_TRACE_ALL_ACCESSES */, 0x0, "flash");
 
 	dev_ram_init(machine, 0x00600004, 4, DEV_RAM_RAM, 0);
 	dev_ram_init(machine, 0x00700000, 0x27ff, DEV_RAM_RAM, 0);

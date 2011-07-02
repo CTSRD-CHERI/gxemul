@@ -4567,4 +4567,7 @@ Changelog for GXemul:
 		Moving GDROM DMA register handling into dev_dreamcast_gdrom.
 		Fixing a bug in the SH4 fipr instruction (inner product): the
 		rm and rn registers were reversed!
+		Implementing fmov_rm_frn for double-sized register access.
+20110702	dev_ram now has a "trace" flag. Useful for figuring out e.g.
+		when/if a program accesses certain memory ranges.
 
