@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2003-2009  Anders Gavare.  All rights reserved.
+ *  Copyright (C) 2003-2011  Anders Gavare.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -227,7 +227,8 @@ void internal_w(char *arg)
  */
 static void usage(int longusage)
 {
-	printf("GXemul "VERSION"    Copyright (C) 2003-2010  Anders Gavare\n");
+
+	printf("GXemul "VERSION"    "COPYRIGHT_MSG"\n"SECONDARY_MSG);
 	printf("Read the source code and/or documentation for "
 	    "other Copyright messages.\n");
 
@@ -836,7 +837,7 @@ int main(int argc, char *argv[])
 	}
 
 	/*  Print startup message:  */
-	debug("GXemul "VERSION"    Copyright (C) 2003-2010  Anders Gavare\n"
+	debug("GXemul "VERSION"    "COPYRIGHT_MSG"\n"SECONDARY_MSG
 	    "Read the source code and/or documentation for other Copyright "
 	    "messages.\n\n");
 
