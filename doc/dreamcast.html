@@ -124,20 +124,20 @@ making a complete ISO may be the best way to go. This can then be booted
 <p>
 To manually start at 0x8c008300, i.e. show the logo:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:TEST.BIN 0x8c008000:0:0x8c008300:IP.BIN
+	gxemul -XEdreamcast 0xac010000:TEST.BIN 0x8c008000:0:0x8c008300:IP.BIN
 </pre>
 
 <p>
 To manually start at 0x8c00b800 (Bootstrap 1), i.e. skip the logo and allow bootstrap code to jump to 0x8c010000:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:TEST.BIN 0x8c008000:0:0x8c00b800:IP.BIN
+	gxemul -XEdreamcast 0xac010000:TEST.BIN 0x8c008000:0:0x8c00b800:IP.BIN
 </pre>
 
 <p>
 Starting at 0x8c000140 fakes a boot from CDROM, i.e. the emulated ROM calls
 0x8c008300 first, and then when that code returns, it calls 0x8c00b800:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:TEST.BIN 0x8c008000:0:0x8c000140:IP.BIN
+	gxemul -XEdreamcast 0xac010000:TEST.BIN 0x8c008000:0:0x8c000140:IP.BIN
 </pre>
 
 <p>This does not always work very well, though, because graphics may be initialized
@@ -149,7 +149,7 @@ counter.
 <p>And last, but not least, skip the IP.BIN part alltogether and just run the
 binary you are interested in:
 <pre>
-	gxemul -XEdreamcast 0x8c010000:TEST.BIN
+	gxemul -XEdreamcast 0xac010000:TEST.BIN
 </pre>
 
 <p>
@@ -171,10 +171,10 @@ Almost none of the Dreamcast's hardware is actually emulated by GXemul so far
   <li>Start GXemul like this:
 <pre>
 	# Starting using bootstrap code in IP.BIN:
-	gxemul -XEdreamcast 0x8c010000:roto.bin 0x8c008000:0:0x8c00b800:IP.BIN
+	gxemul -XEdreamcast 0xac010000:roto.bin 0x8c008000:0:0x8c00b800:IP.BIN
 
 	# or easier: starting the raw binary by itself:
-	gxemul -XEdreamcast 0x8c010000:roto.bin
+	gxemul -XEdreamcast 0xac010000:roto.bin
 </pre>
 </ul>
 
@@ -184,10 +184,8 @@ KOS examples, which more or less works:
 
 <p>
 <a href="20110624-dreamcast-gltest.png"><img src="20110624-dreamcast-gltest-small.png"></a>
-
-<p>
-Nothing related to texture rendering is implemented yet in GXemul, only
-the outlines are drawn, producing the wire-frame look.
+&nbsp;&nbsp;
+<a href="20110703-dreamcast-gltest.png"><img src="20110703-dreamcast-gltest-small.png"></a>
 
 
 

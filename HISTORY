@@ -4570,4 +4570,9 @@ Changelog for GXemul:
 		Implementing fmov_rm_frn for double-sized register access.
 20110702	dev_ram now has a "trace" flag. Useful for figuring out e.g.
 		when/if a program accesses certain memory ranges.
+		Continuing on Dreamcast PVR (graphics) emulation; implementing
+		software triangle rendering, so that some demo programs (such
+		as Comstedt's "tatest", KOS' "gltest.bin" and "dcfighting.bin")
+		now render solid polygons. Color is random though, and no
+		textures yet.
 

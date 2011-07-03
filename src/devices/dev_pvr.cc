@@ -88,6 +88,22 @@
 #define	PVR_LMMODE0		0x84  
 #define	PVR_LMMODE1		0x88
 
+// An expanded (more easily read) variant of all the rendering commands.
+struct pvr_drawing_command {
+	int		cmd;
+	uint32_t	texture;
+	int		texture_xsize;
+	int		texture_ysize;
+
+	// float would be enough for most of this, I guess.
+	double		x;
+	double		y;
+	double		z;
+	double		u;
+	double		v;
+	double		extra1;
+	double		extra2;
+};
 
 struct pvr_data {
 	struct vfb_data		*fb;
@@ -131,6 +147,14 @@ struct pvr_data {
 	/*  Tile Accelerator Command:  */
 	uint32_t		ta[64 / sizeof(uint32_t)];
 
+	/*  GXemul's own variant of the rendering commands:  */
+	int			current_list_type;
+	struct pvr_drawing_command *drawing_commands;
+	size_t			allocated_drawing_commands;
+	size_t			n_drawing_commands;
+	double			*vram_z;
+
+	/*  Video RAM:  */
 	uint8_t			*vram;
 
 	/*  DMA registers:  */
@@ -226,34 +250,53 @@ void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 		dar = d->dma_reg[PVR_ADDR / sizeof(uint32_t)];
 
 		if (dar != 0x10000000) {
-			fatal("[TODO: DMA to non-TA? dar=%08x\n", (int)dar);
-			exit(1);	// TODO
-			//sar += src_delta * count;
-			//count = 0;
-			break;
-		}
+			fatal("[ NOTE: DMA to non-TA: dar=%08x (delta %i), sar=%08x (delta %i) ]\n",
+			    (int)dar, (int)dst_delta, (int)sar, (int)src_delta);
+			dar = 0x04000000 | (dar & 0x007fffff);
+			if (dst_delta == 0)
+				dst_delta = src_delta;
 
-		while (count > 0) {
-			unsigned char buf[32];
-			int ofs;
-			size_t chunksize = transmit_size;
+			uint8_t *buf = (uint8_t*) malloc(transmit_size);
+			while (count > 0) {
+				// printf("sar = %08x dar = %08x\n", (int)sar, (int)dar);
+				
+				cpu->memory_rw(cpu, cpu->mem, sar, buf,
+				    transmit_size, MEM_READ, NO_EXCEPTIONS | PHYSICAL);
+				// for (int i = 0; i < transmit_size; ++i)
+				// 	printf("%02x ", buf[i]);
+				// printf("\n");
 
-			if (chunksize > sizeof(uint32_t))
-				chunksize = sizeof(uint32_t);
+				cpu->memory_rw(cpu, cpu->mem, dar, buf,
+				    transmit_size, MEM_WRITE, NO_EXCEPTIONS | PHYSICAL);
 
-			for (ofs = 0; ofs < transmit_size; ofs += chunksize) {
-				cpu->memory_rw(cpu, cpu->mem, sar + ofs, buf,
-				    chunksize, MEM_READ, NO_EXCEPTIONS | PHYSICAL);
-
-				dev_pvr_ta_access(cpu, cpu->mem, ofs, buf, chunksize,
-				    MEM_WRITE, d);
-
-				/*  cpu->memory_rw(cpu, cpu->mem, dar + ofs, buf,
-				    chunksize, MEM_WRITE, NO_EXCEPTIONS | PHYSICAL);  */
+				count --;
+				sar += src_delta;
+				dar += dst_delta;
 			}
 
-			count --;
-			sar += src_delta;
+			free(buf);
+
+			break;
+		} else {
+			while (count > 0) {
+				unsigned char buf[sizeof(uint32_t)];
+				int ofs;
+				size_t chunksize = transmit_size;
+
+				if (chunksize > sizeof(uint32_t))
+					chunksize = sizeof(uint32_t);
+
+				for (ofs = 0; ofs < transmit_size; ofs += chunksize) {
+					cpu->memory_rw(cpu, cpu->mem, sar + ofs, buf,
+					    chunksize, MEM_READ, NO_EXCEPTIONS | PHYSICAL);
+
+					dev_pvr_ta_access(cpu, cpu->mem, ofs, buf, chunksize,
+					    MEM_WRITE, d);
+				}
+
+				count --;
+				sar += src_delta;
+			}
 		}
 
 		// Transfer End. TODO: _EXACTLY_ what happens at the end of
@@ -262,6 +305,9 @@ void pvr_dma_transfer(struct cpu *cpu, struct pvr_data *d)
 		cpu->cd.sh.dmac_chcr[channel] &= ~CHCR_TD;
 		cpu->cd.sh.dmac_sar[channel] = sar;
 		cpu->cd.sh.dmac_tcr[channel] = count;
+
+		// d->dma_reg[PVR_ADDR / sizeof(uint32_t)] = ???;
+		d->dma_reg[PVR_COUNT / sizeof(uint32_t)] = 0;
 
 		SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_PVR_DMA);
 
@@ -302,7 +348,7 @@ DEVICE_ACCESS(pvr_dma)
 
 	case PVR_COUNT:
 		if (writeflag == MEM_WRITE) {
-			debug("[ pvr_dma: LEN set to 0x%08x ]\n",
+			debug("[ pvr_dma: COUNT set to 0x%08x ]\n",
 			    (int) idata);
 		}
 		break;
@@ -371,7 +417,11 @@ DEVICE_ACCESS(pvr_dma)
 		break;
 
 	case 0x9c:
-		/*  TODO  */
+		if (writeflag == MEM_WRITE && idata != 0) {
+			fatal("[ pvr_dma: TODO: unknown_0x%02x set to "
+			    "0x%08x ]\n", (int) relative_addr, (int) idata);
+			exit(1);
+		}
 		break;
 
 	case 0xa0:
@@ -504,6 +554,12 @@ static void pvr_vblank_timer_tick(struct timer *t, void *extra)
  */
 void pvr_geometry_updated(struct pvr_data *d)
 {
+	/*  Scrap Z buffer if we have one.  */
+	if (d->vram_z == NULL) {
+		free(d->vram_z);
+		d->vram_z = NULL;
+	}
+		
 	/*  Make sure to redraw border on geometry changes.  */
 	d->border_updated = 1;
 
@@ -563,6 +619,161 @@ static void line(struct pvr_data *d, int x1, int y1, int x2, int y2)
 	}
 }
 
+// Ugly quick-hack z-buffer line drawer, for triangles.
+// Assumes 16-bit color.
+static void simpleline(struct pvr_data *d, int y, double x1, double x2,
+	double z1, double z2, int color)
+{
+	int fb_base = REG(PVRREG_FB_RENDER_ADDR1);
+	if (x1 > x2) {
+		double tmpf = x1; x1 = x2; x2 = tmpf;
+		tmpf = z1; z1 = z2; z2 = tmpf;
+	}
+	
+	double dz12 = (x2 - x1 != 0) ? ( (double)(z2 - z1) / (double)(x2 - x1) ) : 0;
+	double z = z1;
+	for (int x = x1; x <= x2; ++x) {
+		if (x > 0 && y > 0 && x < d->xsize && y < d->ysize) {
+			int ofs = x + y * d->xsize;
+			if (d->vram_z[ofs] > z)
+				continue;
+
+			d->vram_z[ofs] = z;
+
+			int fbofs = fb_base + ofs * d->bytes_per_pixel;
+			d->vram[(fbofs+0) % VRAM_SIZE] = color & 255;
+			d->vram[(fbofs+1) % VRAM_SIZE] = color >> 8;
+		}
+		
+		z += dz12;
+	}
+}
+
+// Slow software rendering, for debugging:
+static void pvr_render_triangle(struct pvr_data *d,
+	int x1, int y1, double z1,
+	int x2, int y2, double z2,
+	int x3, int y3, double z3,
+	int flatcolor)
+{
+	// Wire-frame test:
+	if (false) {
+		line(d, x1, y1, x2, y2);
+		line(d, x1, y1, x3, y3);
+		line(d, x2, y2, x3, y3);
+		return;
+	}
+
+	// Easiest if 1, 2, 3 are in order top to bottom.
+	if (y2 < y1) {
+		int tmp = x1; x1 = x2; x2 = tmp;
+		tmp = y1; y1 = y2; y2 = tmp;
+		double tmpf = z1; z1 = z2; z2 = tmpf;
+	}
+
+	if (y3 < y1) {
+		int tmp = x1; x1 = x3; x3 = tmp;
+		tmp = y1; y1 = y3; y3 = tmp;
+		double tmpf = z1; z1 = z3; z3 = tmpf;
+	}
+
+	if (y3 < y2) {
+		int tmp = x2; x2 = x3; x3 = tmp;
+		tmp = y2; y2 = y3; y3 = tmp;
+		double tmpf = z2; z2 = z3; z3 = tmpf;
+	}
+
+	double dx12 = (y2-y1 != 0) ? ( (x2 - x1) / (double)(y2 - y1) ) : 0.0;
+	double dx13 = (y3-y1 != 0) ? ( (x3 - x1) / (double)(y3 - y1) ) : 0.0;
+	double dx23 = (y3-y2 != 0) ? ( (x3 - x2) / (double)(y3 - y2) ) : 0.0;
+
+	double dz12 = (y2-y1 != 0) ? ( (z2 - z1) / (double)(y2 - y1) ) : 0.0;
+	double dz13 = (y3-y1 != 0) ? ( (z3 - z1) / (double)(y3 - y1) ) : 0.0;
+	double dz23 = (y3-y2 != 0) ? ( (z3 - z2) / (double)(y3 - y2) ) : 0.0;
+
+	double startx = x1, startz = z1;
+	double stopx = x1, stopz = z1;
+	for (int y = y1; y < y2; ++y)
+	{
+		simpleline(d, y, startx, stopx, startz, stopz, flatcolor);
+		startx += dx13; startz += dz13;
+		stopx += dx12; stopz += dz12;
+	}
+
+	stopx = x2; stopz = z2;
+	for (int y = y2; y < y3; ++y)
+	{
+		simpleline(d, y, startx, stopx, startz, stopz, flatcolor);
+		startx += dx13; startz += dz13;
+		stopx += dx23; stopz += dz23;
+	}
+}
+
+
+// Slow software rendering, for debugging:
+static void pvr_render_texture(struct pvr_data *d, int* wf_x, int* wf_y, double* wf_z, int flatcolor)
+{
+	// Wire-frame test:
+	if (false) {
+		line(d, wf_x[0], wf_y[0], wf_x[1], wf_y[1]);
+		line(d, wf_x[0], wf_y[0], wf_x[2], wf_y[2]);
+		line(d, wf_x[1], wf_y[1], wf_x[3], wf_y[3]);
+		line(d, wf_x[2], wf_y[2], wf_x[3], wf_y[3]);
+		return;
+	}
+
+	// Render as two triangles:
+	pvr_render_triangle(d,
+	    wf_x[0], wf_y[0], wf_z[0],
+	    wf_x[1], wf_y[1], wf_z[1],
+	    wf_x[2], wf_y[2], wf_z[2], flatcolor);
+	pvr_render_triangle(d,
+	    wf_x[1], wf_y[1], wf_z[1],
+	    wf_x[2], wf_y[2], wf_z[2],
+	    wf_x[3], wf_y[3], wf_z[3], flatcolor);
+}
+
+
+static void pvr_clear_drawing_commands(struct pvr_data* d)
+{
+	d->n_drawing_commands = 0;
+}
+
+
+static void pvr_add_drawing_command(struct pvr_data* d, int cmd, uint32_t texture,
+	int texture_xsize, int texture_ysize,
+	double x, double y, double z, double u, double v, double extra1, double extra2)
+{
+	if (d->drawing_commands == NULL) {
+		d->allocated_drawing_commands = 10000;
+		d->drawing_commands = (struct pvr_drawing_command *)
+		    malloc(sizeof(struct pvr_drawing_command)
+		    * d->allocated_drawing_commands);
+		d->n_drawing_commands = 0;
+	}
+
+	if (d->n_drawing_commands + 1 >= d->allocated_drawing_commands) {
+		d->allocated_drawing_commands *= 2;
+		d->drawing_commands = (struct pvr_drawing_command *)
+		    realloc(d->drawing_commands, sizeof
+		    (struct pvr_drawing_command) * d->allocated_drawing_commands);
+	}
+
+	d->drawing_commands[d->n_drawing_commands].cmd = cmd;
+	d->drawing_commands[d->n_drawing_commands].texture = texture;
+	d->drawing_commands[d->n_drawing_commands].texture_xsize = texture_xsize;
+	d->drawing_commands[d->n_drawing_commands].texture_ysize = texture_ysize;
+	d->drawing_commands[d->n_drawing_commands].x = x;
+	d->drawing_commands[d->n_drawing_commands].y = y;
+	d->drawing_commands[d->n_drawing_commands].z = z;
+	d->drawing_commands[d->n_drawing_commands].u = u;
+	d->drawing_commands[d->n_drawing_commands].v = v;
+	d->drawing_commands[d->n_drawing_commands].extra1 = extra1;
+	d->drawing_commands[d->n_drawing_commands].extra2 = extra2;
+
+	d->n_drawing_commands ++;
+}
+
 
 /*
  *  pvr_render():
@@ -574,70 +785,86 @@ static void line(struct pvr_data *d, int x1, int y1, int x2, int y2)
  */
 void pvr_render(struct cpu *cpu, struct pvr_data *d)
 {
-	int ob_ofs = REG(PVRREG_OB_ADDR);
 	int fb_base = REG(PVRREG_FB_RENDER_ADDR1);
 	int wf_point_nr, texture = 0;
-	int wf_x[4], wf_y[4];
+	int flatcolor = 0xf978;
+	int wf_x[4], wf_y[4]; double wf_z[4];
 
 	debug("[ pvr_render: rendering to FB offset 0x%x ]\n", fb_base);
 
-	/*  Clear all pixels first:  */
-	/*  TODO  */
+	/*  Clear all pixels first. TODO: Maybe only clear specific tiles?  */
 	memset(d->vram + fb_base, 0, d->xsize * d->ysize * d->bytes_per_pixel);
+
+	/*  Clear Z as well:  */
+	if (d->vram_z == NULL) {
+		d->vram_z = (double*) malloc(sizeof(double) * d->xsize * d->ysize);
+	}
+
+	memset(d->vram_z, 0, sizeof(double) * d->xsize * d->ysize);
 
 	wf_point_nr = 0;
 
-	for (;;) {
-		uint8_t cmd = d->vram[ob_ofs % VRAM_SIZE];
+	for (size_t index = 0; index < d->n_drawing_commands; ++index) {
+		struct pvr_drawing_command* command = &d->drawing_commands[index];
 
-		if (ob_ofs >= VRAM_SIZE)
-			fatal("[ pvr_render: WARNING: ob_ofs > VRAM_SIZE! ]\n");
-
-		if (cmd == 0)
+		switch (command->cmd)
+		{
+		case 0:	// end of list
 			break;
-		else if (cmd == 1) {
-			int16_t px = d->vram[(ob_ofs+2)%VRAM_SIZE] +
-			    d->vram[(ob_ofs+3)%VRAM_SIZE]*256;
-			int16_t py = d->vram[(ob_ofs+4)%VRAM_SIZE] +
-			    d->vram[(ob_ofs+5)%VRAM_SIZE]*256;
 
-			wf_x[wf_point_nr] = px;
-			wf_y[wf_point_nr] = py;
-
+		case 1:	// vertex
+		case 2:	// closing vertex
+			wf_x[wf_point_nr] = command->x;
+			wf_y[wf_point_nr] = command->y;
+			wf_z[wf_point_nr] = command->z;
 			wf_point_nr ++;
-			if (wf_point_nr == 4) {
-#if 1
-				line(d, wf_x[0], wf_y[0], wf_x[1], wf_y[1]);
-				line(d, wf_x[0], wf_y[0], wf_x[2], wf_y[2]);
-				line(d, wf_x[1], wf_y[1], wf_x[3], wf_y[3]);
-				line(d, wf_x[2], wf_y[2], wf_x[3], wf_y[3]);
-				wf_point_nr = 0;
-				wf_x[0] = wf_x[2]; wf_y[0] = wf_y[2];
-				wf_x[1] = wf_x[3]; wf_y[1] = wf_y[3];
-#else
-				draw_texture(d, wf_x[0], wf_y[0],
-				    wf_x[1], wf_y[1],
-				    wf_x[2], wf_y[2],
-				    wf_x[3], wf_y[3], texture);
-#endif
-			}
 
-		} else if (cmd == 2) {
+			if (wf_point_nr == 4) {
+				pvr_render_texture(d, wf_x, wf_y, wf_z, flatcolor);
+
+				if (command->cmd == 1) {
+					// Not a closing vertex, then move points 2 and 3
+					// into slots 0 and 1, so that the stripe can continue.
+					wf_point_nr = 2;
+					wf_x[0] = wf_x[2]; wf_y[0] = wf_y[2]; wf_z[0] = wf_z[2];
+					wf_x[1] = wf_x[3]; wf_y[1] = wf_y[3]; wf_z[1] = wf_z[3];
+				} else {
+					// Closing vertex. Change the color for the next stripe.
+					wf_point_nr = 0;
+					flatcolor = ((flatcolor * 0xf813) ^ 0xcc01) - 0xf928;
+				}
+			}
+			break;
+			
+		case 3:	// polygon or modifier volume:
 			wf_point_nr = 0;
-			texture = d->vram[(ob_ofs+4)%VRAM_SIZE] +
-			    (d->vram[(ob_ofs+5)%VRAM_SIZE]
-			    << 8) + (d->vram[(ob_ofs+6)%VRAM_SIZE] << 16) +
-			    (d->vram[(ob_ofs+7)%VRAM_SIZE] << 24);
+			texture = command->texture;
 			texture <<= 3;
 			texture &= 0x7fffff;
-			debug("PVR TEXTURE = 0x%08x\n", texture);
-		} else {
+
+			/* if (texture != 0) {
+				// NOTE: Maybe depends on "twiddle" bit in one of
+				// the TA command words.
+				fatal("PVR TEXTURE = 0x%08x\n", texture);
+				for (int i = 0; i < 500; ++i) {
+					int addr = texture + i;
+					addr = ((addr & 4) << 20) | (addr & 3) | ((addr & 0x7ffff8) >> 1);
+					fatal("%02x ", d->vram[addr+i]);
+				}
+				fatal("\n");
+			} */
+
+			flatcolor = ((flatcolor * 0xf813) ^ 0xcc01) - 0xf928;
+
+			break;
+			
+		default:
 			fatal("pvr_render: internal error, unknown cmd\n");
 		}
-
-		ob_ofs += sizeof(uint64_t);
 	}
 
+	pvr_clear_drawing_commands(d);
+	
 	// TODO: RENDERDONE is 2. How about other events?
 	SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_RENDERDONE);
 }
@@ -651,6 +878,7 @@ void pvr_render(struct cpu *cpu, struct pvr_data *d)
 static void pvr_reset_ta(struct pvr_data *d)
 {
 	REG(PVRREG_DIWCONF) = DIWCONF_MAGIC;
+	pvr_clear_drawing_commands(d);
 }
 
 
@@ -678,16 +906,46 @@ void pvr_ta_init(struct cpu *cpu, struct pvr_data *d)
 }
 
 
+static void pvr_tilebuf_debugdump(struct pvr_data *d)
+{
+	return;
+
+	// According to Marcus Comstedt's "tatest":
+	// 24 word header (before the TILEBUF_ADDR pointer), followed by
+	// 6 words for each tile.
+	uint32_t tilebuf = REG(PVRREG_TILEBUF_ADDR) & PVR_TILEBUF_ADDR_MASK;
+	uint32_t *p = (uint32_t*) (d->vram + tilebuf);
+
+	fatal("PVR tile buffer debug dump:\n");
+	p -= 24;
+	for (int i = 0; i < 24; ++i)
+		fatal("  %08x", *p++);
+
+	fatal("\n%i x %i tiles:\n", d->tilebuf_xsize, d->tilebuf_ysize);
+
+	for (int x = 0; x < d->tilebuf_xsize; ++x)
+	{
+		for (int y = 0; y < d->tilebuf_ysize; ++y)
+		{
+			fatal("  Tile %i,%i:", x, y);
+			for (int i = 0; i < 6; ++i)
+				fatal(" %08x", *p++);
+			fatal("\n");
+		}
+	}
+}
+
+
 /*
  *  pvr_ta_command():
  *
  *  Read a command (e.g. parts of a polygon primitive) from d->ta[], and output
  *  "compiled commands" into the Object list and Object Pointer list.
+ *
+ *  TODO.
  */
 static void pvr_ta_command(struct cpu *cpu, struct pvr_data *d, int list_ofs)
 {
-	int ob_ofs;
-	int16_t x, y;
 	uint32_t *ta = &d->ta[list_ofs];
 
 #ifdef TA_DEBUG
@@ -701,69 +959,60 @@ static void pvr_ta_command(struct cpu *cpu, struct pvr_data *d, int list_ofs)
 	}
 #endif
 
-	/*
-	 *  TODO: REWRITE!!!
-	 *
-	 *  This is just a quick hack to see if I can get out at least
-	 *  the pixel coordinates.
-	 */
+	// ob_ofs = REG(PVRREG_TA_OB_POS);
+	// REG(PVRREG_TA_OB_POS) = ob_ofs + sizeof(uint64_t);
 
-	{
-		struct ieee_float_value fx, fy;
-		ieee_interpret_float_value(ta[1], &fx, IEEE_FMT_S);
-		ieee_interpret_float_value(ta[2], &fy, IEEE_FMT_S);
-		x = (int16_t) fx.f; y = (int16_t) fy.f;
-	}
-
-	ob_ofs = REG(PVRREG_TA_OB_POS);
-
-	if (ob_ofs >= VRAM_SIZE - 8)
-		fatal("[ WARNING: ob_ofs >= VRAM_SIZE - 8 ]\n");
-
-	switch (ta[0] >> 28) {
-	case 0x8:
-		d->vram[ob_ofs + 0] = 2;
-		d->vram[ob_ofs + 4] = ta[3];
-		d->vram[ob_ofs + 5] = ta[3] >> 8;
-		d->vram[ob_ofs + 6] = ta[3] >> 16;
-		d->vram[ob_ofs + 7] = ta[3] >> 24;
-		REG(PVRREG_TA_OB_POS) = ob_ofs + sizeof(uint64_t);
+	switch (ta[0] >> 29) {
+	case 4:	// polygon or modifier volume
+		{
+			bool useTexture = ta[0] & 8;
+			uint32_t texture = ta[3];
+			int texture_usize = 8 << ((ta[2] >> 3) & 7);
+			int texture_vsize = 8 << (ta[2] & 7);
+			pvr_add_drawing_command(d, 3, useTexture ? texture : 0,
+			    texture_usize, texture_vsize,
+			    0,0,0, 0,0,0, 0);
+			d->current_list_type = (ta[0] >> 24) & 7;
+		}
 		break;
-	case 0xe:
-	case 0xf:
-		/*  Point.  */
-		d->vram[ob_ofs + 0] = 1;
-		d->vram[ob_ofs + 2] = x & 255;
-		d->vram[ob_ofs + 3] = x >> 8;
-		d->vram[ob_ofs + 4] = y & 255;
-		d->vram[ob_ofs + 5] = y >> 8;
-		REG(PVRREG_TA_OB_POS) = ob_ofs + sizeof(uint64_t);
+	case 7:	// vertex
+		{
+			struct ieee_float_value fx, fy, fz, u, v, extra1, extra2;
+			ieee_interpret_float_value(ta[1], &fx, IEEE_FMT_S);
+			ieee_interpret_float_value(ta[2], &fy, IEEE_FMT_S);
+			ieee_interpret_float_value(ta[3], &fz, IEEE_FMT_S);
+			ieee_interpret_float_value(ta[4], &u, IEEE_FMT_S);
+			ieee_interpret_float_value(ta[5], &v, IEEE_FMT_S);
+			ieee_interpret_float_value(ta[6], &extra1, IEEE_FMT_S);
+			ieee_interpret_float_value(ta[7], &extra2, IEEE_FMT_S);
+
+			// command 1 = normal vertex, command 2 = closing vertex
+			pvr_add_drawing_command(d, 1 + ((ta[0] >> 28) & 1), 0,0,0,
+			    fx.f, fy.f, fz.f, u.f, v.f, extra1.f, extra2.f);
+		}
 		break;
-	case 0x0:
-		if (ta[1] == 0) {
-			/*  End of list.  */
+	case 0:	// end of list
+		{
+			pvr_add_drawing_command(d, 0, 0,0,0, 0,0,0, 0,0,0,0);
+
 			uint32_t opb_cfg = REG(PVRREG_TA_OPB_CFG);
-			d->vram[ob_ofs + 0] = 0;
-			REG(PVRREG_TA_OB_POS) = ob_ofs + sizeof(uint64_t);
-			if (opb_cfg & TA_OPB_CFG_OPAQUEPOLY_MASK)
+
+			if (d->current_list_type == 0 && opb_cfg & TA_OPB_CFG_OPAQUEPOLY_MASK)
 				SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_OPAQUEDONE);
-			if (opb_cfg & TA_OPB_CFG_OPAQUEMOD_MASK)
-				SYSASIC_TRIGGER_EVENT(
-				    SYSASIC_EVENT_OPAQUEMODDONE);
-			if (opb_cfg & TA_OPB_CFG_TRANSPOLY_MASK)
+			if (d->current_list_type == 1 && opb_cfg & TA_OPB_CFG_OPAQUEMOD_MASK)
+				SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_OPAQUEMODDONE);
+			if (d->current_list_type == 2 && opb_cfg & TA_OPB_CFG_TRANSPOLY_MASK)
 				SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_TRANSDONE);
-			if (opb_cfg & TA_OPB_CFG_TRANSMOD_MASK)
-				SYSASIC_TRIGGER_EVENT(
-				    SYSASIC_EVENT_TRANSMODDONE);
-			if (opb_cfg & TA_OPB_CFG_PUNCHTHROUGH_MASK)
+			if (d->current_list_type == 3 && opb_cfg & TA_OPB_CFG_TRANSMOD_MASK)
+				SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_TRANSMODDONE);
+			if (d->current_list_type == 4 && opb_cfg & TA_OPB_CFG_PUNCHTHROUGH_MASK)
 				SYSASIC_TRIGGER_EVENT(SYSASIC_EVENT_PVR_PTDONE);
 		}
 		break;
-	case 2:	/*  Ignore for now.  */
-	case 3:	/*  Ignore for now.  */
+	case 1:	// user clip: Ignore for now.
 		/*  TODO  */
 		break;
-	default:fatal("Unimplemented top TA nibble %i\n", ta[0] >> 28);
+	default:fatal("Unimplemented TA command: %i\n", ta[0] >> 29);
 		exit(1);
 	}
 }
@@ -774,15 +1023,6 @@ DEVICE_ACCESS(pvr_ta)
 	struct pvr_data *d = (struct pvr_data *) extra;
 	uint64_t idata = 0, odata = 0;
 
-#if 0
-	if (writeflag == MEM_WRITE)
-		fatal("[ pvr_ta: WRITE addr=%08x value=%08x ]\n",
-		    (int)relative_addr, (int)idata);
-	else
-		fatal("[ pvr_ta: READ addr=%08x ]\n",
-		    (int)relative_addr);
-#endif
-
 	if (len != sizeof(uint32_t)) {
 		fatal("pvr_ta access len = %i: TODO\n", (int) len);
 		exit(1);
@@ -790,11 +1030,17 @@ DEVICE_ACCESS(pvr_ta)
 
 	if (writeflag == MEM_WRITE) {
 		idata = memory_readmax64(cpu, data, len);
+#if 0
+		fatal("[ pvr_ta: WRITE addr=%08x value=%08x ]\n",
+		    (int)relative_addr, (int)idata);
+#endif
 
 		/*  Write to the tile accelerator command buffer:  */
 		d->ta[relative_addr / sizeof(uint32_t)] = idata;
 
-		/*  Execute the command, after a complete write:  */
+		// Execute the command, after a complete write.
+		// (Note: This assumes that commands are written from low
+		// address to high.)
 		if (relative_addr == 0x1c)
 			pvr_ta_command(cpu, d, 0);
 		if (relative_addr == 0x3c)
@@ -802,6 +1048,9 @@ DEVICE_ACCESS(pvr_ta)
 	} else {
 		odata = d->ta[relative_addr / sizeof(uint32_t)];
 		memory_writemax64(cpu, data, len, odata);
+#if 1
+		fatal("[ pvr_ta: READ addr=%08x value=%08x ]\n", (int)relative_addr, (int)odata);
+#endif
 	}
 
 	return 1;
@@ -823,6 +1072,14 @@ DEVICE_ACCESS(pvr)
 	/*  Fog table access:  */
 	if (relative_addr >= PVRREG_FOG_TABLE &&
 	    relative_addr < PVRREG_FOG_TABLE + PVR_FOG_TABLE_SIZE) {
+		if (writeflag == MEM_WRITE)
+			DEFAULT_WRITE;
+		goto return_ok;
+	}
+
+	/*  Palette access:  */
+	if (relative_addr >= PVRREG_PALETTE &&
+	    relative_addr < PVRREG_PALETTE + PVR_PALETTE_SIZE) {
 		if (writeflag == MEM_WRITE)
 			DEFAULT_WRITE;
 		goto return_ok;
@@ -885,12 +1142,15 @@ DEVICE_ACCESS(pvr)
 		if (writeflag == MEM_WRITE) {
 			debug("[ pvr: TILEBUF_ADDR set to 0x%08"PRIx32" ]\n",
 			    (uint32_t)(idata & PVR_TILEBUF_ADDR_MASK));
-			if (idata & ~PVR_TILEBUF_ADDR_MASK)
-				fatal("[ pvr: TILEBUF_ADDR: WARNING: Unknown"
+			if (idata & ~PVR_TILEBUF_ADDR_MASK) {
+				fatal("[ pvr: TILEBUF_ADDR: Unknown"
 				    " bits set: 0x%08"PRIx32" ]\n",
 				    (uint32_t)(idata & ~PVR_TILEBUF_ADDR_MASK));
+				exit(1);
+			}
 			idata &= PVR_TILEBUF_ADDR_MASK;
 			DEFAULT_WRITE;
+			pvr_tilebuf_debugdump(d);
 		}
 		break;
 
@@ -1312,6 +1572,13 @@ DEVICE_ACCESS(pvr)
 		}
 		break;
 
+	case PVRREG_PALETTE_CFG:
+		if (writeflag == MEM_WRITE) {
+			debug("[ pvr: PALETTE_CFG 0x%08x ]\n", (int)idata);
+			DEFAULT_WRITE;
+		}
+		break;
+
 	case PVRREG_SYNC_STAT:
 		/*  TODO. Ugly hack, but it works:  */
 		odata = random();
@@ -1467,8 +1734,7 @@ return_ok:
 }
 
 
-void pvr_extend_update_region(struct pvr_data *d, uint64_t low, 
-	uint64_t high)
+void pvr_extend_update_region(struct pvr_data *d, uint64_t low, uint64_t high)
 {
 	int vram_ofs = REG(PVRREG_DIWADDRL);
 	int bytes_per_line = d->xsize * d->bytes_per_pixel;
@@ -1703,15 +1969,23 @@ DEVICE_ACCESS(pvr_vram_alt)
 		return 1;
 	}
 
+	// Writes are only allowed as 16-bit access or higher.
+	if (len < sizeof(uint16_t))
+		fatal("pvr_vram_alt: write of less than 16 bits attempted?\n");
+
 	/*
 	 *  Convert writes to alternative VRAM, into normal writes:
 	 */
 
 	for (i=0; i<len; i++) {
 		int addr = relative_addr + i;
-		addr = ((addr & 4) << 20) | (addr & 3)
-		    | ((addr & 0x7ffff8) >> 1);
+		addr = ((addr & 4) << 20) | (addr & 3) | ((addr & 0x7ffff8) >> 1);
+		// printf("  %08x => alt addr %08x: %02x\n", (int)(relative_addr + i), (int)addr, data[i]);
 		d->vram[addr % VRAM_SIZE] = data[i];
+
+		// TODO: This is probably ultra-slow. (Should not be called
+		// for every _byte_.)
+		pvr_extend_update_region(d, addr, addr);
 	}
 
 	return 1;
@@ -1722,10 +1996,16 @@ DEVICE_ACCESS(pvr_vram)
 {
 	struct pvr_data *d = (struct pvr_data *) extra;
 
+	// According to http://mc.pp.se/dc/pvr.html, reads of any size are
+	// allowed.
 	if (writeflag == MEM_READ) {
 		memcpy(data, d->vram + relative_addr, len);
 		return 1;
 	}
+
+	// However, writes are only allowed as 16-bit access or higher.
+	if (len < sizeof(uint16_t))
+		fatal("pvr_vram: write of less than 16 bits attempted?\n");
 
 	/*
 	 *  Write to VRAM:
