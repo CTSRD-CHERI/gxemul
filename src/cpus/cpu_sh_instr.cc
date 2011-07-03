@@ -583,6 +583,16 @@ X(fmov_rm_frn)
 	if (cpu->cd.sh.fpscr & SH_FPSCR_SZ) {
 		// Register pair. Read second word first, then fallback
 		// to read the first word.
+
+		// Check if it is to an odd register first.
+		size_t r1 = ic->arg[1];
+		int ofs = (r1 - (size_t)&cpu->cd.sh.fr[0]) / sizeof(uint32_t);
+		if (ofs & 1) {
+			fatal("ODD fmov_rm_frn: TODO");
+			exit(1);
+			r1 = (size_t)&cpu->cd.sh.xf[ofs & ~1];
+		}
+		
 		SYNCH_PC;
 		if (!cpu->memory_rw(cpu, cpu->mem, addr + 4, (unsigned char *)&data,
 		    sizeof(data), MEM_READ, CACHE_DATA)) {
@@ -2863,16 +2873,16 @@ X(pref_rn)
 	extaddr = addr & 0x03ffffe0;
 	sq_nr = addr & 0x20? 1 : 0;
 
-	if (addr & 0x0000001f)
-		fatal("[ WARNING: SH4 Store Queue, addr = 0x%08x... lowest 5 "
-		    "bits are non-zero. Ignoring. ]\n", addr);
+	// if (addr & 0x0000001f)
+	//	debug("[ WARNING: SH4 Store Queue, addr = 0x%08x... lowest 5 "
+	//	    "bits are non-zero. Ignoring. ]\n", addr);
 
 	if (sq_nr == 0)
 		extaddr |= (((cpu->cd.sh.qacr0 >> 2) & 7) << 26);
 	else
 		extaddr |= (((cpu->cd.sh.qacr1 >> 2) & 7) << 26);
 
-	// debug("[ SH4 pref: SQ extaddr = 0x%08x (pc = 0x%08x) ]\n", extaddr, (int)cpu->pc);
+	// fatal("[ SH4 pref: SQ extaddr = 0x%08x (pc = 0x%08x) ]\n", extaddr, (int)cpu->pc);
 
 	// Is the MMU turned on?
 	if (cpu->cd.sh.mmucr & SH4_MMUCR_AT) {
