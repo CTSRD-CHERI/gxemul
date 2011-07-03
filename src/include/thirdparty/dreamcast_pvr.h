@@ -96,7 +96,10 @@
 
 #define	PVRREG_OB_ADDR		0x20
 /*  Object Buffer start address. Bits 0..19 should always be zero.  */
-#define	PVR_OB_ADDR_MASK	0x00f00000
+// #define	PVR_OB_ADDR_MASK	0x00f00000
+// GXemul change: In order to get Marcus Comstedt's "tatest" demo to
+// run, which uses bit 19, I've had to change this:
+#define	PVR_OB_ADDR_MASK	0x00f80000
 
 #define	PVRREG_TILEBUF_ADDR	0x2c
 #define	PVR_TILEBUF_ADDR_MASK	0x00fffff8
