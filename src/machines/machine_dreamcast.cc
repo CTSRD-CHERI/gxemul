@@ -72,8 +72,11 @@ MACHINE_SETUP(dreamcast)
 	 *
 	 *  0x00000000 - 0x001fffff	Boot ROM (2 MB)
 	 *  0x00200000 - 0x003fffff	Flash (256 KB)
+	 *				The bytes read by the Dreamcast PROM during
+	 *				boot are:
 	 *				    Offset 0x1a000 .. 0x1a004 = 5 bytes
 	 *					hex digits (maybe limited to 0x30, 0x31, 0x32, or 0x33)
+	 *					0x1a000 could be the machine's region code
 	 *				    Offset 0x1a056 .. 0x1a05d = 8 bytes
 	 *					serial number / machine ID.
 	 *  0x005f0000 - ...            ???
