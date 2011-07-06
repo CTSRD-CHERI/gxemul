@@ -1125,9 +1125,28 @@ X(fmov_frm_rn)
 	FLOATING_POINT_AVAILABLE_CHECK;
 
 	if (cpu->cd.sh.fpscr & SH_FPSCR_SZ) {
-		fatal("fmov_frm_rn: sz=1 (register pair): TODO\n");
-		ABORT_EXECUTION;
-		return;
+		// Register pair. Store second word first, then fallback
+		// to store the first word.
+
+		// Check if it is to an odd register first.
+		size_t r0 = ic->arg[1];
+		int ofs = (r0 - (size_t)&cpu->cd.sh.fr[0]) / sizeof(uint32_t);
+		if (ofs & 1) {
+			fatal("ODD fmov_frm_rn: TODO");
+			exit(1);
+			r0 = (size_t)&cpu->cd.sh.xf[ofs & ~1];
+		}
+
+		uint32_t data2 = reg(ic->arg[0] + 4);
+
+		SYNCH_PC;
+		if (!cpu->memory_rw(cpu, cpu->mem, addr + 4, (unsigned char *)&data2,
+		    sizeof(data2), MEM_WRITE, CACHE_DATA)) {
+			/*  Exception.  */
+			return;
+		}
+		
+		// fall-through to write the first word in the pair:
 	}
 
 	if (cpu->byte_order == EMUL_LITTLE_ENDIAN)
@@ -2907,7 +2926,7 @@ X(pref_rn)
 		cpu->memory_rw(cpu, cpu->mem, 0xe0000000UL + ofs
 		    + sq_nr * 0x20, (unsigned char *)
 		    &word, sizeof(word), MEM_READ, PHYSICAL);
-		// debug("  addr %08x: %08x\n", (extaddr + ofs), word);
+		// fatal("  addr %08x: %08x\n", (extaddr + ofs), word);
 		cpu->memory_rw(cpu, cpu->mem, extaddr+ofs, (unsigned char *)
 		    &word, sizeof(word), MEM_WRITE, PHYSICAL);
 	}
@@ -3553,6 +3572,11 @@ X(to_be_translated)
 			case 0x09:	/*  SHLR2 Rn  */
 				ic->f = instr(shlr2_rn);
 				break;
+			case 0x0a:	/*  LDS Rm,MACH  */
+				ic->f = instr(mov_rm_rn);
+				ic->arg[0] = (size_t)&cpu->cd.sh.r[r8];	/* m */
+				ic->arg[1] = (size_t)&cpu->cd.sh.mach;
+				break;
 			case 0x0b:	/*  JSR @Rn  */
 				if (cpu->machine->show_trace_tree)
 					ic->f = instr(jsr_rn_trace);
@@ -3594,6 +3618,11 @@ X(to_be_translated)
 				break;
 			case 0x19:	/*  SHLR8 Rn  */
 				ic->f = instr(shlr8_rn);
+				break;
+			case 0x1a:	/*  LDS Rm,MACL  */
+				ic->f = instr(mov_rm_rn);
+				ic->arg[0] = (size_t)&cpu->cd.sh.r[r8];	/* m */
+				ic->arg[1] = (size_t)&cpu->cd.sh.macl;
 				break;
 			case 0x1b:	/*  TAS.B @Rn  */
 				ic->f = instr(tas_b_rn);

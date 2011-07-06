@@ -4575,4 +4575,6 @@ Changelog for GXemul:
 		as Comstedt's "tatest", KOS' "gltest.bin" and "dcfighting.bin")
 		now render solid polygons. Color is random though, and no
 		textures yet.
+20110706	Implementing register pair variant of SuperH fmov_frm_rn,
+		adding implementations of "LDS Rm,MACH", and "LDS Rm,MACL".
 
