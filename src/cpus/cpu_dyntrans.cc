@@ -1673,6 +1673,10 @@ cpu->cd.DYNTRANS_ARCH.vph_tlb_entry[r].valid);
 				fatal("BREAKPOINT: pc = 0x%"PRIx64"\n(The "
 				    "instruction has not yet executed.)\n",
 				    (uint64_t)cpu->pc);
+ 				    int gprs = 1;
+ 				    int coprocs = 0x0;
+ 				    cpu_register_dump(cpu->machine, cpu, gprs, coprocs);
+ 				    exit(0);
 #endif
 #ifdef DYNTRANS_DELAYSLOT
 				if (cpu->delay_slot != NOT_DELAYED)
