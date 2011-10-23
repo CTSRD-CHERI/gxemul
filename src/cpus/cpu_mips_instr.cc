@@ -4229,11 +4229,9 @@ X(to_be_translated)
 		break;
 
 	case HI6_COP2:
-		/*  Always cause a coprocessor unusable exception if
-		    there is no coprocessor 2:  */
+		/* Treat all COP2 operations as NOPs */
 		if (cpu->cd.mips.coproc[2] == NULL) {
-			ic->f = instr(cpu);
-			ic->arg[0] = 2;
+			ic->f = instr(nop);
 			break;
 		}
 		if (!cpu->translation_readahead)
