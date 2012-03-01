@@ -1262,6 +1262,8 @@ X(div)
 	int32_t res, rem;
 	if (b == 0)
 		res = 0, rem = a;
+	else if (a==(int32_t)0x80000000 && b==(int32_t)0xffffffff) // special overflow case
+	  	res = a, rem = 0; // answer that cheri gives 
 	else
 		res = a / b, rem = a - b*res;
 	cpu->cd.mips.lo = (int32_t)res;
@@ -1284,6 +1286,8 @@ X(ddiv)
 	int64_t res, rem;
 	if (b == 0)
 		res = 0;
+	else if (a==(int64_t)0x8000000000000000 && b==(int64_t)0xffffffffffffffff) // special overflow case
+	  	res = a, rem = 0; // answer that cheri gives 
 	else
 		res = a / b;
 	rem = a - b*res;
