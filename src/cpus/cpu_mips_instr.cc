@@ -1286,7 +1286,7 @@ X(ddiv)
 	int64_t res, rem;
 	if (b == 0)
 		res = 0;
-	else if (a==(int64_t)0x8000000000000000 && b==(int64_t)0xffffffffffffffff) // special overflow case
+	else if (a==(int64_t)0x8000000000000000LL && b==(int64_t)0xffffffffffffffffLL) // special overflow case
 	  	res = a, rem = 0; // answer that cheri gives 
 	else
 		res = a / b;
