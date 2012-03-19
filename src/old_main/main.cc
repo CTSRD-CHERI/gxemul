@@ -64,6 +64,8 @@ char *progname;
 size_t dyntrans_cache_size = DEFAULT_DYNTRANS_CACHE_SIZE;
 static int skip_srandom_call = 0;
 
+int broken_interrupts = 0;
+
 
 /*****************************************************************************
  *
@@ -270,6 +272,8 @@ static void usage(int longusage)
 	printf("                t      tape\n");
 	printf("                V      add an overlay\n");
 	printf("                0-7    force a specific ID\n");
+	printf("  -f        do broken stuff on MIPS: speed up timer interrupts\n");
+	printf("            and disable interrupts whilst stepping\n");
 	printf("  -I hz     set the main cpu frequency to hz (not used by "
 	    "all combinations\n            of machines and guest OSes)\n");
 	printf("  -i        display each instruction as it is executed\n");
@@ -378,7 +382,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 	struct machine *m = emul_add_machine(emul, NULL);
 
 	const char *opts =
-	    "BC:c:Dd:E:e:HhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUVvW:"
+	    "BC:c:Dd:E:e:fHhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUVvW:"
 #ifdef WITH_X11
 	    "XxY:"
 #endif
@@ -430,6 +434,9 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 			}
 			subtype = optarg;
 			msopts = 1;
+			break;
+		case 'f':
+			broken_interrupts = 1;
 			break;
 		case 'H':
 			GXemul::ListTemplates();
