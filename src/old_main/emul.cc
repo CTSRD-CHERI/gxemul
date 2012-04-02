@@ -872,8 +872,9 @@ void emul_run(struct emul *emul)
 			old_quiet_mode = quiet_mode;
 			old_show_trace_tree =
 			    emul->machines[0]->show_trace_tree;
-			emul->machines[0]->instruction_trace = 1;
-			emul->machines[0]->show_trace_tree = 1;
+//			Don't enable instruction/tree trace automatically when entering debugger.
+//			emul->machines[0]->instruction_trace = 1;
+//			emul->machines[0]->show_trace_tree = 1;
 			quiet_mode = 0;
 			single_step = SINGLE_STEPPING;
 		}
