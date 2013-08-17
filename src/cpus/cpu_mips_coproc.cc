@@ -1168,42 +1168,50 @@ static int fpu_op(struct cpu *cpu, struct mips_coproc *cp, int op, int fmt,
 			unordered = 1;
 
 		switch (cond) {
+		case 0: /*  False  */
+			return 0;
+		case 1:	/*  Unordered  */
+			return unordered;
 		case 2:	/*  Equal  */
-			return (float_value[0].f == float_value[1].f);
-		case 4:	/*  Ordered or Less than  */
-			return (float_value[0].f < float_value[1].f)
-			    || !unordered;
+			return !unordered
+			    && (float_value[0].f == float_value[1].f);
+		case 3:	/*  Unordered or Equal  */
+			return unordered
+			    || (float_value[0].f == float_value[1].f);
+		case 4:	/*  Ordered and Less than  */
+			return !unordered
+                            && (float_value[0].f < float_value[1].f);
 		case 5:	/*  Unordered or Less than  */
-			return (float_value[0].f < float_value[1].f)
-			    || unordered;
-		case 6:	/*  Ordered or Less than or Equal  */
-			return (float_value[0].f <= float_value[1].f)
-			    || !unordered;
+			return unordered
+                            || (float_value[0].f < float_value[1].f);
+		case 6:	/*  Ordered and Less than or Equal  */
+			return !unordered
+                            && (float_value[0].f <= float_value[1].f);
 		case 7:	/*  Unordered or Less than or Equal  */
-			return (float_value[0].f <= float_value[1].f)
-			    || unordered;
-		case 12:/*  Less than  */
-			return (float_value[0].f < float_value[1].f);
-		case 14:/*  Less than or equal  */
-			return (float_value[0].f <= float_value[1].f);
-
-		/*  The following are not commonly used, so I'll move these out
-		    of the if-0 on a case-by-case basis.  */
-#if 0
-case 0:	return 0;					/*  False  */
-case 1:	return 0;					/*  Unordered  */
-case 3:	return (float_value[0].f == float_value[1].f);
-			/*  Unordered or Equal  */
-case 8:	return 0;				/*  Signaling false  */
-case 9:	return 0;	/*  Not Greater than or Less than or Equal  */
-case 10:return (float_value[0].f == float_value[1].f);	/*  Signaling Equal  */
-case 11:return (float_value[0].f == float_value[1].f);	/*  Not Greater
-		than or Less than  */
-case 13:return !(float_value[0].f >= float_value[1].f);	/*  Not greater
-		than or equal */
-case 15:return !(float_value[0].f > float_value[1].f);	/*  Not greater than  */
-#endif
-
+			return unordered
+                            || (float_value[0].f <= float_value[1].f);
+		case 8: /*  Signaling false  */
+			return 0;	
+		case 9:	/*  Not Greater than or Less than or Equal  */
+			return unordered;
+		case 10: /*  Signaling Equal  */
+			return !unordered
+			    && (float_value[0].f == float_value[1].f);
+		case 11: /*  Not Greater than or Less than  */
+			return unordered
+			    || (float_value[0].f == float_value[1].f);
+		case 12: /*  Less than  */
+			return !unordered
+			    && (float_value[0].f < float_value[1].f);
+		case 13: /*  Not greater than or equal */
+			return unordered
+			    || (float_value[0].f < float_value[1].f);
+		case 14: /*  Less than or equal  */
+			return !unordered
+			    && (float_value[0].f <= float_value[1].f);
+		case 15: /*  Not greater than  */
+			return unordered
+			    || (float_value[0].f <= float_value[1].f);
 		default:
 			fatal("fpu_op(): unimplemented condition "
 			    "code %i. see cpu_mips_coproc.c\n", cond);
