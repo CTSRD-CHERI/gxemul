@@ -1003,7 +1003,11 @@ static const char *ccname[16] = {
 #define	FPU_OP_C	8
 #define	FPU_OP_ABS	9
 #define	FPU_OP_NEG	10
-/*  TODO: CEIL.L, CEIL.W, FLOOR.L, FLOOR.W, RECIP, ROUND.L, ROUND.W, RSQRT  */
+#define FPU_OP_ROUND	11
+#define FPU_OP_TRUNC	12
+#define FPU_OP_CEIL	13
+#define FPU_OP_FLOOR	14
+/*  TODO: RECIP, RSQRT  */
 
 
 /*
@@ -1137,7 +1141,31 @@ static int fpu_op(struct cpu *cpu, struct mips_coproc *cp, int op, int fmt,
 		break;
 	case FPU_OP_CVT:
 		nf = float_value[0].f;
-		/*  debug("  mov: %f => %f\n", float_value[0].f, nf);  */
+		/*  debug("  cvt: %f => %f\n", float_value[0].f, nf);  */
+		fpu_store_float_value(cp, fd, nf, output_fmt,
+		    float_value[0].nan);
+		break;
+	case FPU_OP_ROUND:
+		nf = round(float_value[0].f);
+		/*  debug("  round: %f => %f\n", float_value[0].f, nf);  */
+		fpu_store_float_value(cp, fd, nf, output_fmt,
+		    float_value[0].nan);
+		break;
+	case FPU_OP_TRUNC:
+		nf = trunc(float_value[0].f);
+		/*  debug("  trunc: %f => %f\n", float_value[0].f, nf);  */
+		fpu_store_float_value(cp, fd, nf, output_fmt,
+		    float_value[0].nan);
+		break;
+	case FPU_OP_CEIL:
+		nf = ceil(float_value[0].f);
+		/*  debug("  ceil: %f => %f\n", float_value[0].f, nf);  */
+		fpu_store_float_value(cp, fd, nf, output_fmt,
+		    float_value[0].nan);
+		break;
+	case FPU_OP_FLOOR:
+		nf = floor(float_value[0].f);
+		/*  debug("  floor: %f => %f\n", float_value[0].f, nf);  */
 		fpu_store_float_value(cp, fd, nf, output_fmt,
 		    float_value[0].nan);
 		break;
@@ -1367,6 +1395,17 @@ static int fpu_function(struct cpu *cpu, struct mips_coproc *cp,
 		return 1;
 	}
 
+	/*  round.l.fmt: Round  */
+	if ((function & 0x001f003f) == 0x00000008) {
+		if (cpu->machine->instruction_trace || unassemble_only)
+			debug("round.l.%s\tr%i,r%i\n", fmtname[fmt], fd, fs);
+		if (unassemble_only)
+			return 1;
+
+		fpu_op(cpu, cp, FPU_OP_ROUND, fmt, -1, fs, fd, -1, COP1_FMT_L);
+		return 1;
+	}
+
 	/*  trunc.l.fmt: Truncate  */
 	if ((function & 0x001f003f) == 0x00000009) {
 		if (cpu->machine->instruction_trace || unassemble_only)
@@ -1374,9 +1413,40 @@ static int fpu_function(struct cpu *cpu, struct mips_coproc *cp,
 		if (unassemble_only)
 			return 1;
 
-		/*  TODO: not CVT?  */
+		fpu_op(cpu, cp, FPU_OP_TRUNC, fmt, -1, fs, fd, -1, COP1_FMT_L);
+		return 1;
+	}
 
-		fpu_op(cpu, cp, FPU_OP_CVT, fmt, -1, fs, fd, -1, COP1_FMT_L);
+	/*  ceil.l.fmt: Ceiling  */
+	if ((function & 0x001f003f) == 0x0000000a) {
+		if (cpu->machine->instruction_trace || unassemble_only)
+			debug("ceil.l.%s\tr%i,r%i\n", fmtname[fmt], fd, fs);
+		if (unassemble_only)
+			return 1;
+
+		fpu_op(cpu, cp, FPU_OP_CEIL, fmt, -1, fs, fd, -1, COP1_FMT_L);
+		return 1;
+	}
+
+	/*  floor.l.fmt: Floor  */
+	if ((function & 0x001f003f) == 0x0000000b) {
+		if (cpu->machine->instruction_trace || unassemble_only)
+			debug("floor.l.%s\tr%i,r%i\n", fmtname[fmt], fd, fs);
+		if (unassemble_only)
+			return 1;
+
+		fpu_op(cpu, cp, FPU_OP_FLOOR, fmt, -1, fs, fd, -1, COP1_FMT_L);
+		return 1;
+	}
+
+	/*  round.w.fmt: Round  */
+	if ((function & 0x001f003f) == 0x0000000c) {
+		if (cpu->machine->instruction_trace || unassemble_only)
+			debug("round.w.%s\tr%i,r%i\n", fmtname[fmt], fd, fs);
+		if (unassemble_only)
+			return 1;
+
+		fpu_op(cpu, cp, FPU_OP_ROUND, fmt, -1, fs, fd, -1, COP1_FMT_W);
 		return 1;
 	}
 
@@ -1387,9 +1457,29 @@ static int fpu_function(struct cpu *cpu, struct mips_coproc *cp,
 		if (unassemble_only)
 			return 1;
 
-		/*  TODO: not CVT?  */
+		fpu_op(cpu, cp, FPU_OP_TRUNC, fmt, -1, fs, fd, -1, COP1_FMT_W);
+		return 1;
+	}
 
-		fpu_op(cpu, cp, FPU_OP_CVT, fmt, -1, fs, fd, -1, COP1_FMT_W);
+	/*  ceil.w.fmt: Ceiling  */
+	if ((function & 0x001f003f) == 0x0000000e) {
+		if (cpu->machine->instruction_trace || unassemble_only)
+			debug("ceil.w.%s\tr%i,r%i\n", fmtname[fmt], fd, fs);
+		if (unassemble_only)
+			return 1;
+
+		fpu_op(cpu, cp, FPU_OP_CEIL, fmt, -1, fs, fd, -1, COP1_FMT_W);
+		return 1;
+	}
+
+	/*  floor.w.fmt: Floor  */
+	if ((function & 0x001f003f) == 0x0000000f) {
+		if (cpu->machine->instruction_trace || unassemble_only)
+			debug("floor.w.%s\tr%i,r%i\n", fmtname[fmt], fd, fs);
+		if (unassemble_only)
+			return 1;
+
+		fpu_op(cpu, cp, FPU_OP_FLOOR, fmt, -1, fs, fd, -1, COP1_FMT_W);
 		return 1;
 	}
 
