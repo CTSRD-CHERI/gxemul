@@ -33,7 +33,6 @@
  *  this file.
  */
 
-
 #ifndef STATIC_STUFF
 #define	STATIC_STUFF
 /*
@@ -201,7 +200,8 @@ int DYNTRANS_RUN_INSTR_DEF(struct cpu *cpu)
 
 	/*  Note: Do not cause interrupts while single-stepping. It is
 	    so horribly annoying.  */
-	if (!single_step) {
+	extern int broken_interrupts;
+	if (!(broken_interrupts && single_step)) {
 #ifdef DYNTRANS_ARM
 		if (cpu->cd.arm.irq_asserted && !(cpu->cd.arm.cpsr & ARM_FLAG_I))
 			arm_exception(cpu, ARM_EXCEPTION_IRQ);

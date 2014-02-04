@@ -47,6 +47,7 @@
 
 
 extern volatile int single_step;
+extern int broken_interrupts;
 
 static const char *cop0_names[] = COP0_NAMES;
 static const char *regnames[] = MIPS_REGISTER_NAMES;
@@ -589,7 +590,8 @@ void coproc_register_read(struct cpu *cpu,
 	if (cp->coproc_nr==0 && reg_nr==COP0_BADVADDR)	unimpl = 0;
 	if (cp->coproc_nr==0 && reg_nr==COP0_COUNT) {
 		/*  TODO: Increase count in a more meaningful way!  */
-		cp->reg[COP0_COUNT] = (int32_t) (cp->reg[COP0_COUNT] + 1);
+		if (broken_interrupts)
+			cp->reg[COP0_COUNT] = (int32_t) (cp->reg[COP0_COUNT] + 1);
 		unimpl = 0;
 	}
 	if (cp->coproc_nr==0 && reg_nr==COP0_ENTRYHI)	unimpl = 0;
