@@ -86,12 +86,13 @@ void ieee_interpret_float_value(uint64_t x, struct ieee_float_value *fvp,
 	nan = 0;
 	switch (fmt) {
 	case IEEE_FMT_S:
-		if ((x & 0x7f800000UL) == 0x7f800000UL)
+		if (((x & 0x7f800000UL) == 0x7f800000UL) &&
+                    ((x &   0x7fffffUL) != 0))
 			nan = 1;
 		break;
 	case IEEE_FMT_D:
-		if (x == 0x7fffffffffffffffULL ||
-		    x == 0x7ff7ffffffffffffULL)
+		if (((x & 0x7ff0000000000000ULL) == 0x7ff0000000000000ULL) &&
+		    ((x &    0xfffffffffffffULL) != 0))
 			nan = 1;
 		break;
 	}
