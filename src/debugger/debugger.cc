@@ -66,6 +66,7 @@ extern int quiet_mode;
  */
 
 volatile int single_step = NOT_SINGLE_STEPPING;
+volatile int single_step_interrupts = 0;
 volatile int exit_debugger;
 int force_debugger_at_exit = 0;
 

@@ -179,6 +179,8 @@ int DYNTRANS_RUN_INSTR_DEF(struct cpu *cpu)
 	MODE_uint_t cached_pc;
 	int low_pc, n_instrs;
 
+	extern int single_step_interrupts;
+
 	/*  Ugly... fix this some day.  */
 #ifdef DYNTRANS_DUALMODE_32
 #ifdef MODE32
@@ -200,8 +202,11 @@ int DYNTRANS_RUN_INSTR_DEF(struct cpu *cpu)
  	 */
 
 	/*  Note: Do not cause interrupts while single-stepping. It is
-	    so horribly annoying.  */
-	if (!single_step) {
+	 *  so horribly annoying.
+         *  But sometimes you want to single-step into an interrupt handler,
+         *  allow it if single_step_interrupts is set.
+         */
+	if (!single_step || single_step_interrupts) {
 #ifdef DYNTRANS_ARM
 		if (cpu->cd.arm.irq_asserted && !(cpu->cd.arm.cpsr & ARM_FLAG_I))
 			arm_exception(cpu, ARM_EXCEPTION_IRQ);

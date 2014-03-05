@@ -50,6 +50,7 @@
 
 
 extern int single_step;
+extern int single_step_interrupts;
 extern int force_debugger_at_exit;
 
 extern int optind;
@@ -378,7 +379,7 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 	struct machine *m = emul_add_machine(emul, NULL);
 
 	const char *opts =
-	    "BC:c:Dd:E:e:HhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUVvW:"
+	    "BC:c:Dd:E:e:HhI:iJj:k:KM:Nn:Oo:p:QqRrSs:TtUuVvW:"
 #ifdef WITH_X11
 	    "XxY:"
 #endif
@@ -528,6 +529,9 @@ int get_cmd_args(int argc, char *argv[], struct emul *emul,
 		case 'U':
 			m->slow_serial_interrupts_hack_for_linux = 1;
 			msopts = 1;
+			break;
+		case 'u':
+			single_step_interrupts = 1;
 			break;
 		case 'V':
 			single_step = ENTER_SINGLE_STEPPING;
